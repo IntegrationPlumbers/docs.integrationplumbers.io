@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="stylesheet" type="text/css" media="screen" href="/assets/css/style.css?v=fea2884d65443da7b45919abc8e79713c975c08a">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>PostgreSQL Plugin | Integration Plumbers // Docs</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="PostgreSQL Plugin" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Documentation for Integration Plumbers products." />
+<meta property="og:description" content="Documentation for Integration Plumbers products." />
+<link rel="canonical" href="http://localhost:4000/postgresql/" />
+<meta property="og:url" content="http://localhost:4000/postgresql/" />
+<meta property="og:site_name" content="Integration Plumbers // Docs" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="PostgreSQL Plugin" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Documentation for Integration Plumbers products.","headline":"PostgreSQL Plugin","url":"http://localhost:4000/postgresql/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <h1 id="project_title">Integration Plumbers // Docs</h1>
+          <h2 id="project_tagline">Documentation for Integration Plumbers products.</h2>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1 id="postgresql-plugin">PostgreSQL Plugin</h1>
+
+<p><img src="./images/logo.png" alt="Logo" /></p>
+
+<p><strong>Integration Plumbers</strong></p>
+
+<p><strong>Oracle Enterprise Manager Plugin for PostgreSQL User Guide</strong></p>
+
+<p><em>Version 13.2.8.3.0</em>
+<em>July 2025</em></p>
+
+<p>Information in this document, including URL and other Internet Website references, is subject to change without notice. Unless otherwise noted, the companies, organizations, products, domain names, e-mail addresses, logos, people, places, and events depicted in examples herein are fictitious. No association with any real company, organization, product, domain name, e-mail address, logo, person, place, or event is intended or should be inferred.</p>
+
+<p>Complying with all applicable copyright laws is the responsibility of the user. Without limiting the rights under copyright, no part of this document may be reproduced, stored in or introduced into a retrieval system, or transmitted in any form or by any means (electronic, mechanical, photocopying, recording, or otherwise), or for any purpose, without the express written permission of CN Software LLC.</p>
+
+<p>CN Software LLC may have patents, patent applications, trademarks, copyrights, or other intellectual property rights covering the subject matter in this document. Except as expressly provided in any written license agreement from CN Software LLC, the furnishing of this document does not give you any license to these patents, trademarks, copyrights, or other intellectual property.</p>
+
+<p>© 2022 CN Software LLC. All rights reserved.</p>
+
+<p>PostgreSQL and the “Slonik” logo are trademarks of the PostgreSQL Community Association of Canada and are used here with permission.</p>
+
+<h2 id="versions-and-platforms-supported"><strong>Versions and Platforms Supported</strong></h2>
+<p>Oracle Enterprise Manager Cloud Control 13c (13.2.0.0.0+)</p>
+
+<p>Supported PostgreSQL versions PostgreSQL versions 13-17</p>
+
+<p>Supported Oracle Management Agent (OMA) Operating Systems:</p>
+
+<p>Microsoft Windows (64-bit) supported by the OMA</p>
+
+<p>Linux (64-bit) support by the OMA</p>
+
+<p>Supported Oracle Management Server (OMS) Operating Systems: All Oracle supported OMS platforms</p>
+
+<p>Supported PostgreSQL Database OS:</p>
+
+<p>All PostgreSQL supported (for remote monitoring)</p>
+
+<h2 id="prerequisites"><strong>Prerequisites</strong></h2>
+
+<h4 id="monitoring-connectivity"><strong>Monitoring Connectivity</strong></h4>
+<ul>
+  <li>Create a PostgreSQL user with permission to the databases to be monitored</li>
+  <li>Enable remote access for the new user</li>
+  <li>Update hba.conf file to allow Enterprise Manager IP to remotely connect as the new user (see 
+<a href="https://www.postgresql.org/docs/11/auth-pg-hba-conf.html">https://www.postgresql.org/docs/11/auth-pg-hba-conf.html)</a></li>
+</ul>
+
+<h4 id="postgresql-statistics-setup"><strong>PostgreSQL Statistics Setup</strong></h4>
+<ul>
+  <li>Enable statistics monitoring on <code class="language-plaintext highlighter-rouge">pg_stat</code> views are available in the “primary” database (see <a href="https://www.postgresql.org/docs/11/monitoring-stats.html">https://www.postgresql.org/docs/11/monitoring-stats.html)</a></li>
+  <li>Install PostgreSQL SQL Statements extension to verify <code class="language-plaintext highlighter-rouge">pg_stat_statements</code> extension installed (see <a href="https://www.postgresql.org/docs/11/pgstatstatements.html">https://www.postgresql.org/docs/11/pgstatstatements.html)</a>
+    <ul>
+      <li>Verify <code class="language-plaintext highlighter-rouge">pg_stat_statements</code> view is available in the “primary” database
+        <h2 id="setting-up-a-target"><strong>Setting Up A Target</strong></h2>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="plugin-installation"><strong>Plugin Installation</strong></h4>
+<p>Perform the following tasks to install your PostgreSQL plugin.</p>
+
+<ul>
+  <li>
+    <p>Import the OPAR using the <code class="language-plaintext highlighter-rouge">emcli</code> utility (see Oracle documentation for more details)</p>
+
+    <ul>
+      <li>
+        <p>Log in to <code class="language-plaintext highlighter-rouge">emcli</code> utility and enter the password when prompted: 
+  <code class="language-plaintext highlighter-rouge">emcli login -username=sysman</code></p>
+      </li>
+      <li>
+        <p>Ensure <code class="language-plaintext highlighter-rouge">emcli</code> is synchronized: 
+  <code class="language-plaintext highlighter-rouge">emcli sync</code></p>
+      </li>
+      <li>
+        <p>Import the OPAR file with the import update command: <code class="language-plaintext highlighter-rouge">emcli import_update -file=&lt;PATH_TO_FILE&gt; -omslocal</code></p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>Deploy plugin on OMS &amp; Deploy plugin on OMA (PostgreSQL plugin supports remote or local monitoring).</p>
+    <ul>
+      <li>
+        <p>From Oracle Enterprise Manager, navigate to Setup → Extensibility → Plugins. Expand the Databases folder, and click PostgreSQL.</p>
+      </li>
+      <li>
+        <p>Click the Actions menu, Deploy On → Management Servers. Follow the onscreen instructions to install.</p>
+      </li>
+      <li>
+        <p>From Oracle Enterprise Manager, navigate to Setup → Extensibility → Plugins. Expand the Databases folder, and click PostgreSQL.</p>
+      </li>
+      <li>
+        <p>Click the Actions menu, Deploy On → Management Agents. Follow the onscreen instructions to install.</p>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="add-targets-for-each-postgresql-instance">Add targets for each PostgreSQL instance</h5>
+<p>From Oracle Enterprise Manager, navigate to Setup → Add Target → Add Targets Manually.</p>
+
+<p>Select the Host that you installed the Plug-in on and choose the PostgreSQL Database target type. Click Add.</p>
+
+<p><img src="./images/image1.png" alt="Target Name" /></p>
+
+<p>Enter Target Name</p>
+
+<p><img src="./images/image2.png" alt="OMS Creds" /></p>
+
+<p>Enter Oracle Management Server Username and Password for Target Count Validation.</p>
+
+<p><img src="./images/image3.png" alt="PG Creds" /></p>
+
+<p>Enter Credentials for the PostgreSQL Target</p>
+<h5 id="target-properties"><strong>Target Properties</strong></h5>
+<p><img src="./images/image4.png" alt="Properties" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Target Property</th>
+      <th style="text-align: left">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Database Hostname</td>
+      <td style="text-align: left">Host name of PostgreSQL server</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Database Port</td>
+      <td style="text-align: left">PostgreSQL port number (default is <code class="language-plaintext highlighter-rouge">5432</code>)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">OMS Hostname</td>
+      <td style="text-align: left">Login name of Oracle Management Server (for agent service validation)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">OMS Port</td>
+      <td style="text-align: left">OMS HTTPS Console Port (default is <code class="language-plaintext highlighter-rouge">7803</code>, used for target count validation)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Primary Database</td>
+      <td style="text-align: left">The plugin requires a “primary” database to connect to (default is ‘postgres’)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Path to patroni log file</td>
+      <td style="text-align: left">Fully qualified path to patroni log file</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Path to postgres log file</td>
+      <td style="text-align: left">Fully qualified path to postgres log file</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Path to patroni.yml</td>
+      <td style="text-align: left">Fully qualified path to patroni.yml file</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Plugin License</td>
+      <td style="text-align: left">Enter Plugin License here</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Top X Queries</td>
+      <td style="text-align: left">Limits the number of rows returned for the SQL Statement metric groups, ordered by execution time</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Note:</strong> The “primary” database is the only location SQL statements statistics are collected from, since any location <code class="language-plaintext highlighter-rouge">pg_stat_statements</code> is queried from will return data about statements run in all databases.</p>
+
+<p><strong>Warning:</strong> Ensure <code class="language-plaintext highlighter-rouge">pg_stat_statements</code> is viewable from the “primary” database, otherwise no query statistics will be collected.</p>
+
+<p>** If no plugin license is entered, the plugin will have a PostgreSQL instance limit of 2 with no expiration date.  <a href="https://app.hubspot.com/payments/purchase/hscs_8AXvUKjLuB9sCE8vyB4UcOzfhPKMKHNZYGREjd5rpTnmAoGuSdl2K0Ic9s3nCI7C">To purchase plugin licenses</a>.  <a href="https://integrationplumbers.io/request-trial-for-oracle-em-plugin-for-postgresql-database">To request a trial license</a></p>
+<h5 id="add-targets-for-postgresql-cluster">Add targets for PostgreSQL cluster</h5>
+<p>After adding the individual targets that make up the cluster, from Oracle Enterprise Manager, navigate to Setup → Add Target → Add Targets Manually.</p>
+
+<p>Select the Host that you installed the Plug-in on and choose the PostgreSQL<br />
+Cluster target type. Click Add.</p>
+<h5 id="target-properties-1">Target Properties</h5>
+<p><img src="./images/image5.png" alt="Cluster" /></p>
+
+<p>| Target Property  | Description |
+| :—- | :—- |
+| Database Target Names  | Comma-separated list, without spaces, of previously added PostgreSQL Database target names. |</p>
+<h2 id="monitoring-features"><strong>Monitoring Features</strong></h2>
+<p>The Oracle Enterprise Manager Plugin for PostgreSQL provides monitoring of nearly 200 key metrics for a PostgreSQL instance. Thresholds and metric history are available for each PostgreSQL instance, as well as advanced custom views of the instance and individual databases. These views present large amounts of complex data in an easy-to-consume manner. Allowing the user to quickly identify database performance and configuration issues.</p>
+<h4 id="overview"><strong>Overview</strong></h4>
+<p><img src="./images/image6.png" alt="Home Page" /></p>
+
+<p>This page provides insight into the overall health of the databases on the server:</p>
+<ul>
+  <li>Target Status</li>
+  <li>Monitoring Status</li>
+  <li>Incidents</li>
+  <li>Backends</li>
+  <li>Replication</li>
+  <li>Background Writer
+    <h4 id="configuration"><strong>Configuration</strong></h4>
+    <p><img src="./images/image7.png" alt="Configuration Page" />
+This page provides insight into the current configurations of the database, including current, next boot, and reset values.</p>
+    <h4 id="database"><strong>Database</strong></h4>
+    <p><img src="./images/image8.png" alt="Database Page" />
+The Database page provides a per-database view of connected backends, database growth, deadlocks as well as other useful metrics.</p>
+    <h4 id="tables"><strong>Tables</strong></h4>
+    <p><img src="./images/image9.png" alt="Tables Page" />
+The Tables page provides details on tables within a specific database. A breakdown of table size is given as well as top table metrics and graphs specific to the tables you are interested in.</p>
+    <h4 id="indexes"><strong>Indexes</strong></h4>
+    <p><img src="./images/image10.png" alt="Indexes Page" />
+The Indexes page provides details about indexes within a specific database and their size. Quickly being able to find and observe metric history for an index is one of the main features of this page.</p>
+    <h4 id="queries"><strong>Queries</strong></h4>
+    <p><img src="./images/image11.png" alt="Queries Page" />
+The Queries page provides insight into a query’s current and historical performance.</p>
+    <h4 id="query-analyzer"><strong>Query Analyzer</strong></h4>
+    <p><img src="./images/image12.png" alt="Query Analyzer 1" />
+<img src="./images/image13.png" alt="Query Analyzer 2" />
+The Query Analyzer feature lets users input and analyze queries against their PostgreSQL database, providing execution plans and performance metrics. It visualizes details like wait events and explain-plans to help optimize and troubleshoot performance, and includes an interface to view historical query data.</p>
+  </li>
+</ul>
+
+<p>To enable this feature, <a href="https://docs.oracle.com/en/enterprise-manager/cloud-control/enterprise-manager-cloud-control/24.1/emsec/configuring-and-using-target-credentials.html#GUID-227C95BE-8B27-43B3-A553-0F2582C43A3D:~:text=SUDO%3BRUNAS%3Aroot%22-,Preferred%20Credentials,-Preferred%20credentials%20are"><strong>Preferred Credentials</strong></a> must be set for the PostgreSQL target- these credentials are used to execute and analyze the queries. The “Wait Events” table in the database instance’s “Query Analyzer” page relies on the <strong><code class="language-plaintext highlighter-rouge">pg_wait_sampling</code></strong> extension to function. The <code class="language-plaintext highlighter-rouge">pg_wait_sampling.profile_queries</code> enum attribute must be set to “all” or “top”. This extension is not included in most PostgreSQL distributions and is not available for Windows platforms, but can be installed through most package managers.</p>
+
+<p>When using the Explain Plan feature, you may notice that queries displayed in the query list often contain parameter placeholders (such as $1, $2, etc.). These placeholders represent bound parameters from the original query execution and need to be replaced with actual values before the query can be analyzed. For example, a query like <code class="language-plaintext highlighter-rouge">SELECT * FROM users WHERE id = $1</code> should be modified to <code class="language-plaintext highlighter-rouge">SELECT * FROM users WHERE id = 123</code> with an appropriate value for the parameter.</p>
+
+<p>Important Note: The Explain Plan feature will actually execute your modified query against the database to generate accurate execution statistics. For example, running an Explain Plan for the query <code class="language-plaintext highlighter-rouge">SELECT * FROM some_table</code> will run <code class="language-plaintext highlighter-rouge">EXPLAIN(ANALYZE, FORMAT JSON) SELECT * FROM some_table</code>. Also note that running Explain Plans on Explain Plan-queries is not supported. While any data modifications (<code class="language-plaintext highlighter-rouge">INSERT</code>, <code class="language-plaintext highlighter-rouge">UPDATE</code>, <code class="language-plaintext highlighter-rouge">DELETE</code>) are automatically rolled back and won’t persist, the query does temporarily acquire locks and consume database resources during execution. Therefore, it’s recommended to use test data or values that represent typical query parameters, and avoid running explain plans on queries that could have significant performance impact or lock contention with other database operations.</p>
+
+<h2 id="realtime-metrics"><strong>Realtime Metrics</strong></h2>
+
+<h4 id="blocking-sessions-and-wait-locks"><strong>Blocking Sessions and Wait Locks</strong></h4>
+<p><img src="./images/image14.png" alt="Blocking Sessions" />
+The PostgreSQL plugin’s realtime blocking session metric feature provides live monitoring of database locks and blocked queries by collecting data on-demand when users visit the “Blocking Sessions and Wait Locks” page. Unlike scheduled metrics, this realtime feature uses configurable polling intervals (15 seconds to 1 minute) to continuously refresh the UI and display active blocking relationships between database sessions, showing both the blocked queries waiting for locks and the sessions holding those locks.</p>
+<h4 id="vacuums-in-progress"><strong>Vacuums in Progress</strong></h4>
+<p><img src="./images/image15.png" alt="Vacuums" />
+The realtime vacuum progress metric feature displays detailed progress information through columns including PID (process ID), Phase (current vacuum stage), Heap Blocks Total/Scanned/Vacuumed (block processing counts), Percent Vacuumed (completion percentage), State (process state), and Query Start Time (when the vacuum began), allowing administrators to monitor active VACUUM operations in real-time with configurable polling intervals.</p>
+<h4 id="logs"><strong>Logs</strong></h4>
+<p><img src="./images/image16.png" alt="Logs" />
+The PostgreSQL plugin now includes an optional log monitoring feature. It allows users to monitor PostgreSQL server log files for important events, configure alerts, and view recent log entries directly from the UI. This new page allows the user to view the last 500 lines of the configured log file in real-time. There is also a corresponding Log Stats metric group that includes the following delta metrics: Error Count, Fatal Count, Panic Count, Warning Count, Line Count (total lines read).</p>
+
+<p>This feature is supported only when the OEM agent is <strong>local</strong> (i.e., installed on the same host as the PostgreSQL server). It does not support remote log collection.</p>
+
+<h5 id="setup-instructions"><strong>Setup Instructions</strong></h5>
+<ol>
+  <li>Enable logging in PostgreSQL
+PostgreSQL does not log to a file by default. The user must:
+    <ul>
+      <li>Set <code class="language-plaintext highlighter-rouge">log_directory</code> and <code class="language-plaintext highlighter-rouge">log_filename</code> appropriately and set <code class="language-plaintext highlighter-rouge">logging_collector=on</code> in their <code class="language-plaintext highlighter-rouge">postgresql.conf</code> file</li>
+      <li>Reload or restart PostgreSQL</li>
+      <li>Verify the OMA user has permissions set to read the log file.</li>
+    </ul>
+  </li>
+  <li>Configure log file path in the plugin
+    <ul>
+      <li>On the Target Configuration page, enter the full path to the PostgreSQL log file in the PostgreSQL Log File field.</li>
+      <li>This path must point to an accessible file on the same host as the agent.</li>
+      <li>Remote monitoring is not supported.
+<img src="./images/image17.png" alt="Log Path" />
+        <h4 id="idle-connections"><strong>Idle Connections</strong></h4>
+        <p>The PostgreSQL plugin includes support for identifying and managing idle database connections, which can be useful for performance tuning and resource control. This feature includes both a real-time metric and a job that allows idle connections to be terminated from the OEM interface.</p>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<p>The real-time metric displays currently idle PostgreSQL sessions:</p>
+<ul>
+  <li>PID: Process ID of the connection</li>
+  <li>State: Connection state (e.g., <code class="language-plaintext highlighter-rouge">idle</code>, <code class="language-plaintext highlighter-rouge">idle in transaction</code>)</li>
+  <li>Username: PostgreSQL user owning the connection</li>
+  <li>Idle: How long the connection has been idle, in seconds
+<img src="./images/image18.png" alt="Idle Connections" />
+    <h5 id="kill-idle-connections-job"><strong>Kill Idle Connections Job</strong></h5>
+    <p>This job allows users to terminate idle PostgreSQL connections directly from OEM. It is useful for clearing stale sessions that may block resources.</p>
+    <h5 id="create-job"><strong>Create Job</strong></h5>
+    <ol>
+      <li>Choose Enterprise &gt; Job &gt; Activity &gt; Create Job &gt; Kill Idle PostgreSQL Connections.</li>
+      <li>Link the target to run the job against and provide a meaningful job name.</li>
+      <li>Configure parameters</li>
+    </ol>
+    <ul>
+      <li>Database Name – The name of the PostgreSQL database</li>
+      <li>Host/IP Address – Hostname or IP of the PostgreSQL server.</li>
+      <li>Absolute path to <a href="https://www.postgresql.org/docs/current/libpq-pgpass.html">.pgpass file</a> file containing the necessary connection credentials.
+        <ol>
+          <li>Configure Credentials</li>
+        </ol>
+      </li>
+      <li>PostgreSQL Credentials – The role used must have permission to terminate connections (<code class="language-plaintext highlighter-rouge">pg_terminate_backend</code>), which requires superuser privileges.</li>
+      <li>Agent Host Credentials – Host credentials for the machine where the OEM agent is installed. The user must be able to execute the job and read the <code class="language-plaintext highlighter-rouge">.pgpass</code> file.
+        <h5 id="notes"><strong>Notes</strong></h5>
+      </li>
+    </ul>
+  </li>
+  <li>The job only terminates sessions that are in the <code class="language-plaintext highlighter-rouge">idle</code> or <code class="language-plaintext highlighter-rouge">idle in transaction</code> states.</li>
+  <li>Connections belonging to the current user running the job or the PostgreSQL system process (<code class="language-plaintext highlighter-rouge">pg_backend_pid()</code>) will not be terminated.</li>
+  <li>The job must be executed on a local agent where <code class="language-plaintext highlighter-rouge">psql</code> is installed and accessible in the system <code class="language-plaintext highlighter-rouge">PATH</code>.</li>
+</ul>
+
+<h2 id="changelog"><strong>Changelog</strong></h2>
+
+<p><strong>13.2.8.3.0</strong></p>
+<ul>
+  <li>Added support for PG 17</li>
+  <li>Added Realtime metric pages for Logs and Idle Connections</li>
+  <li>Added Job to kill idle connections</li>
+  <li>Added Query Analyzer UI page</li>
+  <li>Added Log Stats metric group</li>
+  <li>Bug fixes</li>
+</ul>
+
+<p><strong>13.2.8.2.0</strong></p>
+<ul>
+  <li>Fixed compatibility issues with newer versions of OEM</li>
+</ul>
+
+<p><strong>13.2.8.1.0</strong></p>
+<ul>
+  <li>Added OMS host + credentials to test connection</li>
+  <li>updated PG JDBC driver</li>
+</ul>
+
+<p><strong>13.2.8.0.0</strong></p>
+<ul>
+  <li>Updated licensing</li>
+</ul>
+
+<p><strong>13.2.7.7.0</strong></p>
+<ul>
+  <li>Fixed heap memory issue from excessive query returns</li>
+  <li>Fixed parsing issue in patroni collections</li>
+</ul>
+
+<p><strong>13.2.7.6.0</strong></p>
+<ul>
+  <li>Fixed multiple jruby dependencies</li>
+</ul>
+
+<p><strong>13.2.7.5.0</strong></p>
+<ul>
+  <li>Fixed bug in collecting patroni metrics</li>
+</ul>
+
+<p><strong>13.2.7.4.0</strong></p>
+<ul>
+  <li>Added metrics for patroni logs</li>
+</ul>
+
+<p><strong>13.2.7.3.0</strong></p>
+<ul>
+  <li>Stability added to new metrics</li>
+</ul>
+
+<p><strong>13.2.7.2.0</strong></p>
+<ul>
+  <li>Bug fixes</li>
+</ul>
+
+<p><strong>13.2.7.1.0</strong></p>
+<ul>
+  <li>Bug fixes</li>
+</ul>
+
+<p><strong>13.2.7.0.0</strong></p>
+<ul>
+  <li>Cluster target / dashboard</li>
+  <li>Queries update</li>
+  <li>Backup &amp; Restore jobs added</li>
+  <li>New Metrics</li>
+  <li>Autodiscovery</li>
+  <li>Replication Metrics added</li>
+</ul>
+
+<p><strong>13.2.6.0.0</strong></p>
+<ul>
+  <li>Support added for PG 15</li>
+</ul>
+
+<p><strong>13.2.5.1.0</strong></p>
+<ul>
+  <li>Compile with Java 8</li>
+</ul>
+
+<p><strong>13.2.5.0.0</strong></p>
+<ul>
+  <li>Support added for PG 9</li>
+</ul>
+
+<p><strong>13.2.4.0.0</strong></p>
+<ul>
+  <li>PG 13 &amp; 14 Support added</li>
+  <li>Compile with Java 7</li>
+</ul>
+
+<p><strong>13.2.3.0.0</strong></p>
+<ul>
+  <li>PostgreSQL 12 support</li>
+</ul>
+
+<p><strong>13.2.2.0.0</strong></p>
+<ul>
+  <li>Fixed issues running Java on certain system configurations</li>
+  <li>Fixed unused indexes count displayed on Overview page</li>
+</ul>
+
+<p><strong>13.2.1.0.0</strong></p>
+<ul>
+  <li>Enterprise Manager 13.3 support</li>
+  <li>PostgreSQL 11 support</li>
+  <li>New HTML/JavaScript user interface</li>
+  <li>Threshold configurations for more metrics</li>
+  <li>Individual collection schedules for each metric group</li>
+  <li>Security updates</li>
+</ul>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner" style="text-align: center;">
+        
+        <p class="copyright">Integration Plumbers // Docs maintained by <a href="https://github.com/IntegrationPlumbers">IntegrationPlumbers</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+        <img src="/assets/ip-logo-white.png" width="128px" heigh="128px">
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,34 @@
+# Site settings
+title: Integration Plumbers // Docs
+email: support@integrationplumbers.io
+description: >- # this means to ignore newlines until "baseurl:"
+  Documentation for Integration Plumbers products.
+baseurl: "/" # the subpath of your site, e.g. /blog
+url: "https://docs.integrationplumbers.io" # the base hostname & protocol for your site, e.g. http://example.com
+# twitter_username: your_twitter_handle
+# github_username:  your_github_username
+
+# Build settings
+markdown: kramdown
+remote_theme: pages-themes/slate # Or another supported theme like "jekyll-theme-cayman"
+plugins:
+  - jekyll-sitemap
+  - jekyll-remote-theme
+  # - jekyll-feed
+
+# Exclude from processing.
+# The following items will not be processed, by Jekyll, when your site is built.
+# Any item listed under the `exclude:` key here will be automatically added to
+# the `exclude:` key inside `_data/jekyll-pages-metadata.yml` by the GitHub Pages
+# build process.
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
