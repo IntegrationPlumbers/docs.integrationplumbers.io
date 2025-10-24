@@ -364,10 +364,9 @@ The PostgreSQL plugin now includes an optional log monitoring feature. It allows
   <li><strong>Basic Properties:</strong></li>
   <ul>
     <li><strong>Command:</strong> %perlBin%/perl</li>
-    <li><strong>Script:</strong> &lt;AGENT_BASE&gt;/agent_&lt;AGENT_VERSION&gt;/plugins/ip.em.xpgs.agent.plugin_&lt;PLUGIN_VERSION&gt;/scripts/run_custom_query.pl</li>
+    <li><strong>Script:</strong> %scriptDir%/run_custom_query.pl</li>
     <ul>
-      <li>You must replace &lt;AGENT_BASE&gt;, &lt;AGENT_VERSION&gt;, and &lt;PLUGIN_VERSION&gt; with their actual values in the path.</li>
-      <li>This path structure can vary in different OEM environments. If your structure is different, search for the file “run_custom_query.pl” from your $ORACLE_HOME directory.</li>
+      <li>The %scriptDir% environment variable will be replaced with the actual path to the script at runtime. Do not replace this variable with a hardcoded path.</li>
     </ul>
     <li><strong>Arguments:</strong> Leave this field blank</li>
     <li><strong>Delimiter:</strong> |</li>
@@ -401,13 +400,18 @@ The PostgreSQL plugin now includes an optional log monitoring feature. It allows
           <li>You must replace &lt;AGENT_BASE&gt;, &lt;AGENT_VERSION&gt;, and &lt;PLUGIN_VERSION&gt; with their actual values in the path.</li>
           <li>This is the same path where you uploaded run_custom_query.pl from when configuring the "Basic Properties" section.</li>
         </ul>
+      <li><strong>LOG4J_CONFIGURATION_FILE:</strong> This value should already be present and should not be altered</li>
     </ul>
-    <li><strong>LOG4J_CONFIGURATION_FILE:</strong> This value should already be present and should not be altered</li>
   </ul>
 
   <li><strong>Upload Custom Files:</strong></li>
   <ul>
-    <li>This table should automatically be populated after you selected the script when configuring the "Basic Properties". If it did not populate automatically then you must manually upload the script here.</li>
+    <li>This table should automatically be populated after you selected the script when configuring the "Basic Properties". If it did not populate automatically then you must manually upload the script to this table.</li>
+    <ul>
+      <li>The location of the script is dependent on the OMA environment but in most cases it can be found here: &lt;AGENT_BASE&gt;/agent_&lt;AGENT_VERSION&gt;/plugins/ip.em.xpgs.agent.plugin_&lt;PLUGIN_VERSION&gt;/scripts/run_custom_query.pl</li>
+      <li>Alternatively, you can search for the file “run_custom_query.pl” from your OMA $ORACLE_HOME directory.</li>
+      <li>If the OMA managing your PostgreSQL plugin target is not on the same host as the OMS then you must transfer a copy of this file to the OMS.</li>
+    </ul>
   </ul>
 </ul>
 
