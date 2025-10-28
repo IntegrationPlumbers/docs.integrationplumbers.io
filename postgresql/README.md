@@ -153,7 +153,7 @@ The Queries page provides insight into a query’s current and historical perfor
 ![Query Analyzer 2](./images/image13.png)
 The Query Analyzer feature lets users input and analyze queries against their PostgreSQL database, providing execution plans and performance metrics. It visualizes details like wait events and explain-plans to help optimize and troubleshoot performance, and includes an interface to view historical query data.
 
-To enable this feature, [**Preferred Credentials**](https://docs.oracle.com/en/enterprise-manager/cloud-control/enterprise-manager-cloud-control/24.1/emsec/configuring-and-using-target-credentials.html#GUID-227C95BE-8B27-43B3-A553-0F2582C43A3D:~:text=SUDO%3BRUNAS%3Aroot%22-,Preferred%20Credentials,-Preferred%20credentials%20are) must be set for the PostgreSQL target- these credentials are used to execute and analyze the queries. The "Wait Events" table in the database instance's "Query Analyzer" page relies on the **`pg_wait_sampling`** extension to function. The `pg_wait_sampling.profile_queries` enum attribute must be set to "all" or "top". This extension is not included in most PostgreSQL distributions and is not available for Windows platforms, but can be installed through most package managers.
+To enable this feature, [**Preferred Credentials**](https://docs.oracle.com/en/enterprise-manager/cloud-control/enterprise-manager-cloud-control/24.1/emsec/configuring-and-using-target-credentials.html#GUID-227C95BE-8B27-43B3-A553-0F2582C43A3D:~:text=SUDO%3BRUNAS%3Aroot%22-,Preferred%20Credentials,-Preferred%20credentials%20are) must be set for the PostgreSQL target- these credentials are used to execute and analyze the queries. The "Wait Events" table in the database instance's "Query Analyzer" page relies on the `pg_wait_sampling` extension to function. The `pg_wait_sampling.profile_queries` enum attribute must be set to "all" or "top". This extension is not included in most PostgreSQL distributions and is not available for Windows platforms, but can be installed through most package managers.
 
 When using the Explain Plan feature, you may notice that queries displayed in the query list often contain parameter placeholders (such as $1, $2, etc.). These placeholders represent bound parameters from the original query execution and need to be replaced with actual values before the query can be analyzed. For example, a query like `SELECT * FROM users WHERE id = $1` should be modified to `SELECT * FROM users WHERE id = 123` with an appropriate value for the parameter.
 
@@ -211,6 +211,12 @@ This job allows users to terminate idle PostgreSQL connections directly from OEM
 - Connections belonging to the current user running the job or the PostgreSQL system process (`pg_backend_pid()`) will not be terminated.
 - The job must be executed on a local agent where `psql` is installed and accessible in the system `PATH`.
 
+#### Patroni Cluster Switchover
+![Switchover Homepage](./images/image19.png)
+The PostgreSQL plugin now includes support for initiating Patroni cluster switchovers directly from the OEM interface. This feature allows database administrators to perform controlled failover operations on Patroni-managed PostgreSQL clusters without requiring direct access to the Patroni API or command-line tools. The switchover functionality is automatically detected and enabled only for clusters that are identified as Patroni-managed environments, ensuring that the feature is only available when appropriate.
+
+![Candidate selection](./images/image20.png)
+When a Patroni cluster is detected, administrators can select any non-leader target database from the available cluster members and initiate a switchover operation through an intuitive dialog interface. The system automatically handles the communication with the Patroni REST API, including leader identification, and attempts to use the user-selected target as the candidate for the switchover operation. For non-Patroni clusters, the switchover button is automatically disabled with a clear message indicating that the feature is only available for Patroni environments.
 ## **Changelog**
 
 **13.2.8.3.0**
