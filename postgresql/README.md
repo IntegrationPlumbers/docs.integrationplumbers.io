@@ -2,13 +2,12 @@
 
 ![Logo](./images/logo.png)
 
+## Integration Plumbers
 
-**Integration Plumbers**
-
-**Oracle Enterprise Manager Plugin for PostgreSQL User Guide** 
+### Oracle Enterprise Manager Plugin for PostgreSQL User Guide
 
 *Version 13.5.9.0.0*
-*July 2025*
+*October 2025*
  	   
 Information in this document, including URL and other Internet Website references, is subject to change without notice. Unless otherwise noted, the companies, organizations, products, domain names, e-mail addresses, logos, people, places, and events depicted in examples herein are fictitious. No association with any real company, organization, product, domain name, e-mail address, logo, person, place, or event is intended or should be inferred.  
 
@@ -16,11 +15,11 @@ Complying with all applicable copyright laws is the responsibility of the user. 
 
 CN Software LLC may have patents, patent applications, trademarks, copyrights, or other intellectual property rights covering the subject matter in this document. Except as expressly provided in any written license agreement from CN Software LLC, the furnishing of this document does not give you any license to these patents, trademarks, copyrights, or other intellectual property. 
    
-© 2022 CN Software LLC. All rights reserved. 
+© 2025 CN Software LLC. All rights reserved.
    
 PostgreSQL and the "Slonik" logo are trademarks of the PostgreSQL Community Association of Canada and are used here with permission. 
 
-## **Versions and Platforms Supported**
+## Versions and Platforms Supported
 Oracle Enterprise Manager Cloud Control 13c (13.5.0.0.0+)
 
 Supported PostgreSQL versions PostgreSQL versions 13-17
@@ -37,43 +36,37 @@ Supported PostgreSQL Database OS:
 
 All PostgreSQL supported (for remote monitoring) 
 
-## **Prerequisites** 
+## Prerequisites
 
-#### **Monitoring Connectivity** 
-* Create a PostgreSQL user with permission to the databases to be monitored 
-* Enable remote access for the new user 
-* Update hba.conf file to allow Enterprise Manager IP to remotely connect as the new user (see 
+### Monitoring Connectivity
+- Create a PostgreSQL user with permission to the databases to be monitored
+- Enable remote access for the new user
+- Update hba.conf file to allow Enterprise Manager IP to remotely connect as the new user (see
   [https://www.postgresql.org/docs/17/auth-pg-hba-conf.html)](https://www.postgresql.org/docs/17/auth-pg-hba-conf.html)
 
-#### **PostgreSQL Statistics Setup**  {#postgresql-statistics-setup}
-* Enable statistics monitoring on `pg_stat` views are available in the “primary” database (see [https://www.postgresql.org/docs/17/monitoring-stats.html)](https://www.postgresql.org/docs/17/monitoring-stats.html)
-* Install PostgreSQL SQL Statements extension to verify `pg_stat_statements` extension installed (see [https://www.postgresql.org/docs/17/pgstatstatements.html)](https://www.postgresql.org/docs/17/pgstatstatements.html)
-	* Verify `pg_stat_statements` view is available in the “primary” database
-## **Setting Up A Target**
+### PostgreSQL Statistics Setup
+- Enable statistics monitoring on `pg_stat` views are available in the “primary” database (see [https://www.postgresql.org/docs/17/monitoring-stats.html)](https://www.postgresql.org/docs/17/monitoring-stats.html)
+- Install PostgreSQL SQL Statements extension to verify `pg_stat_statements` extension installed (see [https://www.postgresql.org/docs/17/pgstatstatements.html)](https://www.postgresql.org/docs/17/pgstatstatements.html)
+	- Verify `pg_stat_statements` view is available in the “primary” database
 
-#### **Plugin Installation**  
+## Setting Up A Target
+### Plugin Installation
 Perform the following tasks to install your PostgreSQL plugin. 
 
-* Import the OPAR using the `emcli` utility (see Oracle documentation for more details) 
-
+- Import the OPAR using the `emcli` utility (see Oracle documentation for more details)
 	- Log in to `emcli` utility and enter the password when prompted: 
 	`emcli login -username=sysman`
-   
 	- Ensure `emcli` is synchronized: 
 	`emcli sync`
-   
 	- Import the OPAR file with the import update command: `emcli import_update -file=<PATH_TO_FILE> -omslocal`
 
-* Deploy plugin on OMS & Deploy plugin on OMA (PostgreSQL plugin supports remote or local monitoring).
-	- From Oracle Enterprise Manager, navigate to Setup → Extensibility → Plugins. Expand the Databases folder, and click PostgreSQL. 
-	
-	- Click the Actions menu, Deploy On → Management Servers. Follow the onscreen instructions to install. 
-	
-	- From Oracle Enterprise Manager, navigate to Setup → Extensibility → Plugins. Expand the Databases folder, and click PostgreSQL. 
-	
+- Deploy plugin on OMS & Deploy plugin on OMA (PostgreSQL plugin supports remote or local monitoring).
+	- From Oracle Enterprise Manager, navigate to Setup → Extensibility → Plugins. Expand the Databases folder, and click PostgreSQL.
+	- Click the Actions menu, Deploy On → Management Servers. Follow the onscreen instructions to install.
+	- From Oracle Enterprise Manager, navigate to Setup → Extensibility → Plugins. Expand the Databases folder, and click PostgreSQL.
 	- Click the Actions menu, Deploy On → Management Agents. Follow the onscreen instructions to install. 
 
-##### Add targets for each PostgreSQL instance 
+#### Add targets for each PostgreSQL instance
 From Oracle Enterprise Manager, navigate to Setup → Add Target → Add Targets Manually.
 
 Select the Host that whose OMA the Plug-in has been deployed to, and choose the PostgreSQL Database target type. Click Add.
@@ -89,10 +82,11 @@ Enter Oracle Management Server Username and Password for Target Count Validation
 ![PG Creds](./images/image3.png)
 
 Enter Credentials for the PostgreSQL Target
-##### **Target Properties**
+
+#### Target Properties
 ![Properties](./images/image4.png)
 
-| Target Property           | Description                                                                                       |
+|    Target Property        |    Description                                                                                    |
 | :------------------------ | :------------------------------------------------------------------------------------------------ |
 | Database Hostname         | Host name of PostgreSQL server                                                                    |
 | Database Port             | PostgreSQL port number (default is `5432`)                                                        |
@@ -110,44 +104,54 @@ Enter Credentials for the PostgreSQL Target
 **Warning:** Ensure `pg_stat_statements` is viewable from the “primary” database, otherwise no query statistics will be collected. 
 
 \*\* If no plugin license is entered, the plugin will have a PostgreSQL instance limit of 2 with no expiration date.  [To purchase plugin licenses](https://app.hubspot.com/payments/purchase/hscs_8AXvUKjLuB9sCE8vyB4UcOzfhPKMKHNZYGREjd5rpTnmAoGuSdl2K0Ic9s3nCI7C).  [To request a trial license](https://integrationplumbers.io/request-trial-for-oracle-em-plugin-for-postgresql-database)
-##### Add targets for PostgreSQL cluster
+
+#### Add targets for PostgreSQL cluster
 After adding the individual targets that make up the cluster, from Oracle Enterprise Manager, navigate to Setup → Add Target → Add Targets Manually.
 
 Select the Host that whose OMA the Plug-in has been deployed to, and choose the PostgreSQL Cluster target type. Click Add.
-##### Target Properties
+
+#### Target Properties
 ![Cluster](./images/image5.png)
 
 | Target Property  | Description |
 | :---- | :---- |
 | Database Target Names  | Comma-separated list, without spaces, of previously added PostgreSQL Database target names. |
-## **Monitoring Features** 
+
+## Monitoring Features
 The Oracle Enterprise Manager Plugin for PostgreSQL provides monitoring of nearly 200 key metrics for a PostgreSQL instance. Thresholds and metric history are available for each PostgreSQL instance, as well as advanced custom views of the instance and individual databases. These views present large amounts of complex data in an easy-to-consume manner. Allowing the user to quickly identify database performance and configuration issues. 
-#### **Overview**
+
+### Overview
 ![Home Page](./images/image6.png)
 
 This page provides insight into the overall health of the databases on the server:
-* Target Status 
-* Monitoring Status 
-* Incidents 
-* Backends 
-* Replication 
-* Background Writer 
-#### **Configuration**
+- Target Status
+- Monitoring Status
+- Incidents
+- Backends
+- Replication
+- Background Writer
+
+### Configuration
 ![Configuration Page](./images/image7.png)
 This page provides insight into the current configurations of the database, including current, next boot, and reset values. 
-#### **Database**
+
+### Database
 ![Database Page](./images/image8.png)
 The Database page provides a per-database view of connected backends, database growth, deadlocks as well as other useful metrics. 
-#### **Tables**
+
+### Tables
 ![Tables Page](./images/image9.png)
 The Tables page provides details on tables within a specific database. A breakdown of table size is given as well as top table metrics and graphs specific to the tables you are interested in.
-#### **Indexes**
+
+### Indexes
 ![Indexes Page](./images/image10.png)
 The Indexes page provides details about indexes within a specific database and their size. Quickly being able to find and observe metric history for an index is one of the main features of this page. 
-#### **Queries**
+
+### Queries
 ![Queries Page](./images/image11.png)
-The Queries page provides insight into a query’s current and historical performance. 
-#### **Query Analyzer**
+The Queries page provides insight into a query’s current and historical performance.
+
+### Query Analyzer
 ![Query Analyzer 1](./images/image12.png)
 ![Query Analyzer 2](./images/image13.png)
 The Query Analyzer feature lets users input and analyze queries against their PostgreSQL database, providing execution plans and performance metrics. It visualizes details like wait events and explain-plans to help optimize and troubleshoot performance, and includes an interface to view historical query data.
@@ -158,21 +162,23 @@ When using the Explain Plan feature, you may notice that queries displayed in th
 
 Important Note: The Explain Plan feature will actually execute your modified query against the database to generate accurate execution statistics. For example, running an Explain Plan for the query `SELECT * FROM some_table` will run `EXPLAIN(ANALYZE, FORMAT JSON) SELECT * FROM some_table`. Also note that running Explain Plans on Explain Plan-queries is not supported. While any data modifications (`INSERT`, `UPDATE`, `DELETE`) are automatically rolled back and won't persist, the query does temporarily acquire locks and consume database resources during execution. Therefore, it's recommended to use test data or values that represent typical query parameters, and avoid running explain plans on queries that could have significant performance impact or lock contention with other database operations.
 
-## **Realtime Metrics**
+## Real-time Metrics
 
-#### **Blocking Sessions and Wait Locks**
+### Blocking Sessions and Wait Locks
 ![Blocking Sessions](./images/image14.png)
-The PostgreSQL plugin's realtime blocking session metric feature provides live monitoring of database locks and blocked queries by collecting data on-demand when users visit the "Blocking Sessions and Wait Locks" page. Unlike scheduled metrics, this realtime feature uses configurable polling intervals (15 seconds to 1 minute) to continuously refresh the UI and display active blocking relationships between database sessions, showing both the blocked queries waiting for locks and the sessions holding those locks.
-#### **Vacuums in Progress**
+The PostgreSQL plugin's real-time blocking session metric feature provides live monitoring of database locks and blocked queries by collecting data on-demand when users visit the "Blocking Sessions and Wait Locks" page. Unlike scheduled metrics, this real-time feature uses configurable polling intervals (15 seconds to 1 minute) to continuously refresh the UI and display active blocking relationships between database sessions, showing both the blocked queries waiting for locks and the sessions holding those locks.
+
+### Vacuums in Progress
 ![Vacuums](./images/image15.png)
-The realtime vacuum progress metric feature displays detailed progress information through columns including PID (process ID), Phase (current vacuum stage), Heap Blocks Total/Scanned/Vacuumed (block processing counts), Percent Vacuumed (completion percentage), State (process state), and Query Start Time (when the vacuum began), allowing administrators to monitor active VACUUM operations in real-time with configurable polling intervals.
-#### **Logs**
+The real-time vacuum progress metric feature displays detailed progress information through columns including PID (process ID), Phase (current vacuum stage), Heap Blocks Total/Scanned/Vacuumed (block processing counts), Percent Vacuumed (completion percentage), State (process state), and Query Start Time (when the vacuum began), allowing administrators to monitor active VACUUM operations in real-time with configurable polling intervals.
+
+### Logs
 ![Logs](./images/image16.png)
 The PostgreSQL plugin now includes an optional log monitoring feature. It allows users to monitor PostgreSQL server log files for important events, configure alerts, and view recent log entries directly from the UI. This page allows the user to view the last 500 lines of the configured log file in real-time. There is also a corresponding Log Stats metric group that includes the following delta metrics: Error Count, Fatal Count, Panic Count, Warning Count, Line Count (total lines read).
 
 This feature is supported only when the OEM agent is **local** (i.e., installed on the same host as the PostgreSQL server). It does not support remote log collection. 
 
-##### **Setup Instructions**
+### Setup Instructions
 1. Enable logging in PostgreSQL
    PostgreSQL does not log to a file by default. The user must:    
     - Set `log_directory` and `log_filename` appropriately and set `logging_collector=on` in their `postgresql.conf` file
@@ -184,18 +190,21 @@ This feature is supported only when the OEM agent is **local** (i.e., installed 
     - This path must point to an accessible file on the same host as the agent.
     - Remote monitoring is not supported.
 ![Log Path](./images/image17.png)
-#### **Idle Connections**
+
+### Idle Connections
 The PostgreSQL plugin includes support for identifying and managing idle database connections, which can be useful for performance tuning and resource control. This feature includes both a real-time metric and a job that allows idle connections to be terminated from the OEM interface.
 
 The real-time metric displays currently idle PostgreSQL sessions:
-- PID: Process ID of the connection
-- State: Connection state (e.g., `idle`, `idle in transaction`)
-- Username: PostgreSQL user owning the connection
-- Idle: How long the connection has been idle, in seconds
+- **PID**: Process ID of the connection
+- **State**: Connection state (e.g., `idle`, `idle in transaction`)
+- **Username**: PostgreSQL user owning the connection
+- **Idle**: How long the connection has been idle, in seconds
 ![Idle Connections](./images/image18.png)
-##### **Kill Idle Connections Job**
+
+### Kill Idle Connections Job
 This job allows users to terminate idle PostgreSQL connections directly from OEM. It is useful for clearing stale sessions that may block resources.
-##### **Create Job**
+
+### Create Job
 1. Choose Enterprise > Job > Activity > Create Job > Kill Idle PostgreSQL Connections.	
 2. Link the target to run the job against and provide a meaningful job name.
 3. Configure parameters
@@ -205,56 +214,61 @@ This job allows users to terminate idle PostgreSQL connections directly from OEM
 4. Configure Credentials
 	- PostgreSQL Credentials – The role used must have permission to terminate connections (`pg_terminate_backend`), which requires superuser privileges.
 	- Agent Host Credentials – Host credentials for the machine where the OEM agent is installed. The user must be able to execute the job and read the `.pgpass` file.
-##### **Notes**
+
+### Notes
 - The job only terminates sessions that are in the `idle` or `idle in transaction` states.
 - Connections belonging to the current user running the job or the PostgreSQL system process (`pg_backend_pid()`) will not be terminated.
 - The job must be executed on a local agent where `psql` is installed and accessible in the system `PATH`.
-## **Creating a Custom Query With a Metric Extension**
+
+## Creating a Custom Query With a Metric Extension
 
 The plugin supports the Metric Extension feature in Oracle. This allows you to define your own metric collections from a custom defined query that will be executed against the target database. When creating the Metric Extension an Adapter of type **OS Command - Multiple Columns** must be selected and configured.
 
-#### **Configuring the "OS Command - Multiple Columns" Adapter**
+### Configuring the "OS Command - Multiple Columns" Adapter
 
-**Basic Properties:**
+#### Basic Properties:
 
-**Command:** %perlBin%/perl
-**Script:** <AGENT\_BASE>/agent\_<AGENT\_VERSION>/plugins/ip.em.xpgs.agent.plugin\_<PLUGIN\_VERSION>/scripts/run\_custom\_query.pl
+**Command:** `%perlBin%/perl`
 
-You must replace <AGENT\_BASE>, <AGENT\_VERSION>, and <PLUGIN\_VERSION> with their actual values in the path.
-This path structure can vary in different OEM environments. If your structure is different, search for the file “run\_custom\_query.pl” from your $ORACLE\_HOME directory.
+**Script:** `<AGENT_BASE>/agent_<AGENT_VERSION>/plugins/ip.em.xpgs.agent.plugin_<PLUGIN_VERSION>/scripts/run_custom_query.pl`
 
-**Arguments:** Leave this field blank
-**Delimiter:** |
-**Starts With:** em\_result=
+You must replace `<AGENT_BASE>`, `<AGENT_VERSION>`, and `<PLUGIN_VERSION>` with their actual values in the path.
+This path structure can vary in different OEM environments. If your structure is different, search for the file `run_custom_query.pl` from your `$ORACLE_HOME` directory.
 
-**Advanced Properties:**
+**Arguments:** `Leave this field blank`
+**Delimiter:** `|`
+**Starts With:** `em_result=`
 
-**Input Properties:**
+#### Advanced Properties:
 
-**USERNAME:** username
+##### Input Properties:
 
-This should be the literal string "username" and not the actual username that connects to the database
-In some environments this feild will already be present with the string value "username" and should not be altered.
+**USERNAME:** `username`
 
-**PASSWORD:** password
+> This should be the literal string "username" and not the actual username that connects to the database
+> In some environments this field will already be present with the string value "username" and should not be altered.
 
-This should be the literal string "password" and not the actual password that connects to the database
-In some environments this feild will already be present with the string value "password" and should not be altered.
+**PASSWORD:** `password`
 
-**Environment Variables:**
+> This should be the literal string "password" and not the actual password that connects to the database
+> In some environments this field will already be present with the string value "password" and should not be altered.
 
-**TARGET\_CONFIG:** port=%port%,host=%host%,primarydb=%primarydb%,guid=%guid%,license=%license%,displayname=%DISPLAY\_NAME%
+##### Environment Variables:
 
-Do not replace any of the vars which are enclosed in percent symbols with their hardcoded values
+**TARGET_CONFIG:** `port=%port%,host=%host%,primarydb=%primarydb%,guid=%guid%,license=%license%,displayname=%DISPLAY_NAME%`
+
+> Do not replace any of the vars which are enclosed in percent symbols with their hardcoded values
 
 **QUERY:** Enter the custom query that you want to run against your target database. Please note that only single query execution is supported.
+
 **COLUMNS:** Enter the columns to be retrieved as a comma delimited list without whitespace and without quotes. The order specified will become the order in which they are returned.
-**PLUGIN\_SCRIPTS\_DIR:** <AGENT\_BASE>/agent\_<AGENT\_VERSION>/plugins/ip.em.xpgs.agent.plugin\_<PLUGIN\_VERSION>/scripts
 
-You must replace <AGENT\_BASE>, <AGENT\_VERSION>, and <PLUGIN\_VERSION> with their actual values in the path.
-This is the same path where you uploaded run\_custom\_query.pl from when configuring the "Basic Properties" section.
+**PLUGIN\_SCRIPTS\_DIR:** `<AGENT_BASE>/agent_<AGENT_VERSION>/plugins/ip.em.xpgs.agent.plugin_<PLUGIN_VERSION>/scripts`
 
-**LOG4J\_CONFIGURATION\_FILE:** This value should already be present and should not be altered
+> You must replace `<AGENT_BASE>`, `<AGENT_VERSION>`, and `<PLUGIN_VERSION>` with their actual values in the path.
+> This is the same path where you uploaded `run_custom_query.pl` from when configuring the "Basic Properties" section.
+
+**LOG4J_CONFIGURATION_FILE:** This value should already be present and should not be altered
 
 **Upload Custom Files:**
 
@@ -262,14 +276,14 @@ This table should automatically be populated after you selected the script when 
 
 The remaining steps of developing the Metric Extension will depend on the custom setup that you are implementing. Remember to confirm the output of your metric extension via test execution prior to saving it.
 
-
-#### Patroni Cluster Switchover
+### Patroni Cluster Switchover
 ![Switchover Homepage](./images/image19.png)
-The PostgreSQL plugin now includes support for initiating Patroni cluster switchovers directly from the OEM interface. This feature allows database administrators to perform controlled failover operations on Patroni-managed PostgreSQL clusters without requiring direct access to the Patroni API or command-line tools. The switchover functionality is automatically detected and enabled only for clusters that are identified as Patroni-managed environments, ensuring that the feature is only available when appropriate.
+The PostgreSQL plugin now includes support for initiating Patroni cluster switchovers directly from the OEM interface. This feature allows database administrators to perform controlled failover operations on Patroni-managed PostgreSQL clusters without requiring direct access to the Patroni API or command-line tools. The switchover functionality is automatically detected and enabled only for clusters that are identified as Patroni-managed environments, ensuring that the feature is only available when appropriate.
 
 ![Candidate selection](./images/image20.png)
-When a Patroni cluster is detected, administrators can select any non-leader target database from the available cluster members and initiate a switchover operation through an intuitive dialog interface. The system automatically handles the communication with the Patroni REST API, including leader identification, and attempts to use the user-selected target as the candidate for the switchover operation. For non-Patroni clusters, the switchover button is automatically disabled with a clear message indicating that the feature is only available for Patroni environments.
-## **Changelog**
+When a Patroni cluster is detected, administrators can select any non-leader target database from the available cluster members and initiate a switchover operation through an intuitive dialog interface. The system automatically handles the communication with the Patroni REST API, including leader identification, and attempts to use the user-selected target as the candidate for the switchover operation. For non-Patroni clusters, the switchover button is automatically disabled with a clear message indicating that the feature is only available for Patroni environments.
+
+## Changelog
 
 **13.5.9.0.0**
 - Added historical visualization of wait events
