@@ -22,6 +22,8 @@ PostgreSQL and the "Slonik" logo are trademarks of the PostgreSQL Community Asso
 ## Versions and Platforms Supported
 Oracle Enterprise Manager Cloud Control 13c (13.5.0.0.0+)
 
+Oracle Enterprise Manager 24ai (24.1.0.0.0+)
+
 Supported PostgreSQL versions PostgreSQL versions 13-17
 
 Supported Oracle Management Agent (OMA) Operating Systems: 
@@ -45,7 +47,6 @@ All PostgreSQL supported (for remote monitoring)
   [https://www.postgresql.org/docs/17/auth-pg-hba-conf.html)](https://www.postgresql.org/docs/17/auth-pg-hba-conf.html)
 
 ### PostgreSQL Statistics Setup
-- Enable statistics monitoring on `pg_stat` views are available in the “primary” database (see [https://www.postgresql.org/docs/17/monitoring-stats.html)](https://www.postgresql.org/docs/17/monitoring-stats.html)
 - Install PostgreSQL SQL Statements extension to verify `pg_stat_statements` extension installed (see [https://www.postgresql.org/docs/17/pgstatstatements.html)](https://www.postgresql.org/docs/17/pgstatstatements.html)
 	- Verify `pg_stat_statements` view is available in the “primary” database
 
@@ -288,14 +289,13 @@ When a Patroni cluster is detected, administrators can select any non-leader tar
 **13.5.9.0.0**
 - Added historical visualization of wait events
 - Added support for custom queries via Metric Extensions (BETA)
-- Added job to kill idle connections
 - Added UI button to trigger a switchover of a patroni cluster
 - Bug fixes
 
 
 **13.2.8.3.0**
 - Added support for PG 17
-- Added Realtime metric pages for Logs and Idle Connections
+- Added Real-time metric pages for Logs and Idle Connections
 - Added Job to kill idle connections
 - Added Query Analyzer UI page
 - Added Log Stats metric group
