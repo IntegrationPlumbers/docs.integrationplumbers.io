@@ -6,8 +6,8 @@
 
 ### Oracle Enterprise Manager Plugin for PostgreSQL User Guide
 
-*Version 13.5.9.0.0*
-*October 2025*
+*Version 13.5.10.0.0*
+*December 2025*
  	   
 Information in this document, including URL and other Internet Website references, is subject to change without notice. Unless otherwise noted, the companies, organizations, products, domain names, e-mail addresses, logos, people, places, and events depicted in examples herein are fictitious. No association with any real company, organization, product, domain name, e-mail address, logo, person, place, or event is intended or should be inferred.  
 
@@ -24,7 +24,7 @@ Oracle Enterprise Manager Cloud Control 13c (13.5.0.0.0+)
 
 Oracle Enterprise Manager 24ai (24.1.0.0.0+)
 
-Supported PostgreSQL versions PostgreSQL versions 13-17
+Supported PostgreSQL versions PostgreSQL versions 14-18
 
 Supported Oracle Management Agent (OMA) Operating Systems: 
 
@@ -286,12 +286,16 @@ When a Patroni cluster is detected, administrators can select any non-leader tar
 
 ## Changelog
 
+**13.5.10.0.0**
+- Added support for PG 18
+- Updated licensing
+- Bug fixes
+
 **13.5.9.0.0**
 - Added historical visualization of wait events
 - Added support for custom queries via Metric Extensions (BETA)
 - Added UI button to trigger a switchover of a patroni cluster
 - Bug fixes
-
 
 **13.2.8.3.0**
 - Added support for PG 17
