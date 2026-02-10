@@ -1,6 +1,6 @@
 # Site settings
 title: Integration Plumbers // Docs
-email: support@integrationplumbers.io
+email: helpdesk@integrationplumbers.io
 description: >- # this means to ignore newlines until "baseurl:"
   Documentation for Integration Plumbers products.
 baseurl: "/" # the subpath of your site, e.g. /blog
