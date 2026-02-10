@@ -284,6 +284,13 @@ The PostgreSQL plugin now includes support for initiating Patroni cluster switch
 ![Candidate selection](./images/image20.png)
 When a Patroni cluster is detected, administrators can select any non-leader target database from the available cluster members and initiate a switchover operation through an intuitive dialog interface. The system automatically handles the communication with the Patroni REST API, including leader identification, and attempts to use the user-selected target as the candidate for the switchover operation. For non-Patroni clusters, the switchover button is automatically disabled with a clear message indicating that the feature is only available for Patroni environments.
 
+## Support
+
+If you need assistance with the PostgreSQL Plugin for Oracle Enterprise Manager, our support team is here to help.
+
+- **Email:** [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io)
+- **Self-Service Portal:** [https://integrationplumbers.zohodesk.com/portal/en/signin](https://integrationplumbers.zohodesk.com/portal/en/signin)
+
 ## Changelog
 
 **13.5.10.0.0**
