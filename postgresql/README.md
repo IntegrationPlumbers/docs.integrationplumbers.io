@@ -25,7 +25,7 @@ Oracle Enterprise Manager Cloud Control 13c (13.5.0.0.0+)
 
 Oracle Enterprise Manager 24ai (24.1.0.0.0+)
 
-Supported PostgreSQL versions PostgreSQL versions 14-18
+Supported PostgreSQL Versions: 14-18
 
 Supported Oracle Management Agent (OMA) Operating Systems:
 
@@ -46,11 +46,11 @@ All PostgreSQL supported (for remote monitoring)
 - Create a PostgreSQL user with permission to the databases to be monitored
 - Enable remote access for the new user
 - Update hba.conf file to allow Enterprise Manager IP to remotely connect as the new user (see
-  [https://www.postgresql.org/docs/17/auth-pg-hba-conf.html)](https://www.postgresql.org/docs/17/auth-pg-hba-conf.html)
+  [https://www.postgresql.org/docs/17/auth-pg-hba-conf.html](https://www.postgresql.org/docs/17/auth-pg-hba-conf.html))
 
 ### PostgreSQL Statistics Setup
 
-- Install PostgreSQL SQL Statements extension to verify `pg_stat_statements` extension installed (see [https://www.postgresql.org/docs/17/pgstatstatements.html)](https://www.postgresql.org/docs/17/pgstatstatements.html)
+- Install PostgreSQL SQL Statements extension to verify `pg_stat_statements` extension installed (see [https://www.postgresql.org/docs/17/pgstatstatements.html](https://www.postgresql.org/docs/17/pgstatstatements.html))
   - Verify `pg_stat_statements` view is available in the "primary" database
 
 ## Setting Up A Target
@@ -76,7 +76,7 @@ Perform the following tasks to install your PostgreSQL plugin.
 
 From Oracle Enterprise Manager, navigate to Setup → Add Target → Add Targets Manually.
 
-Select the Host that whose OMA the Plug-in has been deployed to, and choose the PostgreSQL Database target type. Click Add.
+Select the Host whose OMA the Plug-in has been deployed to, and choose the PostgreSQL Database target type. Click Add.
 
 ![Target Name](./images/image1.png)
 
@@ -117,7 +117,7 @@ Enter Credentials for the PostgreSQL Target
 
 After adding the individual targets that make up the cluster, from Oracle Enterprise Manager, navigate to Setup → Add Target → Add Targets Manually.
 
-Select the Host that whose OMA the Plug-in has been deployed to, and choose the PostgreSQL Cluster target type. Click Add.
+Select the Host whose OMA the Plug-in has been deployed to, and choose the PostgreSQL Cluster target type. Click Add.
 
 #### Cluster Target Properties
 
@@ -129,7 +129,7 @@ Select the Host that whose OMA the Plug-in has been deployed to, and choose the 
 
 ## Monitoring Features
 
-The Oracle Enterprise Manager Plugin for PostgreSQL provides monitoring of nearly 200 key metrics for a PostgreSQL instance. Thresholds and metric history are available for each PostgreSQL instance, as well as advanced custom views of the instance and individual databases. These views present large amounts of complex data in an easy-to-consume manner. Allowing the user to quickly identify database performance and configuration issues.
+The Oracle Enterprise Manager Plugin for PostgreSQL provides monitoring of nearly 200 key metrics for a PostgreSQL instance. Thresholds and metric history are available for each PostgreSQL instance, as well as advanced custom views of the instance and individual databases. These views present large amounts of complex data in an easy-to-consume manner, allowing the user to quickly identify database performance and configuration issues.
 
 ### Overview
 
