@@ -9,6 +9,9 @@
 *Version 13.5.10.0.0*
 *December 2025*
 
+<details>
+<summary>Legal Notice</summary>
+
 Information in this document, including URL and other Internet Website references, is subject to change without notice. Unless otherwise noted, the companies, organizations, products, domain names, e-mail addresses, logos, people, places, and events depicted in examples herein are fictitious. No association with any real company, organization, product, domain name, e-mail address, logo, person, place, or event is intended or should be inferred.
 
 Complying with all applicable copyright laws is the responsibility of the user. Without limiting the rights under copyright, no part of this document may be reproduced, stored in or introduced into a retrieval system, or transmitted in any form or by any means (electronic, mechanical, photocopying, recording, or otherwise), or for any purpose, without the express written permission of CN Software LLC.
@@ -19,25 +22,17 @@ CN Software LLC may have patents, patent applications, trademarks, copyrights, o
 
 PostgreSQL and the "Slonik" logo are trademarks of the PostgreSQL Community Association of Canada and are used here with permission.
 
+</details>
+
 ## Versions and Platforms Supported
 
-Oracle Enterprise Manager Cloud Control 13c (13.5.0.0.0+)
-
-Oracle Enterprise Manager 24ai (24.1.0.0.0+)
-
-Supported PostgreSQL Versions: 14-18
-
-Supported Oracle Management Agent (OMA) Operating Systems:
-
-Microsoft Windows (64-bit) supported by the OMA
-
-Linux (64-bit) support by the OMA
-
-Supported Oracle Management Server (OMS) Operating Systems: All Oracle supported OMS platforms
-
-Supported PostgreSQL Database OS:
-
-All PostgreSQL supported (for remote monitoring)
+| Component | Supported Versions / Platforms |
+| :--- | :--- |
+| Oracle Enterprise Manager | Cloud Control 13c (13.5.0.0.0+), 24ai (24.1.0.0.0+) |
+| PostgreSQL | Versions 14-18 |
+| OMA Operating Systems | Microsoft Windows (64-bit), Linux (64-bit) |
+| OMS Operating Systems | All Oracle supported OMS platforms |
+| PostgreSQL Database OS | All PostgreSQL supported (for remote monitoring) |
 
 ## Prerequisites
 
@@ -54,6 +49,8 @@ All PostgreSQL supported (for remote monitoring)
   - Verify `pg_stat_statements` view is available in the "primary" database
 
 ## Setting Up A Target
+
+**Note:** A valid license key is required for installation and setup. To purchase a license, contact [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io). To request a trial license, visit [our trial request page](https://integrationplumbers.io/request-trial-for-oracle-em-plugin-for-postgresql-database/).
 
 ### Plugin Installation
 
@@ -110,8 +107,6 @@ Enter Credentials for the PostgreSQL Target
 **Note:** The "primary" database is the only location SQL statements statistics are collected from, since any location `pg_stat_statements` is queried from will return data about statements run in all databases.
 
 **Warning:** Ensure `pg_stat_statements` is viewable from the "primary" database, otherwise no query statistics will be collected.
-
-**Note:** A valid license key is required for installation and setup. To purchase a license, contact [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io). To request a trial license, visit [our trial request page](https://integrationplumbers.io/request-trial-for-oracle-em-plugin-for-postgresql-database/).
 
 #### Add targets for PostgreSQL cluster
 
