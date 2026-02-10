@@ -111,7 +111,7 @@ Enter Credentials for the PostgreSQL Target
 
 **Warning:** Ensure `pg_stat_statements` is viewable from the "primary" database, otherwise no query statistics will be collected.
 
-\*\* If no plugin license is entered, the plugin will have a PostgreSQL instance limit of 2 with no expiration date. [To purchase plugin licenses](mailto:sales@integrationplumbers.io). [To request a trial license](https://integrationplumbers.io/request-trial-for-oracle-em-plugin-for-postgresql-database)
+**Note:** A valid license key is required for installation and setup. To purchase a license, contact [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io). To request a trial license, visit [our trial request page](https://integrationplumbers.io/request-trial-for-oracle-em-plugin-for-postgresql-database/).
 
 #### Add targets for PostgreSQL cluster
 
