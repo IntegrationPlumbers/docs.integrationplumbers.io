@@ -293,18 +293,21 @@ If you need assistance with the PostgreSQL Plugin for Oracle Enterprise Manager,
 
 ## Changelog
 
-**13.5.10.0.0**
+### 13.5.10.0.0
+
 - Added support for PG 18
 - Updated licensing
 - Bug fixes
 
-**13.5.9.0.0**
+### 13.5.9.0.0
+
 - Added historical visualization of wait events
 - Added support for custom queries via Metric Extensions (BETA)
 - Added UI button to trigger a switchover of a patroni cluster
 - Bug fixes
 
-**13.2.8.3.0**
+### 13.2.8.3.0
+
 - Added support for PG 17
 - Added Real-time metric pages for Logs and Idle Connections
 - Added Job to kill idle connections
@@ -312,70 +315,88 @@ If you need assistance with the PostgreSQL Plugin for Oracle Enterprise Manager,
 - Added Log Stats metric group
 - Bug fixes
 
-**13.2.8.2.0**
+### 13.2.8.2.0
+
 - Fixed compatibility issues with newer versions of OEM
 
-**13.2.8.1.0**
+### 13.2.8.1.0
+
 - Added OMS host + credentials to test connection
 - updated PG JDBC driver
 
-**13.2.8.0.0**
+### 13.2.8.0.0
+
 - Updated licensing
 
-**13.2.7.7.0**
+### 13.2.7.7.0
+
 - Fixed heap memory issue from excessive query returns
 - Fixed parsing issue in patroni collections
 
-**13.2.7.6.0**
-- Fixed multiple jruby dependencies   
+### 13.2.7.6.0
 
-**13.2.7.5.0**
-- Fixed bug in collecting patroni metrics   
+- Fixed multiple jruby dependencies
 
-**13.2.7.4.0**
+### 13.2.7.5.0
+
+- Fixed bug in collecting patroni metrics
+
+### 13.2.7.4.0
+
 - Added metrics for patroni logs
 
-**13.2.7.3.0**
-- Stability added to new metrics   
+### 13.2.7.3.0
 
-**13.2.7.2.0**
-- Bug fixes   
+- Stability added to new metrics
 
-**13.2.7.1.0**
-- Bug fixes   
+### 13.2.7.2.0
 
-**13.2.7.0.0**
-- Cluster target / dashboard 
-- Queries update   
-- Backup & Restore jobs added   
-- New Metrics   
-- Autodiscovery   
-- Replication Metrics added   
+- Bug fixes
 
-**13.2.6.0.0**
-- Support added for PG 15   
+### 13.2.7.1.0
 
-**13.2.5.1.0**
-- Compile with Java 8 
+- Bug fixes
 
-**13.2.5.0.0**
-- Support added for PG 9 
+### 13.2.7.0.0
 
-**13.2.4.0.0**
+- Cluster target / dashboard
+- Queries update
+- Backup & Restore jobs added
+- New Metrics
+- Autodiscovery
+- Replication Metrics added
+
+### 13.2.6.0.0
+
+- Support added for PG 15
+
+### 13.2.5.1.0
+
+- Compile with Java 8
+
+### 13.2.5.0.0
+
+- Support added for PG 9
+
+### 13.2.4.0.0
+
 - PG 13 & 14 Support added
 - Compile with Java 7
 
-**13.2.3.0.0**
-- PostgreSQL 12 support   
+### 13.2.3.0.0
 
-**13.2.2.0.0**
-- Fixed issues running Java on certain system configurations   
+- PostgreSQL 12 support
+
+### 13.2.2.0.0
+
+- Fixed issues running Java on certain system configurations
 - Fixed unused indexes count displayed on Overview page
 
-**13.2.1.0.0**
-- Enterprise Manager 13.3 support 
-- PostgreSQL 11 support   
-- New HTML/JavaScript user interface   
-- Threshold configurations for more metrics   
-- Individual collection schedules for each metric group   
+### 13.2.1.0.0
+
+- Enterprise Manager 13.3 support
+- PostgreSQL 11 support
+- New HTML/JavaScript user interface
+- Threshold configurations for more metrics
+- Individual collection schedules for each metric group
 - Security updates
