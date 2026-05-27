@@ -6,8 +6,8 @@
 
 ### Oracle Enterprise Manager Plugin for PostgreSQL User Guide
 
-*Version 13.5.10.0.0*
-*December 2025*
+*Version 13.5.12.0.0*
+*May 2026*
 
 <details>
 <summary>Legal Notice</summary>
@@ -121,6 +121,26 @@ Select the Host whose OMA the Plug-in has been deployed to, and choose the Postg
 | Target Property | Description |
 | :---- | :---- |
 | Database Target Names | Comma-separated list, without spaces, of previously added PostgreSQL Database target names. |
+| Patroni REST Hostnames | (Optional) Comma-separated hostnames of the Patroni REST API endpoints, one per cluster node. When set, the plugin uses the Patroni REST API as the source of cluster topology and replication state. Leave blank to fall back to per-database collection. |
+| Patroni API Port | (Optional) TCP port of the Patroni REST API (Patroni default is `8008`). |
+| Patroni REST SSL Mode | (Optional) `disable` (default — plain HTTP), `require` (HTTPS without certificate validation; suitable for self-signed certificates on a trusted internal network), or `verify-full` (HTTPS with full certificate-chain and hostname verification). |
+| Patroni REST CA Certificate Path | (Optional) Absolute path to a PEM-format CA certificate file on the OEM agent host. Used when `Patroni REST SSL Mode` is `verify-full` to validate the REST API's server certificate. |
+| Patroni REST Username | (Optional) Username for HTTP Basic authentication against the Patroni REST API. Leave blank if the REST API has no authentication configured. |
+| Patroni REST Password | (Optional) Password for HTTP Basic authentication against the Patroni REST API. |
+
+#### Patroni Cluster Monitoring via the Patroni REST API
+
+For PostgreSQL clusters managed by [Patroni](https://patroni.readthedocs.io/), the plugin can collect cluster topology and replication state directly from the Patroni REST API instead of inferring it from per-database metrics. To enable this, populate the **Patroni REST Hostnames** target property with one hostname per cluster node (and adjust **Patroni API Port** if Patroni is not running on `8008`).
+
+When **Patroni REST Hostnames** is blank, the plugin falls back to its existing per-database collection model.
+
+The plugin supports three TLS modes for the Patroni REST API, configured via the **Patroni REST SSL Mode** property:
+
+- `disable` (default) — plain HTTP.
+- `require` — HTTPS, but the server certificate is not validated. Use only on a trusted internal network where the Patroni REST endpoints present self-signed certificates.
+- `verify-full` — HTTPS with full certificate-chain and hostname verification. When using a private CA, set **Patroni REST CA Certificate Path** to the absolute path of a PEM-format CA bundle on the OEM agent host.
+
+If your Patroni REST API requires HTTP Basic authentication, set both **Patroni REST Username** and **Patroni REST Password**. Otherwise leave both blank.
 
 ## Monitoring Features
 
@@ -175,6 +195,17 @@ To enable this feature, [**Preferred Credentials**](https://docs.oracle.com/en/e
 When using the Explain Plan feature, you may notice that queries displayed in the query list often contain parameter placeholders (such as $1, $2, etc.). These placeholders represent bound parameters from the original query execution and need to be replaced with actual values before the query can be analyzed. For example, a query like `SELECT * FROM users WHERE id = $1` should be modified to `SELECT * FROM users WHERE id = 123` with an appropriate value for the parameter.
 
 Important Note: The Explain Plan feature will actually execute your modified query against the database to generate accurate execution statistics. For example, running an Explain Plan for the query `SELECT * FROM some_table` will run `EXPLAIN(ANALYZE, FORMAT JSON) SELECT * FROM some_table`. Also note that running Explain Plans on Explain Plan-queries is not supported. While any data modifications (`INSERT`, `UPDATE`, `DELETE`) are automatically rolled back and won't persist, the query does temporarily acquire locks and consume database resources during execution. Therefore, it's recommended to use test data or values that represent typical query parameters, and avoid running explain plans on queries that could have significant performance impact or lock contention with other database operations.
+
+## Schema Inventory Metrics
+
+The plugin collects four schema-inventory metrics every 30 minutes:
+
+- **Triggers** — user-defined triggers per table (schema, table, trigger name, enabled state, definition).
+- **Prepared Transactions** — uncommitted 2PC transactions (useful for detecting stuck prepared transactions).
+- **Sequences** — non-system sequences with last/max/start values, increment, cycle flag, and cache size.
+- **User Functions** — call count and total/self time per user-defined function. Requires `track_functions = 'all'` in `postgresql.conf`.
+
+These metrics are descriptive inventory data and are displayed under the target's **All Metrics** tree (target home page → All Metrics → *metric name*). OEM's repository only persists numeric metric columns for historical trending; because these metrics are primarily textual (schema identifiers, status, definitions), historical charting is not supported. Use the live view in **All Metrics** to inspect current state.
 
 ## Real-time Metrics
 
@@ -315,6 +346,20 @@ If you need assistance with the PostgreSQL Plugin for Oracle Enterprise Manager,
 - **Self-Service Portal:** [https://integrationplumbers.zohodesk.com/portal/en/signin](https://integrationplumbers.zohodesk.com/portal/en/signin)
 
 ## Changelog
+
+### 13.5.12.0.0
+
+- Added Patroni REST API as a cluster monitoring source, with TLS modes (`disable` / `require` / `verify-full`), optional CA certificate, and optional HTTP Basic authentication. See [Patroni Cluster Monitoring via the Patroni REST API](#patroni-cluster-monitoring-via-the-patroni-rest-api).
+- Added four schema-inventory metrics: Triggers, Prepared Transactions, Sequences, User Functions (see [Schema Inventory Metrics](#schema-inventory-metrics))
+- JET 14 and JET 18 (Redwood) UI compatibility fixes
+- Fixed intermittent `MetricGetException: Result has repeating key value` on SQL Statements, Blocked Queries, and Idle Connections pages under active workload
+- Fixed Tables and Indexes toggle-all and clear-filter controls
+- Suppressed transient error dialogs shown when a target is DOWN on the Overview and Configuration pages
+- Fixed License banner handling when no license is configured
+- Fixed silent job-failure bugs in Backup, Restore, Switchover, and Custom Query job wrappers (Perl wrappers now correctly propagate the Java exit code so failed jobs are reported as Failed in OEM)
+- Fixed `EMD_PERL_INFO` crash in job wrapper scripts when `emd_common.pl` is not on Perl's `@INC`
+- CustomQueryMetric ME wizard now accepts both literal (`USERNAME`/`PASSWORD`) and PGSQL_-prefixed (`PGSQL_USERNAME`/`PGSQL_PASSWORD`) stdin credential names — matches plugin auto-populated defaults, so the wizard works without user remapping
+- Bug fixes
 
 ### 13.5.10.0.0
 
