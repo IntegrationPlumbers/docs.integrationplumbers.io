@@ -142,6 +142,8 @@ The plugin supports three TLS modes for the Patroni REST API, configured via the
 
 If your Patroni REST API requires HTTP Basic authentication, set both **Patroni REST Username** and **Patroni REST Password**. Otherwise leave both blank.
 
+> **Just upgraded?** The Cluster Home Page may show an "Error getting meta-data" popup for a short time after an upgrade, until the OMS refreshes its metadata. See [Troubleshooting](#troubleshooting) if you run into this.
+
 ## Monitoring Features
 
 The Oracle Enterprise Manager Plugin for PostgreSQL provides monitoring of nearly 200 key metrics for a PostgreSQL instance. Thresholds and metric history are available for each PostgreSQL instance, as well as advanced custom views of the instance and individual databases. These views present large amounts of complex data in an easy-to-consume manner, allowing the user to quickly identify database performance and configuration issues.
@@ -338,6 +340,26 @@ The PostgreSQL plugin now includes support for initiating Patroni cluster switch
 ![Candidate selection](./images/image20.png)
 When a Patroni cluster is detected, administrators can select any non-leader target database from the available cluster members and initiate a switchover operation through an intuitive dialog interface. The system automatically handles the communication with the Patroni REST API, including leader identification, and attempts to use the user-selected target as the candidate for the switchover operation. For non-Patroni clusters, the switchover button is automatically disabled with a clear message indicating that the feature is only available for Patroni environments.
 
+## Troubleshooting
+
+### "Error getting meta-data" on the Cluster Home Page after an upgrade
+
+![Error getting meta-data popup](./images/image21.png)
+
+After you upgrade the plugin, the OMS does not immediately register the new metric metadata that ships with the release. Until the OMS completes its next metadata refresh, opening the Cluster Home Page can produce an "Error getting meta-data" popup like the one above, because the page requests a metric (for example, `ClusterNodeInfoPatroni`) that the OMS does not yet recognize.
+
+This is expected after an upgrade and resolves on its own. The OMS metadata refresh runs on its own schedule and can take up to 24 hours to complete. You have two options:
+
+- **Wait** for the next automatic OMS metadata refresh. No action is required; the error clears once the refresh finishes.
+- **Force the refresh** by restarting the OMS. Run the following on the OMS host:
+
+  ```
+  emctl stop oms -all
+  emctl start oms
+  ```
+
+  `emctl stop oms -all` stops the OMS together with the WebLogic Admin Server and Node Manager so the metadata is reloaded on the next start. Once the OMS is back up, reload the Cluster Home Page and the error will be gone.
+
 ## Support
 
 If you need assistance with the PostgreSQL Plugin for Oracle Enterprise Manager, our support team is here to help.
@@ -357,8 +379,7 @@ If you need assistance with the PostgreSQL Plugin for Oracle Enterprise Manager,
 - Suppressed transient error dialogs shown when a target is DOWN on the Overview and Configuration pages
 - Fixed License banner handling when no license is configured
 - Fixed silent job-failure bugs in Backup, Restore, Switchover, and Custom Query job wrappers (Perl wrappers now correctly propagate the Java exit code so failed jobs are reported as Failed in OEM)
-- Fixed `EMD_PERL_INFO` crash in job wrapper scripts when `emd_common.pl` is not on Perl's `@INC`
-- CustomQueryMetric ME wizard now accepts both literal (`USERNAME`/`PASSWORD`) and PGSQL_-prefixed (`PGSQL_USERNAME`/`PGSQL_PASSWORD`) stdin credential names — matches plugin auto-populated defaults, so the wizard works without user remapping
+- Security updates
 - Bug fixes
 
 ### 13.5.10.0.0
