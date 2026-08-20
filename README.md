@@ -2,3 +2,4 @@
 
 - [PostgreSQL](/postgresql/)
 
+- [MySQL](/mysql/)
