@@ -19,24 +19,24 @@ Before the PostgreSQL plug-in can monitor anything, you add each PostgreSQL inst
 
 1. From Oracle Enterprise Manager, go to **Setup → Add Target → Add Targets Manually**.
 2. Select the host running the agent the plug-in is deployed to, choose the **PostgreSQL Database** target type, and click **Add**.
+3. Enter the target name.
 
-   ![Target Name](images/image1.png)
+   ![Add Target: enter the target name](images/image1.png)
    *Enter the target name.*
 
-3. Enter the target name.
 4. Enter the Oracle Management Server username and password, used to validate the target count against your license.
 
-   ![OMS Creds](images/image2.png)
+   ![Add Target: enter OMS credentials](images/image2.png)
    *Enter the OMS username and password for target-count validation.*
 
 5. Enter the credentials for the PostgreSQL target.
 
-   ![PG Creds](images/image3.png)
+   ![Add Target: enter PostgreSQL credentials](images/image3.png)
    *Enter the credentials for the PostgreSQL target.*
 
 6. Enter the target properties (see [Database target properties](#database-properties) below), then click **Next** and **Save**.
 
-   ![Properties](images/image4.png)
+   ![PostgreSQL Database target properties screen](images/image4.png)
    *The Database target properties screen.*
 
 > The "primary" database is the only place the plug-in collects SQL statement statistics from — any database `pg_stat_statements` is queried against returns statistics for statements run across every database on the server. Make sure `pg_stat_statements` is viewable from the primary database, or no query statistics are collected.
@@ -46,8 +46,12 @@ Before the PostgreSQL plug-in can monitor anything, you add each PostgreSQL inst
 | Target Property | Description |
 | :--- | :--- |
 | Database Hostname | Host name of the PostgreSQL server. |
+| Database Login Name | Entered on the credential screen; stored as a monitoring credential, not a target property. |
+| Database Login Password | Entered on the credential screen; stored as a monitoring credential, not a target property. |
 | Database Port | PostgreSQL port number (default is `5432`). |
 | OMS Hostname | Hostname of the Oracle Management Server (used for agent service validation). |
+| OMS Login Name | Entered on the credential screen; stored as a monitoring credential, not a target property. |
+| OMS Login Password | Entered on the credential screen; stored as a monitoring credential, not a target property. |
 | OMS Port | OMS HTTPS console port (default is `7803`, used for target count validation). |
 | Primary Database | The database the plug-in connects to for statement statistics (default is `postgres`). |
 | Path to patroni log file | Absolute path, including file name, to the Patroni log file. |
@@ -58,7 +62,7 @@ Before the PostgreSQL plug-in can monitor anything, you add each PostgreSQL inst
 | Collection Throttle: CPU Threshold (%) | Agent-host CPU usage percentage at or above which the plug-in pauses its heavier scheduled collections. See [Collection throttle properties](#throttle-properties). |
 | Collection Throttle: Memory Threshold (%) | Agent-host memory usage percentage at or above which the plug-in pauses its heavier scheduled collections. See [Collection throttle properties](#throttle-properties). |
 
-The Database Login Name/Password and OMS Login Name/Password entered in the wizard's credential screens (image2 and image3 above) are stored as monitoring credentials, not as target properties, so they do not appear in this table.
+The Database Login Name/Password and OMS Login Name/Password are entered on the credential screens above, not on the properties screen — they are stored as monitoring credentials rather than plain target properties.
 
 ## Add a PostgreSQL Cluster target {#add-cluster-target}
 
@@ -69,18 +73,18 @@ The Database Login Name/Password and OMS Login Name/Password entered in the wiza
 
 ## Cluster target properties {#cluster-properties}
 
-![Cluster](images/image5.png)
+![PostgreSQL Cluster target properties screen](images/image5.png)
 *The Cluster target properties screen.*
 
 | Target Property | Description |
 | :--- | :--- |
 | Database Target Names | Comma-separated list, without spaces, of previously added PostgreSQL Database target names. |
-| Patroni REST Hostnames | (Optional) Comma-separated hostnames of the Patroni REST API endpoints, one per cluster node. When set, the plug-in uses the Patroni REST API as the source of cluster topology and replication state. Leave blank to fall back to per-database collection. |
+| Patroni REST Hostnames (comma-separated) | (Optional) Comma-separated hostnames of the Patroni REST API endpoints, one per cluster node. When set, the plug-in uses the Patroni REST API as the source of cluster topology and replication state. Leave blank to fall back to per-database collection. |
 | Patroni API Port | (Optional) TCP port of the Patroni REST API (Patroni default is `8008`). |
-| Patroni REST SSL Mode | (Optional) `disable` (default — plain HTTP), `require` (HTTPS without certificate validation; suitable for self-signed certificates on a trusted internal network), or `verify-full` (HTTPS with full certificate-chain and hostname verification). |
-| Patroni REST CA Certificate Path | (Optional) Absolute path to a PEM-format CA certificate file on the agent host. Used when Patroni REST SSL Mode is `verify-full` to validate the REST API's server certificate. |
-| Patroni REST Username | (Optional) Username for HTTP Basic authentication against the Patroni REST API. Leave blank if the REST API has no authentication configured. |
-| Patroni REST Password | (Optional) Password for HTTP Basic authentication against the Patroni REST API. |
+| Patroni REST SSL Mode (disable \| require \| verify-full; default: disable) | (Optional) `disable` (default — plain HTTP), `require` (HTTPS without certificate validation; suitable for self-signed certificates on a trusted internal network), or `verify-full` (HTTPS with full certificate-chain and hostname verification). |
+| Patroni REST CA Certificate Path (PEM file on agent host; used when sslmode=verify-full) | (Optional) Absolute path to a PEM-format CA certificate file on the agent host. Used when Patroni REST SSL Mode is `verify-full` to validate the REST API's server certificate. |
+| Patroni REST Username (leave blank if REST API has no authentication) | (Optional) Username for HTTP Basic authentication against the Patroni REST API. Leave blank if the REST API has no authentication configured. |
+| Patroni REST Password (leave blank if REST API has no authentication) | (Optional) Password for HTTP Basic authentication against the Patroni REST API. |
 | Collection Throttle: CPU Threshold (%) | Agent-host CPU usage percentage at or above which the plug-in pauses its heavier scheduled collections. See [Collection throttle properties](#throttle-properties). |
 | Collection Throttle: Memory Threshold (%) | Agent-host memory usage percentage at or above which the plug-in pauses its heavier scheduled collections. See [Collection throttle properties](#throttle-properties). |
 
@@ -109,7 +113,7 @@ Set **Collection Throttle: CPU Threshold (%)** and **Collection Throttle: Memory
 ![Monitoring Configuration showing the collection throttle properties](images/13-5-15/target-properties-throttle.png)
 *The collection throttle properties on the Monitoring Configuration page.*
 
-- Each property is a percentage from 0 to 100. Leave a property empty, or enter an invalid value, to disable that resource's gate.
+- Each property is a percentage from 0 to 100. Leave a property empty to disable that resource's gate (an invalid value has the same effect).
 - Leave both properties empty to keep the feature off. This is the default.
 - The properties apply to local-agent deployments on Linux hosts only. On a remote agent, the CPU and memory readings would belong to the management host rather than the database host, so leave both properties empty on remote-agent targets.
 - A change to either property takes effect within one 5-minute collection cycle.
@@ -122,57 +126,39 @@ You can also add targets from the command line with `emcli add_target`, using th
 
 ### Database target
 
-```
-emcli add_target
-  -name="pg-orders-01"
-  -type="ip_postgresql_db"
-  -host="agenthost.example.com"
-  -properties="host:pg01.example.com;port:5432;primarydb:postgres;license:<YOUR_LICENSE_KEY>;omshost:oms.example.com;omsport:7803;topxqueries:10;logfile:/var/log/postgresql/postgresql.log;throttle_cpu_threshold:80;throttle_mem_threshold:80"
-  -subseparator="properties=:"
-```
+The Database Login Name/Password and OMS Login Name/Password are `CREDENTIAL="TRUE"` monitoring credentials rather than plain properties, so pass them with `-credentials` on the same `add_target` call, alongside `-properties`:
 
-The Database Login Name/Password and OMS Login Name/Password are monitoring credentials, not properties, so they are not part of `-properties`. Set them afterward, for example:
-
-```
-emcli set_monitoring_credential
-  -target_name="pg-orders-01" -target_type="ip_postgresql_db"
-  -set_name="PSQLCredsMonitoring" -cred_type="PSQLCreds"
-  -credential_properties="PSQL_Username:<username>;PSQL_Password:<password>"
-
-emcli set_monitoring_credential
-  -target_name="pg-orders-01" -target_type="ip_postgresql_db"
-  -set_name="OMSCredsMonitoring" -cred_type="OMSCreds"
-  -credential_properties="OMS_Username:<oms_username>;OMS_Password:<oms_password>"
+```sh
+emcli add_target \
+  -name="pg-orders-01" \
+  -type="ip_postgresql_db" \
+  -host="agenthost.example.com" \
+  -properties="host:pg01.example.com;port:5432;primarydb:postgres;license:<YOUR_LICENSE_KEY>;omshost:oms.example.com;omsport:7803;topxqueries:10;logfile:/var/log/postgresql/postgresql.log;throttle_cpu_threshold:80;throttle_mem_threshold:80" \
+  -subseparator="properties=:" \
+  -credentials="username:<username>;password:<password>;omsusername:<oms_username>;omspassword:<oms_password>"
 ```
 
 ### Cluster target
 
-```
-emcli add_target
-  -name="pg-orders-cluster"
-  -type="ip_postgresql_cluster"
-  -host="agenthost.example.com"
-  -properties="dbtargets:pg-orders-01,pg-orders-02,pg-orders-03;patroni_port:8008;patroni_hosts:pg01.example.com,pg02.example.com,pg03.example.com;patroni_sslmode:verify-full;patroni_ca_cert_path:/etc/patroni/ca.pem"
+```sh
+emcli add_target \
+  -name="pg-orders-cluster" \
+  -type="ip_postgresql_cluster" \
+  -host="agenthost.example.com" \
+  -properties="dbtargets:pg-orders-01,pg-orders-02,pg-orders-03;patroni_port:8008;patroni_hosts:pg01.example.com,pg02.example.com,pg03.example.com;patroni_sslmode:verify-full;patroni_ca_cert_path:/etc/patroni/ca.pem" \
   -subseparator="properties=:"
 ```
 
-If the Patroni REST API requires HTTP Basic authentication, set the Patroni REST username and password the same way, as a monitoring credential rather than a plain property:
+If the Patroni REST API requires HTTP Basic authentication, set the Patroni REST username and password afterward as a monitoring credential:
 
-```
-emcli set_monitoring_credential
-  -target_name="pg-orders-cluster" -target_type="ip_postgresql_cluster"
-  -set_name="PatroniRESTCredsMonitoring" -cred_type="PatroniRESTCreds"
-  -credential_properties="Patroni_Username:<username>;Patroni_Password:<password>"
+```sh
+emcli set_monitoring_credential \
+  -target_name="pg-orders-cluster" -target_type="ip_postgresql_cluster" \
+  -set_name="PatroniRESTCredsMonitoring" -cred_type="PatroniRESTCreds" \
+  -attributes="Patroni_Username:<username>;Patroni_Password:<password>"
 ```
 
-`use_patroni_api_for_metrics` is not shown on the Monitoring Configuration page. Set it with `emcli add_target` or `emcli modify_target`:
-
-```
-emcli modify_target
-  -name="pg-orders-cluster" -type="ip_postgresql_cluster"
-  -properties="use_patroni_api_for_metrics:true"
-  -subseparator="properties=:"
-```
+You do not set `use_patroni_api_for_metrics` yourself; the agent derives it from **Patroni REST Hostnames** — non-empty means Patroni API mode is on.
 
 ## Related
 
