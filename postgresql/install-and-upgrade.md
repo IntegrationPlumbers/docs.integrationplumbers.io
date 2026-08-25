@@ -74,7 +74,7 @@ The equivalent `emcli` command:
 emcli deploy_plugin_on_agent -agent_names="<host>:<port>" -plugin=ip.em.xpgs
 ```
 
-`get_plugin_deployment_status` (shown above) reports agent deployment progress the same way it reports OMS deployment progress.
+`get_plugin_deployment_status` (shown above) reports agent deployment progress just as it does for the OMS.
 
 ## Upgrade from an earlier release {#upgrade}
 

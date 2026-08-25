@@ -30,7 +30,7 @@ When an advisor page sits empty, a KPI shows a placeholder, or an action fails o
 
 *The popup as it can appear right after an upgrade, before the OMS completes its metadata refresh.*
 
-**Cause:** After you upgrade the plug-in, the OMS does not immediately register the new metric metadata that ships with the release. Until the OMS completes its next metadata refresh, opening the Cluster Home Page can produce this popup, because the page requests a metric (for example, `ClusterNodeInfoPatroni`) that the OMS does not yet recognize. This is expected after an upgrade and resolves on its own. The OMS metadata refresh runs on its own schedule and can take up to 24 hours to complete.
+**Cause:** After you upgrade the plug-in, the OMS does not immediately register the new metric metadata that ships with the release. Until the OMS completes its next metadata refresh, opening the Cluster Home Page can produce this popup, because the page requests a metric (for example, `ClusterNodeInfoPatroni`) that the OMS does not yet recognize. This is expected after an upgrade and clears without intervention. The OMS metadata refresh runs on its own schedule and can take up to 24 hours.
 
 **Fix:**
 1. Wait for the next automatic OMS metadata refresh. No action is required; the error clears once the refresh finishes.

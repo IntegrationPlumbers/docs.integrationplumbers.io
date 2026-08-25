@@ -5,7 +5,7 @@ nav_order: 4
 
 # Prerequisites
 
-If you already monitor PostgreSQL with the plug-in, most of this list is in place today. What the plug-in needs falls into three groups. A monitoring role that can read PostgreSQL's statistics catalogs covers all existing monitoring, and `auto_explain` plus one privilege grant is what plan capture and the advisors built on it require. The third group is a short list of optional extensions that add What-If index simulation, predicate-based index advice, wait-event sampling, and table bloat estimates. Nothing here is applied by the plug-in on your behalf except the `auto_explain` settings, and only when you click **Configure auto_explain**.
+If you already monitor PostgreSQL with the plug-in, most of this list is in place today. What the plug-in needs falls into three groups. A monitoring role that can read PostgreSQL's statistics catalogs covers all existing monitoring. Plan capture and the advisors built on it need `auto_explain` plus one privilege grant. The third group is a short list of optional extensions that add What-If index simulation, predicate-based index advice, wait-event sampling, and table bloat estimates. The plug-in applies none of it for you except the `auto_explain` settings, and only when you click **Configure auto_explain**.
 
 **Where to find it:** every item below is checked live, per target, on the database target's **Monitoring Readiness** page.
 
@@ -121,7 +121,7 @@ Extensions are per-database. Run `CREATE EXTENSION <name>;` in each database you
 | `pg_wait_sampling` | Wait-event sampling and the Wait Events chart on **Query Analyzer**. | PGDG package `postgresql-<ver>-pg-wait-sampling`, then `CREATE EXTENSION pg_wait_sampling;`. Needs the library in `shared_preload_libraries`, which means a restart |
 | `pgstattuple` | Table bloat and avoidable-growth estimates on **Vacuum Advisor**. | Ships in the PostgreSQL contrib package, then `CREATE EXTENSION pgstattuple;` |
 
-Install `hypopg` and `pg_qualstats` together. Catalog-native index detection works on every target with no extension at all, but the two extensions together are the intended everyday **Index Advisor** experience: simulated cost validation from `hypopg`, observed-predicate recommendations from `pg_qualstats`.
+Install `hypopg` and `pg_qualstats` together. Catalog-native index detection works on every target with no extension at all, but the two extensions together give **Index Advisor** its full output: simulated cost validation from `hypopg`, observed-predicate recommendations from `pg_qualstats`.
 
 For `pg_wait_sampling`, set `pg_wait_sampling.profile_queries` to `all` or `top`, otherwise the profile carries no per-query rows. The extension is not included in most PostgreSQL distributions and is not available on Windows, but most package managers carry it.
 

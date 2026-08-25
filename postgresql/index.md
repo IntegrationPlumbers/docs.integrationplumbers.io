@@ -29,7 +29,7 @@ PostgreSQL and the "Slonik" logo are trademarks of the PostgreSQL Community Asso
 
 </details>
 
-The PostgreSQL plug-in monitors PostgreSQL instances from inside Oracle Enterprise Manager: close to 200 metrics per instance, with thresholds, metric history, and incidents on targets you manage alongside everything else in your estate. On top of that it adds five advisory pages: **Plan Analysis**, **Plan Drift Advisor**, **Workload History**, **Index Advisor**, and **Vacuum Advisor** each name the query, index, or table at fault, then hand you SQL that you review and run yourself in your own tooling.
+The PostgreSQL plug-in monitors PostgreSQL instances from inside Oracle Enterprise Manager: close to 200 metrics per instance, with thresholds, metric history, and incidents on targets you manage alongside everything else in your estate. On top of that it adds five advisory pages. **Plan Analysis**, **Plan Drift Advisor**, **Workload History**, **Index Advisor**, and **Vacuum Advisor** each name the query, index, or table at fault, then hand you SQL to review and run in your own tooling.
 
 ## Choose your path
 
@@ -76,7 +76,7 @@ Whichever path you take, the plug-in never applies a recommendation for you, and
 
 ## Support
 
-If you need assistance with the PostgreSQL Plugin for Oracle Enterprise Manager, our support team is here to help.
+If you need assistance with the PostgreSQL Plugin for Oracle Enterprise Manager:
 
 - **Email:** [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io)
 - **Self-Service Portal:** [https://integrationplumbers.zohodesk.com/portal/en/signin](https://integrationplumbers.zohodesk.com/portal/en/signin)

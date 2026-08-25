@@ -5,7 +5,7 @@ nav_order: 16
 
 # Jobs and metric extensions
 
-When you need to act on a target directly (clear a batch of idle connections, take an ad hoc backup, fail over a Patroni cluster, or collect your own custom query as a metric), the plug-in exposes that as an Enterprise Manager job type or a Metric Extension adapter rather than a button on a page. This page lists every job type the plug-in ships, walks through creating the two you are most likely to run by hand, and covers wiring a custom SQL query into a Metric Extension.
+When you need to act on a target directly (clear a batch of idle connections, take an ad hoc backup, fail over a Patroni cluster, or collect your own custom query as a metric), the plug-in exposes that as an Enterprise Manager job type or a Metric Extension adapter rather than a button on a page.
 
 > **Prerequisites for this page**
 > - The jobs behind **Plan Analysis**, **Plan Drift Advisor**, **Workload History**, **Retention Policies**, and the **Configure auto_explain** action need [Preferred Credentials](prerequisites.md#preferred-credentials) set for the target — the plug-in submits those jobs for you, without prompting.

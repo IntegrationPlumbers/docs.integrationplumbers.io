@@ -5,7 +5,7 @@ nav_order: 13
 
 # Monitoring pages
 
-If you came here from the Advisors pages, you already know where plan drift, index and vacuum health, and workload trends live. Everything else lives on the pages this page tours: current connections, table and index growth, currently running and blocked queries, the server log, license status, and the PostgreSQL Cluster target's switchover control.
+If you came here from the Advisors pages, you already know where plan drift, index and vacuum health, and workload trends live. Everything else lives on the pages below: current connections, table and index growth, currently running and blocked queries, the server log, license status, and the PostgreSQL Cluster target's switchover control.
 
 > **Prerequisites for this page**
 > - Query Analyzer's statement list and history read from `pg_stat_statements` — see [Statement statistics (pg_stat_statements)](prerequisites.md#pg-stat-statements).
@@ -110,7 +110,7 @@ With no license recognized, the table reads "No licenses configured". License ke
 
 ## Realtime pages
 
-The pages under **Realtime** query the target live, on demand, each with an **Auto Refresh** selector (No Refresh, 15, 30, or 60 seconds) that controls how often it re-queries while you have the page open. A couple of the metrics behind these pages also collect on their own fixed schedule and carry alert thresholds: Vacuum xmin Horizon collects every 30 minutes with Warning and Critical bands (see [Vacuum Advisor](vacuum-advisor.md#xmin-horizon-root-cause)), and Log Stats, behind the Logs page below, collects every 5 minutes once the collection is enabled in Metric and Collection Settings.
+The pages under **Realtime** query the target live, on demand, each with an **Auto Refresh** selector (No Refresh, 15, 30, or 60 seconds) that controls how often it re-queries while you have the page open. Two of the metrics behind these pages also collect on their own fixed schedule and carry alert thresholds: Vacuum xmin Horizon collects every 30 minutes with Warning and Critical bands (see [Vacuum Advisor](vacuum-advisor.md#xmin-horizon-root-cause)), and Log Stats, behind the Logs page below, collects every 5 minutes once the collection is enabled in Metric and Collection Settings.
 
 ### Locks
 

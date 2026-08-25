@@ -39,7 +39,7 @@ Before the PostgreSQL plug-in can monitor anything, you add each PostgreSQL inst
    ![PostgreSQL Database target properties screen](images/image4.png)
    *The Database target properties screen.*
 
-> The "primary" database is the only place the plug-in collects SQL statement statistics from — any database `pg_stat_statements` is queried against returns statistics for statements run across every database on the server. Make sure `pg_stat_statements` is viewable from the primary database, or no query statistics are collected.
+> The "primary" database is the only place the plug-in collects SQL statement statistics from. Whichever database you query `pg_stat_statements` in, it returns statistics for statements run across every database on the server. Make sure `pg_stat_statements` is viewable from the primary database, or no query statistics are collected.
 
 ## Database target properties {#database-properties}
 
@@ -62,7 +62,7 @@ Before the PostgreSQL plug-in can monitor anything, you add each PostgreSQL inst
 | Collection Throttle: CPU Threshold (%) | Agent-host CPU usage percentage at or above which the plug-in pauses its heavier scheduled collections. See [Collection throttle properties](#throttle-properties). |
 | Collection Throttle: Memory Threshold (%) | Agent-host memory usage percentage at or above which the plug-in pauses its heavier scheduled collections. See [Collection throttle properties](#throttle-properties). |
 
-The Database Login Name/Password and OMS Login Name/Password are entered on the credential screens above, not on the properties screen — they are stored as monitoring credentials rather than plain target properties.
+The Database Login Name/Password and OMS Login Name/Password are entered on the credential screens above, not on the properties screen. They are stored as monitoring credentials rather than plain target properties.
 
 ## Add a PostgreSQL Cluster target {#add-cluster-target}
 

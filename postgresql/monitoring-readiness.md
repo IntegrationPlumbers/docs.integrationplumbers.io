@@ -120,7 +120,7 @@ When a captured plan arrives without a real query id, the plug-in computes a syn
 
 The readiness row states the consequence directly: "Without it the plugin falls back to synthetic query ids (shown as syn:...) derived from the query text - grouping and drift pairing still work, but ids won't match pg_stat_statements and switch to real ids once enabled (starting a fresh drift lineage)."
 
-Enabling the two settings later is safe but not free of side effects. Affected statements switch from `syn:` ids to real ids and start a fresh drift lineage, so their drift history restarts from that point. If you intend to enable them, enable them before you spend time accepting baselines. Both are included in the **Configure auto_explain** preview, so a single Apply covers them alongside the mandatory items.
+Enabling the two settings later is safe, but it has one side effect. Affected statements switch from `syn:` ids to real ids and start a fresh drift lineage, so their drift history restarts from that point. If you intend to enable them, enable them before you spend time accepting baselines. Both are included in the **Configure auto_explain** preview, so a single Apply covers them alongside the mandatory items.
 
 ## Behaviors
 

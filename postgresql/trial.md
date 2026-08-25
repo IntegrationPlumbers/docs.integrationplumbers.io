@@ -5,7 +5,7 @@ nav_order: 3
 
 # Trial setup
 
-If you want to know whether the PostgreSQL plug-in earns a place in your Enterprise Manager before you buy it, a trial gives you the whole product: every page, every advisor, and every metric in this guide, running on your own OMS against your own PostgreSQL instances, with nothing held back. Request a key through the form below, enter it on each target, then work the guided checklist further down this page. It exercises every advisor in about a week.
+If you want to know whether the PostgreSQL plug-in earns a place in your Enterprise Manager before you buy it, a trial gives you the whole product: every page, advisor, and metric in this guide, running on your own OMS against your own PostgreSQL instances. Request a key through the form below, enter it on each target, then work the guided checklist further down this page. It exercises every advisor in about a week.
 
 > **Prerequisites for this page**
 > - Enterprise Manager 13.5.0.0.0 or later, or 24ai 24.1.0.0.0 or later, with an agent that can reach the instances you want to evaluate — see [Enterprise Manager and agents](prerequisites.md#enterprise-manager).
@@ -76,7 +76,7 @@ The checklist is ordered by what the product can show you on each day, not by im
 
 ### Day 1
 
-Everything here works from the first collection, once the target is added and the key is in place.
+Everything here needs only the target added and the key in place.
 
 | What to do | What you should see | Page |
 |---|---|---|

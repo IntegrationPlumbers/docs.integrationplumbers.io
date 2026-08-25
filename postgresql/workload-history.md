@@ -141,8 +141,6 @@ Bars are bucketed across the range, around 48 buckets and never finer than the 1
 Two empty states are worth telling apart. "No data yet — waits_sampled metric populates within one collection interval after enable" (the message names the older `waits_sampled`; the live metric is `wait_events_sampled`) means nothing has been collected for that statement in that range yet. "No data matches the current filter" means the database filter excluded everything that was collected. The whole panel is hidden on targets where wait sampling is not enabled.
 <!-- CONFIRM: engineering to correct the empty-state string before GA -->
 
-
-
 Query Analyzer has no EXPLAIN workbench. The only EXPLAIN the plug-in ever runs is the Fix Workbench on [Plan Drift Advisor](plan-drift-advisor.md), and only when you click it.
 
 ### Granularity and the database filter
@@ -164,7 +162,7 @@ PostgreSQL exposes wait sampling only as cumulative counters, so the plug-in der
 - The metric's **Event Count** column is a per-collection delta computed from the extension's cumulative counter, guarded against counter resets.
 - Every collection stages full-resolution rows into the agent-local history store. Once a day the condense keeps, per completed day, only the (query id, event) combinations that actually waited that day and that meet your minimum daily wait threshold, adding the day's sample-count increase and an estimated wait time.
 - Estimated wait time is the sample count multiplied by the sampling period. It is an estimate derived from sample counts, not a measured duration.
-- The sampling period used is the live `pg_wait_sampling.profile_period` read from the server at each collection and stored per target, so a DBA changing it on the server is picked up on the next collection. Where it has never been captured, the extension's own 10 ms default applies. There is nothing to operate here.
+- The sampling period used is the live `pg_wait_sampling.profile_period` read from the server at each collection and stored per target, so a DBA changing it on the server is picked up on the next collection. Where it has never been captured, the extension's own 10 ms default applies.
 
 This is a high-volume tier. If you want to keep less of it, run the **PostgreSQL - Set Wait History Retention Threshold** job against the target and set **Minimum Daily Wait Time (ms)**: a query and event combination must reach that estimated wait time in a day for its daily row to be kept. The default is `0`, which keeps every combination that waited at all that day.
 

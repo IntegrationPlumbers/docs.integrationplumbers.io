@@ -7,7 +7,7 @@ nav_order: 12
 
 If a table keeps growing while autovacuum is nominally running, the answer is usually one of three things: the table's own storage parameters moved its trigger point, cleanup is running but not often enough for the churn, or something is pinning the transaction horizon so no vacuum anywhere can remove the dead rows. **Vacuum Advisor** answers all three from PostgreSQL's own statistics catalogs, names the table or the holder, and hands you the exact statement to run. It needs no extension for anything except the bloat estimate, and it never runs any of the SQL it recommends.
 
-That last point is worth stating plainly before anything else. Every command on this page is advisory. The `ALTER TABLE` tuning statements, `SELECT pg_terminate_backend(…)`, `SELECT pg_drop_replication_slot(…)` and `ROLLBACK PREPARED` all appear as text you copy and run yourself, in your own tooling, after you have decided they are safe. The plug-in executes none of them.
+Every command on this page is advisory. The `ALTER TABLE` tuning statements, `SELECT pg_terminate_backend(…)`, `SELECT pg_drop_replication_slot(…)` and `ROLLBACK PREPARED` all appear as text you copy and run yourself, in your own tooling, after you have decided they are safe. The plug-in executes none of them.
 
 > **Prerequisites for this page**
 > - The core page is catalog-native. It reads `pg_stat_user_tables`, `pg_class`, `pg_settings`, `pg_stat_activity`, `pg_replication_slots` and `pg_prepared_xacts` under [the monitoring role](prerequisites.md#monitoring-role), with no extension required.
@@ -139,7 +139,7 @@ Finding detail persists to the agent-local store on every collection, under the 
 
 ## Table bloat estimate
 
-The frequency detection and the bloat estimate are cause and consequence. The frequency detection tells you cleanup is falling behind, which is something to act on early. The bloat estimate tells you a table has already grown avoidably, which is something to plan a reclaim for.
+The frequency detection and the bloat estimate are cause and consequence. The frequency detection tells you cleanup is falling behind, which is something to act on early. The bloat estimate tells you a table has already grown avoidably, and that is a reclaim to plan.
 
 This section and the **Table Bloat Estimate** metric need the `pgstattuple` extension on the monitored database. Extensions in PostgreSQL are per-database, so install it in each database you want estimated. The plug-in detects it automatically through the catalog and never installs it. Without it the metric emits zero rows and the page section is simply empty. That is a healthy, expected state, not an error.
 
@@ -154,7 +154,7 @@ The plug-in uses the fast approximate function, which is visibility-map based an
 
 Each row carries its own evidence sentence, for example: "Table is ~46.2% free space (912 MB) with 2204118 dead tuples (~21.7%); a VACUUM (FULL) or pg_repack would reclaim the avoidable growth".
 
-Work a flagged table in that order: check the vacuum recommendation tables first so the bloat stops growing, then reclaim the space manually with a `VACUUM`, or a rewrite or repack approach for severe cases, in your own tooling.
+Work a flagged table in that order: check the vacuum recommendation tables first so the bloat stops growing, then reclaim the space in your own tooling with a `VACUUM`, or with a rewrite or repack for severe cases.
 
 | Metric | Internal name | Collected | Default Warning | Default Critical | Occurrences | Clears when |
 |---|---|---|---|---|---|---|

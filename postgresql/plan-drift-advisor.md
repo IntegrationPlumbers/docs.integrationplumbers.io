@@ -19,7 +19,7 @@ When a query that was fine last week is suddenly slow, the question is rarely wh
 
 ## Problematic Queries
 
-This list is the entry point. It holds one row per query and database pair, showing that query's most recent capture, and it only lists queries whose most recent capture scored worse than OK. An empty list means nothing is currently flagged. Read that against what has been certified so far: until a query has an accepted baseline, only the acute capture-over-capture check can flag it. On a target where you have accepted nothing yet, an empty list says no query has regressed against its own recent history, not that every plan is certified. Once baselines exist, an empty list is the healthy state: nothing is running on an uncertified or degraded plan.
+This list is the entry point. It holds one row per query and database pair, showing that query's most recent capture, and it only lists queries whose most recent capture scored worse than OK. An empty list means nothing is currently flagged, which reads differently depending on what you have certified so far: until a query has an accepted baseline, only the acute capture-over-capture check can flag it. On a target where you have accepted nothing yet, an empty list says no query has regressed against its own recent history, not that every plan is certified. Once baselines exist, an empty list is the healthy state: nothing is running on an uncertified or degraded plan.
 
 1. Open **Plan Drift Advisor**. The list loads on its own.
 2. Set **Sort** to the ordering that matches your question: Total exec time (the default, impact first), Cost Δ vs baseline, Mean exec time, Severity, Calls, or Most recent.
@@ -130,7 +130,7 @@ Severity is the worse of two independent checks:
 
 Improvements are not drift. Both cost comparisons only fire upward, so a plan that gets cheaper produces a negative delta that is displayed but never raises Cost Drift, and a shape change that costs less does not trip the acute check.
 
-Retired baselines behave the way the name implies. A current plan that matches a `retired` row reports Plan Changed, because status describes your certified registry, not what the database is doing — and running a decertified plan is exactly the condition worth telling you about. Resolve it by accepting the plan or by fixing the database.
+Retired baselines behave the way the name implies. A current plan that matches a `retired` row reports Plan Changed, because status describes your certified registry, not what the database is doing. Running a decertified plan is exactly the condition worth telling you about. Resolve it by accepting the plan or by fixing the database.
 
 ## Baseline governance
 
@@ -203,7 +203,7 @@ Each numeric field arrives prefilled with the value in effect, so read the curre
 
 ## Plan Drift alerts
 
-The page is for investigating; the metric is for being told. The `plan_drifts` collection raises a standard Enterprise Manager alert when a query starts running on a plan shape outside its accepted baseline set, and inherits the full alerting machinery — editable schedule, retunable thresholds, alert history, and whatever notification connector your Enterprise Manager already routes through.
+The `plan_drifts` collection raises a standard Enterprise Manager alert when a query starts running on a plan shape outside its accepted baseline set, and inherits the full alerting machinery — editable schedule, retunable thresholds, alert history, and whatever notification connector your Enterprise Manager already routes through.
 
 | Metric | Internal name | Collected | Default Warning | Default Critical | Occurrences | Clears when |
 |---|---|---|---|---|---|---|
@@ -227,7 +227,7 @@ Accepting the new plan is a valid way to clear a drift alert. The metric reports
 
 ## Cross-links with Query Analyzer
 
-An investigation that starts on one query page lands on the right surface with the query already selected.
+An investigation that starts on one query page carries the query you selected across to the other.
 
 - **Query Analyzer → Plan Drift Advisor.** When a selected statement's query id and database have drift captures, a bar appears with the badge "Plan drift data available" and the link "View this query in Plan Drift Advisor →". Clicking it opens this page with that query preselected: the Problematic Queries row is already selected and the detail panels are populated. The link only appears when there is drift data to land on.
 - **Plan Drift Advisor → Query Analyzer.** The Selected Query panel carries "View full statement statistics in Query Analyzer →" for the full `pg_stat_statements` view of the same statement.

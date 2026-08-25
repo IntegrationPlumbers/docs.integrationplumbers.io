@@ -89,7 +89,7 @@ Two things to keep in mind. Collection schedules and thresholds are independent:
 
 ## Monitoring templates {#templates}
 
-Three pre-built Enterprise Manager monitoring templates cover the plug-in's metrics for the `ip_postgresql_db` target type. They are shipped in the standard OEM export format, which is the same shape `emcli export_template` produces, so they behave like any template you built yourself.
+Three pre-built Enterprise Manager monitoring templates cover the plug-in's metrics for the `ip_postgresql_db` target type. They ship in the standard OEM export format, the same shape `emcli export_template` produces, so they behave like any template you built yourself.
 
 | Template name | File | Purpose |
 |---|---|---|
@@ -100,7 +100,7 @@ Three pre-built Enterprise Manager monitoring templates cover the plug-in's metr
 After import, the console lists each template under its template name, and that same name is what you pass to `emcli apply_template`.
 <!-- CONFIRM: verify in the console after import -->
 
-Monitoring templates are repository-side objects. They live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself: an administrator imports them into the OMS once, then applies them to targets.
+Monitoring templates live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself: an administrator imports them into the OMS once, then applies them to targets.
 <!-- CONFIRM: how template files are delivered to customers (download bundle / S3 link) -->
 
 ### Import and apply

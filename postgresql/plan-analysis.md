@@ -74,7 +74,7 @@ The Capture threshold tile is read from the database rather than from anything y
 
 ### Two thresholds, two different units
 
-These are separate settings and they are not measured in the same thing. Getting them confused is the most common way to misread the page.
+Getting these two confused is the most common way to misread the page.
 
 | Setting | Unit | Where you set it | What it decides |
 |---|---|---|---|
@@ -143,11 +143,11 @@ When an Insufficient Index finding is the highest-impact insight across every ca
 ![The top recommendation banner above the Historical Query Insights list, with the Open Index Advisor button](images/13-5-15/plan-analysis-banner.png)
 *The banner promotes the single highest-impact missing-index finding, ranked by severity and then estimated improvement.*
 
-The button navigates to [Index Advisor](index-advisor.md), where the same problem is stated as ranked, ready-to-review index recommendations. A missing index and a bad plan are the same story told from two sides. The banner is hidden when no Insufficient Index finding exists.
+The button navigates to [Index Advisor](index-advisor.md), where the same problem is stated as ranked, ready-to-review index recommendations. The banner is hidden when no Insufficient Index finding exists.
 
 ## Plan Insights alerts
 
-The page is for investigating. The `plan_insights` metric is for being told. It publishes one row per detected pathology on each query's newest captured plan, keyed on query id, database, and insight code, and it raises a standard Enterprise Manager alert when a High-severity insight appears.
+The `plan_insights` metric turns these findings into alerts. It publishes one row per detected pathology on each query's newest captured plan, keyed on query id, database, and insight code, and it raises a standard Enterprise Manager alert when a High-severity insight appears.
 
 | Metric | Internal name | Collected | Default Warning | Default Critical | Occurrences | Clears when |
 |---|---|---|---|---|---|---|

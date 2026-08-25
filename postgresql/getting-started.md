@@ -5,7 +5,7 @@ nav_order: 2
 
 # Getting started
 
-If you have not deployed the PostgreSQL plug-in before, this page is the whole path in one place: six steps that take an empty Enterprise Manager to a console with real data in it. Steps 2 through 6 are console and `emcli` work. Step 1 is the one to plan around, because turning on `pg_stat_statements` needs a PostgreSQL restart. Each step says what to do and how you know it worked, then links to the page that carries the detail.
+If you have not deployed the PostgreSQL plug-in before, this page is the whole path: six steps that take an empty Enterprise Manager to a console with real data in it. Steps 2 through 6 are console and `emcli` work. Step 1 is the one to plan around, because turning on `pg_stat_statements` needs a PostgreSQL restart. Each step says what to do and how you know it worked, then links to the page that carries the detail.
 
 > **Prerequisites for this page**
 > - OMS access that can import an OPAR and deploy plug-ins, for example `sysman` — see [Enterprise Manager and agents](prerequisites.md#enterprise-manager).
@@ -18,7 +18,7 @@ If you have not deployed the PostgreSQL plug-in before, this page is the whole p
 
 ## Before you start
 
-This is the minimum for all existing monitoring. Work through the full version, including the list for the advisory features, in [Prerequisites checklist](prerequisites.md#checklist).
+This is the minimum for all existing monitoring. Work through the full list, including what the advisory features add, in [Prerequisites checklist](prerequisites.md#checklist).
 
 - [ ] PostgreSQL 14-18, and Enterprise Manager 13.5.0.0.0+ or 24ai 24.1.0.0.0+. See [Supported versions and platforms](prerequisites.md#supported-versions).
 - [ ] An agent host on Linux 64-bit or Windows 64-bit, with a network path to the database over JDBC, port 5432 by default. See [Network and connectivity](prerequisites.md#network).

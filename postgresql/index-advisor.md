@@ -54,7 +54,7 @@ Every row spells out its own evidence in the **Detail** column, in the category'
 - Consolidation — "Index is redundant: its column list is a leading prefix of another index (`orders_cust_date_idx`)"
 - Missing — "Table has 812 sequential scans averaging 46,300 rows read each; a targeted index may help"
 
-The **Triggering Value** column holds the number the rule fired on, and it means something different per category: rows read per sequential scan for Missing, the scan count for Unused, the HOT-update percentage for HOT-inhibiting, the number of indexed columns for Consolidation, and 0 for Invalid. **Impact Rank** orders every catalog finding deterministically — severity tier first (Invalid, then Missing and HOT-inhibiting, then Unused and Consolidation), then the triggering value. Rank 1 is the highest priority, as the section hint says: "Always-on catalog detection across five categories; no extension required. Click a **Recommended SQL** cell to review and copy — nothing is applied automatically. Lower **Impact Rank** = higher priority."
+The **Triggering Value** column holds the number the rule fired on, and it means something different per category: rows read per sequential scan for Missing, the scan count for Unused, the HOT-update percentage for HOT-inhibiting, the number of indexed columns for Consolidation, and 0 for Invalid. **Impact Rank** orders every catalog finding deterministically: severity tier first (Invalid, then Missing and HOT-inhibiting, then Unused and Consolidation), then the triggering value. Rank 1 is the highest priority, as the section hint says: "Always-on catalog detection across five categories; no extension required. Click a **Recommended SQL** cell to review and copy — nothing is applied automatically. Lower **Impact Rank** = higher priority."
 
 What to watch for:
 
@@ -123,7 +123,7 @@ How it works:
 
 The **Predicate-Stats Advisory (GIN / GIST)** table carries Impact Rank, Severity, Database, Schema, Table, Predicate Column, Operator, Recommended Type, Queries, Rows Evaluated, Rows Filtered, and Recommended SQL. Each row's Detail states the case in full, for example: "Predicate `payload` @> seen in 6 plan(s); filtered 2,410,338 rows over 18,942 row evaluations - a gin index is recommended". The section hint reads: "With the **pg_qualstats** extension, observed predicates rank candidates and infer the index type (GIN for jsonb/array containment, GIST for range/geometry, btree for equality). Empty when pg_qualstats is not installed."
 
-The two Missing-Index summary tables stay separate on purpose. One is planner cost simulation, the other is observed workload evidence, and they are independent — keeping them apart keeps each of them honest. Where both point at the same table, that agreement is the strongest signal on the page, and it is what the Missing-index banner surfaces with its `pg_qualstats matches: N queries` annotation. The section hint above the pair says so directly: "Candidates from two sources: **HypoPG What-If** simulates planner cost; **pg_qualstats** ranks predicates observed in your workload. Click a SQL cell to copy; full detail in the sections below."
+The two Missing-Index summary tables stay separate on purpose. One is planner cost simulation, the other is observed workload evidence, and they are independent. Where both point at the same table, that agreement is the strongest signal on the page, and it is what the Missing-index banner surfaces with its `pg_qualstats matches: N queries` annotation. The section hint above the pair says so directly: "Candidates from two sources: **HypoPG What-If** simulates planner cost; **pg_qualstats** ranks predicates observed in your workload. Click a SQL cell to copy; full detail in the sections below."
 
 ## Without extensions
 
@@ -131,13 +131,13 @@ With no extension installed, the page and its metrics still work on every suppor
 
 Extension presence is probed per database at collection time, so a database with `hypopg` installed is simulated even when its neighbors are not. When an extension is absent the corresponding collection returns zero rows and the catalog-native layer carries on unchanged.
 
-The **Monitoring Readiness** page tells you exactly where you stand: its "Index Advisor — Enhanced Recommendations" panel lists both extensions with their status and explains the trade — "Catalog-native index detection always works; these optional extensions add What-If cost simulation and predicate-based recommendations." See [Monitoring Readiness](monitoring-readiness.md).
+The **Monitoring Readiness** page tells you exactly where you stand: its "Index Advisor — Enhanced Recommendations" panel lists both extensions with their status and explains the trade: "Catalog-native index detection always works; these optional extensions add What-If cost simulation and predicate-based recommendations." See [Monitoring Readiness](monitoring-readiness.md).
 
-The extensions add precision rather than function. Installing `pg_qualstats` and `hypopg` remains the configuration to aim for, because it is the difference between a ranked list of suspicions and a ranked list of measurements.
+The extensions add precision rather than function: with `pg_qualstats` and `hypopg` installed, a ranked list of suspicions becomes a ranked list of measurements.
 
 ## Index Advisor alerts
 
-Every finding also publishes as a standard Enterprise Manager metric on the target, which means editable collection schedules, thresholds you can tune per target or through a monitoring template, alert history, and routing through the usual notification framework to whatever connector you have bound. The page is where you investigate; the metrics are how you get told.
+Every finding also publishes as a standard Enterprise Manager metric on the target, which means editable collection schedules, thresholds you can tune per target or through a monitoring template, alert history, and routing through the usual notification framework to whatever connector you have bound.
 
 | Metric | Internal name | Collected | Default Warning | Default Critical | Occurrences | Clears when |
 |---|---|---|---|---|---|---|

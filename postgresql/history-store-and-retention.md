@@ -23,7 +23,7 @@ One SQLite database per PostgreSQL database target, on the agent host:
 `%plugin_data%/<target name>_collections.sqlite3`
 
 - The file is created at the first collection that persists history, and its schema updates itself on later releases. There are no manual steps and no upgrade procedure.
-- It is created with restrictive permissions: owner read/write, group read (640) on the database file, and 750 on its parent directory. The WAL and SHM sidecar files inherit the database file's permissions. On a filesystem without POSIX permissions the permission change fails, the collection still proceeds, and a warning is logged.
+- The plug-in creates it with restrictive permissions: owner read/write, group read (640) on the database file, and 750 on its parent directory. The WAL and SHM sidecar files inherit the database file's permissions. On a filesystem without POSIX permissions the permission change fails, the collection still proceeds, and a warning is logged.
 - It holds no Enterprise Manager credentials. It is local to the agent by design: the plug-in does not share, back up or replicate it.
 - **Monitoring Readiness** carries a **Historical Store** check that reports the store's presence and size: "The agent-side SQLite store that holds long-window history."
 
@@ -118,7 +118,7 @@ The page validates before it submits anything:
 
 ## Store size and disk reclaim {#store-size}
 
-Two size ceilings bound the store, and neither is the primary control — the retention windows are. The ceilings are protection you opt into.
+Two size ceilings bound the store. The retention windows are the primary control; the ceilings are protection you opt into.
 
 | Ceiling | Default | What it does | Where to set it |
 |---|---|---|---|
