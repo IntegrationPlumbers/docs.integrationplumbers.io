@@ -8,14 +8,14 @@ nav_order: 16
 When you need to act on a target directly — clear a batch of idle connections, take an ad hoc backup, fail over a Patroni cluster, or collect your own custom query as a metric — the plug-in exposes that as an Enterprise Manager job type or a Metric Extension adapter rather than a button on a page. This page lists every job type the plug-in ships, walks through creating the two you are most likely to run by hand, and covers wiring a custom SQL query into a Metric Extension.
 
 > **Prerequisites for this page**
-> - The jobs behind **Plan Drift Advisor**, **Workload History**, **Retention Policies**, and the **Configure auto_explain** action need [Preferred Credentials](prerequisites.md#preferred-credentials) set for the target — the plug-in submits those jobs for you, without prompting.
+> - The jobs behind **Plan Analysis**, **Plan Drift Advisor**, **Workload History**, **Retention Policies**, and the **Configure auto_explain** action need [Preferred Credentials](prerequisites.md#preferred-credentials) set for the target — the plug-in submits those jobs for you, without prompting.
 > - **Kill Idle PostgreSQL Connections**, **Backup Postgresql Database**, **Restore Postgresql Database**, and **Switchover PostgreSQL Cluster** are jobs you create yourself from Enterprise ▸ Job ▸ Activity, so you choose credentials in the job wizard instead.
 > - Jobs run through the Enterprise Manager agent on [the agent host](prerequisites.md#agent-host); the account executing them needs the tools each job calls on its `PATH`.
 > - A custom query in a Metric Extension needs [the monitoring role](prerequisites.md#monitoring-role), or another role with read access to whatever your query touches.
 
-**Where to find it:** the jobs below run from **Enterprise ▸ Job ▸ Activity ▸ Create Job**; Metric Extensions are created from **Enterprise ▸ Monitoring ▸ Metric Extensions**.
+**Where to find it:** the jobs below run from **Enterprise ▸ Job ▸ Activity ▸ Create Job**; Metric Extensions are created from **Enterprise ▸ Monitoring ▸ Metric Extensions**. <!-- CONFIRM: OEM console path Enterprise ▸ Monitoring ▸ Metric Extensions -->
 
-**In this page:** Jobs shipped with the plug-in · Kill Idle PostgreSQL Connections · Backup and Restore jobs · Patroni cluster switchover · Data-management jobs · Custom queries with a Metric Extension · Related
+**In this page:** Jobs shipped with the plug-in · Kill Idle PostgreSQL Connections · Backup and Restore jobs · Patroni cluster switchover · Data-management jobs · Custom queries with a Metric Extension
 
 ## Jobs shipped with the plug-in
 
