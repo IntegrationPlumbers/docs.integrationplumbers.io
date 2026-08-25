@@ -5,13 +5,11 @@ nav_order: 2
 
 # Getting started
 
-If you have not deployed the PostgreSQL plug-in before, this page is the whole path in one place: six steps that take an empty Enterprise Manager to a console with real data in it. Steps 2 through 6 are console and `emcli` work and finish inside an hour on a database that is already prepared. Step 1 is the one to plan around, because turning on `pg_stat_statements` needs a PostgreSQL restart. Each step says what to do and how you know it worked, then links to the page that carries the detail.
-
-<!-- CONFIRM: the "inside an hour" figure for steps 2-6 -->
+If you have not deployed the PostgreSQL plug-in before, this page is the whole path in one place: six steps that take an empty Enterprise Manager to a console with real data in it. Steps 2 through 6 are console and `emcli` work. Step 1 is the one to plan around, because turning on `pg_stat_statements` needs a PostgreSQL restart. Each step says what to do and how you know it worked, then links to the page that carries the detail.
 
 > **Prerequisites for this page**
 > - OMS access that can import an OPAR and deploy plug-ins, for example `sysman` — see [Enterprise Manager and agents](prerequisites.md#enterprise-manager).
-> - A superuser login on the PostgreSQL instance, for the monitoring role, the extensions, and the one grant the plug-in never applies for you.
+> - A superuser login on the PostgreSQL instance, for the monitoring role, the extensions, and [the one grant the plug-in never applies for you](prerequisites.md#log-read-grant).
 > - A plug-in license key. To request a trial, visit the [trial page](https://integrationplumbers.io/postgresql-plugin/trial).
 
 **Where to find it:** install and deployment under Setup ▸ Extensibility ▸ Plug-ins; the target under Setup ▸ Add Target ▸ Add Targets Manually; everything the plug-in shows you afterwards under the target's own navigation tree.
@@ -62,7 +60,7 @@ Detail: [Add a PostgreSQL Database target](targets-and-properties.md#add-databas
 
 ## Step 4: Enter the license key
 
-Your key goes in the `Plugin License` target property. Type it on the properties screen while you are adding the target, or set it afterwards under Target Setup ▸ Monitoring Configuration. Then open the target's **License Info** page, which shows the customer the license is issued to, its type, status, expiration date, the number of instances it covers, and the days remaining. With no key recognized, that table reads "No licenses configured." To request a trial key, visit the [trial page](https://integrationplumbers.io/postgresql-plugin/trial).
+Your key goes in the `Plugin License` target property. Type it on the properties screen while you are adding the target, or set it afterwards under Target Setup ▸ Monitoring Configuration. Then open the target's **License Info** page, which shows the customer the license is issued to, its type, status, expiration date, the number of instances it covers, and the days remaining. With no key recognized, that table reads "No licenses configured". To request a trial key, visit the [trial page](https://integrationplumbers.io/postgresql-plugin/trial).
 
 **Done when** **License Info** shows your license record with a current status and a positive Days Remaining.
 
@@ -85,7 +83,7 @@ Three things stay with you. Install the `auto_explain` contrib module on the dat
 ![The Monitoring Readiness page showing its seven feature panels with status chips](images/13-5-15/readiness-page.png)
 *Monitoring Readiness reads live server values, so a database you configured yourself shows green exactly like one configured from this page.*
 
-**Done when** the **Plan Capture (auto_explain)** panel carries an OK chip and the **Configure auto_explain** button has disappeared, which happens once everything settable is green. Applied settings take effect for new sessions only, so a connection-pooled application starts producing captures when its pool recycles.
+**Done when** the **Plan Capture (auto_explain)** panel carries an OK chip. The **Configure auto_explain** button disappears as soon as every item the plug-in can set is green, but the panel stays **Not functional** until `pg_read_server_files` is granted as well, because that item is not one the plug-in will set. Applied settings take effect for new sessions only, so a connection-pooled application starts producing captures when its pool recycles.
 
 Detail: [Configure auto_explain](monitoring-readiness.md#configure-auto-explain) · [The server log read grant](prerequisites.md#log-read-grant).
 
@@ -95,9 +93,9 @@ Some pages have content the moment you open them. Others compute against history
 
 | When | What fills in |
 |---|---|
-| **Day 1** | **Overview** populates as its metric groups collect: target status within 5 minutes, the Backends, Replication, and Background Writer regions within 30. **Index Advisor** and **Vacuum Advisor** each collect once when the page loads, so both have findings the first time you open them. Captured plans start arriving once a statement runs longer than your `auto_explain.log_min_duration` threshold and the next capture cycle harvests it, roughly 15 minutes. Until then **Plan Analysis** reads "No captured plans yet. Enable auto_explain (log_min_duration >= 0, log_format = json, log_analyze = on) to populate this panel." |
-| **Day 2** | The **Autovacuum runs · 24h** KPI on **Vacuum Advisor** turns from "—" into a number. It deltas two daily snapshots of PostgreSQL's lifetime `autovacuum_count`, so until the second one lands its tooltip reads "Accumulating: needs two daily snapshots to compute a delta". The XID Consumption panel on the same page snapshots daily too, so its history gains one point per day. |
-| **Week 1** | **Workload History** compares your chosen window against the equal-length window immediately before it, so **Workload vs prior window** reads "Accumulating" until the store holds a full prior window as well as the current one. Plan-drift baselines build over the same period. Baseline mode ships as **Manual**, observed plan shapes accumulate as `candidate` rows on their own, and the accepted set grows only as you accept them in Baseline Management. |
+| **Day 1** | **Overview** populates as its metric groups collect: target status within 5 minutes, the Replication region within 10, and the Backends and Background Writer regions within 30. **Index Advisor** and **Vacuum Advisor** each collect once when the page loads, so neither waits for history to accumulate. Captured plans start arriving once a statement runs longer than your `auto_explain.log_min_duration` threshold and the next capture cycle harvests it, roughly 15 minutes. Until then **Plan Analysis** reads "No captured plans yet. Enable auto_explain (log_min_duration >= 0, log_format = json, log_analyze = on) to populate this panel." |
+| **Day 2** | The **Autovacuum runs · 24h** KPI on **Vacuum Advisor** turns from "—" into a number. It deltas two daily snapshots of PostgreSQL's lifetime `autovacuum_count`, so until the second one lands its tooltip reads "Accumulating: needs two daily snapshots to compute a delta". The XID Consumption panel on the same page snapshots daily too. |
+| **Week 1** | **Workload History** compares your chosen window against the equal-length window immediately before it, so **Workload vs prior window** reads "Accumulating" until the prior equal-length window holds any snapshots. Plan-drift baselines build over the same period. Baseline mode ships as **Manual**, observed plan shapes accumulate as `candidate` rows on their own, and the accepted set grows only as you accept them in Baseline Management. |
 
 ![The Overview page showing availability, incidents, Backends and Replication tables, and the Background Writer and Connections Over Time charts](images/13-5-15/overview.png)
 *A populated console on day 1: target status, incidents, and the live Backends and Replication regions.*
@@ -113,6 +111,7 @@ An empty advisor section is usually the healthy answer rather than a fault. A cl
 
 ## Related
 
+- [Trial setup](trial.md) — the shorter path when you are evaluating the plug-in on a trial key
 - [Prerequisites](prerequisites.md#checklist) — the full checklist behind every step here
 - [Install and upgrade](install-and-upgrade.md#import) — import and deploy, and the same sequence for an upgrade
 - [Targets and properties](targets-and-properties.md#database-properties) — every target property, and adding targets with EM CLI
