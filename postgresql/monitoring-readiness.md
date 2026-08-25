@@ -35,7 +35,7 @@ The page probes once at load and renders seven panels, one per feature, in this 
 | **Table Bloat Estimates** | The `pgstattuple` extension. | Optional. Adds bloat estimates to the **Vacuum Advisor** |
 | **Historical Store** | The agent-side store that holds long-window history. | No action needed |
 
-If **Database Connection** fails, the page reports that live readiness cannot be probed and asks you to verify the target is up and the monitoring credentials are valid. Nothing below it can be trusted until that panel is green.
+If **Database Connection** fails, the page reports that live readiness cannot be probed and asks you to verify the target is up and the monitoring credentials are valid. Until the connection succeeds, only **Database Connection** and **Historical Store** are shown — the feature panels are not probed at all.
 
 Plans reach **Plan Analysis** by being written to the server log by `auto_explain` during the query's own execution and harvested from there. No statement is re-executed to capture a plan.
 
@@ -62,10 +62,10 @@ Every item shows a status dot and every panel a status chip, using three values.
 | Status | Meaning |
 |---|---|
 | **OK** | The current value satisfies what the feature needs. |
-| **Attention** | Something is unset, undetermined, or optional-and-absent. The feature still works, with reduced output. |
+| **Attention** | Something is unset, optional-and-absent, or the probe could not read the value — check the row before assuming the feature is fine. |
 | **Not functional** | A mandatory item is unmet. The feature will not produce data until you fix it. |
 
-A panel's chip is the worst status among its items, with one deliberate exception: an item tagged "optional" never pushes a panel to **Not functional**. A missing optional extension shows **Attention** on its own row and caps its panel at **Attention**, so a red chip always means a genuine blocker.
+A panel's chip is the worst status among its items, with one deliberate exception: an item tagged "optional" never pushes a panel to **Not functional**. A missing optional extension shows **Attention** on its own row and caps its panel at **Attention**. So a **Not functional** chip always means a genuine blocker, but the reverse does not hold. A mandatory item the probe could not read also shows **Attention**, which is why an **Attention** chip on **Plan Capture (auto_explain)** still deserves a look at the rows underneath it.
 
 ## Configure auto_explain {#configure-auto-explain}
 
@@ -82,7 +82,7 @@ When the **Plan Capture (auto_explain)** panel has at least one unmet item the p
    - `auto_explain.log_format = json`
    - `auto_explain.log_analyze = on` + `log_timing = on` (per-query instrumentation cost — this is the capture opt-in)
    - `auto_explain.log_verbose = on` + `compute_query_id = on` (query identifiers)
-3. Check the threshold in the second line. It is prefilled from the value currently in effect on the server, or `1000` ms when the server has none.
+3. Read the threshold in the second line. The preview is read-only and writes back whatever is already in effect on the server, falling back to `1000` ms when `auto_explain.log_min_duration` is absent or set to `-1`; to capture at a different threshold, set `auto_explain.log_min_duration` on the server yourself and run Configure again.
 4. Click **Apply**, or **Cancel** to close the confirmation without writing anything.
 5. Wait for the status line to read "Applied. Re-checking live settings… (new sessions pick the settings up)". The page re-probes once on its own, the panel redraws with the new live values, and the button disappears when everything settable is green.
 
@@ -90,11 +90,11 @@ When the **Plan Capture (auto_explain)** panel has at least one unmet item the p
 
 *The confirmation previews every setting before anything is written.*
 
-Clicking **Configure auto_explain** is the per-target opt-in to `log_analyze`, which is why the preview names its instrumentation cost. Apply records that opt-in first, then applies the settings through the configuration job.
+Using **Configure auto_explain** is the per-target opt-in to `log_analyze`, which is why the preview names its instrumentation cost. Apply records that opt-in first, then applies the settings through the configuration job.
 
 ![The Plan Capture panel after Apply, with every item green](images/13-5-15/readiness-applied.png)
 
-*After the re-probe: every plugin-settable item OK, and the Configure button gone.*
+*After the re-probe: every item the plug-in can set is OK, and the Configure button is gone.*
 
 For items the plug-in will not set itself — the log read grant and the extension installs — copy the statement from the item's detail text, run it in your own tooling, and reload the page to see the verdict change.
 
@@ -118,7 +118,7 @@ Two items in the **Plan Capture (auto_explain)** panel are advisory rather than 
 
 When a captured plan arrives without a real query id, the plug-in computes a synthetic id of the form `syn:<hex-hash>` from the literal-normalized query text. Grouping, plan history, drift detection, and baselines all keep working on synthetic ids, and the `syn:` prefix makes them visible at a glance wherever query ids appear. What you lose is the join to `pg_stat_statements`: synthetic ids will not match the ids reported there.
 
-The readiness row states the consequence directly: without `log_verbose`, "the plugin falls back to synthetic query ids (shown as syn:...) derived from the query text - grouping and drift pairing still work, but ids won't match pg_stat_statements".
+The readiness row states the consequence directly: "Without it the plugin falls back to synthetic query ids (shown as syn:...) derived from the query text - grouping and drift pairing still work, but ids won't match pg_stat_statements and switch to real ids once enabled (starting a fresh drift lineage)."
 
 Enabling the two settings later is safe but not free of side effects. Affected statements switch from `syn:` ids to real ids and start a fresh drift lineage, so their drift history restarts from that point. If you intend to enable them, enable them before you spend time accepting baselines. Both are included in the **Configure auto_explain** preview, so a single Apply covers them alongside the mandatory items.
 
@@ -126,7 +126,7 @@ Enabling the two settings later is safe but not free of side effects. Affected s
 
 **No polling.** The probe runs once at page load, plus one automatic re-probe after a Configure apply. Nothing refreshes in the background. If you change settings outside the console, reload the page to see the new verdict.
 
-**Units are read and converted.** `log_min_duration` is reported by the server with its unit, for example `2s` or `500ms`. The page shows the value as the server reports it and converts it correctly when prefilling the Configure preview, so a server set to `2s` prefills as `2000` ms.
+**Units are read and converted.** `log_min_duration` is reported by the server with its unit, for example `2s` or `500ms`. The page shows the value as the server reports it and converts it correctly when building the Configure preview, so a server set to `2s` appears in the preview as `2000` ms.
 
 **New sessions only.** Applied settings take effect for new sessions and need no restart. Long-lived application sessions keep their old settings until they reconnect, so capture from a connection-pooled application may not begin until the pool recycles.
 
