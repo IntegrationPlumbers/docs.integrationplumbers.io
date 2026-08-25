@@ -9,7 +9,7 @@ If you already monitor PostgreSQL with the plug-in, most of this list is in plac
 
 **Where to find it:** every item below is checked live, per target, on the database target's **Monitoring Readiness** page.
 
-**In this page:** Supported versions and platforms · Enterprise Manager and agents · Network and connectivity · The monitoring role · Statement statistics (pg_stat_statements) · Plan capture (auto_explain) · The server log read grant · Optional extensions · Preferred Credentials · Agent host · Prerequisites checklist · Related
+**In this page:** Supported versions and platforms · Enterprise Manager and agents · Network and connectivity · The monitoring role · Statement statistics (pg_stat_statements) · Plan capture (auto_explain) · The server log read grant · Optional extensions · Preferred Credentials · Agent host · Prerequisites checklist
 
 ## Supported versions and platforms {#supported-versions}
 
@@ -27,7 +27,7 @@ The same 13.5.15.0.0 build runs on Enterprise Manager 13.5 and on 24ai. The vers
 
 Before you add any target, import the plug-in OPAR, deploy it to the OMS, then deploy it to each agent that will monitor a PostgreSQL instance. See [Install and upgrade](install-and-upgrade.md#import).
 
-A valid license key is required for installation and setup. To purchase a license, contact [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io). To request a trial license, visit [our trial request page](https://integrationplumbers.io/request-trial-for-oracle-em-plugin-for-postgresql-database/).
+A valid license key is required before you install; see [License key](install-and-upgrade.md).
 
 ## Network and connectivity {#network}
 
@@ -37,7 +37,9 @@ The agent connects to PostgreSQL over JDBC on the database port, 5432 by default
 2. Allow that role to connect from the agent host: add a matching entry to `pg_hba.conf`, and make sure `listen_addresses` accepts connections from that address. See [pg_hba.conf](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html) in the PostgreSQL documentation.
 3. Reload the server so the new authentication rule takes effect.
 
-Every read the plug-in makes travels over this one connection, including reading the server log for captured plans. The plug-in needs no OS-level access to the database host, so a remote agent collects exactly what a local agent collects.
+Every read against the monitored PostgreSQL instance travels over this one connection, including reading the server log for captured plans. The plug-in needs no OS-level access to the database host, so a remote agent collects exactly what a local agent collects.
+
+Cluster targets using the Patroni REST API also need a path to the Patroni API port. See [Patroni REST API monitoring](targets-and-properties.md#patroni).
 
 ## The monitoring role {#monitoring-role}
 
@@ -45,16 +47,15 @@ The monitoring role reads catalogs and statistics views. It never writes to your
 
 These are the objects the plug-in reads: `pg_stat_*` (including `pg_stat_activity`, `pg_stat_progress_vacuum`, and `pg_stat_statements`), `pg_class`, `pg_index`, `pg_settings`, `pg_replication_slots`, and `pg_prepared_xacts`.
 
-Granting the role membership in the built-in `pg_monitor` role is the practical way to cover that list:
+Grant the monitoring role membership in `pg_monitor` (or equivalent read access to the statistics catalogs):
 
 ```sql
 GRANT pg_monitor TO "<monitoring role>";
 ```
 
-Two capabilities need more than `pg_monitor`:
+`pg_monitor` already carries `pg_stat_scan_tables`, which is what pgstattuple's approximate function needs for the table bloat estimates on **Vacuum Advisor**. That function reads a table only when the monitoring role owns it or holds `pg_stat_scan_tables`, so only tables outside that reach are skipped. A skipped table is logged; the collection does not fail.
 
-- **Plan capture** needs the `pg_read_server_files` grant so the plug-in can read the server log. See [The server log read grant](#log-read-grant).
-- **Table bloat estimates** use pgstattuple's approximate function, which requires the monitoring role either to own the table or to hold `pg_stat_scan_tables`. Tables it cannot read are skipped and logged; the collection does not fail.
+One capability needs more than `pg_monitor`: plan capture needs the `pg_read_server_files` grant so the plug-in can read the server log. See [The server log read grant](#log-read-grant).
 
 ## Statement statistics (pg_stat_statements) {#pg-stat-statements}
 
@@ -85,7 +86,7 @@ Execution plans are captured passively: `auto_explain` writes each qualifying st
 | `auto_explain.log_verbose` | `on`, recommended | Carries the real query id into the captured plan. Without it the plug-in falls back to synthetic ids shown as `syn:…`, derived from the query text. Grouping and drift pairing still work, but the ids will not match `pg_stat_statements`. | Plug-in (Configure auto_explain) |
 | `compute_query_id` | `on`, or `auto` with `pg_stat_statements` preloaded. Recommended | Pairs with `log_verbose` so every captured plan carries its real query id. | Plug-in (Configure auto_explain) |
 | `logging_collector` | `on` | A current server logfile has to exist for the plug-in to read. | DBA |
-| Log destination | `stderr` | The harvester parses stderr-format logs. `csvlog` and `jsonlog` are not parsed. | DBA |
+| `log_destination` | `stderr` | The harvester parses stderr-format logs. `csvlog` and `jsonlog` are not parsed. | DBA |
 | `log_line_prefix` | begins with `%m` | Plan lines are matched by their leading timestamp. | DBA |
 
 Apply the plug-in-settable rows from the **Plan Capture (auto_explain)** panel on **Monitoring Readiness**: click **Configure auto_explain**, review the preview, then click **Apply**. See [Configure auto_explain](monitoring-readiness.md#configure-auto-explain).
@@ -124,7 +125,7 @@ Install `hypopg` and `pg_qualstats` together. Catalog-native index detection wor
 
 For `pg_wait_sampling`, set `pg_wait_sampling.profile_queries` to `all` or `top`, otherwise the profile carries no per-query rows. The extension is not included in most PostgreSQL distributions and is not available on Windows, but most package managers carry it.
 
-For `pgstattuple`, check the ownership requirement in [The monitoring role](#monitoring-role).
+For `pgstattuple`, a monitoring role with `pg_monitor` already holds the `pg_stat_scan_tables` the estimate needs. See [The monitoring role](#monitoring-role).
 
 ## Preferred Credentials {#preferred-credentials}
 
@@ -178,7 +179,7 @@ Copy the list that matches what you want from the release.
 
 - [ ] `auto_explain` module installed on the database server (contrib package)
 - [ ] `logging_collector = on`
-- [ ] Log destination `stderr` (not `csvlog`, not `jsonlog`)
+- [ ] `log_destination = stderr` (not `csvlog`, not `jsonlog`)
 - [ ] `log_line_prefix` begins with `%m`
 - [ ] `session_preload_libraries` includes `auto_explain`
 - [ ] `auto_explain.log_min_duration` set to your capture threshold in milliseconds, `0` or higher
@@ -189,7 +190,7 @@ Copy the list that matches what you want from the release.
 - [ ] `GRANT pg_read_server_files TO "<monitoring role>";` run by a superuser
 - [ ] Optional: `hypopg` and `pg_qualstats` for the full **Index Advisor** output
 - [ ] Optional: `pg_wait_sampling`, with `pg_wait_sampling.profile_queries` set to `all` or `top`
-- [ ] Optional: `pgstattuple`, with table ownership or `pg_stat_scan_tables` for the monitoring role
+- [ ] Optional: `pgstattuple` (the `pg_stat_scan_tables` it needs comes with `pg_monitor`; tables the role neither owns nor can scan are skipped)
 
 The six `auto_explain` and `compute_query_id` rows above are applied for you by **Configure auto_explain** on **Monitoring Readiness**. The rest are yours to set.
 
