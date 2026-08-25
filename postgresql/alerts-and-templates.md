@@ -15,7 +15,7 @@ If you would rather be told about a plan regression or a wraparound risk than go
 
 **Where to find it:** metric values on the target — **Target menu → Monitoring → All Metrics**. Thresholds and schedules — **Target menu → Monitoring → Metric and Collection Settings**. Templates — **Enterprise → Monitoring → Monitoring Templates**.
 
-**In this page:** How findings become alerts · Default thresholds for the new metrics · Tuning thresholds · Monitoring templates · Super-user / Privilege Audit · Related
+**In this page:** How findings become alerts · Default thresholds for the new metrics · Tuning thresholds · Monitoring templates · Super-user / Privilege Audit
 
 ## How findings become alerts
 
@@ -46,7 +46,7 @@ Most of the plug-in's thresholds ship undefined on purpose: the right number for
 | Index Advisor What-If | `index_advisor_whatif` / `speedup` | Every 30 minutes | Estimated Speedup greater than 10 | Not set | 1 | Estimated speedup falls to 10 or below. |
 | Index Advisor (Predicate Stats) | `index_advisor_qualstats` / `severity` | Every 30 minutes | Severity is `HIGH` | Not set | 1 | The predicate candidate drops out of the next collection. |
 | Vacuum Advisor (Frequency) | `vacuum_advisor` / `severity` | Every 30 minutes | Severity is `HIGH` | Not set | 1 | Dead tuples fall back under the table's autovacuum trigger point. |
-| Table Bloat Estimate | `table_bloat` / `severity` | Every 30 minutes | Severity is `HIGH` | Not set | 1 | The estimate drops below the line. |
+| Table Bloat Estimate | `table_bloat` / `severity` | Every 30 minutes | Severity is `HIGH` | Not set | 1 | Severity falls below `HIGH` on the next collection. |
 | Vacuum xmin Horizon (Root Cause) | `xmin_horizon` / `severity` | Every 30 minutes | Wraparound Severity 1 or higher | Wraparound Severity 2 or higher | 2 | The holder is gone from the next collection. |
 | Databases · Transaction Unfrozen Age | `databases` / `transaction_age` | Every 30 minutes | 1,000,000,000 or higher | 1,500,000,000 or higher | 2 | Age returns below the warning value. |
 | Databases · Multixact Unfrozen Age | `databases` / `multixact_age` | Every 30 minutes | 1,000,000,000 or higher | 1,500,000,000 or higher | 2 | Age returns below the warning value. |
@@ -65,7 +65,7 @@ Reading the table:
 - **None** means the metric ships with no alert condition at all. These three are collected for history and diagnostics, not for paging.
 - Severity on the advisor metrics is a string: `HIGH`, `MEDIUM` or `LOW`. Wraparound Severity on `xmin_horizon` is a number, banded at 1 billion transaction IDs (severity 1) and 1.5 billion (severity 2).
 - The two-occurrence rule on the wraparound and xmin-horizon metrics is deliberate debouncing. A single collection that catches a legitimate long batch job does not page anyone; a holder that is still there an hour later does.
-- Cost drift is deliberately left unthresholded. The shipped Plan Drift condition matches `PLAN_CHANGED` only, so a query whose plan shape is unchanged but whose estimated cost moved stays advisory rather than raising an incident. Opt in per query if you want it.
+- Cost drift is deliberately left unthresholded. The shipped Plan Drift condition matches `PLAN_CHANGED` only, so a query whose plan shape is unchanged but whose estimated cost moved stays advisory rather than raising an incident. Opt in per query on **Plan Drift Advisor → Drift Configuration**.
 - Four metrics emit rows only where their extension is present: `index_advisor_whatif` needs hypopg, `index_advisor_qualstats` needs pg_qualstats, `table_bloat` needs pgstattuple, and `wait_events_sampled` needs pg_wait_sampling. Without the extension the metric returns zero rows, which is a healthy state, not an error, and nothing alerts. The **Monitoring Readiness** page tells you which extension is missing.
 - Multixact wraparound is tracked and alerted separately from transaction-ID wraparound, at both database and table grain.
 
@@ -91,13 +91,15 @@ Two things to keep in mind. Collection schedules and thresholds are independent:
 
 Three pre-built Enterprise Manager monitoring templates cover the plug-in's metrics for the `ip_postgresql_db` target type. They are shipped in the standard OEM export format, which is the same shape `emcli export_template` produces, so they behave like any template you built yourself.
 
-| Template | File | Built for |
+| Template name | File | Purpose |
 |---|---|---|
-| PostgreSQL Tier 0/1 Critical baseline | `ip_xpgs_tier01_critical.template.xml` | The most critical production targets. Every safety and advisory metric enabled on a 15-minute schedule with tight thresholds, covering wraparound, super-user drift, and the index, vacuum and bloat advisories. |
-| PostgreSQL Tier 2/3 Standard baseline | `ip_xpgs_tier23_standard.template.xml` | Development, test and staging fleets. Core health at 15 minutes with loosened wraparound and connection thresholds; advisories collected hourly for history only, with no paging. |
-| PostgreSQL Custom Starter | `ip_xpgs_starter.template.xml` | Building a house standard. A minimal, commented seed to clone and extend. |
+| `ip_xpgs_tier01_critical` | `ip_xpgs_tier01_critical.template.xml` | Critical production. "Critical-production baseline: all safety-critical and advisory metrics on a 15-minute schedule with tight thresholds (wraparound, privilege drift, index/vacuum/bloat advisories)." |
+| `ip_xpgs_tier23_standard` | `ip_xpgs_tier23_standard.template.xml` | Dev, test and staging. "Standard baseline for dev/test/staging PostgreSQL databases: core health on a 15-minute schedule with loosened wraparound/connection thresholds; advisory metrics collected store-only on a 1-hour schedule (no paging)." |
+| `ip_xpgs_starter` | `ip_xpgs_starter.template.xml` | A starter to extend. "Minimal starter monitoring template for PostgreSQL databases: availability plus core database health, ready to clone and extend into your own site standard." |
 
-Monitoring templates live in the Enterprise Manager repository, not in agent or OMS plug-in metadata, so they are not registered by deploying the plug-in. The template files ship alongside the plug-in package rather than inside the OPAR, and an administrator imports them into the OMS once and then applies them to targets.
+After import, the console lists each template under its template name, and that same name is what you pass to `emcli apply_template`.
+
+Monitoring templates are repository-side objects. They live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself: an administrator imports them into the OMS once, then applies them to targets.
 <!-- CONFIRM: how template files are delivered to customers (download bundle / S3 link) -->
 
 ### Import and apply
@@ -108,7 +110,7 @@ emcli import_template -files="ip_xpgs_tier01_critical.template.xml"
 
 # Apply it to one or more database targets
 emcli apply_template \
-   -name="PostgreSQL Tier 0/1 Critical baseline" \
+   -name="ip_xpgs_tier01_critical" \
    -targets="myprod_db:ip_postgresql_db" \
    -apply_mode=complete
 ```
@@ -123,7 +125,7 @@ In the console, go to **Enterprise → Monitoring → Monitoring Templates → I
 
 *Applying the imported template to a target, using apply mode Complete.*
 
-Before you adopt the Critical baseline, set the super-user count threshold. It ships with an empty warning threshold because the sanctioned super-user count is site policy, and an empty threshold never fires. Enter your approved roster size so the count-change alert reports privilege drift. See [Super-user / Privilege Audit](#super-user--privilege-audit) below.
+Before you adopt `ip_xpgs_tier01_critical`, set the super-user count threshold. It ships with an empty warning threshold because the sanctioned super-user count is site policy, and an empty threshold never fires. Enter your approved roster size so the count-change alert reports privilege drift. See [Super-user / Privilege Audit](#superuser-audit) below.
 
 ### Build your own
 
@@ -136,14 +138,14 @@ The customer-built path is stock Enterprise Manager:
 
 Templates are versioned repository artifacts, so import them on the OMS version you actually run. After a template is applied, thresholds remain editable per target, and everything a template turns on routes through the same notification connectors as the shipped defaults.
 
-## Super-user / Privilege Audit
+## Super-user / Privilege Audit {#superuser-audit}
 
 The `superuser_audit` metric tracks the target's super-user roster so that privilege drift becomes an alertable event rather than something you find during an audit. It is cluster-global, collects every 30 minutes, and carries the roster in its rows with the current total in the **Super-user Count** column.
 
 The threshold on that column ships empty on purpose: only you know how many super-users your cluster is supposed to have. Until you set it, the metric collects the roster and alerts on nothing.
 
 1. Decide the sanctioned super-user count for the target.
-2. Set it as the Warning threshold on the **Super-user Count** column, either per target through **Metric and Collection Settings** or fleet-wide by editing the Critical baseline template before you apply it.
+2. Set it as the Warning threshold on the **Super-user Count** column, either per target through **Metric and Collection Settings** or fleet-wide by editing `ip_xpgs_tier01_critical` before you apply it.
 3. When the count rises above that number, Enterprise Manager raises a warning naming the count, the role, and the detail.
 4. Review the role changes in your own tooling. The alert clears once the count is back at your threshold or below.
 
