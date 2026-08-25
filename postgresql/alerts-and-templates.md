@@ -65,11 +65,11 @@ Reading the table:
 - **None** means the metric ships with no alert condition at all. These three are collected for history and diagnostics, not for paging.
 - Severity on the advisor metrics is a string: `HIGH`, `MEDIUM` or `LOW`. Wraparound Severity on `xmin_horizon` is a number, banded at 1 billion transaction IDs (severity 1) and 1.5 billion (severity 2).
 - The two-occurrence rule on the wraparound and xmin-horizon metrics is deliberate debouncing. A single collection that catches a legitimate long batch job does not page anyone; a holder that is still there an hour later does.
-- Cost drift is deliberately left unthresholded. The shipped Plan Drift condition matches `PLAN_CHANGED` only, so a query whose plan shape is unchanged but whose estimated cost moved stays advisory rather than raising an incident. Opt in per query on **Plan Drift Advisor → Drift Configuration**.
+- Cost Drift is advisory by default. The shipped Plan Drift condition matches `PLAN_CHANGED` only, so a query whose plan shape is unchanged but whose estimated cost moved does not raise an incident. To be alerted on it, add a Warning threshold on the **Plan Drift** metric's `drift_severity` column for the query keys you care about (see [Tuning thresholds](#tuning-thresholds)); Drift Configuration on **Plan Drift Advisor** changes how captures are classified, not whether they alert.
 - Four metrics emit rows only where their extension is present: `index_advisor_whatif` needs hypopg, `index_advisor_qualstats` needs pg_qualstats, `table_bloat` needs pgstattuple, and `wait_events_sampled` needs pg_wait_sampling. Without the extension the metric returns zero rows, which is a healthy state, not an error, and nothing alerts. The **Monitoring Readiness** page tells you which extension is missing.
 - Multixact wraparound is tracked and alerted separately from transaction-ID wraparound, at both database and table grain.
 
-## Tuning thresholds
+## Tuning thresholds {#tuning-thresholds}
 
 Threshold edits made this way apply to one target. Use a monitoring template when you want the same numbers across a fleet.
 
@@ -98,6 +98,7 @@ Three pre-built Enterprise Manager monitoring templates cover the plug-in's metr
 | `ip_xpgs_starter` | `ip_xpgs_starter.template.xml` | A starter to extend. "Minimal starter monitoring template for PostgreSQL databases: availability plus core database health, ready to clone and extend into your own site standard." |
 
 After import, the console lists each template under its template name, and that same name is what you pass to `emcli apply_template`.
+<!-- CONFIRM: verify in the console after import -->
 
 Monitoring templates are repository-side objects. They live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself: an administrator imports them into the OMS once, then applies them to targets.
 <!-- CONFIRM: how template files are delivered to customers (download bundle / S3 link) -->
