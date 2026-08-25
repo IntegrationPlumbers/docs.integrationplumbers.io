@@ -5,18 +5,19 @@ nav_order: 8
 
 # Plan Analysis
 
-When a query gets slower, the useful evidence is the plan it actually ran, and that plan is usually gone by the time anyone looks. **Plan Analysis** keeps it: the PostgreSQL plug-in harvests execution plans that `auto_explain` already wrote to the server log, stores them on the agent, and runs five detection rules over each one, so every captured plan arrives with its own list of what went wrong and what to change.
+When a query gets slower, the useful evidence is the plan it actually ran, and that plan is usually gone by the time anyone looks. **Plan Analysis** keeps it: the PostgreSQL plug-in harvests execution plans that `auto_explain` already wrote to the server log, stores them on the agent, and runs five detection rules over each one, so a plan that has something wrong with it arrives with the finding and the change to make already attached.
 
 > **Prerequisites for this page**
 > - `auto_explain` installed on the target and configured for capture — see [Plan capture (auto_explain)](prerequisites.md#auto-explain). The plug-in configures the module but never installs it.
 > - `auto_explain.log_min_duration` set to 0 or higher, `auto_explain.log_format = json`, and `auto_explain.log_analyze = on`. Apply all three from [Configure auto_explain](monitoring-readiness.md#configure-auto-explain) on **Monitoring Readiness**.
 > - The `pg_read_server_files` grant on the monitoring role, so the plug-in can read the server log — see [The server log read grant](prerequisites.md#log-read-grant).
+> - Every panel on this page is job-backed, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target's host. If a job aborts, the page raises "Unable to run job. Verify Preferred Credentials are set for this target." See [Unable to run job](troubleshooting.md#unable-to-run-job).
 > - A timestamp-first (`%m`-led) `log_line_prefix` and the `stderr` log destination. The harvester does not parse `csvlog` or `jsonlog`.
 > - Recommended, not required: `auto_explain.log_verbose = on` and `compute_query_id = on`, so captured plans carry real query ids — see [Statement statistics (pg_stat_statements)](prerequisites.md#pg-stat-statements).
 
 **Where to find it:** on a PostgreSQL Database target, left navigation tree ▸ *database name* ▸ **Plan Analysis**. The target's **PostgreSQL** drop-down menu carries the same entry under the database name.
 
-**In this page:** How plans are captured · The Plan Analysis page · The five insights · Top recommendation banner and Index Advisor link · Plan Insights alerts · Behaviors and caveats · Related
+**In this page:** How plans are captured · The Plan Analysis page · The five insights · Top recommendation banner and Index Advisor link · Plan Insights alerts · Behaviors and caveats
 
 ## How plans are captured
 
@@ -45,7 +46,7 @@ There is nothing to do about this. If you later enable the query-id settings, th
 
 ### How long captures are kept
 
-Captured plans default to a 90-day retention window, bounded by a plan-archive size ceiling of 100 MB with oldest-first eviction. Both are managed on the [Retention Policies page](history-store-and-retention.md#retention-policies). Only flagged poor-performing queries are archived, and any capture that represents an accepted baseline is exempt from eviction.
+Captured plans default to a 90-day retention window, set on the [Retention Policies page](history-store-and-retention.md#retention-policies). The archive is additionally bounded by a plan-archive size ceiling of 100 MB with oldest-first eviction, which is not on that page: it is set through the **PostgreSQL - Set Plan Archive Size Ceiling** job, parameter **Captured Plans Size Ceiling (MB)** — see [Store size and disk reclaim](history-store-and-retention.md#store-size). Only flagged poor-performing queries are archived, and any capture that represents an accepted baseline is exempt from eviction.
 
 ## The Plan Analysis page
 
@@ -100,14 +101,14 @@ The window is a preference. Turning capture on or off is done on **Monitoring Re
 |---|---|
 | Query | The captured statement text, truncated |
 | Database | The database the capture came from |
-| Insights | One badge per detected pathology. A clean plan shows no badges |
+| Insights | A count of the pathologies detected on this capture, coloured by the highest severity present. A clean plan shows a dash |
 | Mean (ms) | Mean execution time for the statement |
 | Calls / Total (ms) | Call count and total execution time |
 | Captured | When the plan was harvested |
 
 Sort by **Most recent** (the default), **Total exec time**, **Mean exec time**, or **Calls**. **Rows** offers 25, 50 (default), 100, and 200.
 
-An empty badge cell is not a gap in the data. It means the detection rules found nothing wrong with that plan.
+A dash is not a gap in the data. It means the detection rules found nothing wrong with that plan. The named per-pathology badges appear when you expand the row; a clean capture reads "No insights detected for this capture."
 
 ### Expanding a row
 
@@ -123,7 +124,7 @@ Recommendations are review-and-run: you copy them and run them in your own tooli
 
 ## The five insights
 
-Five detections are surfaced against each newly captured plan. Each carries a Low, Medium, or High severity.
+Five detections are surfaced against each newly captured plan. Each carries a severity, which in practice is Medium or High: none of the five rules fires below Medium.
 
 | Insight | What it detects | Typical recommendation |
 |---|---|---|
@@ -152,7 +153,7 @@ The page is for investigating. The `plan_insights` metric is for being told. It 
 |---|---|---|---|---|---|---|
 | Plan Insights | `plan_insights` | Every 15 minutes | Severity matches `HIGH` | Not defined | 1 | The insight resolves and drops out of the feed at the next collection |
 
-The collection ships enabled, so no per-feature setup is needed. Alert text:
+The collection ships enabled, so once plans are being captured no per-feature setup is needed. Alert text:
 
 - Warning: "PostgreSQL query %query_id% has a HIGH-severity performance insight (%insight_code%) on database %db_name%: %detail%"
 - Clear: "PostgreSQL query %query_id% insight %insight_code% on database %db_name% has cleared."
@@ -180,5 +181,5 @@ The related `plan_drifts` metric alerts on a query running on a plan shape outsi
 - [Prerequisites](prerequisites.md#auto-explain) — the full capture prerequisites, including the server log read grant
 - [Plan Drift Advisor](plan-drift-advisor.md) — baselines, side-by-side plan comparison, and the drift alert, all built on these same captures
 - [Index Advisor](index-advisor.md) — where the missing-index banner lands
-- [History store and retention](history-store-and-retention.md#retention-policies) — the plan-archive retention window and size ceiling
+- [History store and retention](history-store-and-retention.md#retention-policies) — the plan-archive retention window, and where the archive size ceiling is set
 - [Alerts and templates](alerts-and-templates.md#default-thresholds) — every shipped threshold in one table
