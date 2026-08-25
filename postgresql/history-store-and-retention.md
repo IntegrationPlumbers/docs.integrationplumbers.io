@@ -14,7 +14,7 @@ If you want months of statement-level and object-level history without growing t
 
 **Where to find it:** the target's tree navigation ▸ *&lt;database&gt;* ▸ **Retention Policies**, or the same entry on the target menu. **Workload History** links to it from the bottom of the page.
 
-**In this page:** Where the store lives · What it holds · Retention Policies page · Store size and disk reclaim · Data-management jobs · Daily maintenance · Collection throttle · Related
+**In this page:** Where the store lives · What it holds · Retention Policies page · Store size and disk reclaim · Data-management jobs · Daily maintenance · Collection throttle
 
 ## Where the store lives
 
@@ -23,9 +23,9 @@ One SQLite database per PostgreSQL database target, on the agent host:
 `%plugin_data%/<target name>_collections.sqlite3`
 
 - The file is created at the first collection that persists history, and its schema updates itself on later releases. There are no manual steps and no upgrade procedure.
-- It is created with restrictive permissions: owner and group read on the database file (640), and 750 on its parent directory. The WAL and SHM sidecar files inherit the database file's permissions. On a filesystem without POSIX permissions the permission change fails, the collection still proceeds, and a warning is logged.
+- It is created with restrictive permissions: owner read/write, group read (640) on the database file, and 750 on its parent directory. The WAL and SHM sidecar files inherit the database file's permissions. On a filesystem without POSIX permissions the permission change fails, the collection still proceeds, and a warning is logged.
 - It holds no Enterprise Manager credentials. It is local to the agent by design: the plug-in does not share, back up or replicate it.
-- **Monitoring Readiness** carries a **Historical Store** check — "The agent-side SQLite store that holds long-window history." — which reports the store's presence and size.
+- **Monitoring Readiness** carries a **Historical Store** check that reports the store's presence and size: "The agent-side SQLite store that holds long-window history."
 
 Aggregates and alert-carrying metrics still flow to Enterprise Manager exactly as they always have. The store holds the granular detail underneath them.
 
@@ -86,7 +86,7 @@ Rows appear in alphabetical order by display label, as they do on the page. Inde
 ### Set the windows
 
 1. Open **Retention Policies** from the target's tree navigation or menu.
-2. In **Retention Windows**, edit **Min retention (days)** (the protected floor) and **Max retention (days)** (the trim window) for any history type. The form is prefilled with the values currently in effect. On-page help: "Each history type is kept between its minimum and maximum days. The daily trim removes rows older than the maximum (0 disables that type's history); the minimum is protected from size-based eviction (below)."
+2. In **Retention Windows**, edit **Min retention (days)** (the protected floor) and **Max retention (days)** (the trim window) for any history type. The form is prefilled with the values currently in effect. On-page help: "Each history type is kept between its minimum and maximum days. The daily trim removes rows older than the maximum (0 disables that type's history); the minimum is protected from size-based eviction (below)." That help text states the general rule; **Captured Plans** behaves differently — see [Behaviors](#behaviors) below.
 3. In **Store Size Limit**, set **Whole-store size ceiling (MB)**. The hint reads "0 = disabled (no size-based eviction)", and the section help reads "When the store file exceeds this cap, daily maintenance evicts each type's oldest rows, never below its minimum retention. 0 disables."
 4. Click **Save Retention Policies**. One Save persists both sections. Blank fields mean "leave unchanged" — only the fields you fill in are sent.
 5. A dialog confirms "Retention policies saved. Changes take effect at the next daily trim." The form then re-prefills from the store, so it shows what was actually persisted.
@@ -102,7 +102,7 @@ Rows appear in alphabetical order by display label, as they do on the page. Inde
 The page validates before it submits anything:
 
 - A value that is not a whole number is rejected.
-- A minimum greater than its maximum is rejected: "*&lt;History type&gt;*: minimum (N) exceeds maximum (M)". The check is skipped when the maximum is 0, because that type is disabled.
+- A minimum greater than its maximum is rejected: "*&lt;History type&gt;*: minimum (N) exceeds maximum (M)". The check is skipped when the maximum is 0, because a maximum of 0 is a special value.
 - Errors render as "Not saved — …" and nothing is submitted.
 - If every field is blank, the page reports "Nothing to save."
 - A history type the store returns but the page does not yet know about renders read-only, with a hint to set it through the **PostgreSQL - Set Granular Retention Days** job. New history types never silently disappear from the list.
@@ -128,7 +128,7 @@ Two size ceilings bound the store, and neither is the primary control — the re
 - Eviction targets a logical used size of about 85% of the ceiling, so freed pages recycle into future writes and the file's high-water mark stays near the ceiling rather than sawtoothing.
 - Floors are hard. When every history type is already at its protected minimum, eviction stops and reports rather than deleting protected history.
 - Deleting rows does not shrink the SQLite file on its own. Daily maintenance compacts the file when the reclaimable free space is at least 32 MB **and** at least 25% of the file.
-- For immediate reclaim, run the **PostgreSQL - Reclaim Collection Store Disk Space** job on demand. It reports how much space was freed.
+- For immediate reclaim, run the **PostgreSQL - Reclaim Collection Store Disk Space** job on demand from **Enterprise ▸ Job ▸ Activity**. It reports how much space was freed.
 
 When history is shorter than you expected, read the **Status** column of the daily maintenance run — it carries the eviction and compaction notes.
 
@@ -188,7 +188,7 @@ Each takes a percentage from 0 to 100. Empty or invalid disables that resource's
 
 To turn the throttle on:
 
-1. Edit the target's instance properties and set one or both thresholds.
+1. Open the target's instance properties (**target menu ▸ Target Setup ▸ Monitoring Configuration**) and set one or both thresholds.
 2. Wait one 5-minute cycle — that is how long a change takes to reach the gate.
 3. Watch for the banner, and check the `collection_throttle` metric on the target's **All Metrics** page.
 
