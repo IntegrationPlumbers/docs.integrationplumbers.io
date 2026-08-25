@@ -5,7 +5,7 @@ nav_order: 10
 
 # Workload History
 
-When a database gets slower over a fortnight rather than in a spike, the live charts rarely show it. **Workload History** replays the `pg_stat_statements` snapshots the plug-in keeps in its agent-local history store across a time window you choose, so you can see which statements grew, by how much, and against which period. It needs `pg_stat_statements` on the target and Preferred Credentials on the target's host, and it reads only the local store, never the monitored database.
+When a database gets slower over two weeks rather than in a spike, the live charts rarely show it. **Workload History** replays the `pg_stat_statements` snapshots the plug-in keeps in its agent-local history store across a time window you choose, so you can see which statements grew, by how much, and against which period. It needs `pg_stat_statements` on the target and Preferred Credentials on the target's host, and it reads only the local store, never the monitored database.
 
 > **Prerequisites for this page**
 > - [Statement statistics (pg_stat_statements)](prerequisites.md#pg-stat-statements) must be installed and enabled on the target. Without it no per-statement workload accumulates and the list stays on its empty state.
@@ -19,7 +19,7 @@ When a database gets slower over a fortnight rather than in a spike, the live ch
 
 ## Reading the page
 
-The page opens with the window already set to the last 24 hours in your browser's local time, and reads in three bands: a KPI band, the **Workload Trend** chart, and the **Workload Detail** list. The hint under the heading states the rule for the window: "Set an optional time window to scope the KPIs, list and trend; blank = the whole retained history."
+The page opens with the window already set to the last 24 hours in your browser's local time, and reads in three bands: a KPI band, the **Workload Trend** chart, and the **Workload Detail** list. The hint under the heading states the rule for the window: "Set an optional time window to scope the KPIs, list and trend; blank = the whole retained history. Retention is configured on the Retention Policies page."
 
 ![The Workload History page showing the KPI band, the Workload Trend chart and the Workload Detail list](images/13-5-15/workload-history-page.png)
 
@@ -51,7 +51,7 @@ With **Group by** set to Statement, the list carries these columns.
 | Mean (ms) | Mean execution time in the window. |
 | Cache Hit | Share of block reads served from shared buffers. |
 | I/O Share | Share of the window's shared-buffer block accesses. |
-| Trend | Total-exec-time movement across the window (first versus last snapshot), as a coloured ▲/▼/▬ with a percentage. |
+| Trend | Total-exec-time movement across the window (first versus last snapshot), as a colored ▲/▼/▬ with a percentage. |
 
 With **Group by** set to Database, the list drops to Database, Total Exec (ms), Calls, Rows, Mean (ms), Cache Hit, and I/O Share.
 
@@ -81,7 +81,7 @@ If the drill-down has nothing to plot for the statement in the current window, i
 
 ## Filtering to one database
 
-On a target with several busy databases the workload-wide chart can hide a single database's behaviour. Pin the chart to one of them.
+On a target with several busy databases the workload-wide chart can hide a single database's behavior. Pin the chart to one of them.
 
 1. Set **Group by** to Database.
 2. Click the row for the database you want. The chart re-scopes to that database alone and the scope line above it reads "Chart scope: database _name_ only", followed by a **Show all databases** link.
@@ -106,7 +106,7 @@ The page is deliberate about not showing a number it cannot support.
 | "Accumulating" in **Workload vs prior window** | The prior equal-length window holds no snapshots yet. |
 | "—" in **Workload vs prior window** | The prior window has snapshots but no recorded execution time to compare against. |
 
-Two behaviours of the underlying deltas are worth knowing before you read the **Trend** column too literally. The first snapshot inside a window contributes a delta of roughly zero, because it has no predecessor inside the window, so movement is baselined on the first non-zero value instead. And a statement that runs infrequently can show −100% in **Trend** simply because the last snapshot in the window recorded no delta for it. Open the drill-down to see the true shape before acting on either.
+Two behaviors of the underlying deltas are worth knowing before you read the **Trend** column too literally. The first snapshot inside a window contributes a delta of roughly zero, because it has no predecessor inside the window, so movement is baselined on the first non-zero value instead. And a statement that runs infrequently can show −100% in **Trend** simply because the last snapshot in the window recorded no delta for it. Open the drill-down to see the true shape before acting on either.
 
 Zero-activity statements can appear in the list, because they exist in the store. Sorting by the metric under discussion pushes them out of the way.
 
@@ -118,7 +118,7 @@ Workload History tells you which statements got slower. Wait-event sampling tell
 
 ### What it needs
 
-- The `pg_wait_sampling` extension must be installed on the target. You install it through your own platform packaging; the plug-in detects it and never installs anything. The extension is not included in most PostgreSQL distributions and is not available on Windows, but most package managers carry it.
+- The `pg_wait_sampling` extension must be installed on the target. You install it through your own platform packaging; the plug-in detects it and never installs anything. The library also has to be in `shared_preload_libraries`, which means a restart, so plan the install into a maintenance window. See [Optional extensions](prerequisites.md#optional-extensions). The extension is not included in most PostgreSQL distributions and is not available on Windows, but most package managers carry it.
 - `pg_wait_sampling.profile_queries` must be set to `all` or `top`. With it off, the profile carries no query id and nothing can be attributed to a statement.
 - Nothing else. A discovery probe sets the target's wait-sampling property, and the **Wait Events Sampled** metric (`wait_events_sampled`) enables itself only on targets where the extension is present. There is no toggle to find. The collection ships enabled on a 15-minute interval and carries no default thresholds; it feeds the chart and the history store. If the extension disappears while the collection is enabled, collection degrades to an empty state instead of failing.
 
@@ -128,7 +128,7 @@ The **Wait-Event Sampling** panel on [Monitoring Readiness](monitoring-readiness
 
 1. Open **Query Analyzer** on the database target.
 2. Select a statement row. The chart is keyed by that statement's query id and stays empty until a row is selected.
-3. Choose a range with the period radios: Last Month, Last Week, Last Day (the default), or Custom with From/To inputs in your browser's local zone.
+3. Choose a range with the **Time Range:** radios: Last Month, Last Week, Last Day (the default), or Custom with From/To inputs in your browser's local zone.
 4. Read the **Wait Events** section. It draws a stacked bar chart of wait-event counts over time for that statement, grouped by event.
 5. Tick **Filter to this Database** to restrict the rows to the database currently selected.
 
@@ -138,7 +138,10 @@ The **Wait-Event Sampling** panel on [Monitoring Readiness](monitoring-readiness
 
 Bars are bucketed across the range, around 48 buckets and never finer than the 15-minute collection interval. Quiet periods render as explicit zeros rather than gaps, so a flat stretch reads as "nothing waited" and not as "nothing collected". Events that never waited during the range are left out of the legend.
 
-Two empty states are worth telling apart. "No data yet — waits_sampled metric populates within one collection interval after enable" means nothing has been collected for that statement in that range yet. "No data matches the current filter" means the database filter excluded everything that was collected. The whole panel is hidden on targets where wait sampling is not enabled.
+Two empty states are worth telling apart. "No data yet — waits_sampled metric populates within one collection interval after enable" (the message names the older `waits_sampled`; the live metric is `wait_events_sampled`) means nothing has been collected for that statement in that range yet. "No data matches the current filter" means the database filter excluded everything that was collected. The whole panel is hidden on targets where wait sampling is not enabled.
+<!-- CONFIRM: engineering to correct the empty-state string before GA -->
+
+
 
 Query Analyzer has no EXPLAIN workbench. The only EXPLAIN the plug-in ever runs is the Fix Workbench on [Plan Drift Advisor](plan-drift-advisor.md), and only when you click it.
 
@@ -149,10 +152,10 @@ Range length decides which tier the chart reads, and that in turn decides whethe
 | Range | Tier read | **Filter to this Database** |
 |---|---|---|
 | 7 days or less | Raw, at the 15-minute collection grain | Available |
-| More than 7 days | Hourly rollup | Disabled, tooltip "Available for time ranges of 7 days or less" |
+| More than 7 days, up to 31 days | Hourly rollup | Disabled, tooltip "Available for time ranges of 7 days or less" |
 | More than 31 days | Daily rollup | Disabled, tooltip "Available for time ranges of 7 days or less" |
 
-The rollups do not carry the per-database detail, which is why the checkbox greys out rather than silently returning wrong rows.
+The rollups do not carry the per-database detail, which is why the checkbox grays out rather than silently returning wrong rows.
 
 ### How the numbers are derived
 
