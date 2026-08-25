@@ -5,13 +5,13 @@ nav_order: 1
 
 # What's new in 13.5.15
 
-If you monitor PostgreSQL with 13.5.12 today, 13.5.15.0.0 keeps what you already have. The same targets, the same console, and the same alert routing carry forward, and on top of them the plug-in becomes advisory: it now names the index worth creating, the table autovacuum is falling behind on, and the query that has left its accepted plan, each with the SQL for you to review and run.
+If you monitor PostgreSQL with 13.5.12 today, 13.5.15.0.0 keeps what you already have. The same targets, the same console, and the same alert routing carry forward, and on top of them the plug-in becomes advisory. It names the index worth creating and the table autovacuum is falling behind on, each with SQL for you to review and run, and it tells you when a query has left its accepted plan, with both plans side by side so you can test a rewrite or accept the new plan.
 
-Everything in this release is additive. Existing pages, metrics, thresholds, and credentials are untouched, and the upgrade is the ordinary import-and-deploy sequence. There is one new decision to make, and it is on the database side: plan capture needs `auto_explain` configured and the `pg_read_server_files` grant on your monitoring role. That grant is the only prerequisite the plug-in will never apply for you, it is needed only for the two plan pages, and everything else in this release works without it.
+Everything in this release is additive. Your targets, thresholds, schedules, and credentials carry forward unchanged; a few surfaces moved, and those are listed under [What changed or moved](#what-changed-or-moved). The upgrade itself is the ordinary import-and-deploy sequence. There is one new decision to make, and it is on the database side: plan capture needs `auto_explain` configured and the `pg_read_server_files` grant on your monitoring role. Among the settings the plug-in could apply itself, that grant is the one it deliberately never does. It is needed only for the two plan pages, and everything else in this release works without it.
 
 **Where to find it:** the new pages appear in the PostgreSQL Database target's navigation tree under each database name, and in the same target menu you use today. The new metrics appear under **Target menu → Monitoring → All Metrics**.
 
-**In this page:** The new pages at a glance · Monitoring Readiness · Plan Analysis · Plan Drift Advisor · Workload History and wait events · Index Advisor · Vacuum Advisor and xmin horizon · Retention Policies and the history store · Alerts and monitoring templates · Collection throttle · What changed or moved · New prerequisites · Upgrading from 13.5.12 · If you installed the 13.5.14 pre-release
+**In this page:** The new pages at a glance · Monitoring Readiness · Plan Analysis · Plan Drift Advisor · Workload History and wait events · Index Advisor · Vacuum Advisor and xmin horizon · Retention Policies and the history store · Alerts and monitoring templates · Collection throttle · What changed or moved · New prerequisites · Upgrading from 13.5.12 · If you installed the 13.5.14 pre-release · Full changelog
 
 ## The new pages at a glance
 
@@ -42,13 +42,13 @@ Read more: [Monitoring Readiness](monitoring-readiness.md)
 
 ![The Plan Analysis page with its KPI tiles and the Historical Query Insights list](images/13-5-15/plan-analysis-page.png)
 
-*Plan Analysis: the plan archive, the live capture threshold, and one row per captured statement with its insight badges.*
+*Plan Analysis: the plan archive, the live capture threshold, and one row per captured statement with its insight count.*
 
 Read more: [Plan Analysis](plan-analysis.md)
 
 ## Plan Drift Advisor
 
-**Plan Drift Advisor** answers the other half of the question: not what the plan does, but whether the query is still running a plan you certified. It keeps a set of accepted baseline plans per query, compares every new capture against that set, and lists only the queries that have drifted, so an empty **Problematic Queries** list ("No problematic queries found.") is the healthy state. Select a row and you get the drift history over a window you choose, a side-by-side plan-tree comparison against the baseline, insight cards for the current plan, an audit trail of who accepted, pinned, or retired which baseline and why, and the **Fix Workbench: Test a Rewrite**. Baseline mode ships as Manual, so no plan becomes accepted-good without a named operator action, and the workbench is the only place in the product where the plug-in executes anything, on your click.
+**Plan Drift Advisor** answers the other half of the question: not what the plan does, but whether the query is still running a plan you certified. It keeps a set of accepted baseline plans per query, compares every new capture against that set, and lists only the queries that have drifted, so once you have accepted baselines, an empty **Problematic Queries** list ("No problematic queries found.") is the healthy state. Select a row and you get the drift history over a window you choose, a side-by-side plan-tree comparison against the baseline, insight cards for the current plan, an audit trail of who accepted, pinned, or retired which baseline and why, and the **Fix Workbench: Test a Rewrite**. Baseline mode ships as Manual, so no plan becomes accepted-good without a named operator action, and the workbench runs the only EXPLAIN the plug-in ever performs: it is the one place the plug-in executes SQL you supply, and only when you click **Run Explain**.
 
 ![The Plan Drift Advisor page showing the Problematic Queries list](images/13-5-15/plan-drift-problematic-queries.png)
 
@@ -88,7 +88,7 @@ Read more: [Vacuum Advisor](vacuum-advisor.md)
 
 ## Retention Policies and the history store
 
-The granular history behind these pages lives in a per-target SQLite database on the agent host rather than in the Enterprise Manager repository, so months of statement-level and object-level detail cost the repository nothing. The store creates itself at the first collection that persists history, condenses each completed day once a day, and prunes itself on the same schedule. **Retention Policies** is the single control surface: a retention window and a protected minimum for each of the twelve history types, plus the whole-store size ceiling. Most types ship at 90 days, the index archive at 365, and the size ceiling ships disabled, so the retention windows are the bound until you set one. Saved changes take effect at the next daily trim.
+The granular history behind these pages lives in a per-target SQLite database on the agent host rather than in the Enterprise Manager repository, so months of statement-level and object-level detail cost the repository nothing. The store creates itself at the first collection that persists history, condenses each completed day once a day, and prunes itself on the same schedule. **Retention Policies** is the single control surface: a retention window and a protected minimum for each of the twelve history types, plus the whole-store size ceiling. Most types ship at 90 days and the index archive at 365. The whole-store ceiling ships disabled, so the retention windows are the bound until you set one; the captured-plan archive has its own ceiling, which ships enabled at 100 MB and evicts oldest first. Saved changes take effect at the next daily trim.
 
 ![The Retention Policies page with the Retention Windows table and Store Size Limit section](images/13-5-15/retention-policies-page.png)
 
@@ -112,20 +112,21 @@ On a local agent running on Linux, you can now set **Collection Throttle: CPU Th
 
 Read more: [Collection throttle](history-store-and-retention.md#collection-throttle)
 
-## What changed or moved
+## What changed or moved {#what-changed-or-moved}
 
 - **The explain workbench moved off Query Analyzer.** Testing a rewrite now happens in **Fix Workbench: Test a Rewrite** on [Plan Drift Advisor](plan-drift-advisor.md), beside the plan comparison you need in order to judge the result. It still runs `EXPLAIN (ANALYZE, FORMAT JSON)` on the statement in the box, and still only when you click **Run Explain**.
 - **The retention editor moved off Workload History.** All retention windows now live on the [Retention Policies](history-store-and-retention.md#retention-policies) page, together with the store size ceiling. Workload History links to it from the bottom of the page. Older screenshots and guides show the editor in its previous position.
 - **The `waits_sampled` metric is retired.** Wait-event data now comes from **Wait Events Sampled**, which enables itself only on targets where `pg_wait_sampling` is detected. See [Wait-event sampling](workload-history.md#wait-event-sampling).
 - **The realtime page previously called "Blocking Sessions and Wait Locks" is now Locks.** The content is the same: one row per blocked and blocking pair, with **Include Locks Granted** to widen the view. See [Monitoring pages](monitoring-pages.md).
+  <!-- CONFIRM: Locks page rename (was "Blocking Sessions and Wait Locks") -->
 - **Two target properties were added.** **Collection Throttle: CPU Threshold (%)** and **Collection Throttle: Memory Threshold (%)** appear on Database and Cluster targets, both empty by default. See [Collection throttle properties](targets-and-properties.md#throttle-properties).
 
 ## New prerequisites
 
-Nothing here is required to keep monitoring what you monitor today. Each item unlocks one part of the release, and **Monitoring Readiness** checks every one of them live, per target.
+Nothing here is required to keep monitoring what you monitor today. Each item unlocks one part of the release, and **Monitoring Readiness** checks the first three live, per target.
 
-- [ ] `auto_explain` installed on the database server and configured for capture, with `log_min_duration` set to 0 or higher, `log_format = json`, and `log_analyze = on` — see [Plan capture (auto_explain)](prerequisites.md#auto-explain). Required for **Plan Analysis** and **Plan Drift Advisor**. The plug-in applies these settings for you from **Configure auto_explain**.
-- [ ] `GRANT pg_read_server_files TO "<monitoring role>";` run by a superuser, so the plug-in can read the server log — see [The server log read grant](prerequisites.md#log-read-grant). This is the one item the plug-in never applies for you.
+- [ ] `auto_explain` installed on the database server and configured for capture, with `log_min_duration` set to 0 or higher, `log_format = json`, and `log_analyze = on`, plus the server-side logging settings capture reads from (`logging_collector = on`, the `stderr` log destination, and a `%m`-led `log_line_prefix`), which are yours to set — see [Plan capture (auto_explain)](prerequisites.md#auto-explain). Required for **Plan Analysis** and **Plan Drift Advisor**. The plug-in applies the `auto_explain` settings for you from **Configure auto_explain**.
+- [ ] `GRANT pg_read_server_files TO "<monitoring role>";` run by a superuser, so the plug-in can read the server log — see [The server log read grant](prerequisites.md#log-read-grant). Of the plan-capture settings the plug-in could apply itself, this is the one it deliberately never does.
 - [ ] Optional extensions, installed by you through your own packaging and detected automatically — see [Optional extensions](prerequisites.md#optional-extensions). `hypopg` and `pg_qualstats` for the full **Index Advisor** output, `pg_wait_sampling` for wait events, `pgstattuple` for bloat estimates.
 - [ ] Preferred Credentials set for the target, because the advisor pages read their data through Enterprise Manager jobs — see [Preferred Credentials](prerequisites.md#preferred-credentials).
 
@@ -141,7 +142,9 @@ Nothing here is required to keep monitoring what you monitor today. Each item un
 Install 13.5.15.0.0 over it as a normal plug-in update, following the same steps as any other upgrade. History collected by the pre-release build is not guaranteed to carry forward.
 <!-- CONFIRM: Ben — pre-release → GA upgrade guidance (normal update vs clean redeploy; history reset) -->
 
-Full changelog: [Changelog](changelog.md)
+## Full changelog
+
+The [Changelog](changelog.md) lists every new page, metric, job, template, and fix in 13.5.15.0.0, and the releases before it.
 
 ## Related
 
