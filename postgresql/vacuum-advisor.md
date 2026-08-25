@@ -17,7 +17,7 @@ That last point is worth stating plainly before anything else. Every command on 
 
 **Where to find it:** on a PostgreSQL Database target, **target navigation tree ▸ _database name_ ▸ Vacuum Advisor**. The same entry appears in the target menu. Two live watch pages sit under **Realtime ▸ Vacuum xmin Horizon** and **Realtime ▸ Vacuums in Progress**. The same findings alert through the target's **All Metrics**.
 
-**In this page:** The Vacuum Advisor page · Acting on a recommendation · Autovacuum frequency detection · Table bloat estimate · xmin horizon root cause · Wraparound monitoring · Vacuums in Progress · Related
+**In this page:** The Vacuum Advisor page · Acting on a recommendation · Autovacuum frequency detection · Table bloat estimate · xmin horizon root cause · Wraparound monitoring · Vacuums in Progress
 
 ## The Vacuum Advisor page
 
@@ -46,7 +46,7 @@ Two KPIs and a card.
 | **Dead-tuple bloat** | Dead tuples as a share of all rows, across the tables that have vacuum findings. Catalog-native. |
 | **Autovacuum runs · 24h** | How many autovacuum runs happened across the database in the last day, computed by deltaing snapshots of PostgreSQL's lifetime `autovacuum_count`. |
 
-The **xmin-horizon root-cause card** sits below them and has two states. When cleanup is pinned it turns red and reads `Horizon blocked by <holder type> <holder> (PID <n>). Suggested action: <command>`. When nothing is holding the horizon it turns green and reads "No session, replication slot or prepared transaction is currently holding the xmin horizon back."
+The **xmin-horizon root-cause card** sits below them and has two states. When cleanup is pinned its left edge turns red and it reads `Horizon blocked by <holder type> <holder> (PID <n>). Suggested action: <command>`. When nothing is holding the horizon its left edge turns green and it reads "No session, replication slot or prepared transaction is currently holding the xmin horizon back."
 
 **Autovacuum runs · 24h** shows "—" until it has the history it needs, with the tooltip "Accumulating: needs two daily snapshots to compute a delta". Once it has them, the tooltip names the two snapshots the delta was computed over and how many tables were autovacuumed. A busy database reporting zero runs is itself a finding.
 
@@ -109,7 +109,7 @@ using the table's **effective** settings, so a per-table `reloptions` override b
 | **MEDIUM** | Dead tuples past the trigger point. |
 | **LOW** | Every other listed table, including those above half their trigger point. |
 
-Each row also carries a plain-language evidence sentence, for example: "Table has 412,908 dead tuples, past its autovacuum trigger point of 105,220 (last autovacuum: 2026-08-19 03:14); autovacuum frequency appears insufficient for this table's churn". When autovacuum has been switched off on the table, the sentence ends with " - NOTE: autovacuum is DISABLED on this table via reloptions".
+Each row also carries a plain-language evidence sentence, for example: "Table has 412908 dead tuples, past its autovacuum trigger point of 105220 (last autovacuum: 2026-08-19 03:14); autovacuum frequency appears insufficient for this table's churn". When autovacuum has been switched off on the table, the sentence ends with " - NOTE: autovacuum is DISABLED on this table via reloptions".
 
 ### The recommendation it produces
 
@@ -143,7 +143,8 @@ The frequency detection and the bloat estimate are cause and consequence. The fr
 
 This section and the **Table Bloat Estimate** metric need the `pgstattuple` extension on the monitored database. Extensions in PostgreSQL are per-database, so install it in each database you want estimated. The plug-in detects it automatically through the catalog and never installs it. Without it the metric emits zero rows and the page section is simply empty. That is a healthy, expected state, not an error.
 
-The plug-in uses the fast approximate function, which is visibility-map based and only scans pages not already marked all-visible. It never runs a full heap scan. It restricts itself to ordinary permanent tables in user schemas of at least 256 KB. A table the monitoring role cannot read is skipped with a logged note rather than failing the collection.
+The plug-in uses the fast approximate function, which is visibility-map based and only scans pages not already marked all-visible. It never runs a full heap scan. It restricts itself to ordinary permanent tables in user schemas of at least 256 KB. A table outside those bounds is skipped and logged; a table the role cannot read can leave that database's estimate empty for the collection.
+<!-- CONFIRM: Ben — FEATURE_USAGE §5.3 says per-table skip; code degrades per-database -->
 
 | Severity | Condition |
 |---|---|
@@ -151,7 +152,7 @@ The plug-in uses the fast approximate function, which is visibility-map based an
 | **MEDIUM** | Free space ≥ 20%, or dead tuples ≥ 10%. |
 | **LOW** | Everything else in the set. |
 
-Each row carries its own evidence sentence, for example: "Table is ~46.2% free space (912 MB) with 2,204,118 dead tuples (~21.7%); a VACUUM (FULL) or pg_repack would reclaim the avoidable growth".
+Each row carries its own evidence sentence, for example: "Table is ~46.2% free space (912 MB) with 2204118 dead tuples (~21.7%); a VACUUM (FULL) or pg_repack would reclaim the avoidable growth".
 
 Work a flagged table in that order: check the vacuum recommendation tables first so the bloat stops growing, then reclaim the space manually with a `VACUUM`, or a rewrite or repack approach for severe cases, in your own tooling.
 
@@ -169,8 +170,9 @@ The plug-in identifies exactly what is holding the horizon and gives you the rel
 
 | Holder Type | Read from | Holder looks like | Suggested Action |
 |---|---|---|---|
-| `backend` | `pg_stat_activity.backend_xmin` | `backend pid 41207` | Names the user, application and how long it has held the horizon, then `SELECT pg_terminate_backend(41207);` |
-| `replication_slot` | `pg_replication_slots` | `slot standby_2` | Points you at the standby or subscriber first, then `SELECT pg_drop_replication_slot('standby_2');` if the slot is obsolete |
+| `backend` | `pg_stat_activity.backend_xmin` | `backend pid 41207` | Names the user and application, and the timestamp it has been holding xmin since, then `SELECT pg_terminate_backend(41207);` |
+| `replication_slot` (active) | `pg_replication_slots` | `slot standby_2` | Names the slot and its active PID and tells you to check the standby or subscriber, then `SELECT pg_drop_replication_slot('standby_2');` if it is obsolete |
+| `replication_slot` (inactive) | `pg_replication_slots` | `slot standby_2` | Says the inactive slot is pinning the horizon, then `SELECT pg_drop_replication_slot('standby_2');` if it is obsolete |
 | `prepared_transaction` | `pg_prepared_xacts` | `prepared txn_9f31` | Names the owner, then `ROLLBACK PREPARED 'txn_9f31';` if the transaction is abandoned |
 
 The collector excludes its own session, so it never reports itself as the blocker.
@@ -210,14 +212,22 @@ Normally you do nothing here: these thresholds ship enabled. The **XID Consumpti
 
 | Metric | Internal name | Collected | Default Warning | Default Critical | Occurrences | Clears when |
 |---|---|---|---|---|---|---|
-| Databases · Transaction Unfrozen Age | `databases` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
-| Databases · Multixact Unfrozen Age | `databases` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
-| Tables · Table Unfrozen XID Age | `tables` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
-| Tables · Table Unfrozen Multixact Age | `tables` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
+| Databases · Transaction Unfrozen Age | `databases` / `transaction_age` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
+| Databases · Multixact Unfrozen Age | `databases` / `multixact_age` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
+| Tables · Table Unfrozen XID Age | `tables` / `table_xid_age` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
+| Tables · Table Unfrozen Multixact Age | `tables` / `table_multixact_age` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
 
-The table-level rows are the safety net. Their alert messages say directly that the table is holding back the database's `datfrozenxid` or `datminmxid` and to check autovacuum, so a table past its trigger with stale cleanup raises an alert even while autovacuum is nominally running and you can intervene manually.
+The table-level rows are the safety net. Their alert messages say directly that the table is holding back the database's `datfrozenxid` or `datminmxid` and to check autovacuum, so a table past its trigger with stale cleanup raises an alert even while autovacuum is nominally running.
 
-Age history accumulates in the agent-local store from day one with no configuration. Every collection stages full-resolution rows, and the daily condense keeps each day's maximum XID and multixact ages, so trend depth builds on its own. See [History store and retention](history-store-and-retention.md).
+Tuning is not the response to one of these alerts. The `ALTER TABLE … autovacuum_vacuum_scale_factor` recommendation tightens when autovacuum fires next time; it does nothing to the age already accumulated, because only a freeze advances a table's `relfrozenxid`. To bring the age down now, run a freeze against the named table in your own tooling:
+
+```sql
+VACUUM (FREEZE) public.orders;
+```
+
+Check the xmin horizon before you run it. If a session, replication slot or prepared transaction is pinning the horizon, the freeze cannot advance past it and reclaims nothing, so release the holder first. As everywhere else on this page, the plug-in never runs the freeze for you.
+
+Age history accumulates in the agent-local store from day one with no configuration. Every collection stages full-resolution rows, and the daily condense keeps each day's maximum XID and multixact ages, so trend depth builds on its own without touching the [Retention Policies page](history-store-and-retention.md#retention-policies).
 
 All four thresholds are retunable per target or through the shipped [monitoring templates](alerts-and-templates.md#templates), and alerts route through the standard OEM notification framework to whatever connector you have bound.
 
