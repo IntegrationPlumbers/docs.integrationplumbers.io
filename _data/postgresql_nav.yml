@@ -1,0 +1,29 @@
+# Navigation for the PostgreSQL plug-in guide. Rendered by _layouts/default.html on every /postgresql/ page.
+groups:
+  - name: Start here
+    pages:
+      - { title: "PostgreSQL Plug-in", url: /postgresql/ }
+      - { title: "What's new in 13.5.15", url: /postgresql/whats-new.html }
+      - { title: "Getting started", url: /postgresql/getting-started.html }
+      - { title: "Trial setup", url: /postgresql/trial.html }
+  - name: Set up
+    pages:
+      - { title: "Prerequisites", url: /postgresql/prerequisites.html }
+      - { title: "Install and upgrade", url: /postgresql/install-and-upgrade.html }
+      - { title: "Targets and properties", url: /postgresql/targets-and-properties.html }
+      - { title: "Monitoring Readiness", url: /postgresql/monitoring-readiness.html }
+  - name: Advisors
+    pages:
+      - { title: "Plan Analysis", url: /postgresql/plan-analysis.html }
+      - { title: "Plan Drift Advisor", url: /postgresql/plan-drift-advisor.html }
+      - { title: "Workload History", url: /postgresql/workload-history.html }
+      - { title: "Index Advisor", url: /postgresql/index-advisor.html }
+      - { title: "Vacuum Advisor", url: /postgresql/vacuum-advisor.html }
+  - name: Reference
+    pages:
+      - { title: "Monitoring pages", url: /postgresql/monitoring-pages.html }
+      - { title: "Alerts and templates", url: /postgresql/alerts-and-templates.html }
+      - { title: "History store and retention", url: /postgresql/history-store-and-retention.html }
+      - { title: "Jobs and metric extensions", url: /postgresql/jobs-and-metric-extensions.html }
+      - { title: "Troubleshooting", url: /postgresql/troubleshooting.html }
+      - { title: "Changelog", url: /postgresql/changelog.html }
