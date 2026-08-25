@@ -39,7 +39,7 @@ The PostgreSQL plug-in monitors PostgreSQL instances from inside Oracle Enterpri
 
 **Evaluating — [Trial setup](trial.md).** Start here if you are deciding whether to buy. A trial is the whole product on your own OMS against your own instances, with a guided checklist that exercises every advisor in about a week. Request a key at [https://integrationplumbers.io/postgresql-plugin/trial](https://integrationplumbers.io/postgresql-plugin/trial).
 
-Whichever path you take, the plug-in never applies a recommendation for you, and the only EXPLAIN it ever runs against your database is the one you click in the Fix Workbench on **Plan Drift Advisor**. Advisor findings publish as standard Enterprise Manager metrics, so they raise alerts and route through the notification connectors you already have bound. The plug-in supports PostgreSQL 14 to 18 on Enterprise Manager 13.5 and 24ai.
+Whichever path you take, the plug-in never applies a recommendation for you, and the only EXPLAIN that executes a statement is the Fix Workbench on **Plan Drift Advisor**, on your click. The product's one other EXPLAIN, the Index Advisor's HypoPG simulation, plans a synthetic lookup with `EXPLAIN (FORMAT JSON)` and executes nothing. Advisor findings publish as standard Enterprise Manager metrics, so they raise alerts and route through the notification connectors you already have bound. The plug-in supports PostgreSQL 14 to 18 on Enterprise Manager 13.5 and 24ai.
 
 ## Documentation
 

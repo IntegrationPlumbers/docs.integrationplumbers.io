@@ -9,7 +9,7 @@ If you monitor PostgreSQL with 13.5.12 today, 13.5.15.0.0 keeps what you already
 
 Everything in this release is additive. Your targets, thresholds, schedules, and credentials carry forward unchanged; a few surfaces moved, and those are listed under [What changed or moved](#what-changed-or-moved). The upgrade itself is the ordinary import-and-deploy sequence. There is one new decision to make, and it is on the database side: plan capture needs `auto_explain` configured and the `pg_read_server_files` grant on your monitoring role. Among the settings the plug-in could apply itself, that grant is the one it deliberately never does. It is needed only for the two plan pages, and everything else in this release works without it.
 
-**Where to find it:** the new pages appear in the PostgreSQL Database target's navigation tree under each database name, and in the same target menu you use today. The new metrics appear under **Target menu → Monitoring → All Metrics**.
+**Where to find it:** the new pages appear in the PostgreSQL Database target's navigation tree — **Realtime ▸ Vacuum xmin Horizon** under the Realtime group, the rest under each database name — and in the same target menu you use today. The new metrics appear under **Target menu → Monitoring → All Metrics**.
 
 **In this page:** The new pages at a glance · Monitoring Readiness · Plan Analysis · Plan Drift Advisor · Workload History and wait events · Index Advisor · Vacuum Advisor and xmin horizon · Retention Policies and the history store · Alerts and monitoring templates · Collection throttle · What changed or moved · New prerequisites · Upgrading from 13.5.12 · If you installed the 13.5.14 pre-release · Full changelog
 
@@ -48,7 +48,7 @@ Read more: [Plan Analysis](plan-analysis.md)
 
 ## Plan Drift Advisor
 
-**Plan Drift Advisor** answers the other half of the question: whether the query is still running a plan you certified. It keeps a set of accepted baseline plans per query, compares every new capture against that set, and lists only the queries that have drifted, so once you have accepted baselines, an empty **Problematic Queries** list ("No problematic queries found.") is the healthy state. Select a row and you get the drift history over a window you choose, a side-by-side plan-tree comparison against the baseline, insight cards for the current plan, an audit trail of who accepted, pinned, or retired which baseline and why, and the **Fix Workbench: Test a Rewrite**. Baseline mode ships as Manual, so no plan becomes accepted-good without a named operator action. The workbench runs the only EXPLAIN the plug-in ever performs, and is the one place the plug-in's console executes SQL you supply (custom-query Metric Extensions you define run your own SQL on their own schedule — see [Jobs and metric extensions](jobs-and-metric-extensions.md)). Nothing runs until you click **Run Explain**.
+**Plan Drift Advisor** answers the other half of the question: whether the query is still running a plan you certified. It keeps a set of accepted baseline plans per query, compares every new capture against that set, and lists only the queries that have drifted, so once you have accepted baselines, an empty **Problematic Queries** list ("No problematic queries found.") is the healthy state. Select a row and you get the drift history over a window you choose, a side-by-side plan-tree comparison against the baseline, insight cards for the current plan, an audit trail of who accepted, pinned, or retired which baseline and why, and the **Fix Workbench: Test a Rewrite**. Baseline mode ships as Manual, so no plan becomes accepted-good without a named operator action. The workbench runs the only EXPLAIN that executes a statement, `EXPLAIN (ANALYZE, FORMAT JSON)` once per click, and is the one place the plug-in's console runs SQL you supply (custom-query Metric Extensions you define run your own SQL on their own schedule — see [Jobs and metric extensions](jobs-and-metric-extensions.md)). Nowhere else does the plug-in execute a statement to obtain a plan: the Index Advisor's HypoPG simulation plans a synthetic lookup with `EXPLAIN (FORMAT JSON)` and executes nothing. Nothing runs until you click **Run Explain**.
 
 ![The Plan Drift Advisor page showing the Problematic Queries list](images/13-5-15/plan-drift-problematic-queries.png)
 
@@ -117,8 +117,6 @@ Read more: [Collection throttle](history-store-and-retention.md#collection-throt
 - **The explain workbench moved off Query Analyzer.** Testing a rewrite now happens in **Fix Workbench: Test a Rewrite** on [Plan Drift Advisor](plan-drift-advisor.md), beside the plan comparison you need in order to judge the result. It still runs `EXPLAIN (ANALYZE, FORMAT JSON)` on the statement in the box, and still only when you click **Run Explain**.
 - **The retention editor moved off Workload History.** All retention windows now live on the [Retention Policies](history-store-and-retention.md#retention-policies) page, together with the store size ceiling. Workload History links to it from the bottom of the page. Older screenshots and guides show the editor in its previous position.
 - **The `waits_sampled` metric is retired.** Wait-event data now comes from **Wait Events Sampled**, which enables itself only on targets where `pg_wait_sampling` is detected. See [Wait-event sampling](workload-history.md#wait-event-sampling).
-- **The realtime page previously called "Blocking Sessions and Wait Locks" is now Locks.** The content is the same: one row per blocked and blocking pair, with **Include Locks Granted** to widen the view. See [Monitoring pages](monitoring-pages.md).
-  <!-- CONFIRM: Locks page rename (was "Blocking Sessions and Wait Locks") -->
 - **Two target properties were added.** **Collection Throttle: CPU Threshold (%)** and **Collection Throttle: Memory Threshold (%)** appear on Database and Cluster targets, both empty by default. See [Collection throttle properties](targets-and-properties.md#throttle-properties).
 
 ## New prerequisites
@@ -140,7 +138,7 @@ Nothing here is required to keep monitoring what you monitor today. Each item ad
 ## If you installed the 13.5.14 pre-release
 
 Install 13.5.15.0.0 over it as a normal plug-in update, following the same steps as any other upgrade. History collected by the pre-release build is not guaranteed to carry forward.
-<!-- CONFIRM: Ben — pre-release → GA upgrade guidance (normal update vs clean redeploy; history reset) -->
+{% comment %}CONFIRM: Ben — pre-release → GA upgrade guidance (normal update vs clean redeploy; history reset){% endcomment %}
 
 ## Full changelog
 

@@ -13,7 +13,8 @@ When you need to act on a target directly (clear a batch of idle connections, ta
 > - Jobs run through the Enterprise Manager agent on [the agent host](prerequisites.md#agent-host); the account executing them needs the tools each job calls on its `PATH`.
 > - A custom query in a Metric Extension needs [the monitoring role](prerequisites.md#monitoring-role), or another role with read access to whatever your query touches.
 
-**Where to find it:** the jobs below run from **Enterprise ▸ Job ▸ Activity ▸ Create Job**; Metric Extensions are created from **Enterprise ▸ Monitoring ▸ Metric Extensions**. <!-- CONFIRM: OEM console path Enterprise ▸ Monitoring ▸ Metric Extensions -->
+**Where to find it:** the jobs below run from **Enterprise ▸ Job ▸ Activity ▸ Create Job**; Metric Extensions are created from **Enterprise ▸ Monitoring ▸ Metric Extensions**.
+{% comment %}CONFIRM: OEM console path Enterprise ▸ Monitoring ▸ Metric Extensions{% endcomment %}
 
 **In this page:** Jobs shipped with the plug-in · Kill Idle PostgreSQL Connections · Backup and Restore jobs · Patroni cluster switchover · Data-management jobs · Custom queries with a Metric Extension
 
@@ -23,14 +24,14 @@ Every job type the plug-in ships is single-target and agent-bound — it runs ag
 
 | Job | Target type | Purpose | Used by |
 |---|---|---|---|
-| **PostgreSQL - Analyze Query** | PostgreSQL Database | Runs a single EXPLAIN against the target database. This is the only EXPLAIN the plug-in ever runs, and the only place the plug-in's console executes SQL you supply; [custom-query Metric Extensions](#custom-queries-with-a-metric-extension) you define run your own SQL on their schedule. | [Plan Drift Advisor](plan-drift-advisor.md#fix-workbench-test-a-rewrite) — Fix Workbench: Test a Rewrite; used by the console page, not normally run by hand. |
+| **PostgreSQL - Analyze Query** | PostgreSQL Database | Runs a single EXPLAIN against the target database. This is the only EXPLAIN that executes a statement, and the only place the plug-in's console runs SQL you supply; [custom-query Metric Extensions](#custom-queries-with-a-metric-extension) you define run your own SQL on their schedule. The Index Advisor's HypoPG simulation issues a plan-only `EXPLAIN (FORMAT JSON)` that executes nothing. | [Plan Drift Advisor](plan-drift-advisor.md#fix-workbench-test-a-rewrite) — Fix Workbench: Test a Rewrite; used by the console page, not normally run by hand. |
 | **PostgreSQL - Read Plan Drift Data** | PostgreSQL Database | Reads the plan-drift lists, history, captured plans, baselines, audit trail, and insights from the agent-local store. | [Plan Drift Advisor](plan-drift-advisor.md) (every panel); used by the console page, not normally run by hand. |
 | **PostgreSQL - Plan Drift Baseline Action** | PostgreSQL Database | Applies a baseline action (accept, pin, unpin, retire, or set the drift-detection configuration) that you submit from the page. | [Plan Drift Advisor](plan-drift-advisor.md#baseline-governance) — Baseline governance. |
 | **PostgreSQL - Read Workload History Data** | PostgreSQL Database | Reads the database, statement, and time-series aggregates computed over the stored per-statement history. | [Workload History](workload-history.md), and the Retention Policies prefill; used by the console pages, not normally run by hand. |
 | **PostgreSQL - Configure auto_explain** | PostgreSQL Database | Applies the plan-capture settings through `ALTER SYSTEM`. | [Monitoring Readiness](monitoring-readiness.md#configure-auto-explain) — Configure auto_explain. Also one of the seven [data-management jobs](#data-management-jobs). |
 | **PostgreSQL - Set Plan Capture Window & Opt-in** | PostgreSQL Database | Sets the `log_analyze` per-target opt-in and the off-peak plan-harvest window. | [Plan Analysis](plan-analysis.md#capture-window) — Capture Window. Also one of the seven [data-management jobs](#data-management-jobs). |
 | **PostgreSQL - Set Granular Retention Days** | PostgreSQL Database | Sets per-tier retention days and protected minimums for all twelve history types. | [History store and retention](history-store-and-retention.md#retention-policies) — Retention Policies (Save). |
-| **PostgreSQL - Set Plan Archive Size Ceiling** | PostgreSQL Database | Sets the whole-store MB ceiling and the plan-archive write guard. | [History store and retention](history-store-and-retention.md#retention-policies) — Retention Policies (Save). |
+| **PostgreSQL - Set Plan Archive Size Ceiling** | PostgreSQL Database | Sets the whole-store MB ceiling and the plan-archive ceiling (oldest-first eviction). | [History store and retention](history-store-and-retention.md#retention-policies) — Retention Policies (Save). |
 | **PostgreSQL - Reclaim Collection Store Disk Space** | PostgreSQL Database | Compacts the store file on demand and reports the space freed. | Not tied to a page — run directly or via `emcli`. |
 | **PostgreSQL - Set Wait History Retention Threshold** | PostgreSQL Database | Sets the minimum estimated daily wait time below which condensed wait-event rows are dropped. | Not tied to a page — run directly or via `emcli`. |
 | **PostgreSQL - Trim Historical Granular Collections** | PostgreSQL Database | Runs the daily retention, eviction, and compaction maintenance on demand. | Not tied to a page — run directly or via `emcli`. |
@@ -83,8 +84,8 @@ Runs `pg_dump` against the target database. The connection port is filled in aut
 | Fully qualified hostname/IP address | Must be listed in the pgpass file. |
 | Fully qualified path to pgpass.conf | Fully qualified path to the pgpass file. |
 
-<!-- CONFIRM: whether the job overwrites an existing file at "Backup file path", or fails. -->
-<!-- CONFIRM: whether pg_dump must already be installed and on the agent host's PATH, or the plug-in provides it. -->
+{% comment %}CONFIRM: whether the job overwrites an existing file at "Backup file path", or fails.{% endcomment %}
+{% comment %}CONFIRM: whether pg_dump must already be installed and on the agent host's PATH, or the plug-in provides it.{% endcomment %}
 
 ### Restore Postgresql Database
 
@@ -105,7 +106,7 @@ Runs `pg_restore` against the target database — or `psql`, if you mark the bac
 | Fully qualified path to pgpass.conf | Fully qualified path to the pgpass file. |
 | Is the backup file plain text SQL? | Optional. Type `yes` if the backup file is plain-text SQL. |
 
-<!-- CONFIRM: whether the database named in "Database name" must already exist before Restore runs, or the job creates it. -->
+{% comment %}CONFIRM: whether the database named in "Database name" must already exist before Restore runs, or the job creates it.{% endcomment %}
 
 ## Patroni cluster switchover
 
@@ -116,7 +117,7 @@ Runs `pg_restore` against the target database — or `psql`, if you mark the bac
 Seven jobs back the **Retention Policies** page and the store's daily maintenance, and are also available for direct or scripted use through `emcli`:
 
 - **PostgreSQL - Set Granular Retention Days** — sets per-tier retention days and protected minimums for all twelve history types.
-- **PostgreSQL - Set Plan Archive Size Ceiling** — sets the whole-store MB ceiling and the plan-archive write guard.
+- **PostgreSQL - Set Plan Archive Size Ceiling** — sets the whole-store MB ceiling and the plan-archive ceiling (oldest-first eviction).
 - **PostgreSQL - Reclaim Collection Store Disk Space** — compacts the store file on demand and reports the space freed.
 - **PostgreSQL - Set Wait History Retention Threshold** — sets the minimum estimated daily wait time below which condensed wait-event rows are dropped.
 - **PostgreSQL - Configure auto_explain** — applies the plan-capture settings through `ALTER SYSTEM`, the same job the Monitoring Readiness **Configure auto_explain** action submits.

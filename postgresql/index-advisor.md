@@ -85,7 +85,7 @@ Two statements deserve a second look before they go anywhere near a change ticke
 
 ## HypoPG What-If simulation
 
-With `hypopg` installed in a database, every catalog-native Missing candidate in that database is tested by simulation instead of being left as a hunch. A hypothetical index is materialized in the planner only (never built on disk, no lock taken), a representative equality lookup is re-planned against it, and the estimated cost improvement is reported.
+With `hypopg` installed in a database, every catalog-native Missing candidate in that database is tested by simulation instead of being left as a hunch. A hypothetical index is materialized in the planner only (never built on disk, no lock taken), a representative equality lookup is re-planned against it, and the estimated cost improvement is reported. Both measurements come from plain `EXPLAIN (FORMAT JSON)` — no `ANALYZE` — so the synthetic lookup is planned and costed but never executed.
 
 ![The HypoPG What-If Simulation section showing baseline cost, hypothetical cost, estimated speedup, and the complete CREATE INDEX statement](images/13-5-15/index-advisor-whatif.png)
 *Cost simulation, not a wall-clock measurement: it tells you which candidate to look at first.*

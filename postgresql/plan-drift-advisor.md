@@ -138,7 +138,7 @@ Retired baselines behave the way the name implies. A current plan that matches a
 
 Automatic promotion is opt-in through the **Auto** and **Hybrid** baseline modes. Under either, a candidate is promoted once it has been seen at least **Stability captures** times across at least **Stability days**, and only if its cost is at most **Auto cost guard %** of the cheapest accepted plan's cost. That guard is what stops a stable-but-worse plan from quietly certifying itself.
 
-<!-- CONFIRM: Ben — Auto and Hybrid baseline modes behave identically in this build; keep both? -->
+{% comment %}CONFIRM: Ben — Auto and Hybrid baseline modes behave identically in this build; keep both?{% endcomment %}
 
 Read Auto cost guard % as a ratio rather than a deviation: 100 means a candidate may be no worse than the accepted best, and a higher value is the multiple you are willing to tolerate. Numeric band % and Delta prev % work the other way round, as deviation percentages measuring how far above a reference a cost has moved. A candidate with no accepted plan to compare against, or with no usable cost, passes the guard.
 
@@ -153,7 +153,7 @@ Baselines also protect their evidence: the captured plan behind an accepted or p
 
 ## Fix Workbench: Test a Rewrite
 
-This is where you prove a rewrite before it goes anywhere near application code. It is the only EXPLAIN the plug-in ever runs and the only place the plug-in's console executes SQL you supply (custom-query Metric Extensions you define run your own SQL on their schedule — see [Jobs and metric extensions](jobs-and-metric-extensions.md#custom-queries-with-a-metric-extension)), and nothing happens until you click **Run Explain**.
+This is where you prove a rewrite before it goes anywhere near application code. It is the only EXPLAIN that executes a statement and the only place the plug-in's console runs SQL you supply (custom-query Metric Extensions you define run your own SQL on their schedule — see [Jobs and metric extensions](jobs-and-metric-extensions.md#custom-queries-with-a-metric-extension)), and nothing happens until you click **Run Explain**. The plug-in issues one other EXPLAIN, in the [Index Advisor](index-advisor.md#hypopg-what-if-simulation) HypoPG simulation, but that one is a plan-only `EXPLAIN (FORMAT JSON)` over a synthetic lookup and executes nothing.
 
 1. Select a query in Problematic Queries and scroll to **Fix Workbench: Test a Rewrite**. The panel shows the target database and the query text, prefilled and editable.
 2. Replace any parameter placeholders with real values. Captured statements often carry bound-parameter placeholders such as `$1` and `$2`; `SELECT * FROM users WHERE id = $1` has to become `SELECT * FROM users WHERE id = 123` before it can run. Choose values that represent a typical execution — an unrepresentative value produces a plan you cannot learn from.
@@ -169,7 +169,7 @@ This is where you prove a rewrite before it goes anywhere near application code.
 - The statement runs inside a transaction that is rolled back, so `INSERT`, `UPDATE`, and `DELETE` changes do not persist. The execution still takes locks and consumes CPU and I/O while it runs.
 - The run is capped at 30 seconds. A rewrite that takes longer is canceled and the panel reports a failure state instead of a plan.
 - Use test data or off-peak timing for anything that could contend with production work.
-- Nothing schedules this job. There is no background use of the workbench, and the plug-in never runs EXPLAIN, or any proposed rewrite, anywhere else.
+- Nothing schedules this job. There is no background use of the workbench, and the plug-in never executes a statement, or any proposed rewrite, anywhere else.
 
 Failure states are explicit rather than blank: "Explain failed.", "No plan returned.", or "Could not parse plan JSON."
 

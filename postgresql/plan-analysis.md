@@ -21,7 +21,7 @@ When a query gets slower, the useful evidence is the plan it actually ran, and t
 
 ## How plans are captured
 
-Capture is passive. `auto_explain` writes each qualifying statement's plan to the PostgreSQL server log during that query's own execution, and the plug-in reads those plan bodies back out of the log. The plug-in never re-executes a statement and never issues an EXPLAIN of its own as part of capture or configuration. The only EXPLAIN the product ever runs is the **Fix Workbench: Test a Rewrite** panel on [Plan Drift Advisor](plan-drift-advisor.md), and only when you click **Run Explain**.
+Capture is passive. `auto_explain` writes each qualifying statement's plan to the PostgreSQL server log during that query's own execution, and the plug-in reads those plan bodies back out of the log. The plug-in never re-executes a statement and never issues an EXPLAIN of its own as part of capture or configuration. The only EXPLAIN that executes a statement is the **Fix Workbench: Test a Rewrite** panel on [Plan Drift Advisor](plan-drift-advisor.md), which runs `EXPLAIN (ANALYZE, FORMAT JSON)` once, and only when you click **Run Explain**. The Index Advisor's HypoPG simulation issues the one other EXPLAIN in the product, a plan-only `EXPLAIN (FORMAT JSON)` over a synthetic lookup that executes nothing.
 
 The harvester finds the current log file with `pg_current_logfile()` and reads it with `pg_read_file()` over the same JDBC connection the plug-in already uses. There is no OS-level file access, so capture behaves identically whether the agent runs on the database host or somewhere else. If the log cannot be read, the plug-in logs a warning and skips the harvest; the collection itself does not fail.
 

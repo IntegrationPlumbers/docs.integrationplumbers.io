@@ -154,3 +154,10 @@ Include the following in your ticket, so we can reproduce what you're seeing:
 - Your PostgreSQL version.
 - The page or metric involved.
 - A screenshot of what you're seeing.
+
+## Related
+
+- [Prerequisites](prerequisites.md) — the settings, grants, and extensions each feature needs before it can produce data
+- [Monitoring Readiness](monitoring-readiness.md) — checks those prerequisites live against the target and names the missing one
+- [Install and upgrade](install-and-upgrade.md) — import, deploy, and upgrade steps, including what to expect straight after an upgrade
+- [PostgreSQL Plug-in](index.md) — the documentation hub for every page in this guide

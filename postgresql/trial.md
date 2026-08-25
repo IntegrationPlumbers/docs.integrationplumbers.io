@@ -18,7 +18,7 @@ If you want to know whether the PostgreSQL plug-in earns a place in your Enterpr
 
 ## Request a trial
 
-Request the key before you install anything. A valid license key is required for installation and setup, and adding a target validates the target count against your license.
+Request the key before you install anything. A valid license key is required to monitor a target — it is a target property — and adding a target validates the target count against your license.
 
 Fill in the form at [integrationplumbers.io/postgresql-plugin/trial](https://integrationplumbers.io/postgresql-plugin/trial). Have four answers ready.
 
@@ -27,14 +27,14 @@ Fill in the form at [integrationplumbers.io/postgresql-plugin/trial](https://int
 | Your Enterprise Manager version, 13.5 or 24ai | The same 13.5.15.0.0 build runs on Enterprise Manager 13.5 and on 24ai, so this changes nothing about what you can evaluate. It tells us which console screens to point you at. |
 | Your PostgreSQL versions, 14 to 18 | Versions outside that range are not supported. See [Supported versions and platforms](prerequisites.md#supported-versions). |
 | How many instances you want to monitor | The key carries an instance count, and that count is what the **Instances** column on **License Info** reports back to you. |
-| Whether your agents are local or remote | Both are supported. Every read travels over one JDBC connection, including reading the server log for captured plans, so a remote agent collects exactly what a local agent collects. Knowing which you run lets us check the network path with you up front. |
+| Whether your agents are local or remote | Both are supported. Every read travels over one JDBC connection, including reading the server log for captured plans, so a remote agent collects the same metric data as a local agent, apart from three local-only capabilities: the [Logs](monitoring-pages.md#logs) page, the Kill Idle Connections job, and the collection throttle. Knowing which you run lets us check the network path with you up front. |
 
 While you wait for the key, work through the [Prerequisites checklist](prerequisites.md#checklist) on the instance you plan to evaluate. The minimum list gets every monitoring page populating; the full advisory list adds `auto_explain` and one superuser grant, which is what **Plan Analysis** and **Plan Drift Advisor** need. The plug-in never installs an extension and never grants a privilege to itself, so those two items are yours to do whether you trial or buy.
 
 ## Your trial key
 
 Your key is issued by Integration Plumbers once the request has been processed.
-<!-- CONFIRM: Andre — trial length and how/when the key is delivered (email from sales@?) -->
+{% comment %}CONFIRM: Andre — trial length and how/when the key is delivered (email from sales@?){% endcomment %}
 
 ### Enter the key
 
@@ -59,10 +59,10 @@ Open **License Info**, at the bottom of the target's navigation tree. It shows t
 If the table reads "No licenses configured", the key has not been saved on the target you are looking at. Go back to **Monitoring Configuration** and check the **Plugin License** property. See [Monitoring pages](monitoring-pages.md) for the rest of the target's pages.
 
 One key can cover several instances, and the **Instances** column is where you read the count.
-<!-- CONFIRM: per-instance vs per-key licensing wording -->
+{% comment %}CONFIRM: per-instance vs per-key licensing wording{% endcomment %}
 
 **Days Remaining** is the number to keep an eye on during the evaluation. Give yourself enough of it to reach the week-1 steps below, which need history depth that only accumulates with time.
-<!-- CONFIRM: what happens when Days Remaining reaches zero (collection stops? banner?) -->
+{% comment %}CONFIRM: what happens when Days Remaining reaches zero (collection stops? banner?){% endcomment %}
 
 ## Install
 
@@ -101,7 +101,7 @@ These steps need captured plans, so give the database a day of real traffic abov
 | Open **Plan Drift Advisor** and read **Problematic Queries**. | One row per query and database that scored worse than OK, with a **Severity** badge of Cost Drift or Plan Changed. When nothing is drifting the list reads "No problematic queries found."; when your filter hides it, "No queries match the current severity filter." | [Plan Drift Advisor](plan-drift-advisor.md) |
 | Select a query, go to **Baseline Management**, select the row carrying the **Current** badge, fill in **Label** and **Note**, and click **Accept**. | The shape joins the accepted set and the query stops being off-baseline. In **Plan Comparison** above, the right-hand tree stops reading "No accepted baseline for this query yet. Accept one in Baseline Management below." and renders the baseline plan beside the current one. | [Plan Drift Advisor](plan-drift-advisor.md) |
 | Scroll to **Audit Trail**. | A row for the action you just took, with **When**, **Action**, **Actor**, **Reason**, and **Label**. The actor is the Enterprise Manager user who clicked, which is how you answer who certified a plan and why. Before any action the table reads "No audit events." | [Plan Drift Advisor](plan-drift-advisor.md) |
-| In **Fix Workbench: Test a Rewrite**, replace bound-parameter placeholders such as `$1` with real values, edit the statement into the rewrite you want to test, and click **Run Explain**. | "Running EXPLAIN…" while the job runs, then the resulting plan tree to compare against the Current and Baseline trees above. This is the only place in the product that executes anything against your database: the run is capped at 30 seconds and happens inside a transaction that is rolled back. | [Plan Drift Advisor](plan-drift-advisor.md) |
+| In **Fix Workbench: Test a Rewrite**, replace bound-parameter placeholders such as `$1` with real values, edit the statement into the rewrite you want to test, and click **Run Explain**. | "Running EXPLAIN…" while the job runs, then the resulting plan tree to compare against the Current and Baseline trees above. This is the only place in the product that executes a statement against your database (the Index Advisor's HypoPG simulation plans a synthetic lookup with `EXPLAIN (FORMAT JSON)` and executes nothing). The run is capped at 30 seconds and happens inside a transaction that is rolled back. | [Plan Drift Advisor](plan-drift-advisor.md) |
 | Return to **Vacuum Advisor** and look at **Autovacuum runs · 24h** in the Vacuum Health band. | A number in place of the day-1 "—", once two daily snapshots exist to delta. Hover it for the two snapshots the delta was computed over. On a busy database, zero runs in 24 hours is itself the finding. | [Vacuum Advisor](vacuum-advisor.md) |
 
 ### Week 1
@@ -120,7 +120,7 @@ Empty is a result, not a gap. "No problematic queries found." means no query has
 
 ## Send us your findings
 
-Tell us what you found, including the parts that did not work. Evaluation feedback is how the next build gets better, and a question from a trial user goes to the same helpdesk that answers customer tickets.
+Tell us what you found, including the parts that did not work. Evaluation feedback is how the next build gets better.
 
 - **Email:** [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io)
 - **Self-Service Portal:** [https://integrationplumbers.zohodesk.com/portal/en/signin](https://integrationplumbers.zohodesk.com/portal/en/signin)

@@ -13,7 +13,7 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 
 - [Monitoring Readiness](monitoring-readiness.md) — checks each advisor's prerequisites against what's live on the target, and applies the `auto_explain` settings for you where the plug-in can set them itself.
 - [Plan Analysis](plan-analysis.md) — captured execution plans with per-node estimated-versus-actual rows and insight-rule recommendations.
-- [Plan Drift Advisor](plan-drift-advisor.md) — plan baselines, drift detection against the accepted baseline, and the Fix Workbench, the only place the plug-in runs an EXPLAIN.
+- [Plan Drift Advisor](plan-drift-advisor.md) — plan baselines, drift detection against the accepted baseline, and the Fix Workbench, the only place the plug-in executes a statement to obtain a plan.
 - [Workload History](workload-history.md) — per-statement workload trends over a retained window, with equal-length window comparison and per-statement drill-down.
 - [Index Advisor](index-advisor.md) — catalog-native index detection across five categories, with ready-to-review CREATE and DROP statements, enriched by HypoPG and pg_qualstats when present.
 - [Vacuum Advisor](vacuum-advisor.md) — per-table autovacuum tuning recommendations and wraparound visibility.
@@ -188,3 +188,9 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 - Threshold configurations for more metrics
 - Individual collection schedules for each metric group
 - Security updates
+
+## Related
+
+- [What's new in 13.5.15](whats-new.md) — the current release in detail, page by page, with what changed or moved
+- [Install and upgrade](install-and-upgrade.md) — how to move an existing deployment onto a newer build
+- [PostgreSQL Plug-in](index.md) — the documentation hub for every page in this guide

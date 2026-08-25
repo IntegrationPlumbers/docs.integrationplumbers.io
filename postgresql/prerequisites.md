@@ -27,7 +27,7 @@ The same 13.5.15.0.0 build runs on Enterprise Manager 13.5 and on 24ai. The vers
 
 Before you add any target, import the plug-in OPAR, deploy it to the OMS, then deploy it to each agent that will monitor a PostgreSQL instance. See [Install and upgrade](install-and-upgrade.md#import).
 
-A valid license key is required before you install; see [License key](install-and-upgrade.md).
+A valid license key is required to monitor a target; it is a target property. See [License key](install-and-upgrade.md).
 
 ## Network and connectivity {#network}
 
@@ -37,7 +37,7 @@ The agent connects to PostgreSQL over JDBC on the database port, 5432 by default
 2. Allow that role to connect from the agent host: add a matching entry to `pg_hba.conf`, and make sure `listen_addresses` accepts connections from that address. See [pg_hba.conf](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html) in the PostgreSQL documentation.
 3. Reload the server so the new authentication rule takes effect.
 
-Every read against the monitored PostgreSQL instance travels over this one connection, including reading the server log for captured plans. The plug-in needs no OS-level access to the database host, so a remote agent collects exactly what a local agent collects.
+Every read against the monitored PostgreSQL instance travels over this one connection, including reading the server log for captured plans. The plug-in needs no OS-level access to the database host, so a remote agent collects the same metric data as a local agent, apart from three local-only capabilities: the [Logs](monitoring-pages.md#logs) page, the [Kill Idle PostgreSQL Connections](jobs-and-metric-extensions.md#kill-idle-postgresql-connections) job, and the collection throttle.
 
 Cluster targets using the Patroni REST API also need a path to the Patroni API port. See [Patroni REST API monitoring](targets-and-properties.md#patroni).
 
@@ -129,7 +129,7 @@ For `pgstattuple`, a monitoring role with `pg_monitor` already holds the `pg_sta
 
 ## Preferred Credentials {#preferred-credentials}
 
-Some plug-in pages read their data through Enterprise Manager jobs that run on the target's host, and those jobs need OEM Preferred Credentials set for the target. Set them once per target under Setup, Security, Preferred Credentials. See [Configuring and Using Target Credentials](https://docs.oracle.com/en/enterprise-manager/cloud-control/enterprise-manager-cloud-control/24.1/emsec/configuring-and-using-target-credentials.html) in the Oracle documentation.
+Some plug-in pages read their data through Enterprise Manager jobs that run on the target's host, and those jobs need OEM Preferred Credentials set for the target. Set them once per target under Setup, Security, Preferred Credentials. See [Configuring and Using Target Credentials](https://docs.oracle.com/en/enterprise-manager/cloud-control/enterprise-manager-cloud-control/24.1/emsec/configuring-using-target-credentials.html) in the Oracle documentation.
 
 Preferred Credentials are needed by:
 
@@ -146,7 +146,7 @@ When they are missing, the page raises "Unable to run job. Verify Preferred Cred
 
 ## Agent host {#agent-host}
 
-Decide where the agent runs before you add targets. Both models are supported and collect the same data:
+Decide where the agent runs before you add targets. Both models are supported and collect the same metric data, apart from three local-only capabilities — the [Logs](monitoring-pages.md#logs) page, the [Kill Idle PostgreSQL Connections](jobs-and-metric-extensions.md#kill-idle-postgresql-connections) job (it runs `psql` on the agent host), and the collection throttle:
 
 - **Local agent**, on the database host.
 - **Remote agent**, connecting out to the database. Plan capture works here too, because the log is read over JDBC rather than from the filesystem.

@@ -98,10 +98,10 @@ Three pre-built Enterprise Manager monitoring templates cover the plug-in's metr
 | `ip_xpgs_starter` | `ip_xpgs_starter.template.xml` | A starter to extend. "Minimal starter monitoring template for PostgreSQL databases: availability plus core database health, ready to clone and extend into your own site standard." |
 
 After import, the console lists each template under its template name, and that same name is what you pass to `emcli apply_template`.
-<!-- CONFIRM: verify in the console after import -->
+{% comment %}CONFIRM: verify in the console after import{% endcomment %}
 
 Monitoring templates live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself: an administrator imports them into the OMS once, then applies them to targets.
-<!-- CONFIRM: how template files are delivered to customers (download bundle / S3 link) -->
+{% comment %}CONFIRM: how template files are delivered to customers (download bundle / S3 link){% endcomment %}
 
 ### Import and apply
 
@@ -112,8 +112,7 @@ emcli import_template -files="ip_xpgs_tier01_critical.template.xml"
 # Apply it to one or more database targets
 emcli apply_template \
    -name="ip_xpgs_tier01_critical" \
-   -targets="myprod_db:ip_postgresql_db" \
-   -apply_mode=complete
+   -targets="myprod_db:ip_postgresql_db"
 ```
 
 In the console, go to **Enterprise → Monitoring → Monitoring Templates → Import**, then select the template and choose **Actions → Apply**.
@@ -124,7 +123,7 @@ In the console, go to **Enterprise → Monitoring → Monitoring Templates → I
 
 ![Applying an imported template to a PostgreSQL Database target](images/13-5-15/templates-apply.png)
 
-*Applying the imported template to a target, using apply mode Complete.*
+*Applying the imported template to a target from the console's Apply dialog.*
 
 Before you adopt `ip_xpgs_tier01_critical`, set the super-user count threshold. It ships with an empty warning threshold because the sanctioned super-user count is site policy, and an empty threshold never fires. Enter your approved roster size so the count-change alert reports privilege drift. See [Super-user / Privilege Audit](#superuser-audit) below.
 

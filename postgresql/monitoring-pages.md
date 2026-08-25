@@ -87,7 +87,7 @@ Overview, Configuration, and License Info apply to the whole target. Database, T
 
 **Query Analyzer** lists the database's statements from `pg_stat_statements`; selecting one opens its per-statement detail and historical charts, plus the **Wait Events** chart of wait-event counts sampled for that statement over time. See [Wait-event sampling](workload-history.md#wait-event-sampling) for what the extension needs and how the chart reads it.
 
-When a selected statement has plan-drift captures, a "View this query in Plan Drift Advisor →" link appears above the detail panels and takes you straight to that query, preselected, on [Plan Drift Advisor](plan-drift-advisor.md). Testing a proposed query rewrite is no longer done on this page — it happens in the Fix Workbench on **Plan Drift Advisor**, the only place in the plug-in that runs a query on your behalf, and only on your explicit click.
+When a selected statement has plan-drift captures, a "View this query in Plan Drift Advisor →" link appears above the detail panels and takes you straight to that query, preselected, on [Plan Drift Advisor](plan-drift-advisor.md). Testing a proposed query rewrite is no longer done on this page — it happens in the Fix Workbench on **Plan Drift Advisor**, the only place in the plug-in that executes a statement on your behalf, and only on your explicit click. (The Index Advisor's HypoPG simulation also runs an EXPLAIN, but a plan-only `EXPLAIN (FORMAT JSON)` that executes nothing.)
 
 ### License Info
 
@@ -118,7 +118,7 @@ The pages under **Realtime** query the target live, on demand, each with an **Au
 
 *Locks: blocking sessions and the lock waits behind them.*
 
-**Locks** shows blocking sessions and lock waits: for each blocked query, the session and query holding the lock it's waiting on. The table has one row per blocked/blocking pair — Blocked PID, Blocked Query, Blocked State, Blocked Username, Blocking PID, Blocking Query, Blocking State, Blocking Username, and Lock Granted. By default it shows only queries that are actually blocked; check **Include Locks Granted** to also show granted locks in the same view.
+**Locks** shows blocking sessions and lock waits: for each blocked query, the session and query holding the lock it's waiting on. The tree entry reads **Locks**, and the page heading reads "Blocking Sessions and Wait Locks", its name in the older guide. The table has one row per blocked/blocking pair — Blocked PID, Blocked Query, Blocked State, Blocked Username, Blocking PID, Blocking Query, Blocking State, Blocking Username, and Lock Granted. By default it shows only queries that are actually blocked; check **Include Locks Granted** to also show granted locks in the same view.
 
 ### Vacuums in Progress and Vacuum xmin Horizon
 
@@ -140,7 +140,7 @@ The pages under **Realtime** query the target live, on demand, each with an **Au
 
 **Logs** shows the PostgreSQL server log. A **Log Statistics (last collection)** panel reports Total Lines, Warnings, Errors, Fatals, and Panics; it refreshes every 5 minutes once the collection is enabled in Metric and Collection Settings, regardless of the Auto Refresh setting, which controls only the entries table below it. The **PostgreSQL Logs** table shows the last 500 lines of the configured log file, parsed into Timestamp, Severity, PID, Username, Database Name, and Message. An empty table means nothing new has been parsed since the last collection, or the log file path needs a second look.
 
-<!-- CONFIRM: Ben — does setting the log path enable log_stats? It ships DISABLED in defaultCollection. -->
+{% comment %}CONFIRM: Ben — does setting the log path enable log_stats? It ships DISABLED in defaultCollection.{% endcomment %}
 
 This feature works only when the OEM agent is **local** — installed on the same host as the PostgreSQL server. It does not support remote log collection.
 
