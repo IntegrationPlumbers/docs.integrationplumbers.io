@@ -20,7 +20,7 @@ If you want to know whether the PostgreSQL plug-in earns a place in your Enterpr
 
 Request the key before you install anything. A valid license key is required for installation and setup, and adding a target validates the target count against your license.
 
-Fill in the form at [https://integrationplumbers.io/postgresql-plugin/trial](https://integrationplumbers.io/postgresql-plugin/trial). Have four answers ready.
+Fill in the form at [integrationplumbers.io/postgresql-plugin/trial](https://integrationplumbers.io/postgresql-plugin/trial). Have four answers ready.
 
 | What we ask for | Why it matters |
 |---|---|
@@ -56,12 +56,13 @@ Open **License Info**, at the bottom of the target's navigation tree. It shows t
 | Instances | Number of instances the license covers |
 | Days Remaining | Days left before expiration |
 
-If the table reads "No licenses configured.", the key has not been saved on the target you are looking at. Go back to **Monitoring Configuration** and check the **Plugin License** property. See [Monitoring pages](monitoring-pages.md) for the rest of the target's pages.
+If the table reads "No licenses configured", the key has not been saved on the target you are looking at. Go back to **Monitoring Configuration** and check the **Plugin License** property. See [Monitoring pages](monitoring-pages.md) for the rest of the target's pages.
 
 One key can cover several instances, and the **Instances** column is where you read the count.
 <!-- CONFIRM: per-instance vs per-key licensing wording -->
 
 **Days Remaining** is the number to keep an eye on during the evaluation. Give yourself enough of it to reach the week-1 steps below, which need history depth that only accumulates with time.
+<!-- CONFIRM: what happens when Days Remaining reaches zero (collection stops? banner?) -->
 
 ## Install
 
@@ -79,7 +80,7 @@ Everything here works from the first collection, once the target is added and th
 
 | What to do | What you should see | Page |
 |---|---|---|
-| Open **Monitoring Readiness** and read the seven panels top to bottom. | Every panel chip reads **OK**, apart from panels whose only unmet items are tagged optional: those cap at **Attention** and are fine to leave. A **Not functional** chip always means a genuine blocker. On a new target **Historical Store** reads `not created yet`, which is expected. | [Monitoring Readiness](monitoring-readiness.md) |
+| Open **Monitoring Readiness** and read the seven panels top to bottom. | Every panel chip reads **OK**, apart from two expected exceptions: panels whose only unmet items are tagged optional cap at **Attention** and are fine to leave, and **Plan Capture (auto_explain)** reads **Not functional** until you work the next two rows. On a new target **Historical Store** reads `not created yet`, which is expected. | [Monitoring Readiness](monitoring-readiness.md) |
 | On the **Plan Capture (auto_explain)** panel, click **Configure auto_explain**, read the preview, and click **Apply**. | An inline confirmation under the heading "The following will be applied to this database (new sessions only, no restart):", then the status line "Applied. Re-checking live settings… (new sessions pick the settings up)". The page re-probes once and the button disappears when everything settable is green. | [Configure auto_explain](monitoring-readiness.md#configure-auto-explain) |
 | Copy the `GRANT pg_read_server_files TO "<monitoring role>";` statement from the **Server log read grant** item, run it as a superuser, and reload the page. | The item stops reading `not granted` and the **Plan Capture (auto_explain)** panel leaves **Not functional**. This is the one item the plug-in will never apply for you. | [Monitoring Readiness](monitoring-readiness.md) |
 | Open **Index Advisor** and read the KPI band. | **Detections by Category** tiles for Missing, Unused, Invalid, HOT-inhibiting, and Consolidation. The Unused tile also carries the summed on-disk size of every unused index, for example `3 / 2.4 GB`. | [Index Advisor](index-advisor.md) |
@@ -111,15 +112,15 @@ These steps need history depth, which accumulates on its own from the moment the
 |---|---|---|
 | Open **Workload History**, set **From** and **To** around a period you care about, and read the KPI band. | **History depth**, **Statements · window**, and **Workload vs prior window**, the last comparing this window against the equal-length window immediately before it as ▲/▼/▬ with a percentage. It reads "Accumulating" while the prior window holds no snapshots yet, and "n/a" when no explicit window is set. | [Workload History](workload-history.md) |
 | Sort **Workload Detail** by the metric that moved, then click the statement row whose **Trend** matches the shape of the chart. | The **Statement Drill-down** panel opens above the list and plots that one statement's own history for the metric and window you chose. Until you click a row it reads "Select a statement row below to see that statement's own history for the chosen metric and window." Widen the window: a spike that survives is a real regression. | [Workload History](workload-history.md) |
-| Import `ip_xpgs_tier23_standard` and apply it to a non-production target with `emcli apply_template`, or through **Enterprise → Monitoring → Monitoring Templates**. | The template applies its standard baseline: core health on a 15-minute schedule with loosened wraparound and connection thresholds, and the advisory metrics collected store-only on a 1-hour schedule. Findings collect; nothing pages. | [Monitoring templates](alerts-and-templates.md#templates) |
+| Import `ip_xpgs_tier23_standard` with `emcli import_template`, then apply it to a non-production target with `emcli apply_template`. Both steps are also available under **Enterprise → Monitoring → Monitoring Templates**. | The template applies its standard baseline: core health on a 15-minute schedule with loosened wraparound and connection thresholds, and the advisory metrics collected store-only on a 1-hour schedule. Findings collect; nothing pages. | [Monitoring templates](alerts-and-templates.md#templates) |
 | Turn one advisory finding into an incident: either apply `ip_xpgs_tier01_critical`, which carries the `index_advisor` and `index_advisor_whatif` thresholds, or set a Warning threshold yourself under **Target menu → Monitoring → Metric and Collection Settings**. | When a `HIGH`-severity Index Advisor finding is collected, Enterprise Manager opens an incident exactly as it does for any other target type, routed through the notification connectors you already have bound. The alert names the category, the object, and the detail. It clears itself at the next collection after the finding resolves. | [Alerts and templates](alerts-and-templates.md#default-thresholds) |
 | Open **Retention Policies** and read the windows before you decide what to keep. | Twelve history types, each with **Min retention (days)** and **Max retention (days)**, above a **Store Size Limit** section whose hint reads "0 = disabled (no size-based eviction)". Saving reports "Retention policies saved. Changes take effect at the next daily trim." | [Retention Policies page](history-store-and-retention.md#retention-policies) |
 
-Empty is a result, not a gap. "No problematic queries found." means nothing is running on an uncertified plan. An empty **xmin Horizon · Holder Detail** table means nothing is pinning cleanup. An empty **HypoPG What-If Simulation** section means `hypopg` is not installed in that database, or there was nothing worth simulating. Read those states as answers, and use **Monitoring Readiness** to tell a healthy empty from a missing prerequisite.
+Empty is a result, not a gap. "No problematic queries found." means no query has regressed against its own recent history; once you have accepted baselines, it also means nothing is running on an uncertified plan. An empty **xmin Horizon · Holder Detail** table means nothing is pinning cleanup. An empty **HypoPG What-If Simulation** section means `hypopg` is not installed in that database, or there was nothing worth simulating. Read those states as answers, and use **Monitoring Readiness** to tell a healthy empty from a missing prerequisite.
 
 ## Send us your findings
 
-Tell us what you found, including the parts that did not work. Evaluation feedback is how the next build gets better, and a question from a trial user is answered by the same people who answer a customer's.
+Tell us what you found, including the parts that did not work. Evaluation feedback is how the next build gets better, and a question from a trial user goes to the same helpdesk that answers customer tickets.
 
 - **Email:** [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io)
 - **Self-Service Portal:** [https://integrationplumbers.zohodesk.com/portal/en/signin](https://integrationplumbers.zohodesk.com/portal/en/signin)
