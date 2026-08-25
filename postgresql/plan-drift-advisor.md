@@ -5,7 +5,7 @@ nav_order: 9
 
 # Plan Drift Advisor
 
-When a query that was fine last week is suddenly slow, the question is rarely what the statement does — it is which plan the statement is running. The Plan Drift Advisor keeps a set of accepted-good ("baseline") plans for each query, compares every newly captured plan against that set, and tells you when a query has left it, both on the page and through a standard Enterprise Manager alert. It reads the same captured-plan archive as **Plan Analysis**, so it needs no extensions of its own.
+When a query that was fine last week is suddenly slow, the question is rarely what the statement does — it is which plan the statement is running. The Plan Drift Advisor keeps a set of accepted-good ("baseline") plans for each query, compares every newly captured plan against that set, and tells you when a query has left it, both on the page and through a standard Enterprise Manager alert. It reads the same captured-plan archive as **Plan Analysis** — plans written to the server log by `auto_explain` while the query ran, never re-executed to obtain them — so it needs no extensions of its own.
 
 > **Prerequisites for this page**
 > - Plan capture is populating the archive: `auto_explain` loaded with `log_min_duration` ≥ 0, `log_format = json`, and `log_analyze = on` ([Plan capture (auto_explain)](prerequisites.md#auto-explain), applied for you from [Configure auto_explain](monitoring-readiness.md#configure-auto-explain)).
@@ -15,11 +15,11 @@ When a query that was fine last week is suddenly slow, the question is rarely wh
 
 **Where to find it:** on a PostgreSQL Database target, the navigation tree under the database name ▸ **Plan Drift Advisor**. The target's PostgreSQL menu carries the same entry.
 
-**In this page:** Problematic Queries · Investigating a query · Severity model · Baseline governance · Fix Workbench: Test a Rewrite · Drift Configuration · Plan Drift alerts · Working across the query pages · Related
+**In this page:** Problematic Queries · Investigating a query · Severity model · Baseline governance · Fix Workbench: Test a Rewrite · Drift Configuration · Plan Drift alerts · Cross-links with Query Analyzer
 
 ## Problematic Queries
 
-This list is the entry point. It holds one row per query and database pair, showing that query's most recent capture, and it only lists queries whose most recent capture scored worse than OK. An empty list is the healthy state: nothing is running on an uncertified or degraded plan.
+This list is the entry point. It holds one row per query and database pair, showing that query's most recent capture, and it only lists queries whose most recent capture scored worse than OK. An empty list means nothing is currently flagged. Read that against what has been certified so far: until a query has an accepted baseline, only the acute capture-over-capture check can flag it. On a target where you have accepted nothing yet, an empty list says no query has regressed against its own recent history, not that every plan is certified. Once baselines exist, an empty list is the healthy state: nothing is running on an uncertified or degraded plan.
 
 1. Open **Plan Drift Advisor**. The list loads on its own.
 2. Set **Sort** to the ordering that matches your question: Total exec time (the default, impact first), Cost Δ vs baseline, Mean exec time, Severity, Calls, or Most recent.
@@ -35,8 +35,8 @@ This list is the entry point. It holds one row per query and database pair, show
 | Query | The statement text. Statements captured without a real query id are grouped under a synthetic id and shown with a `syn:` prefix. |
 | Database | The database the statement ran in. Query id plus database is the key for everything on this page. |
 | Severity | The drift badge for the newest capture: OK, Cost Drift, or Plan Changed. |
-| Insights | How many plan pathologies were detected on the newest captured plan, coloured by the highest severity present. A dash means none were found. |
-| Cost Δ | How far the newest capture's optimizer total cost sits from the cheapest accepted baseline, as a percentage. Empty until the query has an accepted baseline. |
+| Insights | How many plan pathologies were detected on the newest captured plan, colored by the highest severity present. A dash means none were found. |
+| Cost Δ | How far the newest capture's optimizer total cost sits from the cheapest accepted baseline, as a percentage. Reads `n/a` until the query has an accepted baseline. |
 | Mean (ms) | Mean execution time for the capture. |
 | Calls / Total (ms) | Call count and total execution time. |
 | Captured | When the plan was captured. |
@@ -49,7 +49,7 @@ Click a row. The detail panels below the list expand and populate for that query
 
 ### Selected Query
 
-Five KPIs summarise the newest capture: **Severity**, **Mean exec**, **Calls**, **Cost Δ vs baseline**, and **Captured**. The panel also carries the link "View full statement statistics in Query Analyzer →" for the full `pg_stat_statements` view of the same statement.
+Five KPIs summarize the newest capture: **Severity**, **Mean exec**, **Calls**, **Cost Δ vs baseline**, and **Captured**. The panel also carries the link "View full statement statistics in Query Analyzer →" for the full `pg_stat_statements` view of the same statement.
 
 ### Drift History
 
@@ -63,7 +63,7 @@ An empty chart reads "No captures for this query in the selected time range. Wid
 
 The insight rules run against this query's newest captured plan and render as cards, highest severity first. Five detections surface: **Insufficient Index**, **Misestimate**, **Stale Statistics**, **Slow Sequential Scan**, and **Lossy Bitmap**.
 
-Each card carries the detection name with a Low, Medium, or High severity, the plan node it is anchored at, the evidence from the plan, and, where the rule has one, a recommendation with a type chip (Parameter, Index, Statistics, Query rewrite, or Review) and the concrete setting to try. Insight severity is a separate scale from the drift severity badge — a High insight on an OK plan means the plan is certified but still doing something expensive.
+Each card carries the detection name with a Low, Medium, or High severity, the plan node it is anchored at, the evidence from the plan, and, where the rule has one, a recommendation with a type chip (Parameter, Index, Statistics, or Review) and the concrete setting to try. Insight severity is a separate scale from the drift severity badge — a High insight on an OK plan means the plan is certified but still doing something expensive.
 
 Recommendations are review-and-run: you run them in your own tooling. The plug-in never applies a recommendation. When there is nothing to report the panel reads "No insights detected for this query's latest capture."
 
@@ -84,10 +84,10 @@ Every plan shape the plug-in has observed for this query is a row here, ordered 
 
 | Column | What it shows |
 |---|---|
-| Label | The name you gave the baseline when you accepted it. Unlabelled rows show "(unlabeled)" in the selection line. |
+| Label | The name you gave the baseline when you accepted it. A baseline accepted without one reads "(unlabeled)", both here and in the selection line under the actions. |
 | Status | `candidate` (observed, not certified), `accepted` (in the active baseline set), or `retired` (decertified). |
 | Origin | `manual` when a person accepted it, `auto` when the plug-in promoted it. |
-| Pinned | Whether the baseline is exempt from automatic eviction. |
+| Pinned | Reads "Pinned" when the baseline is exempt from automatic eviction, and is blank otherwise. |
 | Cost | The optimizer total cost of the representative capture. |
 | Seen | How many captures have matched this shape. |
 | Last seen | When the shape was last observed. |
@@ -104,13 +104,13 @@ Select a row first — the actions stay disabled until you do, and the line bene
 *Baseline Management: every observed shape, its status, and the Accept, Pin, and Retire actions.*
 
 ![Accepting a plan as a baseline](images/13-5-15/plan-drift-accept-baseline.gif)
-*Selecting the current plan shape, labelling it, and accepting it as a baseline.*
+*Selecting the current plan shape, labeling it, and accepting it as a baseline.*
 
 Accepting the current shape is a legitimate answer to a Plan Drift alert: if the new plan is fine, certify it and the alert clears at the next collection.
 
 ### Audit Trail
 
-Every baseline action is recorded: **When**, **Action**, **Actor**, **Reason**, and **Label**. The actor is the Enterprise Manager user who clicked, so you can answer who certified a plan, when, and why. Actions the plug-in takes on its own are recorded with the actor `auto` and a reason that says what triggered them, such as promotion after stability or ageing out after a period unseen. With no history yet the table reads "No audit events."
+Every baseline action is recorded: **When**, **Action**, **Actor**, **Reason**, and **Label**. The actor is the Enterprise Manager user who clicked, so you can answer who certified a plan, when, and why. Actions the plug-in takes on its own are recorded with the actor `auto` and a reason that says what triggered them, such as promotion after stability or aging out after a period unseen. With no history yet the table reads "No audit events."
 
 ![The Audit Trail panel listing baseline actions](images/13-5-15/plan-drift-audit-trail.png)
 *The Audit Trail records who accepted, pinned, or retired each baseline, and why.*
@@ -119,7 +119,7 @@ Every baseline action is recorded: **When**, **Action**, **Actor**, **Reason**, 
 
 | Badge | Value | What it means |
 |---|---|---|
-| OK | 0 | The plan the query is running is an accepted shape and its cost is inside tolerance. |
+| OK | 0 | The plan the query is running is an accepted shape and its cost is inside tolerance — or the query has no accepted baseline yet and its cost has not jumped against its own previous capture. |
 | Cost Drift | 1 | The same plan shape, but cost outside the Numeric band % tolerance, or a capture-over-capture spike past Delta prev %. |
 | Plan Changed | 2 | The running plan's shape is not in the accepted baseline set. This is the alertable condition. |
 
@@ -136,7 +136,11 @@ Retired baselines behave the way the name implies. A current plan that matches a
 
 **Baseline mode defaults to Manual.** No plan becomes accepted-good without a named operator action, and that action, its actor, and its rationale land in the Audit Trail. Observed shapes still accumulate as `candidate` rows in the meantime, so when you do decide to certify one, the history is already there.
 
-Automatic promotion is opt-in through the **Auto** and **Hybrid** baseline modes. Under either, a candidate is promoted once it has been seen at least **Stability captures** times across at least **Stability days**, and the promotion is refused if the candidate's cost sits more than **Auto cost guard %** above the accepted cost — the guard is what stops a stable-but-worse plan from certifying itself.
+Automatic promotion is opt-in through the **Auto** and **Hybrid** baseline modes. Under either, a candidate is promoted once it has been seen at least **Stability captures** times across at least **Stability days**, and only if its cost is at most **Auto cost guard %** of the cheapest accepted plan's cost. That guard is what stops a stable-but-worse plan from quietly certifying itself.
+
+<!-- CONFIRM: Ben — Auto and Hybrid baseline modes behave identically in this build; keep both? -->
+
+Read Auto cost guard % as a ratio rather than a deviation: 100 means a candidate may be no worse than the accepted best, and a higher value is the multiple you are willing to tolerate. Numeric band % and Delta prev % work the other way round, as deviation percentages measuring how far above a reference a cost has moved. A candidate with no accepted plan to compare against, or with no usable cost, passes the guard.
 
 Two mechanisms bound the accepted set so it does not grow without limit:
 
@@ -149,7 +153,7 @@ Baselines also protect their evidence: the captured plan behind an accepted or p
 
 ## Fix Workbench: Test a Rewrite
 
-This is where you prove a rewrite before it goes anywhere near application code. It is also the only place in the product that executes anything against your database, and it runs only when you click **Run Explain**.
+This is where you prove a rewrite before it goes anywhere near application code. It is the only EXPLAIN the plug-in ever runs and the only place it executes SQL you supply, and nothing happens until you click **Run Explain**.
 
 1. Select a query in Problematic Queries and scroll to **Fix Workbench: Test a Rewrite**. The panel shows the target database and the query text, prefilled and editable.
 2. Replace any parameter placeholders with real values. Captured statements often carry bound-parameter placeholders such as `$1` and `$2`; `SELECT * FROM users WHERE id = $1` has to become `SELECT * FROM users WHERE id = 123` before it can run. Choose values that represent a typical execution — an unrepresentative value produces a plan you cannot learn from.
@@ -188,7 +192,7 @@ The **Drift Configuration** panel sits at the bottom of the page and is always v
 | Baseline mode | How plans become accepted-good: Manual (an operator accepts each one), or Auto / Hybrid (candidates can be promoted automatically). |
 | Stability captures | How many times a candidate shape must be seen before automatic promotion may consider it. |
 | Stability days | How long a candidate shape must have been observed before automatic promotion may consider it. |
-| Auto cost guard % | How far above the accepted cost a candidate may sit and still be promoted automatically. Above this, promotion is refused. |
+| Auto cost guard % | The most a candidate may cost, as a percentage **of** the cheapest accepted plan's cost, and still be promoted automatically. A ratio, not a deviation: 100 allows no worse than the accepted best. |
 | Set size cap | The maximum number of accepted baselines kept per query. Beyond it, the least recently seen unpinned baselines are retired. Pinned baselines are exempt. |
 | Staleness days | How long an accepted, unpinned baseline may go unseen before it is retired automatically. |
 | Numeric band % | How far the current plan's cost may deviate from the cheapest accepted baseline before it counts as Cost Drift. |
@@ -221,7 +225,7 @@ Accepting the new plan is a valid way to clear a drift alert. The metric reports
 
 **Responding to an alert.** Open Plan Drift Advisor and select the query the alert names. Read Drift History to find when it changed, Plan Comparison to see what changed, and the Insights cards for the likely cause. Use Fix Workbench to prove a rewrite. Then either accept the new plan in Baseline Management, or fix the underlying cause in your own tooling and let the alert clear when the query returns to a certified plan.
 
-## Working across the query pages
+## Cross-links with Query Analyzer
 
 An investigation that starts on one query page lands on the right surface with the query already selected.
 
