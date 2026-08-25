@@ -15,7 +15,7 @@ If you came here from the Advisors pages, you already know where plan drift, ind
 
 **Where to find it:** PostgreSQL Database target navigation tree (Overview, Configuration, and Realtime at the top level; Database, Tables, Indexes, Queries, and Query Analyzer under each database name; License Info at the bottom). PostgreSQL Cluster target: the cluster's target home page.
 
-**In this page:** Database target pages · Realtime pages · Schema inventory metrics · Cluster target · Related
+**In this page:** Database target pages · Realtime pages · Schema inventory metrics · Cluster target
 
 ## Database target pages
 
@@ -27,7 +27,7 @@ Overview, Configuration, and License Info apply to the whole target. Database, T
 
 *Overview: target status, incidents, and the Backends, Replication, Background Writer, and Connections Over Time regions.*
 
-**Overview** is the target's landing page: PostgreSQL version, data directory, and config file path, followed by availability and open incidents, then a **Backends** table (process ID, user, application, client address/hostname/port, start time) and a **Replication** table (application name, write/replay lag, data lag, state, sync state, client info) for any streaming replicas. Below those, **Background Writer** and **Connections Over Time** are trend charts you can switch between Last Day, Last Week, Last Month, or a custom range.
+**Overview** is the target's landing page. Open it first to see whether a target is healthy at a glance, before drilling into a specific database. It opens on three status panels: **PostgreSQL Target Status** (unused indexes, disabled triggers, backends usage, prepared transactions, autovacuum freeze age), **Monitoring Status** (`pg_stat`, `pg_stat_statements`, replication, and plug-in license status), and **Server Configuration** (PostgreSQL version, data directory, config file path). Below those, availability and open incidents, then a **Backends** table (process ID, user, application, client address/hostname/port, start time) and a **Replication** table (application name, write/replay lag, data lag, state, sync state, client info) for any streaming replicas. **Background Writer** and **Connections Over Time** are trend charts you can switch between Last Day, Last Week, Last Month, or a custom range.
 
 ### Configuration
 
@@ -53,7 +53,7 @@ Overview, Configuration, and License Info apply to the whole target. Database, T
 
 *Database: size and statistics charts for the selected database, plus its live backends.*
 
-**Database** shows the selected database's size and a **Statistics** chart you can plot against Database Size, Transactions, Blocks Read and Hit, Block Read/Write Time, Row Access Counts, Deadlocks and Conflicts, or Conflict Details. A **Backends** table below lists the connections currently open to that database.
+**Database** shows the selected database's size and a **Statistics** chart you can plot against Database Size, Transactions, Blocks Read and Hit, Block Read Time and Write Time, Row Access Counts, Deadlocks and Conflicts, or Conflict Details. A **Backends** table below lists the connections currently open to that database.
 
 ### Tables
 
@@ -61,7 +61,7 @@ Overview, Configuration, and License Info apply to the whole target. Database, T
 
 *Tables: size and statistics for every table in the selected database.*
 
-**Tables** breaks table size down per table, with a **Table Statistics** chart selectable across Scan Counts, Rows Fetched by Scan Type, Rows Inserted/Fetched/Updated/Deleted, Live/Dead Rows, Table Maintenance, and Heap/Index/Toast block counts. The **Table Details** list below shows Table, Schema, Type, Rows, and Size for every table, so you can find and drill into one quickly.
+**Tables** breaks table size down per table, with a **Table Statistics** chart selectable across Scan Counts, Rows Fetched by Scan Type, Rows Inserted/Fetched/Updated/Deleted, Live/Dead Rows, Table Maintenance, Heap Blocks, Index Blocks, Toast Blocks, and Toast Index Blocks. The **Table Details** list below shows Table, Schema, Type, Rows, and Size for every table, so you can find and drill into one quickly.
 
 ### Indexes
 
@@ -69,7 +69,7 @@ Overview, Configuration, and License Info apply to the whole target. Database, T
 
 *Indexes: size and statistics for every index in the selected database.*
 
-**Indexes** is the same idea applied to indexes: an **Index Statistics** chart (Index Scans, Index Entries Read, Table Rows Fetched, Disk Blocks) and an **Index Details** list of Index, Table, Schema, Type, and Size.
+**Indexes** is the same idea applied to indexes: an **Index Statistics** chart (Index Scans, Index Entries Read, Table Rows Fetched, Disk Blocks) and an **Index Details** list of Index, Table, Schema, Type, and Size. Open it when you're chasing index bloat or confirming whether an index is actually being scanned before deciding to drop it.
 
 ### Queries
 
@@ -106,11 +106,11 @@ When a selected statement has plan-drift captures, a "View this query in Plan Dr
 | Instances | Number of instances the license covers |
 | Days Remaining | Days left before expiration |
 
-With no license recognized, the table reads "No licenses configured." License keys are entered per target in the `Plugin License` target property, in Monitoring Configuration — see [Database target properties](targets-and-properties.md#database-properties). Email [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io) for a trial or to purchase additional licenses.
+With no license recognized, the table reads "No licenses configured". License keys are entered per target in the `Plugin License` target property, in Monitoring Configuration. See [Database target properties](targets-and-properties.md#database-properties). Email [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io) for a trial or to purchase additional licenses.
 
 ## Realtime pages
 
-The pages under **Realtime** collect nothing on a schedule — each one queries the target live, on demand, only while you have the page open. Every one has an **Auto Refresh** selector (No Refresh, 15, 30, or 60 seconds) that controls how often it re-queries while you're watching.
+The pages under **Realtime** query the target live, on demand, each with an **Auto Refresh** selector (No Refresh, 15, 30, or 60 seconds) that controls how often it re-queries while you have the page open. A couple of the metrics behind these pages also collect on their own fixed schedule and carry alert thresholds: Vacuum xmin Horizon collects every 30 minutes with Warning and Critical bands (see [Vacuum Advisor](vacuum-advisor.md#xmin-horizon-root-cause)), and Log Stats, behind the Logs page below, collects every 5 minutes.
 
 ### Locks
 
@@ -138,7 +138,7 @@ The pages under **Realtime** collect nothing on a schedule — each one queries 
 
 *Logs: recent log-statistic counts and the most recent parsed log entries.*
 
-**Logs** shows the PostgreSQL server log. A **Log Statistics (last collection)** panel reports Total Lines, Warnings, Errors, Fatals, and Panics; it refreshes every 5 minutes regardless of the Auto Refresh setting, which controls only the entries table below it. The **PostgreSQL Logs** table shows the most recent entries parsed from the log file: Timestamp, Severity, PID, Username, Database Name, and Message. An empty table means nothing new has been parsed since the last collection, or the log file path needs a second look.
+**Logs** shows the PostgreSQL server log. A **Log Statistics (last collection)** panel reports Total Lines, Warnings, Errors, Fatals, and Panics; it refreshes every 5 minutes regardless of the Auto Refresh setting, which controls only the entries table below it. The **PostgreSQL Logs** table shows the last 500 lines of the configured log file, parsed into Timestamp, Severity, PID, Username, Database Name, and Message. An empty table means nothing new has been parsed since the last collection, or the log file path needs a second look.
 
 This feature works only when the OEM agent is **local** — installed on the same host as the PostgreSQL server. It does not support remote log collection.
 
@@ -148,24 +148,24 @@ This feature works only when the OEM agent is **local** — installed on the sam
    - Set `log_directory` and `log_filename`, and set `logging_collector = on` in `postgresql.conf`.
    - Reload or restart PostgreSQL.
    - Confirm the OMA (agent) user can read the log file.
-2. **Configure the log file path in the plug-in.** On the target's Configuration page (target properties), enter the full path to the PostgreSQL log file in the **PostgreSQL Log File** field. The path must point to a file readable by the agent on the same host — remote paths aren't supported.
+2. **Configure the log file path in the plug-in.** On the target's Monitoring Configuration page (target menu ▸ Target Setup ▸ Monitoring Configuration), enter the full path in **Path to postgres log file**. See [Database target properties](targets-and-properties.md#database-properties). The path must point to a file readable by the agent on the same host; remote paths aren't supported.
 
 ![The target property field for the PostgreSQL log file path](images/image17.png)
 
-*Setting the PostgreSQL Log File target property.*
+*Setting the "Path to postgres log file" target property.*
 
 ## Schema inventory metrics
 
-The plug-in collects four schema-inventory metrics every 30 minutes: **Triggers**, **Prepared Transactions**, **Sequences**, and **User Functions**. They're descriptive inventory, not a page in the tree — find them under the target's **All Metrics** tab (target home page → All Metrics → *metric name*).
+The plug-in collects four schema-inventory metrics every 30 minutes: **Trigger**, **Prepared Transactions**, **Sequences**, and **User Function**. They're descriptive inventory, not a page in the tree — find them under the target's **All Metrics** tab (target home page → All Metrics → *metric name*).
 
 | Metric | Internal name | Shows |
 |---|---|---|
-| Triggers | `triggers` | Database, table, trigger name, function, enabled state, and whether the trigger is internal (system-generated) |
+| Trigger | `triggers` | Database Name, Table ID, Trigger Name, Function ID, Enabled State, and Is Internal (whether the trigger is system-generated). Table and function are identified by ID, not name |
 | Prepared Transactions | `prepared_transactions` | Transaction ID, global transaction ID, prepared time, owner, and database — useful for finding stuck two-phase-commit transactions |
 | Sequences | `sequences` | Database, schema, sequence name, sequence type, and blocks read/hit |
-| User Functions | `user_functions` | Schema, function name, call count, total time, and self time. Requires `track_functions = 'all'` in `postgresql.conf` |
+| User Function | `user_functions` | Schema, function name, call count, total time, and self time. Requires `track_functions = 'all'` in `postgresql.conf` |
 
-Because most of their columns are text (names, states, identifiers) rather than numbers, OEM's repository has little to chart historically for these. Use the live view under **All Metrics** to inspect current state.
+OEM's repository persists only numeric metric columns for historical trending. Because these metrics are mostly text (names, states, identifiers), there is little for it to chart. Use the live view under **All Metrics** to inspect current state.
 
 ## Cluster target
 
@@ -175,7 +175,7 @@ Because most of their columns are text (names, states, identifiers) rather than 
 
 *Cluster home: cluster identity, availability and incidents, node information, and replication.*
 
-The PostgreSQL Cluster target's home page opens on **Cluster Information** (cluster name, environment, status) next to availability and open incidents, then **Cluster Node Information**, listing each member's Target, Availability (Last 24 Hours %), Uptime, Node State, Connections, Host, and Alert Count, and **Cluster Replication**, which names the current primary and lists each replica's application name, state, data lag, write/replay lag, sync state, and client info.
+The PostgreSQL Cluster target's home page opens on **Cluster Information** (cluster name, environment, status) next to availability and open incidents, then **Cluster Node Information**, listing each member's Target, Availability (Last 24 Hours %), Uptime (Minutes), Node State, Connections, Host, and Alert Count, and **Cluster Replication**, which names the current primary and lists each replica's application name, state, data lag, write/replay lag, sync state, and client info. Open it to check cluster-wide health or run a switchover, rather than drilling into one member's database target.
 
 If the page shows "No Patroni cluster data available," allow up to 24 hours after a Patroni configuration change for the first collection to register; if it persists, verify `patroni_hosts` and `patroni_port` are reachable from the agent host.
 
