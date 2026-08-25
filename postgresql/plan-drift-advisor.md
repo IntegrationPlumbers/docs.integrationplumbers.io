@@ -169,7 +169,7 @@ This is where you prove a rewrite before it goes anywhere near application code.
 - The statement runs inside a transaction that is rolled back, so `INSERT`, `UPDATE`, and `DELETE` changes do not persist. The execution still takes locks and consumes CPU and I/O while it runs.
 - The run is capped at 30 seconds. A rewrite that takes longer is canceled and the panel reports a failure state instead of a plan.
 - Use test data or off-peak timing for anything that could contend with production work.
-- Nothing schedules this job. There is no background use of the workbench, and the plug-in never executes a statement, or any proposed rewrite, anywhere else.
+- Nothing schedules this job. There is no background use of the workbench, and the plug-in never executes a statement to obtain a plan, or any proposed rewrite, anywhere else.
 
 Failure states are explicit rather than blank: "Explain failed.", "No plan returned.", or "Could not parse plan JSON."
 

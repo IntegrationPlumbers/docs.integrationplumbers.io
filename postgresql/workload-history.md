@@ -191,7 +191,7 @@ See [Retention Policies page](history-store-and-retention.md#retention-policies)
 - [Prerequisites](prerequisites.md#pg-stat-statements) — installing `pg_stat_statements`, and the optional extensions this page and its wait-event chart depend on
 - [Monitoring Readiness](monitoring-readiness.md) — confirms whether `pg_stat_statements` and `pg_wait_sampling` are in place before you go looking for missing data
 - [History store and retention](history-store-and-retention.md#retention-policies) — where retention for the workload and wait-event tiers is set
-- [Plan Drift Advisor](plan-drift-advisor.md) — when a statement's cost moved because its plan changed, and the only place the plug-in executes a statement
+- [Plan Drift Advisor](plan-drift-advisor.md) — when a statement's cost moved because its plan changed, and the only place the plug-in executes a statement to obtain a plan
 - [Vacuum Advisor](vacuum-advisor.md) — the Autovacuum runs KPI in its health band
 - [Monitoring pages](monitoring-pages.md) — the Query Analyzer page that hosts the Wait Events panel
 - [Troubleshooting](troubleshooting.md#unable-to-run-job) — what to do when the page raises a job error
