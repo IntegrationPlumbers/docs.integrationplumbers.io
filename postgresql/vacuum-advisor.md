@@ -166,7 +166,7 @@ Detail history persists to the agent-local store under the **Table Bloat** row o
 
 Autovacuum cannot remove a dead row that might still be visible to some open snapshot. The oldest such snapshot is the cluster's xmin horizon, and while something holds it back, no amount of vacuum tuning helps: cleanup runs and reclaims nothing. This is the case where **Tables past autovacuum trigger** climbs while autovacuum is plainly running.
 
-The plug-in identifies exactly what is holding the horizon and gives you the release command for it. It never runs that command. Three kinds of holder are detected:
+The plug-in identifies exactly what is holding the horizon and gives you the release command for it. It never runs that command. Three kinds of holder are detected; replication slots are reported differently depending on whether the slot is active, so the table has four rows:
 
 | Holder Type | Read from | Holder looks like | Suggested Action |
 |---|---|---|---|
@@ -219,13 +219,15 @@ Normally you do nothing here: these thresholds ship enabled. The **XID Consumpti
 
 The table-level rows are the safety net. Their alert messages say directly that the table is holding back the database's `datfrozenxid` or `datminmxid` and to check autovacuum, so a table past its trigger with stale cleanup raises an alert even while autovacuum is nominally running.
 
-Tuning is not the response to one of these alerts. The `ALTER TABLE … autovacuum_vacuum_scale_factor` recommendation tightens when autovacuum fires next time; it does nothing to the age already accumulated, because only a freeze advances a table's `relfrozenxid`. To bring the age down now, run a freeze against the named table in your own tooling:
+Tuning is not the response to one of these alerts. The `ALTER TABLE … autovacuum_vacuum_scale_factor` recommendation tightens when autovacuum fires next time; it does nothing to the age already accumulated, because only a freeze advances a table's `relfrozenxid`.
+
+Check the xmin horizon first. If a session, replication slot or prepared transaction is pinning the horizon, a freeze cannot advance past it and reclaims nothing, so release the holder before you go any further. Once the horizon is clear, run a freeze against the named table in your own tooling:
 
 ```sql
 VACUUM (FREEZE) public.orders;
 ```
 
-Check the xmin horizon before you run it. If a session, replication slot or prepared transaction is pinning the horizon, the freeze cannot advance past it and reclaims nothing, so release the holder first. As everywhere else on this page, the plug-in never runs the freeze for you.
+As everywhere else on this page, the plug-in never runs the freeze for you.
 
 Age history accumulates in the agent-local store from day one with no configuration. Every collection stages full-resolution rows, and the daily condense keeps each day's maximum XID and multixact ages, so trend depth builds on its own without touching the [Retention Policies page](history-store-and-retention.md#retention-policies).
 
