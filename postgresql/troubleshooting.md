@@ -118,11 +118,11 @@ When an advisor page sits empty, a KPI shows a placeholder, or an action fails o
 
 **Symptoms:** "Collections are paused because agent-host CPU or memory usage exceeds …" at the top of a plug-in page.
 
-**Cause:** The collection throttle — an optional, off-by-default self-protection governor — is gating the target's heavier scheduled collections because the agent host's CPU and/or memory usage is at or above the thresholds you set. Availability checks, real-time pages, and user-triggered jobs are never gated; only scheduled heavier collections are skipped for that cycle.
+**Cause:** The collection throttle (an optional, off-by-default self-protection governor) is gating the target's heavier scheduled collections because the agent host's CPU and/or memory usage is at or above the thresholds you set. Availability checks, real-time pages, and user-triggered jobs are never gated; only scheduled heavier collections are skipped for that cycle.
 
 **Fix:**
 1. No action is required. The banner is informational, not an alert or an error, and clears on its own once the gate lifts.
-2. To see the detail behind it — gate reason, CPU/memory used vs. threshold — check the `collection_throttle` metric on the target's All Metrics page.
+2. To see the detail behind it (gate reason, CPU/memory used vs. threshold), check the `collection_throttle` metric on the target's All Metrics page.
 3. If the gate fires more often than you want, adjust or clear the `throttle_cpu_threshold` and `throttle_mem_threshold` instance properties on the target. Leaving both empty turns the feature off.
 
 **Related:** [History store and retention](history-store-and-retention.md#collection-throttle)
@@ -131,7 +131,7 @@ When an advisor page sits empty, a KPI shows a placeholder, or an action fails o
 
 **Symptoms:** The **HypoPG What-If Simulation** and/or **Predicate-Stats Advisory (GIN / GIST)** sections show no rows, while the catalog-native sections above them do.
 
-**Cause:** These two sections are extension-gated. An empty table means the corresponding extension — `hypopg` for What-If simulation, `pg_qualstats` for predicate-stats advice — is not installed in that database, or there are no worthwhile candidates. Both are healthy states; the catalog-native detection above them always works with no extension.
+**Cause:** These two sections are extension-gated. An empty table means the corresponding extension (`hypopg` for What-If simulation, `pg_qualstats` for predicate-stats advice) is not installed in that database, or there are no worthwhile candidates. Both are healthy states; the catalog-native detection above them always works with no extension.
 
 **Fix:**
 1. Check the **Index Advisor — Enhanced Recommendations** panel on [Monitoring Readiness](monitoring-readiness.md) to see which extension is missing.

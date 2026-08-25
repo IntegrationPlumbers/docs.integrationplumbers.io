@@ -15,7 +15,7 @@ When an advisor page sits empty or a feature produces nothing, the cause is usua
 
 **Where to find it:** on a PostgreSQL Database target, **target navigation tree ▸ _database name_ ▸ Monitoring Readiness**. The same entry appears in the target menu.
 
-**In this page:** The seven panels · Status model · Configure auto_explain · The grant the plug-in never applies · Query identifiers and the syn: fallback · Behaviors · Related
+**In this page:** The seven panels · Status model · Configure auto_explain · The grant the plug-in never applies · Query identifiers and the syn: fallback · Behaviors
 
 ## The seven panels
 
@@ -30,7 +30,7 @@ The page probes once at load and renders seven panels, one per feature, in this 
 | **Database Connection** | The monitoring connection every probe below depends on. | Required |
 | **Plan Capture (auto_explain)** | The `auto_explain` settings and the log read grant behind log-based plan capture. | Required for **Plan Analysis** and **Plan Drift Advisor** |
 | **Statement Monitoring & Workload History** | The `pg_stat_statements` extension. | Required for SQL statement monitoring and **Workload History** |
-| **Wait-Event Sampling** | The `pg_wait_sampling` extension. | Optional. Without it, basic monitoring continues |
+| **Wait-Event Sampling** | The `pg_wait_sampling` extension. | Optional. Without it, basic monitoring continues. See [Wait-event sampling](workload-history.md#wait-event-sampling) |
 | **Index Advisor — Enhanced Recommendations** | The `hypopg` and `pg_qualstats` extensions. | Optional. Catalog-native index detection always works without them |
 | **Table Bloat Estimates** | The `pgstattuple` extension. | Optional. Adds bloat estimates to the **Vacuum Advisor** |
 | **Historical Store** | The agent-side store that holds long-window history. | No action needed |
@@ -96,7 +96,7 @@ Using **Configure auto_explain** is the per-target opt-in to `log_analyze`, whic
 
 *After the re-probe: every item the plug-in can set is OK, and the Configure button is gone.*
 
-For items the plug-in will not set itself — the log read grant and the extension installs — copy the statement from the item's detail text, run it in your own tooling, and reload the page to see the verdict change.
+For items the plug-in will not set itself (the log read grant and the extension installs), copy the statement from the item's detail text, run it in your own tooling, and reload the page to see the verdict change.
 
 ## The grant the plug-in never applies
 
@@ -112,7 +112,7 @@ Run it as a superuser, then reload the page. Until it is granted, the item reads
 
 Extension items behave the same way. Each shows an install hint of the form `CREATE EXTENSION <name>;`, and you install the underlying package through your own platform packaging first.
 
-## Query identifiers and the syn: fallback
+## Query identifiers and the syn: fallback {#query-identifiers-and-the-syn-fallback}
 
 Two items in the **Plan Capture (auto_explain)** panel are advisory rather than blocking: **Query identifiers (log_verbose)** and **Query id computation (compute_query_id)**. Both show **Attention** when off, never **Not functional**.
 

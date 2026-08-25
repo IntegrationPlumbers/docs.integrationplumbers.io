@@ -5,7 +5,7 @@ nav_order: 11
 
 # Index Advisor
 
-When a table is read end to end fifty times an hour, or an index has not been touched since the last statistics reset, someone has to notice before it shows up as a slow report or a full disk. The **Index Advisor** page notices for you: it analyses how each database is actually used and lists the indexes worth creating, dropping, or rebuilding, each with SQL you review and run yourself. It works on any monitored target with no extension installed, but the configuration to aim for is `hypopg` and `pg_qualstats` installed in the databases you care about — that is what turns a heuristic ("this table is scanned a lot") into evidence ("this predicate filtered 2.4 million rows and a GIN index would serve it").
+When a table is read end to end fifty times an hour, or an index has not been touched since the last statistics reset, someone has to notice before it shows up as a slow report or a full disk. The **Index Advisor** page notices for you: it analyzes how each database is actually used and lists the indexes worth creating, dropping, or rebuilding, each with SQL you review and run yourself. It works on any monitored target with no extension installed, but the configuration to aim for is `hypopg` and `pg_qualstats` installed in the databases you care about — that is what turns a heuristic ("this table is scanned a lot") into evidence ("this predicate filtered 2.4 million rows and a GIN index would serve it").
 
 > **Prerequisites for this page**
 > - The monitoring role on the target — see [Prerequisites](prerequisites.md#monitoring-role). Nothing else is required for catalog-native detection.
@@ -16,7 +16,7 @@ When a table is read end to end fifty times an hour, or an index has not been to
 
 **Where to find it:** on a PostgreSQL Database target, open the target menu and choose **Index Advisor**, or select it in the left-hand tree under the database node. The **Plan Analysis** page also links here from its top recommendation card, with the button **Open Index Advisor →**, when the highest-impact plan finding is an index problem.
 
-**In this page:** Reading the page · The five catalog-native categories · Review-and-run SQL · HypoPG What-If simulation · Predicate-Stats Advisory with pg_qualstats · Without extensions · Index Advisor alerts · Related
+**In this page:** Reading the page · The five catalog-native categories · Review-and-run SQL · HypoPG What-If simulation · Predicate-Stats Advisory with pg_qualstats · Without extensions · Index Advisor alerts
 
 ## Reading the page
 
@@ -42,11 +42,11 @@ Catalog-native detection runs on every monitored target with no extension, once 
 |---|---|---|---|
 | Missing | A table with at least 50 sequential scans, more sequential scans than index scans, at least 1,000 live rows, and an average of at least 100 rows read per scan. | MEDIUM | A `CREATE INDEX CONCURRENTLY` skeleton with an inline placeholder comment where the column list goes. |
 | Unused | A valid, non-primary-key, non-unique index with zero scans since the last statistics reset. | LOW | `DROP INDEX CONCURRENTLY <schema>.<index>;` |
-| Invalid | `pg_index.indisvalid = false` — typically a failed `CREATE INDEX CONCURRENTLY` build. The index is maintained on every write and serves no query. | HIGH | `DROP INDEX CONCURRENTLY <schema>.<index>;` — or `REINDEX`, if the index is one you want. |
+| Invalid | `pg_index.indisvalid = false`, typically a failed `CREATE INDEX CONCURRENTLY` build. The index is maintained on every write and serves no query. | HIGH | `DROP INDEX CONCURRENTLY <schema>.<index>;` — or `REINDEX`, if the index is one you want. |
 | HOT-inhibiting | A valid non-primary-key index on a table with at least 50 updates whose HOT-update ratio is below 50 %. | MEDIUM | `DROP INDEX CONCURRENTLY <schema>.<index>;` — advisory; the index may still serve reads. |
-| Consolidation | An index whose column list is a leading prefix of another index on the same table using the same access method. Deduplicated to one row per redundant index. | LOW | `DROP INDEX CONCURRENTLY <schema>.<index>;` |
+| Consolidation | An index whose column list is a leading prefix of another index on the same table using the same access method. Primary-key and unique indexes are excluded. Deduplicated to one row per redundant index. | LOW | `DROP INDEX CONCURRENTLY <schema>.<index>;` |
 
-Every row spells out its own evidence in the **Detail** column, in the category's own words:
+Every row spells out its own evidence in the **Detail** column, in the category's own words. The numbers and object names below are examples:
 
 - Unused — "Index has had 0 scans since the last stats reset; candidate for removal"
 - Invalid — "Index is INVALID (indisvalid=false) - likely a failed concurrent index build; REINDEX or drop it"
@@ -65,7 +65,7 @@ What to watch for:
 
 ## Review-and-run SQL
 
-Every finding carries remediation SQL, always in the online, non-locking `CONCURRENTLY` form. Where the offending index is known — Unused, Invalid, HOT-inhibiting, Consolidation — it is an exact, schema-qualified `DROP INDEX CONCURRENTLY`. For missing-index candidates it is a `CREATE INDEX CONCURRENTLY` statement: complete and specific when it comes from the What-If or predicate-stats layers, and a clearly marked skeleton with a placeholder comment for the column list when only the catalog-native heuristic is available.
+Every finding carries remediation SQL, always in the online, non-locking `CONCURRENTLY` form. Where the offending index is known (Unused, Invalid, HOT-inhibiting, Consolidation), it is an exact, schema-qualified `DROP INDEX CONCURRENTLY`. For missing-index candidates it is a `CREATE INDEX CONCURRENTLY` statement: complete and specific when it comes from the What-If or predicate-stats layers, and a clearly marked skeleton with a placeholder comment for the column list when only the catalog-native heuristic is available.
 
 The plug-in never runs any of it. There is no apply action anywhere on this page.
 
@@ -85,7 +85,7 @@ Two statements deserve a second look before they go anywhere near a change ticke
 
 ## HypoPG What-If simulation
 
-With `hypopg` installed in a database, every catalog-native Missing candidate in that database is tested by simulation instead of being left as a hunch. A hypothetical index is materialised in the planner only — never built on disk, no lock taken — a representative equality lookup is re-planned against it, and the estimated cost improvement is reported.
+With `hypopg` installed in a database, every catalog-native Missing candidate in that database is tested by simulation instead of being left as a hunch. A hypothetical index is materialized in the planner only (never built on disk, no lock taken), a representative equality lookup is re-planned against it, and the estimated cost improvement is reported.
 
 ![The HypoPG What-If Simulation section showing baseline cost, hypothetical cost, estimated speedup, and the complete CREATE INDEX statement](images/13-5-15/index-advisor-whatif.png)
 *Cost simulation, not a wall-clock measurement: it tells you which candidate to look at first.*
@@ -98,13 +98,13 @@ How a row is produced:
 4. **Est. Speedup (x)** is baseline cost divided by hypothetical cost, and the row records whether the planner actually chose the hypothetical index.
 5. `hypopg_reset()` runs after every candidate, so no hypothetical index leaks into the next simulation. A failure on one table is logged and skipped without affecting the others.
 
-The **HypoPG What-If Simulation** table carries Database, Schema, Table, Candidate Column, Index Type, Baseline Cost, Hypothetical Cost, Est. Speedup (x), Planner Adopts, and Recommended SQL. **Planner Adopts** reads 1 when the re-planned query used the hypothetical index and 0 when the planner ignored it — a candidate with a high speedup that the planner does not adopt is worth a closer look before you build anything. **Index Type** reads `btree`: the simulation materialises a hypothetical btree index on the candidate column. The section hint states the family coverage: "With the **hypopg** extension, each candidate is planned as a hypothetical index (no build, no lock) to estimate its speedup. Covers btree/hash/BRIN/bloom; GIN/GIST come from Predicate-Stats below. Empty when hypopg is not installed."
+The **HypoPG What-If Simulation** table carries Database, Schema, Table, Candidate Column, Index Type, Baseline Cost, Hypothetical Cost, Est. Speedup (x), Planner Adopts, and Recommended SQL. **Planner Adopts** reads 1 when the re-planned query used the hypothetical index and 0 when the planner ignored it — a candidate with a high speedup that the planner does not adopt is worth a closer look before you build anything. **Index Type** reads `btree`: the simulation materializes a hypothetical btree index on the candidate column. The section hint states the family coverage: "With the **hypopg** extension, each candidate is planned as a hypothetical index (no build, no lock) to estimate its speedup. Covers btree/hash/BRIN/bloom; GIN/GIST come from Predicate-Stats below. Empty when hypopg is not installed."
 
-That split is worth holding on to: recommendations cover every index type, but cost simulation covers four of them. HypoPG does not model GIN or GIST costs — a constraint of the extension itself, not of the plug-in — so GIN and GIST recommendations arrive from the Predicate-Stats Advisory instead.
+That split is worth holding on to: recommendations cover every index type, but cost simulation covers four of them, and this release simulates the btree case, the general shape for `column = value` lookups. HypoPG does not model GIN or GIST costs (a constraint of the extension itself, not of the plug-in), so GIN and GIST recommendations arrive from the Predicate-Stats Advisory instead.
 
 The **Recommended SQL** in this section is a real, complete `CREATE INDEX CONCURRENTLY … (column)`. It replaces the catalog-native placeholder skeleton for the same table.
 
-Treat the estimated speedup as a prioritisation signal, not a promise. It is a ratio between two planner cost estimates, and its job is to tell you which candidate deserves your attention first. An empty table means either that `hypopg` is not installed in that database or that nothing was worth simulating — both are fine.
+Treat the estimated speedup as a prioritization signal, not a promise. It is a ratio between two planner cost estimates, and its job is to tell you which candidate deserves your attention first. An empty table means either that `hypopg` is not installed in that database or that nothing was worth simulating — both are fine.
 
 ## Predicate-Stats Advisory with pg_qualstats
 
@@ -116,12 +116,12 @@ This is the sharpest missing-index evidence the plug-in produces, and the reason
 How it works:
 
 - Observed post-scan filter predicates are aggregated per table, column, and operator, with three evidence numbers: how many distinct plans the predicate appeared in, how many executions evaluated it, and how many rows it filtered away.
-- The access method is inferred from the catalog operator families for that operator, in preference order btree, gin, gist, spgist, brin, hash. JSON and array containment operators resolve to GIN, range and geometry overlap to GIST, and scalar equality to btree. For non-btree recommendations the correct operator class — `jsonb_ops`, for example — is resolved and written into the SQL.
+- The access method is inferred from the catalog operator families for that operator, in preference order btree, gin, gist, spgist, brin, hash. JSON and array containment operators resolve to GIN, range and geometry overlap to GIST, and scalar equality to btree. For non-btree recommendations the correct operator class (`jsonb_ops`, for example) is resolved and written into the SQL.
 - The existing-index check is access-method-aware. A btree index already on a column does not suppress a needed GIN or GIST recommendation for a different operator on that same column.
 - Severity comes from the filtered volume: 100,000 rows or more is HIGH, 1,000 or more is MEDIUM, anything less is LOW. Impact Rank orders by rows filtered, then by executions; rank 1 is the highest impact.
 - The recommendation is a complete statement: `CREATE INDEX CONCURRENTLY ON <schema>.<table> USING <method> (<column> <opclass>);`
 
-The **Predicate-Stats Advisory (GIN / GIST)** table carries Impact Rank, Severity, Database, Schema, Table, Predicate Column, Operator, Recommended Type, Queries, Rows Evaluated, Rows Filtered, and Recommended SQL. Each row's Detail states the case in full: "Predicate `payload` @> seen in 6 plan(s); filtered 2,410,338 rows over 18,942 row evaluations - a gin index is recommended". The section hint reads: "With the **pg_qualstats** extension, observed predicates rank candidates and infer the index type (GIN for jsonb/array containment, GIST for range/geometry, btree for equality). Empty when pg_qualstats is not installed."
+The **Predicate-Stats Advisory (GIN / GIST)** table carries Impact Rank, Severity, Database, Schema, Table, Predicate Column, Operator, Recommended Type, Queries, Rows Evaluated, Rows Filtered, and Recommended SQL. Each row's Detail states the case in full, for example: "Predicate `payload` @> seen in 6 plan(s); filtered 2,410,338 rows over 18,942 row evaluations - a gin index is recommended". The section hint reads: "With the **pg_qualstats** extension, observed predicates rank candidates and infer the index type (GIN for jsonb/array containment, GIST for range/geometry, btree for equality). Empty when pg_qualstats is not installed."
 
 The two Missing-Index summary tables stay separate on purpose. One is planner cost simulation, the other is observed workload evidence, and they are independent — keeping them apart keeps each of them honest. Where both point at the same table, that agreement is the strongest signal on the page, and it is what the Missing-index banner surfaces with its `pg_qualstats matches: N queries` annotation. The section hint above the pair says so directly: "Candidates from two sources: **HypoPG What-If** simulates planner cost; **pg_qualstats** ranks predicates observed in your workload. Click a SQL cell to copy; full detail in the sections below."
 
@@ -129,7 +129,7 @@ The two Missing-Index summary tables stay separate on purpose. One is planner co
 
 With no extension installed, the page and its metrics still work on every supported target. All five catalog-native categories, the KPI band, both recommendation banners, the Unused & Invalid table, impact ranking, and the recommendation SQL are fully functional. The extension-gated sections come up empty — no error, no broken panel, no partial data.
 
-Extension presence is probed per database at collection time, so a database with `hypopg` installed is simulated even when its neighbours are not. When an extension is absent the corresponding collection returns zero rows and the catalog-native layer carries on unchanged.
+Extension presence is probed per database at collection time, so a database with `hypopg` installed is simulated even when its neighbors are not. When an extension is absent the corresponding collection returns zero rows and the catalog-native layer carries on unchanged.
 
 The **Monitoring Readiness** page tells you exactly where you stand: its "Index Advisor — Enhanced Recommendations" panel lists both extensions with their status and explains the trade — "Catalog-native index detection always works; these optional extensions add What-If cost simulation and predicate-based recommendations." See [Monitoring Readiness](monitoring-readiness.md).
 
@@ -153,7 +153,7 @@ What each metric carries:
 
 To resolve an alert, open the Index Advisor page, find the alerted object in the matching full-detail section, copy its Recommended SQL, then review and run it in your own tooling. Alerts clear at the next collection after the finding resolves, so the clear event is your verification that the change did what you wanted.
 
-The shipped monitoring templates cover these metrics. The **PostgreSQL Tier 0/1 Critical baseline** enables all three collections on a 15-minute schedule and turns on the `index_advisor` and `index_advisor_whatif` thresholds. The **PostgreSQL Tier 2/3 Standard baseline** runs the catalog-native collection hourly with its threshold disabled, so findings are collected and alerting stays opt-in. See [Monitoring templates](alerts-and-templates.md#templates) and [Default thresholds for the new metrics](alerts-and-templates.md#default-thresholds).
+The shipped monitoring templates cover these metrics. `ip_xpgs_tier01_critical`, the critical-production baseline, enables all three collections on a 15-minute schedule and turns on the `index_advisor` and `index_advisor_whatif` thresholds. `ip_xpgs_tier23_standard`, the dev-test baseline, runs the catalog-native collection hourly with its threshold disabled, so findings are collected and alerting stays opt-in. See [Monitoring templates](alerts-and-templates.md#templates) and [Default thresholds for the new metrics](alerts-and-templates.md#default-thresholds).
 
 Finding detail from all three metrics also persists to the agent-local historical store on each collection, with retention managed from the **Retention Policies** page. See [Retention Policies page](history-store-and-retention.md#retention-policies).
 

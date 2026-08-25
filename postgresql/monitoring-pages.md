@@ -110,7 +110,7 @@ With no license recognized, the table reads "No licenses configured". License ke
 
 ## Realtime pages
 
-The pages under **Realtime** query the target live, on demand, each with an **Auto Refresh** selector (No Refresh, 15, 30, or 60 seconds) that controls how often it re-queries while you have the page open. A couple of the metrics behind these pages also collect on their own fixed schedule and carry alert thresholds: Vacuum xmin Horizon collects every 30 minutes with Warning and Critical bands (see [Vacuum Advisor](vacuum-advisor.md#xmin-horizon-root-cause)), and Log Stats, behind the Logs page below, collects every 5 minutes.
+The pages under **Realtime** query the target live, on demand, each with an **Auto Refresh** selector (No Refresh, 15, 30, or 60 seconds) that controls how often it re-queries while you have the page open. A couple of the metrics behind these pages also collect on their own fixed schedule and carry alert thresholds: Vacuum xmin Horizon collects every 30 minutes with Warning and Critical bands (see [Vacuum Advisor](vacuum-advisor.md#xmin-horizon-root-cause)), and Log Stats, behind the Logs page below, collects every 5 minutes once the collection is enabled in Metric and Collection Settings.
 
 ### Locks
 
@@ -138,7 +138,9 @@ The pages under **Realtime** query the target live, on demand, each with an **Au
 
 *Logs: recent log-statistic counts and the most recent parsed log entries.*
 
-**Logs** shows the PostgreSQL server log. A **Log Statistics (last collection)** panel reports Total Lines, Warnings, Errors, Fatals, and Panics; it refreshes every 5 minutes regardless of the Auto Refresh setting, which controls only the entries table below it. The **PostgreSQL Logs** table shows the last 500 lines of the configured log file, parsed into Timestamp, Severity, PID, Username, Database Name, and Message. An empty table means nothing new has been parsed since the last collection, or the log file path needs a second look.
+**Logs** shows the PostgreSQL server log. A **Log Statistics (last collection)** panel reports Total Lines, Warnings, Errors, Fatals, and Panics; it refreshes every 5 minutes once the collection is enabled in Metric and Collection Settings, regardless of the Auto Refresh setting, which controls only the entries table below it. The **PostgreSQL Logs** table shows the last 500 lines of the configured log file, parsed into Timestamp, Severity, PID, Username, Database Name, and Message. An empty table means nothing new has been parsed since the last collection, or the log file path needs a second look.
+
+<!-- CONFIRM: Ben — does setting the log path enable log_stats? It ships DISABLED in defaultCollection. -->
 
 This feature works only when the OEM agent is **local** — installed on the same host as the PostgreSQL server. It does not support remote log collection.
 
@@ -154,7 +156,7 @@ This feature works only when the OEM agent is **local** — installed on the sam
 
 *Setting the "Path to postgres log file" target property.*
 
-## Schema inventory metrics
+## Schema inventory metrics {#schema-inventory-metrics}
 
 The plug-in collects four schema-inventory metrics every 30 minutes: **Trigger**, **Prepared Transactions**, **Sequences**, and **User Function**. They're descriptive inventory, not a page in the tree — find them under the target's **All Metrics** tab (target home page → All Metrics → *metric name*).
 
@@ -177,9 +179,9 @@ OEM's repository persists only numeric metric columns for historical trending. B
 
 The PostgreSQL Cluster target's home page opens on **Cluster Information** (cluster name, environment, status) next to availability and open incidents, then **Cluster Node Information**, listing each member's Target, Availability (Last 24 Hours %), Uptime (Minutes), Node State, Connections, Host, and Alert Count, and **Cluster Replication**, which names the current primary and lists each replica's application name, state, data lag, write/replay lag, sync state, and client info. Open it to check cluster-wide health or run a switchover, rather than drilling into one member's database target.
 
-If the page shows "No Patroni cluster data available," allow up to 24 hours after a Patroni configuration change for the first collection to register; if it persists, verify `patroni_hosts` and `patroni_port` are reachable from the agent host.
+The empty state reads "No Patroni cluster data available." Allow up to 24 hours after a Patroni configuration change for the first collection to register; if it persists, verify `patroni_hosts` and `patroni_port` are reachable from the agent host.
 
-### Patroni switchover
+### Patroni switchover {#patroni-switchover}
 
 For clusters monitored with the Patroni API mode enabled, the cluster home page carries an **Initiate Switchover** button. For any other cluster, the button is disabled with the message "Switchover is only available for Patroni clusters with API access configured."
 

@@ -13,7 +13,7 @@ If you would rather be told about a plan regression or a wraparound risk than go
 > - The matching extension for each extension-gated metric — see [Optional extensions](prerequisites.md#optional-extensions).
 > - An Enterprise Manager administrator with `emcli` or console access to Monitoring Templates — see [Enterprise Manager and agents](prerequisites.md#enterprise-manager).
 
-**Where to find it:** metric values on the target — **Target menu → Monitoring → All Metrics**. Thresholds and schedules — **Target menu → Monitoring → Metric and Collection Settings**. Templates — **Enterprise → Monitoring → Monitoring Templates**.
+**Where to find it:** metric values on the target under **Target menu → Monitoring → All Metrics**; thresholds and schedules under **Target menu → Monitoring → Metric and Collection Settings**; templates under **Enterprise → Monitoring → Monitoring Templates**.
 
 **In this page:** How findings become alerts · Default thresholds for the new metrics · Tuning thresholds · Monitoring templates · Super-user / Privilege Audit
 
@@ -64,7 +64,7 @@ Reading the table:
 - **Not set** means the metric ships with an alert condition attached but no threshold value in it. The collection still runs and the rows still appear in All Metrics and on the advisor page; nothing alerts until you enter a value or apply a template that carries one.
 - **None** means the metric ships with no alert condition at all. These three are collected for history and diagnostics, not for paging.
 - Severity on the advisor metrics is a string: `HIGH`, `MEDIUM` or `LOW`. Wraparound Severity on `xmin_horizon` is a number, banded at 1 billion transaction IDs (severity 1) and 1.5 billion (severity 2).
-- The two-occurrence rule on the wraparound and xmin-horizon metrics is deliberate debouncing. A single collection that catches a legitimate long batch job does not page anyone; a holder that is still there an hour later does.
+- The two-occurrence rule on the wraparound and xmin-horizon metrics is deliberate debouncing. A single collection that catches a legitimate long batch job does not page anyone; a holder that is still there at the next collection, 30 minutes after the first breach, does.
 - Cost Drift is advisory by default. The shipped Plan Drift condition matches `PLAN_CHANGED` only, so a query whose plan shape is unchanged but whose estimated cost moved does not raise an incident. To be alerted on it, add a Warning threshold on the **Plan Drift** metric's `drift_severity` column for the query keys you care about (see [Tuning thresholds](#tuning-thresholds)); Drift Configuration on **Plan Drift Advisor** changes how captures are classified, not whether they alert.
 - Four metrics emit rows only where their extension is present: `index_advisor_whatif` needs hypopg, `index_advisor_qualstats` needs pg_qualstats, `table_bloat` needs pgstattuple, and `wait_events_sampled` needs pg_wait_sampling. Without the extension the metric returns zero rows, which is a healthy state, not an error, and nothing alerts. The **Monitoring Readiness** page tells you which extension is missing.
 - Multixact wraparound is tracked and alerted separately from transaction-ID wraparound, at both database and table grain.

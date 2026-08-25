@@ -15,7 +15,7 @@ When a database gets slower over two weeks rather than in a spike, the live char
 
 **Where to find it:** on a PostgreSQL Database target, **target navigation tree ▸ _database name_ ▸ Workload History**. The same entry appears in the target menu.
 
-**In this page:** Reading the page · Investigating a spike · Filtering to one database · Time handling and honest indicators · Wait-event sampling · Autovacuum runs KPI · Retention · Related
+**In this page:** Reading the page · Investigating a spike · Filtering to one database · Time handling and honest indicators · Wait-event sampling · Autovacuum runs KPI · Retention
 
 ## Reading the page
 

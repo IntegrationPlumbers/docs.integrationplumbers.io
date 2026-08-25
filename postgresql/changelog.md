@@ -18,7 +18,7 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 - [Index Advisor](index-advisor.md) — catalog-native index detection across five categories, with ready-to-review CREATE and DROP statements, enriched by HypoPG and pg_qualstats when present.
 - [Vacuum Advisor](vacuum-advisor.md) — per-table autovacuum tuning recommendations and wraparound visibility.
 - [Retention Policies](history-store-and-retention.md#retention-policies) — the retention-day and size-ceiling editor for the agent-side history store.
-- Realtime ▸ [Vacuum xmin Horizon](vacuum-advisor.md) — the exact session, replication slot, or prepared transaction holding vacuum back, with the release command ready to copy.
+- Realtime ▸ [Vacuum xmin Horizon](vacuum-advisor.md#xmin-horizon-root-cause) — the exact session, replication slot, or prepared transaction holding vacuum back, with the release command ready to copy.
 
 **New metrics**
 
@@ -50,9 +50,9 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 
 **Monitoring templates**
 
-- PostgreSQL Tier 0/1 Critical baseline
-- PostgreSQL Tier 2/3 Standard baseline
-- PostgreSQL Custom Starter
+- `ip_xpgs_tier01_critical` — critical production
+- `ip_xpgs_tier23_standard` — dev, test, and staging
+- `ip_xpgs_starter` — a minimal starter to clone and extend
 
 **Changed**
 
@@ -70,8 +70,8 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 
 ### 13.5.12.0.0
 
-- Added Patroni REST API as a cluster monitoring source, with TLS modes (`disable` / `require` / `verify-full`), optional CA certificate, and optional HTTP Basic authentication. See [Patroni Cluster Monitoring via the Patroni REST API](#patroni-cluster-monitoring-via-the-patroni-rest-api).
-- Added four schema-inventory metrics: Triggers, Prepared Transactions, Sequences, User Functions (see [Schema Inventory Metrics](#schema-inventory-metrics))
+- Added Patroni REST API as a cluster monitoring source, with TLS modes (`disable` / `require` / `verify-full`), optional CA certificate, and optional HTTP Basic authentication. See [Patroni REST API monitoring](targets-and-properties.md#patroni).
+- Added four schema-inventory metrics: Triggers, Prepared Transactions, Sequences, User Functions (see [Schema inventory metrics](monitoring-pages.md#schema-inventory-metrics))
 - JET 14 and JET 18 (Redwood) UI compatibility fixes
 - Fixed intermittent `MetricGetException: Result has repeating key value` on SQL Statements, Blocked Queries, and Idle Connections pages under active workload
 - Fixed Tables and Indexes toggle-all and clear-filter controls

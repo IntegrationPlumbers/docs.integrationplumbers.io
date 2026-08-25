@@ -181,8 +181,8 @@ Set one or both instance properties on the PostgreSQL database or cluster target
 
 | Property | Label | What it gates |
 |---|---|---|
-| `throttle_cpu_threshold` | Collection Throttle: CPU Threshold (%) | Pauses scheduled collections while agent-host CPU usage — the 1-minute load average divided by core count, as a percentage — is at or above this value |
-| `throttle_mem_threshold` | Collection Throttle: Memory Threshold (%) | Pauses scheduled collections while agent-host memory usage — (MemTotal − MemAvailable) / MemTotal, as a percentage — is at or above this value |
+| `throttle_cpu_threshold` | Collection Throttle: CPU Threshold (%) | Pauses scheduled collections while agent-host CPU usage is at or above this value, where usage is the 1-minute load average divided by core count, as a percentage |
+| `throttle_mem_threshold` | Collection Throttle: Memory Threshold (%) | Pauses scheduled collections while agent-host memory usage is at or above this value, where usage is (MemTotal − MemAvailable) / MemTotal as a percentage |
 
 Each takes a percentage from 0 to 100. Empty or invalid disables that resource's gate; both empty means the feature is fully off, which is the default. See [Collection throttle properties](targets-and-properties.md#throttle-properties) for where they sit among the other target properties.
 

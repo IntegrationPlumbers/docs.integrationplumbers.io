@@ -5,7 +5,7 @@ nav_order: 4
 
 # Prerequisites
 
-If you already monitor PostgreSQL with the plug-in, most of this list is in place today. What the plug-in needs falls into three groups: a monitoring role that can read PostgreSQL's statistics catalogs, which covers all existing monitoring; `auto_explain` plus one privilege grant, which plan capture and the advisors built on it require; and a short list of optional extensions that add What-If index simulation, predicate-based index advice, wait-event sampling, and table bloat estimates. Nothing here is applied by the plug-in on your behalf except the `auto_explain` settings, and only when you click **Configure auto_explain**.
+If you already monitor PostgreSQL with the plug-in, most of this list is in place today. What the plug-in needs falls into three groups. A monitoring role that can read PostgreSQL's statistics catalogs covers all existing monitoring, and `auto_explain` plus one privilege grant is what plan capture and the advisors built on it require. The third group is a short list of optional extensions that add What-If index simulation, predicate-based index advice, wait-event sampling, and table bloat estimates. Nothing here is applied by the plug-in on your behalf except the `auto_explain` settings, and only when you click **Configure auto_explain**.
 
 **Where to find it:** every item below is checked live, per target, on the database target's **Monitoring Readiness** page.
 
@@ -184,7 +184,7 @@ Copy the list that matches what you want from the release.
 - [ ] `session_preload_libraries` includes `auto_explain`
 - [ ] `auto_explain.log_min_duration` set to your capture threshold in milliseconds, `0` or higher
 - [ ] `auto_explain.log_format = json`
-- [ ] `auto_explain.log_analyze = on`
+- [ ] `auto_explain.log_analyze = on`, applied together with `auto_explain.log_timing = on`
 - [ ] `auto_explain.log_verbose = on`
 - [ ] `compute_query_id = on`, or `auto` with `pg_stat_statements` preloaded
 - [ ] `GRANT pg_read_server_files TO "<monitoring role>";` run by a superuser

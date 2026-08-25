@@ -40,7 +40,7 @@ Plan bodies stay on the agent. Nothing plan-body-sized is uploaded to the manage
 
 ### Query identifiers and the `syn:` fallback
 
-Captured plans are keyed by query id. When a plan arrives without one — usually because `auto_explain.log_verbose` or `compute_query_id` is off, or `pg_stat_statements` is not set up — the plug-in computes a synthetic id of the form `syn:<hash>` from the literal-normalized query text. Grouping, plan history, drift detection, and baselines all keep working on synthetic ids, and the `syn:` prefix makes them visible at a glance.
+Captured plans are keyed by query id. When a plan arrives without one (usually because `auto_explain.log_verbose` or `compute_query_id` is off, or `pg_stat_statements` is not set up), the plug-in computes a synthetic id of the form `syn:<hash>` from the literal-normalized query text. Grouping, plan history, drift detection, and baselines all keep working on synthetic ids, and the `syn:` prefix makes them visible at a glance.
 
 There is nothing to do about this. If you later enable the query-id settings, the affected statements move from `syn:` ids to real ids and start a fresh lineage, so expect their history to restart from that point.
 
@@ -83,7 +83,7 @@ These are separate settings and they are not measured in the same thing. Getting
 
 The high-cost threshold changes nothing about what is captured. It only moves the line the **High-cost plans** KPI counts against. The on-page hint says it plainly: "A plan is 'high-cost' when its optimizer Total Cost exceeds this value (cost units, not ms — separate from the capture threshold). Tune to your workload." Cost units are instance-relative, which is why the default of `100000` is a starting point rather than an answer.
 
-### Capture Window
+### Capture Window {#capture-window}
 
 Log harvesting can be confined to an off-peak window. Tick **Restrict plan harvest to an off-peak window**, set **From** and **To**, and click **Save**.
 
@@ -101,7 +101,7 @@ The window is a preference. Turning capture on or off is done on **Monitoring Re
 |---|---|
 | Query | The captured statement text, truncated |
 | Database | The database the capture came from |
-| Insights | A count of the pathologies detected on this capture, coloured by the highest severity present. A clean plan shows a dash |
+| Insights | A count of the pathologies detected on this capture, colored by the highest severity present. A clean plan shows a dash |
 | Mean (ms) | Mean execution time for the statement |
 | Calls / Total (ms) | Call count and total execution time |
 | Captured | When the plan was harvested |
@@ -181,5 +181,6 @@ The related `plan_drifts` metric alerts on a query running on a plan shape outsi
 - [Prerequisites](prerequisites.md#auto-explain) — the full capture prerequisites, including the server log read grant
 - [Plan Drift Advisor](plan-drift-advisor.md) — baselines, side-by-side plan comparison, and the drift alert, all built on these same captures
 - [Index Advisor](index-advisor.md) — where the missing-index banner lands
-- [History store and retention](history-store-and-retention.md#retention-policies) — the plan-archive retention window, and where the archive size ceiling is set
+- [History store and retention](history-store-and-retention.md#retention-policies) — the plan-archive retention window
+- [Store size and disk reclaim](history-store-and-retention.md#store-size) — where the plan-archive size ceiling is set
 - [Alerts and templates](alerts-and-templates.md#default-thresholds) — every shipped threshold in one table

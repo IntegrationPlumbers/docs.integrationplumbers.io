@@ -118,7 +118,7 @@ Set **Collection Throttle: CPU Threshold (%)** and **Collection Throttle: Memory
 - The properties apply to local-agent deployments on Linux hosts only. On a remote agent, the CPU and memory readings would belong to the management host rather than the database host, so leave both properties empty on remote-agent targets.
 - A change to either property takes effect within one 5-minute collection cycle.
 
-For what happens while the gate is active — the banner, the `collection_throttle` metric, and which collections are never gated — see [Collection throttle](history-store-and-retention.md#collection-throttle).
+For what happens while the gate is active (the banner, the `collection_throttle` metric, and which collections are never gated), see [Collection throttle](history-store-and-retention.md#collection-throttle).
 
 ## Add targets with EM CLI {#emcli}
 

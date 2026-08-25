@@ -119,7 +119,7 @@ A table past its trigger point gets a statement of this shape:
 ALTER TABLE public.orders SET (autovacuum_vacuum_scale_factor=0.02);
 ```
 
-The proposed factor is the lower of two candidates: a value that would have fired at half the dead tuples the table has now, and half the table's current effective factor. It therefore always tightens the trigger and never loosens it, with a floor of 0.01. When autovacuum has been disabled on the table through `reloptions` — the most common reason a past-trigger table was never vacuumed — the same statement also sets `autovacuum_enabled=true`:
+The proposed factor is the lower of two candidates: a value that would have fired at half the dead tuples the table has now, and half the table's current effective factor. It therefore always tightens the trigger and never loosens it, with a floor of 0.01. When autovacuum has been disabled on the table through `reloptions` (the most common reason a past-trigger table was never vacuumed), the same statement also sets `autovacuum_enabled=true`:
 
 ```sql
 ALTER TABLE public.orders SET (autovacuum_enabled=true, autovacuum_vacuum_scale_factor=0.02);
@@ -162,7 +162,7 @@ Work a flagged table in that order: check the vacuum recommendation tables first
 
 Detail history persists to the agent-local store under the **Table Bloat** row on the [Retention Policies page](history-store-and-retention.md#retention-policies).
 
-## xmin horizon root cause
+## xmin horizon root cause {#xmin-horizon-root-cause}
 
 Autovacuum cannot remove a dead row that might still be visible to some open snapshot. The oldest such snapshot is the cluster's xmin horizon, and while something holds it back, no amount of vacuum tuning helps: cleanup runs and reclaims nothing. This is the case where **Tables past autovacuum trigger** climbs while autovacuum is plainly running.
 

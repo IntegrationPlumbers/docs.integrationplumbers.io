@@ -5,7 +5,7 @@ nav_order: 9
 
 # Plan Drift Advisor
 
-When a query that was fine last week is suddenly slow, the question is rarely what the statement does — it is which plan the statement is running. The Plan Drift Advisor keeps a set of accepted-good ("baseline") plans for each query, compares every newly captured plan against that set, and tells you when a query has left it, both on the page and through a standard Enterprise Manager alert. It reads the same captured-plan archive as **Plan Analysis** — plans written to the server log by `auto_explain` while the query ran, never re-executed to obtain them — so it needs no extensions of its own.
+When a query that was fine last week is suddenly slow, the question is rarely what the statement does — it is which plan the statement is running. The Plan Drift Advisor keeps a set of accepted-good ("baseline") plans for each query, compares every newly captured plan against that set, and tells you when a query has left it, both on the page and through a standard Enterprise Manager alert. It reads the same captured-plan archive as **Plan Analysis** (plans written to the server log by `auto_explain` while the query ran, never re-executed to obtain them), so it needs no extensions of its own.
 
 > **Prerequisites for this page**
 > - Plan capture is populating the archive: `auto_explain` loaded with `log_min_duration` ≥ 0, `log_format = json`, and `log_analyze = on` ([Plan capture (auto_explain)](prerequisites.md#auto-explain), applied for you from [Configure auto_explain](monitoring-readiness.md#configure-auto-explain)).
@@ -153,7 +153,7 @@ Baselines also protect their evidence: the captured plan behind an accepted or p
 
 ## Fix Workbench: Test a Rewrite
 
-This is where you prove a rewrite before it goes anywhere near application code. It is the only EXPLAIN the plug-in ever runs and the only place it executes SQL you supply, and nothing happens until you click **Run Explain**.
+This is where you prove a rewrite before it goes anywhere near application code. It is the only EXPLAIN the plug-in ever runs and the only place the plug-in's console executes SQL you supply (custom-query Metric Extensions you define run your own SQL on their schedule — see [Jobs and metric extensions](jobs-and-metric-extensions.md#custom-queries-with-a-metric-extension)), and nothing happens until you click **Run Explain**.
 
 1. Select a query in Problematic Queries and scroll to **Fix Workbench: Test a Rewrite**. The panel shows the target database and the query text, prefilled and editable.
 2. Replace any parameter placeholders with real values. Captured statements often carry bound-parameter placeholders such as `$1` and `$2`; `SELECT * FROM users WHERE id = $1` has to become `SELECT * FROM users WHERE id = 123` before it can run. Choose values that represent a typical execution — an unrepresentative value produces a plan you cannot learn from.
@@ -167,7 +167,7 @@ This is where you prove a rewrite before it goes anywhere near application code.
 `EXPLAIN (ANALYZE, ...)` genuinely runs the statement, once, on the database you selected. Treat the button as a deliberate act:
 
 - The statement runs inside a transaction that is rolled back, so `INSERT`, `UPDATE`, and `DELETE` changes do not persist. The execution still takes locks and consumes CPU and I/O while it runs.
-- The run is capped at 30 seconds. A rewrite that takes longer is cancelled and the panel reports a failure state instead of a plan.
+- The run is capped at 30 seconds. A rewrite that takes longer is canceled and the panel reports a failure state instead of a plan.
 - Use test data or off-peak timing for anything that could contend with production work.
 - Nothing schedules this job. There is no background use of the workbench, and the plug-in never runs EXPLAIN, or any proposed rewrite, anywhere else.
 
@@ -221,7 +221,7 @@ and the clear text is:
 
 Cost Drift (severity 1) carries no default threshold. Ordinary optimizer-estimate variance would make it noisy across a fleet, so it is advisory by default and you opt into it per query through the standard threshold UI when a particular statement earns the attention. See [Default thresholds for the new metrics](alerts-and-templates.md#default-thresholds).
 
-Accepting the new plan is a valid way to clear a drift alert. The metric reports the state of the query at each collection, so once the running shape is in the accepted set — because you accepted it, or because the database went back to the old plan — the alert clears on its own.
+Accepting the new plan is a valid way to clear a drift alert. The metric reports the state of the query at each collection, so once the running shape is in the accepted set (because you accepted it, or because the database went back to the old plan), the alert clears on its own.
 
 **Responding to an alert.** Open Plan Drift Advisor and select the query the alert names. Read Drift History to find when it changed, Plan Comparison to see what changed, and the Insights cards for the likely cause. Use Fix Workbench to prove a rewrite. Then either accept the new plan in Baseline Management, or fix the underlying cause in your own tooling and let the alert clear when the query returns to a certified plan.
 
