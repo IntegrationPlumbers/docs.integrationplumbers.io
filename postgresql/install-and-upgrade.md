@@ -43,7 +43,9 @@ You enter the key per target, in the `Plugin License` target property (see [Data
 
 ## Deploy to the OMS {#deploy-oms}
 
-From the console, navigate to Setup → Extensibility → Plug-ins. Expand the Databases folder and click PostgreSQL. From the Actions menu, click Deploy On → Management Servers and follow the on-screen instructions.
+1. Navigate to Setup → Extensibility → Plug-ins.
+2. Expand the Databases folder and click PostgreSQL.
+3. From the Actions menu, click Deploy On → Management Servers and follow the on-screen instructions.
 
 ![The Plug-ins page showing PostgreSQL 13.5.15.0.0](images/13-5-15/plugins-page.png)
 *The Plug-ins page after 13.5.15.0.0 is imported.*
@@ -62,7 +64,9 @@ emcli get_plugin_deployment_status -plugin=ip.em.xpgs
 
 ## Deploy to agents {#deploy-agents}
 
-From the same Plug-ins page, select PostgreSQL, and from the Actions menu click Deploy On → Management Agents. Follow the on-screen instructions to select the agent hosts.
+1. From the same Plug-ins page, select PostgreSQL.
+2. From the Actions menu, click Deploy On → Management Agents.
+3. Follow the on-screen instructions to select the agent hosts.
 
 The equivalent `emcli` command:
 
@@ -90,13 +94,13 @@ Once the plug-in is deployed, open [**Monitoring Readiness**](monitoring-readine
 2. Undeploy the plug-in from each agent:
 
    ```
-   emcli undeploy_plugin_from_agent -plugin_id=ip.em.xpgs -agent_names="<host>:<port>"
+   emcli undeploy_plugin_from_agent -plugin=ip.em.xpgs -agent_names="<host>:<port>"
    ```
 
 3. Undeploy the plug-in from the OMS:
 
    ```
-   emcli undeploy_plugin_from_server -plugin_id=ip.em.xpgs
+   emcli undeploy_plugin_from_server -plugin=ip.em.xpgs
    ```
 
 Uninstalling the plug-in does not delete its collected history. The store file, `%plugin_data%/<target name>_collections.sqlite3`, remains on the agent host until an administrator deletes it.
