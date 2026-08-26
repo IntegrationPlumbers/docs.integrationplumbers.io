@@ -69,7 +69,7 @@ A panel's chip is the worst status among its items, with one deliberate exceptio
 
 ## Configure auto_explain {#configure-auto-explain}
 
-![Applying the auto_explain settings from the Plan Capture panel](images/13-5-15/readiness-configure.gif)
+<video class="walkthrough" src="images/13-5-15/readiness-configure.mp4" poster="images/13-5-15/readiness-configure-poster.png" autoplay loop muted playsinline controls aria-label="Applying the auto_explain settings from the Plan Capture panel"></video>
 
 *Configure auto_explain: preview, Apply, automatic re-probe.*
 
