@@ -199,10 +199,6 @@ Confirming submits an OEM job that calls the Patroni REST API to promote the sel
 
 For Patroni-managed clusters with the Patroni API mode enabled, the plug-in also collects the cluster's timeline-switch history as a standard metric, so "when did the cluster last change leaders?" is answerable from Enterprise Manager without a separate tool.
 
-![The All Metrics view of the Cluster Events (Patroni) metric, one row per timeline switch](images/13-5-15/cluster-events-metric.png)
-
-*Cluster Events (Patroni) under All Metrics: one row per historical leader change.*
-
 1. On the cluster target, open **All Metrics** and select **Cluster Events (Patroni)**.
 2. Each row is one timeline switch, with columns Timeline, Event Timestamp, New Leader, Reason, LSN, and Event Type.
 3. Collection runs hourly; standard OEM metric-history views show the accumulated record.
