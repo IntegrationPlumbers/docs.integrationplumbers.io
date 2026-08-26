@@ -11,7 +11,7 @@ FILES=("$@")
 
 # Terms that must never appear in customer-facing pages (internal markers, roadmap/season language,
 # retired names, unshipped features, unverified claims, placeholders).
-FORBID='\[INTERNAL|INTERNAL:|Winter|24\.1\.2|\bPRD\b|roadmap|Query Advisor|Plan Capture readiness|one-click|Disk Sort|Hash Batches|Expensive Node|Large Offset|arrives in|next release|coming soon|planned for|\bTBD\b|\bTODO\b|encrypted at rest|Lorem ipsum|\bSummer\b|Tier 0/1|Tier 2/3|\\bOEM\\b'
+FORBID='\[INTERNAL|INTERNAL:|Winter|24\.1\.2|\bPRD\b|roadmap|Query Advisor|Plan Capture readiness|one-click|Disk Sort|Hash Batches|Expensive Node|Large Offset|arrives in|next release|coming soon|planned for|\bTBD\b|\bTODO\b|encrypted at rest|Lorem ipsum|\bSummer\b|Tier 0/1|Tier 2/3|\bOEM\b'
 
 rc=0
 for f in "${FILES[@]}"; do
