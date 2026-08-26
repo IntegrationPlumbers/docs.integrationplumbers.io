@@ -165,7 +165,7 @@ Two things depend on that choice.
 
 **The collection throttle** applies to local agents on Linux hosts. It skips heavier scheduled collections while agent-host CPU or memory sits above thresholds you set. On a remote agent the CPU reading would be the management host's rather than the database host's, so leave the throttle properties empty on remote-agent targets. Non-Linux agent hosts never throttle. The feature is off until you set a threshold. See [Collection throttle properties](targets-and-properties.md#throttle-properties) and [Collection throttle](history-store-and-retention.md#collection-throttle).
 
-**Disk headroom** on the agent host for the agent-local history store, a SQLite file per target under `%plugin_data%`. The store is created automatically by the first collection that persists history; there are no manual steps. How large it gets is governed by three things you control: the capture threshold, the retention windows, and the store size ceilings. See [Store size and disk reclaim](history-store-and-retention.md#store-size).
+**Disk headroom** on the agent host for the agent-local history store, a SQLite file per target under `%plugin_data%` (`<agent state directory>/ip_plugin/xpgs/data`). The store is created automatically by the first collection that persists history; there are no manual steps. How large it gets is governed by three things you control: the capture threshold, the retention windows, and the store size ceilings. See [Store size and disk reclaim](history-store-and-retention.md#store-size).
 
 ## Prerequisites checklist {#checklist}
 

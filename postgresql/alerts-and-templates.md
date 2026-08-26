@@ -93,8 +93,8 @@ Three pre-built Enterprise Manager monitoring templates cover the plug-in's metr
 
 | Template name | File | Purpose |
 |---|---|---|
-| `ip_xpgs_tier01_critical` | `ip_xpgs_tier01_critical.template.xml` | Critical production. "Critical-production baseline: all safety-critical and advisory metrics on a 15-minute schedule with tight thresholds (wraparound, privilege drift, index/vacuum/bloat advisories)." |
-| `ip_xpgs_tier23_standard` | `ip_xpgs_tier23_standard.template.xml` | Dev, test and staging. "Standard baseline for dev/test/staging PostgreSQL databases: core health on a 15-minute schedule with loosened wraparound/connection thresholds; advisory metrics collected store-only on a 1-hour schedule (no paging)." |
+| `ip_xpgs_production_critical` | `ip_xpgs_production_critical.template.xml` | Critical production. "Production Critical baseline: all safety-critical and advisory metrics on a 15-minute schedule with tight thresholds (wraparound, privilege drift, failover, blocking, index/vacuum/bloat advisories)." |
+| `ip_xpgs_standard` | `ip_xpgs_standard.template.xml` | Dev, test and staging. "Standard baseline for dev/test/staging PostgreSQL databases: core health on a 15-minute schedule with loosened wraparound/connection thresholds; advisory metrics collected store-only on a 1-hour schedule (no paging)." |
 | `ip_xpgs_starter` | `ip_xpgs_starter.template.xml` | A starter to extend. "Minimal starter monitoring template for PostgreSQL databases: availability plus core database health, ready to clone and extend into your own site standard." |
 
 After import, the console lists each template under its template name, and that same name is what you pass to `emcli apply_template`.
@@ -106,11 +106,11 @@ Monitoring templates live in the Enterprise Manager repository rather than in ag
 
 ```sh
 # Import a template into the OMS repository
-emcli import_template -files="ip_xpgs_tier01_critical.template.xml"
+emcli import_template -files="ip_xpgs_production_critical.template.xml"
 
 # Apply it to one or more database targets
 emcli apply_template \
-   -name="ip_xpgs_tier01_critical" \
+   -name="ip_xpgs_production_critical" \
    -targets="myprod_db:ip_postgresql_db"
 ```
 
@@ -128,7 +128,7 @@ In the console:
 
 *Applying the imported template to a target from the console's Apply dialog.*
 
-Before you adopt `ip_xpgs_tier01_critical`, set the super-user count threshold. It ships with an empty warning threshold because the sanctioned super-user count is site policy, and an empty threshold never fires. Enter your approved roster size so the count-change alert reports privilege drift. See [Super-user / Privilege Audit](#superuser-audit) below.
+Before you adopt `ip_xpgs_production_critical`, set the super-user count threshold. It ships with an empty warning threshold because the sanctioned super-user count is site policy, and an empty threshold never fires. Enter your approved roster size so the count-change alert reports privilege drift. See [Super-user / Privilege Audit](#superuser-audit) below.
 
 ### Build your own
 
@@ -148,7 +148,7 @@ The `superuser_audit` metric tracks the target's super-user roster so that privi
 The threshold on that column ships empty on purpose: only you know how many super-users your cluster is supposed to have. Until you set it, the metric collects the roster and alerts on nothing.
 
 1. Decide the sanctioned super-user count for the target.
-2. Set it as the Warning threshold on the **Super-user Count** column, either per target through **Metric and Collection Settings** or fleet-wide by editing `ip_xpgs_tier01_critical` before you apply it.
+2. Set it as the Warning threshold on the **Super-user Count** column, either per target through **Metric and Collection Settings** or fleet-wide by editing `ip_xpgs_production_critical` before you apply it.
 3. When the count rises above that number, Enterprise Manager raises a warning naming the count, the role, and the detail.
 4. Review the role changes in your own tooling. The alert clears once the count is back at your threshold or below.
 

@@ -50,8 +50,8 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 
 **Monitoring templates**
 
-- `ip_xpgs_tier01_critical` — critical production
-- `ip_xpgs_tier23_standard` — dev, test, and staging
+- `ip_xpgs_production_critical` — critical production
+- `ip_xpgs_standard` — dev, test, and staging
 - `ip_xpgs_starter` — a minimal starter to clone and extend
 
 **Changed**

@@ -100,7 +100,7 @@ How a row is produced:
 
 The **HypoPG What-If Simulation** table carries Database, Schema, Table, Candidate Column, Index Type, Baseline Cost, Hypothetical Cost, Est. Speedup (x), Planner Adopts, and Recommended SQL. **Planner Adopts** reads 1 when the re-planned query used the hypothetical index and 0 when the planner ignored it — a candidate with a high speedup that the planner does not adopt is worth a closer look before you build anything. **Index Type** reads `btree`: the simulation materializes a hypothetical btree index on the candidate column. The section hint states the family coverage: "With the **hypopg** extension, each candidate is planned as a hypothetical index (no build, no lock) to estimate its speedup. Covers btree/hash/BRIN/bloom; GIN/GIST come from Predicate-Stats below. Empty when hypopg is not installed."
 
-That split is worth holding on to: recommendations cover every index type, but cost simulation covers four of them, and this release simulates the btree case, the general shape for `column = value` lookups. HypoPG does not model GIN or GIST costs (a constraint of the extension itself, not of the plug-in), so GIN and GIST recommendations arrive from the Predicate-Stats Advisory instead.
+That split is worth holding on to: recommendations cover every index type, but the What-If simulation is btree-only in this release: each candidate is planned as a hypothetical btree index for a `column = value` lookup. HypoPG does not model GIN or GIST costs (a constraint of the extension itself, not of the plug-in), so GIN and GIST recommendations arrive from the Predicate-Stats Advisory instead.
 
 The **Recommended SQL** in this section is a real, complete `CREATE INDEX CONCURRENTLY … (column)`. It replaces the catalog-native placeholder skeleton for the same table.
 
@@ -153,7 +153,7 @@ What each metric carries:
 
 To resolve an alert, open the Index Advisor page, find the alerted object in the matching full-detail section, copy its Recommended SQL, then review and run it in your own tooling. Alerts clear at the next collection after the finding resolves, so the clear event is your verification that the change did what you wanted.
 
-The shipped monitoring templates cover these metrics. `ip_xpgs_tier01_critical`, the critical-production baseline, enables all three collections on a 15-minute schedule and turns on the `index_advisor` and `index_advisor_whatif` thresholds. `ip_xpgs_tier23_standard`, the dev-test baseline, runs the catalog-native collection hourly with its threshold disabled, so findings are collected and alerting stays opt-in. See [Monitoring templates](alerts-and-templates.md#templates) and [Default thresholds for the new metrics](alerts-and-templates.md#default-thresholds).
+The shipped monitoring templates cover these metrics. `ip_xpgs_production_critical`, the critical-production baseline, enables all three collections on a 15-minute schedule and turns on the `index_advisor` and `index_advisor_whatif` thresholds. `ip_xpgs_standard`, the dev-test baseline, runs the catalog-native collection hourly with its threshold disabled, so findings are collected and alerting stays opt-in. See [Monitoring templates](alerts-and-templates.md#templates) and [Default thresholds for the new metrics](alerts-and-templates.md#default-thresholds).
 
 Finding detail from all three metrics also persists to the agent-local historical store on each collection, with retention managed from the **Retention Policies** page. See [Retention Policies page](history-store-and-retention.md#retention-policies).
 

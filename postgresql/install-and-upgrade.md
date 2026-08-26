@@ -107,7 +107,7 @@ Once the plug-in is deployed, open [**Monitoring Readiness**](monitoring-readine
    emcli undeploy_plugin_from_server -plugin=ip.em.xpgs
    ```
 
-Uninstalling the plug-in does not delete its collected history. The store file, `%plugin_data%/<target name>_collections.sqlite3`, remains on the agent host until an administrator deletes it.
+Uninstalling the plug-in does not delete its collected history. The store file, `%plugin_data%/<target name>_collections.sqlite3` (under `<agent state directory>/ip_plugin/xpgs/data`), remains on the agent host until an administrator deletes it.
 
 ## Related
 
