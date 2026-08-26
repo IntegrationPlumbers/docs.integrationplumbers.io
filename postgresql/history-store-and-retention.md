@@ -21,6 +21,7 @@ If you want months of statement-level and object-level history without growing t
 One SQLite database per PostgreSQL database target, on the agent host:
 
 `%plugin_data%/<target name>_collections.sqlite3`
+{% comment %}CONFIRM: Ben/Andre — GA "plugin data directory" fix: does it change the store path, the directory, or the modes described below? Revisit before final publish.{% endcomment %}
 
 - The file is created at the first collection that persists history, and its schema updates itself on later releases. There are no manual steps and no upgrade procedure.
 - The plug-in creates it with restrictive permissions: owner read/write, group read (640) on the database file, and 750 on its parent directory. The WAL and SHM sidecar files inherit the database file's permissions. On a filesystem without POSIX permissions the permission change fails, the collection still proceeds, and a warning is logged.

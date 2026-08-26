@@ -100,6 +100,7 @@ Three pre-built Enterprise Manager monitoring templates cover the plug-in's metr
 After import, the console lists each template under its template name, and that same name is what you pass to `emcli apply_template`.
 
 Monitoring templates live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself. Integration Plumbers publishes the three template files for download with each release. Download them, import them into the OMS once, then apply them to targets.
+{% comment %}CONFIRM: Andre — link the S3 download URL for the three .template.xml files here before final publish.{% endcomment %}
 
 ### Import and apply
 
