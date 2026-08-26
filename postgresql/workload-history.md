@@ -139,7 +139,6 @@ The **Wait-Event Sampling** panel on [Monitoring Readiness](monitoring-readiness
 Bars are bucketed across the range, around 48 buckets and never finer than the 15-minute collection interval. Quiet periods render as explicit zeros rather than gaps, so a flat stretch reads as "nothing waited" and not as "nothing collected". Events that never waited during the range are left out of the legend.
 
 Two empty states are worth telling apart. "No data yet — waits_sampled metric populates within one collection interval after enable" (the message names the older `waits_sampled`; the live metric is `wait_events_sampled`) means nothing has been collected for that statement in that range yet. "No data matches the current filter" means the database filter excluded everything that was collected. The whole panel is hidden on targets where wait sampling is not enabled.
-{% comment %}CONFIRM: engineering to correct the empty-state string before GA{% endcomment %}
 
 Query Analyzer has no EXPLAIN workbench. The only EXPLAIN that executes a statement is the Fix Workbench on [Plan Drift Advisor](plan-drift-advisor.md), and only when you click it.
 
