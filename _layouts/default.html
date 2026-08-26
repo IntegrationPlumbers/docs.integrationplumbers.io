@@ -24,7 +24,40 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
+        {% assign in_pg = page.url | slice: 0, 12 %}
+        {% if in_pg == "/postgresql/" %}
+        <nav class="ip-docnav" aria-label="PostgreSQL documentation">
+          <div class="ip-crumb"><a href="/">Docs</a> › <a href="/postgresql/">PostgreSQL Plug-in</a>{% if page.url != "/postgresql/" and page.title %} › {{ page.title }}{% endif %}</div>
+          {% for g in site.data.postgresql_nav.groups %}
+          <div class="ip-navgroup"><span class="ip-navgroup-name">{{ g.name }}</span>
+            {% for p in g.pages %}{% assign cur = p.url | replace: ".html", "" %}{% assign here = page.url | replace: ".html", "" %}<a href="{{ p.url }}"{% if cur == here %} class="ip-current"{% endif %}>{{ p.title }}</a> {% endfor %}
+          </div>
+          {% endfor %}
+        </nav>
+        <style>
+          .ip-docnav{border:1px solid #e1e4e8;border-radius:8px;padding:12px 16px 8px;margin:0 0 28px;background:#f6f8fa;font-size:13.5px;line-height:1.5}
+          .ip-crumb{margin-bottom:10px;color:#57606a;font-size:13px}
+          .ip-crumb a{color:#0969da}
+          .ip-navgroup{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 7px}
+          .ip-navgroup-name{flex:0 0 88px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e7781}
+          .ip-navgroup a{display:inline-block;padding:2px 10px;border:1px solid #d0d7de;border-radius:999px;background:#fff;color:#24292f;text-decoration:none;white-space:nowrap;line-height:1.6}
+          .ip-navgroup a:hover{border-color:#0969da;color:#0969da;text-decoration:none}
+          .ip-navgroup a.ip-current{background:#0969da;border-color:#0969da;color:#fff;font-weight:600}
+          @media (max-width:640px){.ip-navgroup-name{flex-basis:100%}}
+          #main_content blockquote{border-left:4px solid #3a7bd5;background:#eef4fc;padding:8px 14px;margin:14px 0;color:#222;font-size:inherit}
+          #main_content img{max-width:100%;border:1px solid #e3e3e3;border-radius:4px}
+          #main_content video.walkthrough{display:block;width:100%;max-width:100%;height:auto;border:1px solid #e3e3e3;border-radius:4px;background:#fff}
+          /* PostgreSQL guide: wider column, real tables that fit it, wrapping cells */
+          .inner{max-width:1040px}
+          #main_content table{display:table;width:100%;max-width:100%;table-layout:auto;font-size:0.93em;line-height:1.35}
+          #main_content th,#main_content td{vertical-align:top;overflow-wrap:break-word;padding:8px 10px}
+          #main_content td code,#main_content th code{white-space:normal;overflow-wrap:break-word}
+        </style>
+        {% endif %}
         {{ content }}
+        {% if in_pg == "/postgresql/" and page.url != "/postgresql/" %}
+        <p class="ip-crumb" style="margin-top:32px">↑ <a href="/postgresql/">PostgreSQL Plug-in documentation</a></p>
+        {% endif %}
       </section>
     </div>
 

@@ -32,3 +32,6 @@ exclude:
   - vendor/cache/
   - vendor/gems/
   - vendor/ruby/
+  - scripts/
+  - docs/
+  - mysql/          # MySQL guide hidden from the published site (beta); remove this line to publish it again
