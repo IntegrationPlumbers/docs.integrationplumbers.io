@@ -53,7 +53,7 @@ Grant the monitoring role membership in `pg_monitor` (or equivalent read access 
 GRANT pg_monitor TO "<monitoring role>";
 ```
 
-`pg_monitor` already carries `pg_stat_scan_tables`, which is what pgstattuple's approximate function needs for the table bloat estimates on **Vacuum Advisor**. That function reads a table only when the monitoring role owns it or holds `pg_stat_scan_tables`, so only tables outside that reach are skipped. A skipped table is logged; the collection does not fail.
+`pg_monitor` already carries `pg_stat_scan_tables`, which is what pgstattuple's approximate function needs for the table bloat estimates on **Vacuum Advisor**, so no additional grant is needed for the estimate. A table the role somehow cannot read is skipped and logged; the collection does not fail.
 
 One capability needs more than `pg_monitor`: plan capture needs the `pg_read_server_files` grant so the plug-in can read the server log. See [The server log read grant](#log-read-grant).
 
@@ -200,7 +200,7 @@ Copy the list that matches what you want from the release.
 - [ ] `GRANT pg_read_server_files TO "<monitoring role>";` run by a superuser
 - [ ] Optional: `hypopg` and `pg_qualstats` for the full **Index Advisor** output
 - [ ] Optional: `pg_wait_sampling`, with `pg_wait_sampling.profile_queries` set to `all` or `top`
-- [ ] Optional: `pgstattuple` (the `pg_stat_scan_tables` it needs comes with `pg_monitor`; tables the role neither owns nor can scan are skipped)
+- [ ] Optional: `pgstattuple` (no extra grant: the `pg_stat_scan_tables` it needs comes with `pg_monitor`)
 
 The six `auto_explain` and `compute_query_id` rows above are applied for you by **Configure auto_explain** on **Monitoring Readiness**. The rest are yours to set.
 

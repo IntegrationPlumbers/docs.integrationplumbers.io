@@ -12,7 +12,7 @@ Every command on this page is advisory. The `ALTER TABLE` tuning statements, `SE
 > **Prerequisites for this page**
 > - The core page is catalog-native. It reads `pg_stat_user_tables`, `pg_class`, `pg_settings`, `pg_stat_activity`, `pg_replication_slots` and `pg_prepared_xacts` under [the monitoring role](prerequisites.md#monitoring-role), with no extension required.
 > - The **Avoidable-Growth / Bloat Estimate** section needs the `pgstattuple` extension installed on the monitored database. See [Optional extensions](prerequisites.md#optional-extensions). Without it that one section is empty and nothing else on the page changes.
-> - `pgstattuple`'s approximate function also needs the monitoring role to own the table or hold `pg_stat_scan_tables`. Tables it cannot read are skipped.
+> - No extra grant is needed for the estimate: `pgstattuple`'s approximate function requires `pg_stat_scan_tables`, which `pg_monitor` already includes. A table the role somehow cannot read is skipped.
 > - The **Autovacuum runs · 24h** KPI is read through an Enterprise Manager job, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target. It also needs two daily snapshots in the agent-local store before it can compute a delta.
 
 **Where to find it:** on a PostgreSQL Database target, **target navigation tree ▸ _database name_ ▸ Vacuum Advisor**. The same entry appears in the target menu. Two live watch pages sit under **Realtime ▸ Vacuum xmin Horizon** and **Realtime ▸ Vacuums in Progress**. The same findings alert through the target's **All Metrics**.
@@ -143,7 +143,7 @@ The frequency detection and the bloat estimate are cause and consequence. The fr
 
 This section and the **Table Bloat Estimate** metric need the `pgstattuple` extension on the monitored database. Extensions in PostgreSQL are per-database, so install it in each database you want estimated. The plug-in detects it automatically through the catalog and never installs it. Without it the metric emits zero rows and the page section is simply empty. That is a healthy, expected state, not an error.
 
-The estimate uses pgstattuple's fast approximate function, which samples only the pages PostgreSQL has not already marked as fully visible, so it never reads a whole table. It covers ordinary permanent tables in user schemas of at least 256 KB. A table outside those bounds is skipped and logged. A table the role cannot read leaves that whole database's estimate empty for that collection, a known limitation in this release, so grant the monitoring role read access to every table you want estimated.
+The estimate uses pgstattuple's fast approximate function, which samples only the pages PostgreSQL has not already marked as fully visible, so it never reads a whole table. It covers ordinary permanent tables in user schemas of at least 256 KB. A table outside those bounds is skipped and logged. A table the role cannot read leaves that whole database's estimate empty for that collection, a known limitation in this release. That is unusual with the standard role, because `pg_monitor` already includes the `pg_stat_scan_tables` membership the function needs, so if a database's estimate stays empty with `pgstattuple` installed, check that the monitoring role still holds `pg_monitor`.
 
 | Severity | Condition |
 |---|---|
