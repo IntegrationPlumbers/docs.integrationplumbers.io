@@ -23,7 +23,7 @@ If you already monitor PostgreSQL with the plug-in, most of this list is in plac
 
 ## Enterprise Manager and agents {#enterprise-manager}
 
-The same 13.5.15.0.0 build runs on Enterprise Manager 13.5 and on 24ai. The version number tracks the plug-in, not a platform.
+This release ships as two plug-in builds with the same features: **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.15.0.0** for Enterprise Manager 13.5. The version number tells you which Enterprise Manager the build is for, not what it does; everything in this guide applies to both.
 
 Before you add any target, import the plug-in OPAR, deploy it to the OMS, then deploy it to each agent that will monitor a PostgreSQL instance. See [Install and upgrade](install-and-upgrade.md#import).
 

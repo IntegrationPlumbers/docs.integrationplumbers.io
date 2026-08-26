@@ -24,7 +24,7 @@ Fill in the form at [integrationplumbers.io/postgresql-plugin/trial](https://int
 
 | What we ask for | Why it matters |
 |---|---|
-| Your Enterprise Manager version, 13.5 or 24ai | The same 13.5.15.0.0 build runs on Enterprise Manager 13.5 and on 24ai, so this changes nothing about what you can evaluate. It tells us which console screens to point you at. |
+| Your Enterprise Manager version, 13.5 or 24ai | It decides which build you receive, 24.1.1.0.0 for 24ai or 13.5.15.0.0 for 13.5. Both carry the same features, so this changes nothing about what you can evaluate; it also tells us which console screens to point you at. |
 | Your PostgreSQL versions, 14 to 18 | Versions outside that range are not supported. See [Supported versions and platforms](prerequisites.md#supported-versions). |
 | How many instances you want to monitor | The key carries an instance count, and that count is what the **Instances** column on **License Info** reports back to you. |
 | Whether your agents are local or remote | Both are supported. Every read travels over one JDBC connection, including reading the server log for captured plans, so a remote agent collects the same metric data as a local agent, apart from three local-only capabilities: the [Logs](monitoring-pages.md#logs) page, the Kill Idle Connections job, and the collection throttle. Knowing which you run lets us check the network path with you up front. |

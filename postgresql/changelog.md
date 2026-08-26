@@ -7,7 +7,9 @@ nav_order: 18
 
 This page lists what changed in each release of the PostgreSQL plug-in, most recent first.
 
-## 13.5.15.0.0
+## 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.15.0.0 (Enterprise Manager 13.5)
+
+One release, two builds with the same content: 24.1.1.0.0 installs on Enterprise Manager 24ai, 13.5.15.0.0 on Enterprise Manager 13.5.
 
 **New pages**
 
@@ -191,6 +193,6 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 
 ## Related
 
-- [What's new in 13.5.15](whats-new.md) — the current release in detail, page by page, with what changed or moved
+- [What's new in this release](whats-new.md) — the current release in detail, page by page, with what changed or moved
 - [Install and upgrade](install-and-upgrade.md) — how to move an existing deployment onto a newer build
 - [PostgreSQL Plug-in](index.md) — the documentation hub for every page in this guide

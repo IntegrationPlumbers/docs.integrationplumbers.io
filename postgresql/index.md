@@ -11,8 +11,10 @@ nav_order: 0
 
 ### Oracle Enterprise Manager Plugin for PostgreSQL User Guide
 
-*Version 13.5.15.0.0*  
+*Release 24.1.1.0.0 for Enterprise Manager 24ai · 13.5.15.0.0 for Enterprise Manager 13.5*  
 *August 2026*
+
+This release ships as two plug-in builds with the same features: **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.15.0.0** for Enterprise Manager 13.5. Install the build that matches your Enterprise Manager; everything in this guide applies to both.
 
 <details>
 <summary>Legal Notice</summary>
@@ -33,7 +35,7 @@ The PostgreSQL plug-in monitors PostgreSQL instances from inside Oracle Enterpri
 
 ## Choose your path
 
-**Existing customers — [What's new in 13.5.15](whats-new.md).** Start here if you monitor PostgreSQL with 13.5.12 today. Your targets, console, and alert routing carry forward untouched, and the page covers the new advisor pages and metrics plus the one database-side prerequisite the plan pages need.
+**Existing customers — [What's new in this release](whats-new.md).** Start here if you monitor PostgreSQL with 13.5.12 today. Your targets, console, and alert routing carry forward untouched, and the page covers the new advisor pages and metrics plus the one database-side prerequisite the plan pages need.
 
 **New customers — [Getting started](getting-started.md).** Start here if the plug-in is not yet deployed. Six steps take an empty Enterprise Manager to a console with real data in it, each with what to do and how you know it worked.
 
@@ -46,7 +48,7 @@ Whichever path you take, the plug-in never applies a recommendation for you, and
 ### Start here
 
 - **PostgreSQL Plug-in** (this page) — what the plug-in does, and where every topic in this guide lives.
-- [What's new in 13.5.15](whats-new.md) — everything added since 13.5.12, why the upgrade is additive, and the one prerequisite the new plan pages need.
+- [What's new in this release](whats-new.md) — everything added since 13.5.12, why the upgrade is additive, and the one prerequisite the new plan pages need.
 - [Getting started](getting-started.md) — six steps from an empty Enterprise Manager to a console with real data, each with a check that tells you it worked.
 - [Trial setup](trial.md) — request a trial key, enter it on each target, then work the checklist that exercises every advisor.
 

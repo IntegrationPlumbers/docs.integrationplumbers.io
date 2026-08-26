@@ -43,7 +43,7 @@ Detail: [The monitoring role](prerequisites.md#monitoring-role) · [Statement st
 
 Import the OPAR onto the OMS with `emcli import_update -file=<PATH_TO_FILE> -omslocal`, deploy it to the OMS, then deploy it to every agent that will monitor a PostgreSQL instance, in that order. Both deployments run from Setup ▸ Extensibility ▸ Plug-ins, Databases ▸ PostgreSQL, Actions ▸ Deploy On, or from the equivalent `emcli deploy_plugin_on_server` and `emcli deploy_plugin_on_agent` commands.
 
-**Done when** `emcli get_plugin_deployment_status -plugin=ip.em.xpgs` reports the deployment complete for the OMS and for each agent, and the Plug-ins page lists PostgreSQL 13.5.15.0.0.
+**Done when** `emcli get_plugin_deployment_status -plugin=ip.em.xpgs` reports the deployment complete for the OMS and for each agent, and the Plug-ins page lists the PostgreSQL plug-in at the version you imported (24.1.1.0.0 on Enterprise Manager 24ai, 13.5.15.0.0 on 13.5).
 
 Detail: [Download](install-and-upgrade.md#download) · [Import the OPAR](install-and-upgrade.md#import) · [Deploy to the OMS](install-and-upgrade.md#deploy-oms) · [Deploy to agents](install-and-upgrade.md#deploy-agents).
 

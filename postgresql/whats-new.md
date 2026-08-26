@@ -1,11 +1,11 @@
 ---
-title: What's new in 13.5.15
+title: What's new in this release
 nav_order: 1
 ---
 
-# What's new in 13.5.15
+# What's new in this release
 
-If you monitor PostgreSQL with 13.5.12 today, 13.5.15.0.0 keeps what you already have. Your targets, console, and alert routing carry forward, and on top of them the plug-in becomes advisory. It names the index worth creating and the table autovacuum is falling behind on, each with SQL for you to review and run, and it tells you when a query has left its accepted plan, with both plans side by side so you can test a rewrite or accept the new plan.
+If you monitor PostgreSQL with 13.5.12 today, this release keeps what you already have. It ships as two builds with the same features, 24.1.1.0.0 for Enterprise Manager 24ai and 13.5.15.0.0 for Enterprise Manager 13.5. Your targets, console, and alert routing carry forward, and on top of them the plug-in becomes advisory. It names the index worth creating and the table autovacuum is falling behind on, each with SQL for you to review and run, and it tells you when a query has left its accepted plan, with both plans side by side so you can test a rewrite or accept the new plan.
 
 Everything in this release is additive. Your targets, thresholds, schedules, and credentials carry forward unchanged; a few surfaces moved, and those are listed under [What changed or moved](#what-changed-or-moved). The upgrade itself is the ordinary import-and-deploy sequence. There is one new decision to make, and it is on the database side: plan capture needs `auto_explain` configured and the `pg_read_server_files` grant on your monitoring role. Among the settings the plug-in could apply itself, that grant is the one it deliberately never does. It is needed only for the two plan pages, and everything else in this release works without it.
 
@@ -130,14 +130,14 @@ Nothing here is required to keep monitoring what you monitor today. Each item ad
 
 ## Upgrading from 13.5.12
 
-1. Import the new OPAR and deploy it to the OMS and to every monitoring agent, the same three steps as any plug-in update. See [Upgrade from an earlier release](install-and-upgrade.md#upgrade). Targets, thresholds, schedules, and credentials carry forward unchanged, and the agent-local history store is created automatically at the first collection after the upgrade.
+1. Import the new OPAR (13.5.15.0.0 on Enterprise Manager 13.5, 24.1.1.0.0 on 24ai) and deploy it to the OMS and to every monitoring agent, the same three steps as any plug-in update. See [Upgrade from an earlier release](install-and-upgrade.md#upgrade). Targets, thresholds, schedules, and credentials carry forward unchanged, and the agent-local history store is created automatically at the first collection after the upgrade.
 2. Allow up to 24 hours for the OMS metadata refresh. An "Error getting meta-data" message during that period clears itself. See [After an upgrade](install-and-upgrade.md#after-upgrade).
 3. Open **Monitoring Readiness** on each target and read the panels top to bottom. The panels tell you which of the new prerequisites that particular target is still missing.
 4. On the targets where you want plan capture, run the `pg_read_server_files` grant, then click **Configure auto_explain** and **Apply**. Reload the page to confirm the panel turned green.
 
 ## Full changelog
 
-The [Changelog](changelog.md) lists every new page, metric, job, template, and fix in 13.5.15.0.0, and the releases before it.
+The [Changelog](changelog.md) lists every new page, metric, job, template, and fix in this release (24.1.1.0.0 / 13.5.15.0.0), and the releases before it.
 
 ## Related
 

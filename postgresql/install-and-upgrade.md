@@ -23,7 +23,7 @@ You enter the key per target, in the `Plugin License` target property (see [Data
 
 ## Download {#download}
 
-Download details for the plug-in OPAR and the three monitoring template files (`.template.xml`), including their SHA-256 checksums, are provided during the order process or trial enrollment. If you need access to the download, email [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io) or contact us through [integrationplumbers.io](https://integrationplumbers.io). Verify the checksum of each file before you import it.
+Download details for the plug-in OPAR and the three monitoring template files (`.template.xml`), including their SHA-256 checksums, are provided during the order process or trial enrollment. The plug-in ships as two plug-in builds with the same features: **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.15.0.0** for Enterprise Manager 13.5; download the one that matches your Enterprise Manager (the 13.5.15.0.0 build also installs on 24ai, but the 24.1.1.0.0 build does not install on 13.5). If you need access to the download, email [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io) or contact us through [integrationplumbers.io](https://integrationplumbers.io). Verify the checksum of each file before you import it.
 
 ## Import the OPAR {#import}
 
@@ -51,8 +51,8 @@ Download details for the plug-in OPAR and the three monitoring template files (`
 2. Expand the Databases folder and click PostgreSQL.
 3. From the Actions menu, click Deploy On → Management Servers and follow the on-screen instructions.
 
-![The Plug-ins page showing PostgreSQL 13.5.15.0.0](images/13-5-15/plugins-page.png)
-*The Plug-ins page after 13.5.15.0.0 is imported.*
+![The Plug-ins page showing the PostgreSQL plug-in after import](images/13-5-15/plugins-page.png)
+*The Plug-ins page after the OPAR is imported. The version shown is the build you imported, here 13.5.15.0.0.*
 
 The equivalent `emcli` command:
 
@@ -82,7 +82,7 @@ emcli deploy_plugin_on_agent -agent_names="<host>:<port>" -plugin=ip.em.xpgs
 
 ## Upgrade from an earlier release {#upgrade}
 
-Upgrading from 13.5.12, or any other 13.5.x release, to 13.5.15.0.0 uses the same three steps as a first-time install: [import the new OPAR](#import), [deploy it to the OMS](#deploy-oms), then [deploy it to every agent](#deploy-agents). Enterprise Manager treats it as a standard plug-in update — your existing targets, thresholds, and credentials carry forward unchanged.
+Upgrading from 13.5.12, or any other 13.5.x release, to this release uses the same three steps as a first-time install: [import the new OPAR](#import), [deploy it to the OMS](#deploy-oms), then [deploy it to every agent](#deploy-agents). Enterprise Manager treats it as a standard plug-in update — your existing targets, thresholds, and credentials carry forward unchanged. Import the build that matches your Enterprise Manager: 24.1.1.0.0 on 24ai, 13.5.15.0.0 on 13.5.
 
 The agent-local history store used by the plan and workload advisory pages is created automatically the first time each target collects after the upgrade. There is no migration step and nothing to run by hand.
 
@@ -90,7 +90,7 @@ The agent-local history store used by the plan and workload advisory pages is cr
 
 For up to 24 hours after the upgrade, the OMS may show an "Error getting meta-data" error until its next metadata refresh completes. See [Error getting meta-data after an upgrade](troubleshooting.md#error-getting-meta-data) if you run into it.
 
-Once the plug-in is deployed, open [**Monitoring Readiness**](monitoring-readiness.md) on each target. 13.5.15.0.0 adds new prerequisites for its advisory features, and this page shows exactly which ones a given target is still missing.
+Once the plug-in is deployed, open [**Monitoring Readiness**](monitoring-readiness.md) on each target. This release adds new prerequisites for its advisory features, and this page shows exactly which ones a given target is still missing.
 
 ## Uninstall
 

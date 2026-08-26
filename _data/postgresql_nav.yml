@@ -3,7 +3,7 @@ groups:
   - name: Start here
     pages:
       - { title: "PostgreSQL Plug-in", url: /postgresql/ }
-      - { title: "What's new in 13.5.15", url: /postgresql/whats-new.html }
+      - { title: "What's new", url: /postgresql/whats-new.html }
       - { title: "Getting started", url: /postgresql/getting-started.html }
       - { title: "Trial setup", url: /postgresql/trial.html }
   - name: Set up
