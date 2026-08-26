@@ -103,7 +103,7 @@ Select a row first — the actions stay disabled until you do, and the line bene
 ![The Baseline Management panel with the baseline table and its actions](images/13-5-15/plan-drift-baseline-management.png)
 *Baseline Management: every observed shape, its status, and the Accept, Pin, and Retire actions.*
 
-![Accepting a plan as a baseline](images/13-5-15/plan-drift-accept-baseline.gif)
+<video class="walkthrough" src="images/13-5-15/plan-drift-accept-baseline.mp4" poster="images/13-5-15/plan-drift-accept-baseline-poster.png" autoplay loop muted playsinline controls aria-label="Accepting a plan as a baseline"></video>
 *Selecting the current plan shape, labeling it, and accepting it as a baseline.*
 
 Accepting the current shape is a legitimate answer to a Plan Drift alert: if the new plan is fine, certify it and the alert clears at the next collection.
