@@ -46,8 +46,8 @@
           /* PostgreSQL guide: wider column, real tables that fit it, wrapping cells */
           .inner{max-width:1040px}
           #main_content table{display:table;width:100%;max-width:100%;table-layout:auto;font-size:0.93em;line-height:1.35}
-          #main_content th,#main_content td{vertical-align:top;overflow-wrap:anywhere;padding:8px 10px}
-          #main_content td code,#main_content th code{white-space:normal;overflow-wrap:anywhere}
+          #main_content th,#main_content td{vertical-align:top;overflow-wrap:break-word;padding:8px 10px}
+          #main_content td code,#main_content th code{white-space:normal;overflow-wrap:break-word}
         </style>
         {% endif %}
         {{ content }}
