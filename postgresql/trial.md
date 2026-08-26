@@ -10,7 +10,7 @@ If you want to know whether the PostgreSQL plug-in earns a place in your Enterpr
 > **Prerequisites for this page**
 > - Enterprise Manager 13.5.0.0.0 or later, or 24ai 24.1.0.0.0 or later, with an agent that can reach the instances you want to evaluate — see [Enterprise Manager and agents](prerequisites.md#enterprise-manager).
 > - PostgreSQL 14 to 18 and a monitoring role on each instance — see [The monitoring role](prerequisites.md#monitoring-role).
-> - Preferred Credentials set for every target you add. Several pages in the checklist below read their data through Enterprise Manager jobs and report "Unable to run job. Verify Preferred Credentials are set for this target." without them — see [Preferred Credentials](prerequisites.md#preferred-credentials).
+> - **Agent Host Credentials** set under Preferred Credentials for every target you add. Several pages in the checklist below read their data through Enterprise Manager jobs and report "Unable to run job. Verify Preferred Credentials are set for this target." without them — see [Preferred Credentials](prerequisites.md#preferred-credentials).
 
 **Where to find it:** the request form is at [integrationplumbers.io/postgresql-plugin/trial](https://integrationplumbers.io/postgresql-plugin/trial). The key you are sent goes into the **Plugin License** property on each target, under **Target Setup ▸ Monitoring Configuration**, and the target's **License Info** page confirms it.
 

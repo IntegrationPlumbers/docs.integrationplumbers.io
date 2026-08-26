@@ -26,7 +26,7 @@ This is the minimum for all existing monitoring. Work through the full list, inc
 - [ ] A PostgreSQL monitoring role, with a matching `pg_hba.conf` entry for the agent host. See [The monitoring role](prerequisites.md#monitoring-role).
 - [ ] `pg_stat_statements` preloaded and created in each monitored database. See [Statement statistics (pg_stat_statements)](prerequisites.md#pg-stat-statements).
 - [ ] A valid license key.
-- [ ] OEM Preferred Credentials set for the target. See [Preferred Credentials](prerequisites.md#preferred-credentials).
+- [ ] Agent Host Credentials set for the target under OEM Preferred Credentials. See [Preferred Credentials](prerequisites.md#preferred-credentials).
 - [ ] Disk headroom on the agent host for the agent-local history store. See [Store size and disk reclaim](history-store-and-retention.md#store-size).
 
 **Plan Analysis** and **Plan Drift Advisor** need more than this: the `auto_explain` module and one privilege grant. Step 6 covers both.
@@ -68,7 +68,7 @@ Detail: [Database target properties](targets-and-properties.md#database-properti
 
 ## Step 5: Set Preferred Credentials
 
-Some pages read their data through Enterprise Manager jobs that run on the target's host rather than through the monitoring connection, and those jobs need OEM Preferred Credentials. Set them once per target under Setup, Security, Preferred Credentials. **Workload History**, **Plan Analysis**, **Plan Drift Advisor**, **Retention Policies**, the "Autovacuum runs · 24h" KPI on **Vacuum Advisor**, and the **Configure auto_explain** action on **Monitoring Readiness** all depend on them. Until they are set, each of those raises "Unable to run job. Verify Preferred Credentials are set for this target."
+Some pages read their data through Enterprise Manager jobs that run on the agent host rather than through the monitoring connection, and those jobs need one Preferred Credential set on the PostgreSQL target: **Agent Host Credentials**, an operating-system login for the agent host. Go to Setup, Security, Preferred Credentials, open the **PostgreSQL Database** target type, select the target's **Agent Host Credentials** row under **Target Preferred Credentials**, click **Set**, choose a named host credential, and click **Test and Save**. **Workload History**, **Plan Analysis**, **Plan Drift Advisor**, **Retention Policies**, the "Autovacuum runs · 24h" KPI on **Vacuum Advisor**, and the **Configure auto_explain** action on **Monitoring Readiness** all depend on it. Until it is set, each of those raises "Unable to run job. Verify Preferred Credentials are set for this target."
 
 **Done when** opening **Workload History** on the target returns a page instead of that message. If you see it later on any other page, the fix is the same one.
 

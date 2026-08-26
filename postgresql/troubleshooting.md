@@ -13,11 +13,11 @@ When an advisor page sits empty, a KPI shows a placeholder, or an action fails o
 
 **Symptoms:** "Unable to run job. Verify Preferred Credentials are set for this target."
 
-**Cause:** This message appears wherever a page or action reads its data through an Enterprise Manager job instead of the live monitoring connection, and the target has no Preferred Credentials set. It can show up on **Workload History**, **Plan Analysis**, **Plan Drift Advisor**, **Retention Policies**, the "Autovacuum runs · 24h" KPI on **Vacuum Advisor**, and the **Configure auto_explain** action on **Monitoring Readiness**.
+**Cause:** This message appears wherever a page or action reads its data through an Enterprise Manager job instead of the live monitoring connection, and the PostgreSQL target has no **Agent Host Credentials** set under Preferred Credentials. It can show up on **Workload History**, **Plan Analysis**, **Plan Drift Advisor**, **Retention Policies**, the "Autovacuum runs · 24h" KPI on **Vacuum Advisor**, and the **Configure auto_explain** action on **Monitoring Readiness**.
 
 **Fix:**
-1. Go to Setup, Security, Preferred Credentials.
-2. Set the Preferred Credentials for the PostgreSQL target.
+1. Go to Setup, Security, Preferred Credentials, and open the **PostgreSQL Database** target type.
+2. Under **Target Preferred Credentials**, select the target's **Agent Host Credentials** row, click **Set**, choose a named host credential for the agent host, and click **Test and Save**. Normal Host Credentials set on the host target are a different set; the jobs do not read them.
 3. Reload the page, or retry the action.
 
 **Related:** [Preferred Credentials](prerequisites.md#preferred-credentials)
