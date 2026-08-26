@@ -84,7 +84,7 @@ Runs `pg_dump` against the target database. The connection port is filled in aut
 | Fully qualified path to pgpass.conf | Fully qualified path to the pgpass file. |
 
 
-The job runs `pg_dump` from the PATH of the Agent Host Credentials user on the agent host; the plug-in does not ship PostgreSQL client tools, so install them there first. Both credential sets must be set for the target under Preferred Credentials before the job can run. The connection authenticates with the PostgreSQL Credentials you choose for the job; the pgpass file you name is used only when those credentials carry no password, and must then be readable by the Agent Host Credentials user. An existing file at **Backup file path** is overwritten. With the directory format (`-F d`), `pg_dump` refuses a directory that is not empty.
+The job runs `pg_dump` from the PATH of the Agent Host Credentials user on the agent host; the plug-in does not ship PostgreSQL client tools, so install them there first. Both credential sets must be set for the target under Preferred Credentials before the job can run. The connection authenticates with the PostgreSQL Credentials you choose for the job; the pgpass file you name is used only when those credentials carry no password, and must then be readable by the Agent Host Credentials user. An existing file at **Backup file path** is overwritten. With the directory format (`-F d`), `pg_dump` refuses a directory that is not empty. The flags field cannot be left blank; pass at least the format, for example `-F c`. Read the job's output to confirm the result: it shows the exact command that ran and either "Successfully backed up" or the `pg_dump` error.
 
 ### Restore Postgresql Database
 
@@ -106,7 +106,7 @@ Runs `pg_restore` against the target database — or `psql`, if you mark the bac
 | Is the backup file plain text SQL? | Optional. Type `yes` if the backup file is plain-text SQL. |
 
 
-The database named in **Database name** must already exist: the job connects to it and restores into it, and does not create it. `pg_restore` and `psql` must be on the PATH of the Agent Host Credentials user, and the same two credential sets as for Backup must be set for the target. If you leave "Is the backup file plain text SQL?" empty, the job detects the format from the file itself (custom, tar, or directory dumps go to `pg_restore`; anything else is treated as plain SQL and goes to `psql`).
+The database named in **Database name** must already exist: the job connects to it and restores into it, and does not create it. `pg_restore` and `psql` must be on the PATH of the Agent Host Credentials user, and the same two credential sets as for Backup must be set for the target. If you leave "Is the backup file plain text SQL?" empty, the job detects the format from the file itself (custom, tar, or directory dumps go to `pg_restore`; anything else is treated as plain SQL and goes to `psql`). The flags field cannot be left blank either (`--no-owner` is a safe minimum). Read the job's output to confirm the result: a `pg_restore` error such as "database … does not exist" appears there, followed by "Failed to restore".
 
 ## Patroni cluster switchover
 
