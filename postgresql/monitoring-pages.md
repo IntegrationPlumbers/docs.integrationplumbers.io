@@ -140,7 +140,6 @@ The pages under **Realtime** query the target live, on demand, each with an **Au
 
 **Logs** shows the PostgreSQL server log. A **Log Statistics (last collection)** panel reports Total Lines, Warnings, Errors, Fatals, and Panics; it refreshes every 5 minutes once the collection is enabled in Metric and Collection Settings, regardless of the Auto Refresh setting, which controls only the entries table below it. The **PostgreSQL Logs** table shows the last 500 lines of the configured log file, parsed into Timestamp, Severity, PID, Username, Database Name, and Message. An empty table means nothing new has been parsed since the last collection, or the log file path needs a second look.
 
-{% comment %}CONFIRM: Ben — does setting the log path enable log_stats? It ships DISABLED in defaultCollection.{% endcomment %}
 
 This feature works only when the OEM agent is **local** — installed on the same host as the PostgreSQL server. It does not support remote log collection.
 
@@ -151,6 +150,7 @@ This feature works only when the OEM agent is **local** — installed on the sam
    - Reload or restart PostgreSQL.
    - Confirm the OMA (agent) user can read the log file.
 2. **Configure the log file path in the plug-in.** On the target's Monitoring Configuration page (target menu ▸ Target Setup ▸ Monitoring Configuration), enter the full path in **Path to postgres log file**. See [Database target properties](targets-and-properties.md#database-properties). The path must point to a file readable by the agent on the same host; remote paths aren't supported.
+3. **Enable the Log Statistics collection.** Setting the path does not enable it. Open the target's **Metric and Collection Settings**, find **Log Statistics**, and enable the collection; it then runs every 5 minutes. The shipped monitoring templates do not enable it either. The **PostgreSQL Logs** table needs only the path.
 
 ![The target property field for the PostgreSQL log file path](images/image17.png)
 

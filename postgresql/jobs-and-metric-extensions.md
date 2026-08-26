@@ -83,8 +83,8 @@ Runs `pg_dump` against the target database. The connection port is filled in aut
 | Fully qualified hostname/IP address | Must be listed in the pgpass file. |
 | Fully qualified path to pgpass.conf | Fully qualified path to the pgpass file. |
 
-{% comment %}CONFIRM: whether the job overwrites an existing file at "Backup file path", or fails.{% endcomment %}
-{% comment %}CONFIRM: whether pg_dump must already be installed and on the agent host's PATH, or the plug-in provides it.{% endcomment %}
+
+The job runs `pg_dump` from the PATH of the Agent Host Credentials user on the agent host; the plug-in does not ship PostgreSQL client tools, so install them there first. An existing file at **Backup file path** is overwritten. With the directory format (`-F d`), `pg_dump` refuses a directory that is not empty. The password comes from the pgpass file you name; the job points `PGPASSFILE` at it.
 
 ### Restore Postgresql Database
 
@@ -105,7 +105,8 @@ Runs `pg_restore` against the target database — or `psql`, if you mark the bac
 | Fully qualified path to pgpass.conf | Fully qualified path to the pgpass file. |
 | Is the backup file plain text SQL? | Optional. Type `yes` if the backup file is plain-text SQL. |
 
-{% comment %}CONFIRM: whether the database named in "Database name" must already exist before Restore runs, or the job creates it.{% endcomment %}
+
+The database named in **Database name** must already exist: the job connects to it and restores into it, and does not create it. `pg_restore` and `psql` must be on the PATH of the Agent Host Credentials user. If you leave "Is the backup file plain text SQL?" empty, the job detects the format from the file itself (custom, tar, or directory dumps go to `pg_restore`; anything else is treated as plain SQL and goes to `psql`).
 
 ## Patroni cluster switchover
 

@@ -143,8 +143,7 @@ The frequency detection and the bloat estimate are cause and consequence. The fr
 
 This section and the **Table Bloat Estimate** metric need the `pgstattuple` extension on the monitored database. Extensions in PostgreSQL are per-database, so install it in each database you want estimated. The plug-in detects it automatically through the catalog and never installs it. Without it the metric emits zero rows and the page section is simply empty. That is a healthy, expected state, not an error.
 
-The plug-in uses the fast approximate function, which is visibility-map based and only scans pages not already marked all-visible. It never runs a full heap scan. It restricts itself to ordinary permanent tables in user schemas of at least 256 KB. A table outside those bounds is skipped and logged; a table the role cannot read can leave that database's estimate empty for the collection.
-{% comment %}CONFIRM: Ben — FEATURE_USAGE §5.3 says per-table skip; code degrades per-database{% endcomment %}
+The plug-in uses the fast approximate function, which is visibility-map based and only scans pages not already marked all-visible. It never runs a full heap scan. It restricts itself to ordinary permanent tables in user schemas of at least 256 KB. A table outside those bounds is skipped and logged. A table the role cannot read leaves that whole database's estimate empty for that collection, a known limitation in this release, so grant the monitoring role read access to every table you want estimated.
 
 | Severity | Condition |
 |---|---|

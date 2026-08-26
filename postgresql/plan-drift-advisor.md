@@ -136,9 +136,8 @@ Retired baselines behave the way the name implies. A current plan that matches a
 
 **Baseline mode defaults to Manual.** No plan becomes accepted-good without a named operator action, and that action, its actor, and its rationale land in the Audit Trail. Observed shapes still accumulate as `candidate` rows in the meantime, so when you do decide to certify one, the history is already there.
 
-Automatic promotion is opt-in through the **Auto** and **Hybrid** baseline modes. Under either, a candidate is promoted once it has been seen at least **Stability captures** times across at least **Stability days**, and only if its cost is at most **Auto cost guard %** of the cheapest accepted plan's cost. That guard is what stops a stable-but-worse plan from quietly certifying itself.
+Automatic promotion is opt-in through the **Auto** baseline mode. Under it, a candidate is promoted once it has been seen at least **Stability captures** times across at least **Stability days**, and only if its cost is at most **Auto cost guard %** of the cheapest accepted plan's cost. That guard is what stops a stable-but-worse plan from quietly certifying itself.
 
-{% comment %}CONFIRM: Ben — Auto and Hybrid baseline modes behave identically in this build; keep both?{% endcomment %}
 
 Read Auto cost guard % as a ratio rather than a deviation: 100 means a candidate may be no worse than the accepted best, and a higher value is the multiple you are willing to tolerate. Numeric band % and Delta prev % work the other way round, as deviation percentages measuring how far above a reference a cost has moved. A candidate with no accepted plan to compare against, or with no usable cost, passes the guard.
 
@@ -178,7 +177,7 @@ Failure states are explicit rather than blank: "Explain failed.", "No plan retur
 The **Drift Configuration** panel sits at the bottom of the page and is always visible, whether or not a query is selected. It is prefilled with the configuration currently in effect, and the panel says so: "Prefilled with the configuration currently in effect (stored values over defaults). Only filled fields are sent."
 
 1. Choose the **Scope**: **Global** for the whole target, or **Per query-id** and enter the query id to give one hot query tighter rules than the rest.
-2. Choose the **Baseline mode**: **Leave unchanged**, **Manual**, **Auto**, or **Hybrid**. Leave unchanged means exactly that, and stays selectable so you can back out of a choice before saving.
+2. Choose the **Baseline mode**: **Leave unchanged**, **Manual**, or **Auto**. Leave unchanged means exactly that, and stays selectable so you can back out of a choice before saving.
 3. Set the knobs you want to change. Fields you leave blank are not sent, so blanking a field does not reset it.
 4. Set **Alert on off-baseline (structural) plan change** to **Leave unchanged**, **On**, or **Off**.
 5. Click **Save Configuration**.
@@ -189,7 +188,7 @@ The **Drift Configuration** panel sits at the bottom of the page and is always v
 | Setting | What it controls |
 |---|---|
 | Scope | Whether this configuration applies to the whole target (Global) or to one query id. Per-query-id values win over the global ones. |
-| Baseline mode | How plans become accepted-good: Manual (an operator accepts each one), or Auto / Hybrid (candidates can be promoted automatically). |
+| Baseline mode | How plans become accepted-good: Manual (an operator accepts each one), or Auto (candidates can be promoted automatically). |
 | Stability captures | How many times a candidate shape must be seen before automatic promotion may consider it. |
 | Stability days | How long a candidate shape must have been observed before automatic promotion may consider it. |
 | Auto cost guard % | The most a candidate may cost, as a percentage **of** the cheapest accepted plan's cost, and still be promoted automatically. A ratio, not a deviation: 100 allows no worse than the accepted best. |

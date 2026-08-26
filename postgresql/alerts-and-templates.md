@@ -98,10 +98,8 @@ Three pre-built Enterprise Manager monitoring templates cover the plug-in's metr
 | `ip_xpgs_starter` | `ip_xpgs_starter.template.xml` | A starter to extend. "Minimal starter monitoring template for PostgreSQL databases: availability plus core database health, ready to clone and extend into your own site standard." |
 
 After import, the console lists each template under its template name, and that same name is what you pass to `emcli apply_template`.
-{% comment %}CONFIRM: verify in the console after import{% endcomment %}
 
-Monitoring templates live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself: an administrator imports them into the OMS once, then applies them to targets.
-{% comment %}CONFIRM: how template files are delivered to customers (download bundle / S3 link){% endcomment %}
+Monitoring templates live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself. Integration Plumbers publishes the three template files for download with each release. Download them, import them into the OMS once, then apply them to targets.
 
 ### Import and apply
 
@@ -115,7 +113,11 @@ emcli apply_template \
    -targets="myprod_db:ip_postgresql_db"
 ```
 
-In the console, go to **Enterprise → Monitoring → Monitoring Templates → Import**, then select the template and choose **Actions → Apply**.
+In the console:
+
+1. Go to **Enterprise ▸ Monitoring ▸ Monitoring Templates**, click **Import**, choose the `.template.xml` file, and import it.
+2. In the search region, select **Display Oracle Certified Templates** and search again. The imported template is listed under its template name.
+3. Select the template, choose **Actions ▸ Apply**, add the PostgreSQL Database targets, and apply.
 
 ![The Monitoring Templates page with the Import action selected](images/13-5-15/templates-import.png)
 
