@@ -135,7 +135,11 @@ Some plug-in pages read their data through Enterprise Manager jobs that run on t
 2. On the **My Preferences** tab, under **Target Preferred Credentials**, select the target's **Agent Host Credentials** row and click **Set**.
 3. Choose a named host credential for the agent host, or create one, then click **Test and Save**.
 
-To cover every target of the type with one login, set it under **Default Preferred Credentials** on the same page instead. The jobs look up this set on the PostgreSQL target; Normal Host Credentials set on the host target itself do not satisfy them. See [Configuring and Using Target Credentials](https://docs.oracle.com/en/enterprise-manager/cloud-control/enterprise-manager-cloud-control/24.1/emsec/configuring-using-target-credentials.html) in the Oracle documentation.
+![The PostgreSQL Database Preferred Credentials page with Agent Host Credentials set for a target](images/13-5-15/preferred-credentials-agent-host.png)
+
+*Agent Host Credentials set for one target under Target Preferred Credentials.*
+
+To cover every target of the type with one login, set it under **Default Preferred Credentials** on the same page instead. The jobs look up this set on the PostgreSQL target; Normal Host Credentials set on the host target itself do not satisfy them. The same page holds **Postgresql Preferred Credentials**, a database login that only the [Backup and Restore jobs](jobs-and-metric-extensions.md#backup-and-restore-jobs) need. See [Configuring and Using Target Credentials](https://docs.oracle.com/en/enterprise-manager/cloud-control/enterprise-manager-cloud-control/24.1/emsec/configuring-using-target-credentials.html) in the Oracle documentation.
 
 Agent Host Credentials are needed by:
 
