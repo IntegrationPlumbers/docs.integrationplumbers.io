@@ -59,8 +59,7 @@ If the table reads "No licenses configured", the key has not been saved on the t
 
 Licensing is per monitored instance: one key carries an instance count, and the **Instances** column is where you read it. For pricing, use the self-serve quote tool on [integrationplumbers.io](https://integrationplumbers.io).
 
-**Days Remaining** is the number to keep an eye on during the evaluation. Give yourself enough of it to reach the week-1 steps below, which need history depth that only accumulates with time.
-{% comment %}CONFIRM: Ben — at Days Remaining = 0 a banner is shown; do collections stop as well? (Andre checking, 2026-08-26){% endcomment %}
+**Days Remaining** is the number to keep an eye on during the evaluation. Give yourself enough of it to reach the week-1 steps below, which need history depth that only accumulates with time. When it reaches 0 the key has expired: the target's pages show an expiry banner and collections stop.
 
 ## Install
 
