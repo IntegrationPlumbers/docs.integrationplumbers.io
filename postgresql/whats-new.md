@@ -11,7 +11,7 @@ Everything in this release is additive. Your targets, thresholds, schedules, and
 
 **Where to find it:** the new pages appear in the PostgreSQL Database target's navigation tree — **Realtime ▸ Vacuum xmin Horizon** under the Realtime group, the rest under each database name — and in the same target menu you use today. The new metrics appear under **Target menu → Monitoring → All Metrics**.
 
-**In this page:** The new pages at a glance · Monitoring Readiness · Plan Analysis · Plan Drift Advisor · Workload History and wait events · Index Advisor · Vacuum Advisor and xmin horizon · Retention Policies and the history store · Alerts and monitoring templates · Collection throttle · What changed or moved · New prerequisites · Upgrading from 13.5.12 · If you installed the 13.5.14 pre-release · Full changelog
+**In this page:** The new pages at a glance · Monitoring Readiness · Plan Analysis · Plan Drift Advisor · Workload History and wait events · Index Advisor · Vacuum Advisor and xmin horizon · Retention Policies and the history store · Alerts and monitoring templates · Collection throttle · What changed or moved · New prerequisites · Upgrading from 13.5.12 · Full changelog
 
 ## The new pages at a glance
 
@@ -134,11 +134,6 @@ Nothing here is required to keep monitoring what you monitor today. Each item ad
 2. Allow up to 24 hours for the OMS metadata refresh. An "Error getting meta-data" message during that period clears itself. See [After an upgrade](install-and-upgrade.md#after-upgrade).
 3. Open **Monitoring Readiness** on each target and read the panels top to bottom. The panels tell you which of the new prerequisites that particular target is still missing.
 4. On the targets where you want plan capture, run the `pg_read_server_files` grant, then click **Configure auto_explain** and **Apply**. Reload the page to confirm the panel turned green.
-
-## If you installed the 13.5.14 pre-release
-
-Install 13.5.15.0.0 over it as a normal plug-in update, following the same steps as any other upgrade. History collected by the pre-release build is not guaranteed to carry forward.
-{% comment %}CONFIRM: Ben — pre-release → GA upgrade guidance (normal update vs clean redeploy; history reset){% endcomment %}
 
 ## Full changelog
 

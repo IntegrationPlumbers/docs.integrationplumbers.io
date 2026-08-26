@@ -33,8 +33,7 @@ While you wait for the key, work through the [Prerequisites checklist](prerequis
 
 ## Your trial key
 
-Your key is issued by Integration Plumbers once the request has been processed.
-{% comment %}CONFIRM: Andre — trial length and how/when the key is delivered (email from sales@?){% endcomment %}
+A trial runs for 30 days. Request a key through the [trial page](https://integrationplumbers.io/postgresql-plugin/trial) or by emailing [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io); Integration Plumbers issues the key once the request has been processed.
 
 ### Enter the key
 
@@ -58,11 +57,10 @@ Open **License Info**, at the bottom of the target's navigation tree. It shows t
 
 If the table reads "No licenses configured", the key has not been saved on the target you are looking at. Go back to **Monitoring Configuration** and check the **Plugin License** property. See [Monitoring pages](monitoring-pages.md) for the rest of the target's pages.
 
-One key can cover several instances, and the **Instances** column is where you read the count.
-{% comment %}CONFIRM: per-instance vs per-key licensing wording{% endcomment %}
+Licensing is per monitored instance: one key carries an instance count, and the **Instances** column is where you read it. For pricing, use the self-serve quote tool on [integrationplumbers.io](https://integrationplumbers.io).
 
 **Days Remaining** is the number to keep an eye on during the evaluation. Give yourself enough of it to reach the week-1 steps below, which need history depth that only accumulates with time.
-{% comment %}CONFIRM: what happens when Days Remaining reaches zero (collection stops? banner?){% endcomment %}
+{% comment %}CONFIRM: Ben — at Days Remaining = 0 a banner is shown; do collections stop as well? (Andre checking, 2026-08-26){% endcomment %}
 
 ## Install
 
@@ -137,7 +135,7 @@ Before you write, check [Troubleshooting](troubleshooting.md). An empty advisor 
 
 ## Buying
 
-Email [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io) to buy, or to add instances to a license you already hold.
+Use the self-serve quote tool on [integrationplumbers.io](https://integrationplumbers.io), or email [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io), to buy or to add instances to a license you already hold.
 
 Buying changes the key, not the installation. Enter the production key in the same **Plugin License** property under **Target Setup ▸ Monitoring Configuration** on each target, then open **License Info** and check the **Type**, **Expiration**, and **Instances** columns. Nothing else moves: the targets, the thresholds, the templates you applied, and the history already accumulated in the agent-local store all stay exactly as they are.
 

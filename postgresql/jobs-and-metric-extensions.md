@@ -14,7 +14,6 @@ When you need to act on a target directly (clear a batch of idle connections, ta
 > - A custom query in a Metric Extension needs [the monitoring role](prerequisites.md#monitoring-role), or another role with read access to whatever your query touches.
 
 **Where to find it:** the jobs below run from **Enterprise ▸ Job ▸ Activity ▸ Create Job**; Metric Extensions are created from **Enterprise ▸ Monitoring ▸ Metric Extensions**.
-{% comment %}CONFIRM: OEM console path Enterprise ▸ Monitoring ▸ Metric Extensions{% endcomment %}
 
 **In this page:** Jobs shipped with the plug-in · Kill Idle PostgreSQL Connections · Backup and Restore jobs · Patroni cluster switchover · Data-management jobs · Custom queries with a Metric Extension
 
