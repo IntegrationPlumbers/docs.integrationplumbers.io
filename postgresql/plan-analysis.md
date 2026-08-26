@@ -114,7 +114,7 @@ A dash is not a gap in the data. It means the detection rules found nothing wron
 
 Click a row to expand it. The plug-in loads that capture's plan body and renders the plan tree, showing each node's type, cost, estimated versus actual rows, and actual time, nested the way it executed. Beneath the tree, under a **Recommendations** heading, sits one card per detected insight that carries concrete advice. Each card names the pathology, states the evidence behind it, and gives the change to make. Where the advice names a parameter value or a SQL statement, the card carries a **Copy** button for the copy-ready text.
 
-![Expanding a Plan Analysis row to show the captured plan tree and the recommendation cards below it](images/13-5-15/plan-analysis-expand.gif)
+<video class="walkthrough" src="images/13-5-15/plan-analysis-expand.mp4" poster="images/13-5-15/plan-analysis-expand-poster.png" autoplay loop muted playsinline controls aria-label="Expanding a Plan Analysis row to show the captured plan tree and the recommendation cards below it"></video>
 *Expanding a row loads the stored plan body and renders it as a tree.*
 
 ![An expanded Plan Analysis row with the plan tree and a recommendation card](images/13-5-15/plan-analysis-row-expanded.png)
