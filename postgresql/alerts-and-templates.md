@@ -117,7 +117,7 @@ emcli apply_template \
 In the console:
 
 1. Go to **Enterprise ▸ Monitoring ▸ Monitoring Templates**, click **Import**, choose the `.template.xml` file, and import it.
-2. In the search region, select **Display Oracle Certified Templates** and search again. The imported template is listed under its template name.
+2. The imported template is listed under its template name. If it is not, select **Display Oracle Certified Templates** in the search region and search again.
 3. Select the template, choose **Actions ▸ Apply**, add the PostgreSQL Database targets, and apply.
 
 ![The Monitoring Templates page with the Import action selected](images/13-5-15/templates-import.png)
