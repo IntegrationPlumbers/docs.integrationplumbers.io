@@ -33,7 +33,7 @@ While you wait for the key, work through the [Prerequisites checklist](prerequis
 
 ## Your trial key
 
-A trial runs for 30 days. Request a key through the [trial page](https://integrationplumbers.io/postgresql-plugin/trial) or by emailing [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io); Integration Plumbers issues the key once the request has been processed.
+A trial runs for 30 days. Request a key through the [trial page](https://integrationplumbers.io/postgresql-plugin/trial) or by emailing [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io); Integration Plumbers issues the key once the request has been processed. Download details for the OPAR and the monitoring template files, including SHA-256 checksums, come with your trial enrollment — see [Download](install-and-upgrade.md#download) if you need access.
 
 ### Enter the key
 

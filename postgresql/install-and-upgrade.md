@@ -13,13 +13,17 @@ Installing or upgrading the PostgreSQL plug-in follows Oracle Enterprise Manager
 
 **Where to find it:** Setup → Extensibility → Plug-ins → Databases → PostgreSQL → Actions → Deploy On, or the equivalent `emcli` plug-in commands shown below.
 
-**In this page:** License key · Import the OPAR · Deploy to the OMS · Deploy to agents · Upgrade from an earlier release · After an upgrade · Uninstall
+**In this page:** License key · Download · Import the OPAR · Deploy to the OMS · Deploy to agents · Upgrade from an earlier release · After an upgrade · Uninstall
 
 ## License key
 
 A valid license key is required to monitor a target with the PostgreSQL plug-in. To purchase a license, contact [sales@integrationplumbers.io](mailto:sales@integrationplumbers.io). To request a trial license, visit the [trial page](https://integrationplumbers.io/postgresql-plugin/trial).
 
 You enter the key per target, in the `Plugin License` target property (see [Database target properties](targets-and-properties.md#database-properties)). To confirm a target's key is recognized, open its **License Info** page.
+
+## Download {#download}
+
+Download details for the plug-in OPAR and the three monitoring template files (`.template.xml`), including their SHA-256 checksums, are provided during the order process or trial enrollment. If you need access to the download, email [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io) or contact us through [integrationplumbers.io](https://integrationplumbers.io). Verify the checksum of each file before you import it.
 
 ## Import the OPAR {#import}
 

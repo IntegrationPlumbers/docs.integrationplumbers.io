@@ -45,7 +45,7 @@ Import the OPAR onto the OMS with `emcli import_update -file=<PATH_TO_FILE> -oms
 
 **Done when** `emcli get_plugin_deployment_status -plugin=ip.em.xpgs` reports the deployment complete for the OMS and for each agent, and the Plug-ins page lists PostgreSQL 13.5.15.0.0.
 
-Detail: [Import the OPAR](install-and-upgrade.md#import) · [Deploy to the OMS](install-and-upgrade.md#deploy-oms) · [Deploy to agents](install-and-upgrade.md#deploy-agents).
+Detail: [Download](install-and-upgrade.md#download) · [Import the OPAR](install-and-upgrade.md#import) · [Deploy to the OMS](install-and-upgrade.md#deploy-oms) · [Deploy to agents](install-and-upgrade.md#deploy-agents).
 
 ## Step 3: Add your first target
 
