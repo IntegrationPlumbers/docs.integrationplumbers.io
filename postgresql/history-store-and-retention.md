@@ -21,7 +21,8 @@ If you want months of statement-level and object-level history without growing t
 One SQLite database per PostgreSQL database target, on the agent host:
 
 `%plugin_data%/<target name>_collections.sqlite3`
-{% comment %}CONFIRM: Ben/Andre — GA "plugin data directory" fix: does it change the store path, the directory, or the modes described below? Revisit before final publish.{% endcomment %}
+
+`%plugin_data%` resolves to `<agent state directory>/ip_plugin/xpgs/data`, a dedicated tree beside the agent's own `plugin_data` directory, so the collected history is not tied to the plug-in's `plugin_data` lifecycle. The directory is created on demand at the first connection.
 
 - The file is created at the first collection that persists history, and its schema updates itself on later releases. There are no manual steps and no upgrade procedure.
 - The plug-in creates it with restrictive permissions: owner read/write, group read (640) on the database file, and 750 on its parent directory. The WAL and SHM sidecar files inherit the database file's permissions. On a filesystem without POSIX permissions the permission change fails, the collection still proceeds, and a warning is logged.
@@ -88,7 +89,7 @@ Rows appear in alphabetical order by display label, as they do on the page. Inde
 ### Set the windows
 
 1. Open **Retention Policies** from the target's tree navigation or menu.
-2. In **Retention Windows**, edit **Min retention (days)** (the protected floor) and **Max retention (days)** (the trim window) for any history type. The form is prefilled with the values currently in effect. On-page help: "Each history type is kept between its minimum and maximum days. The daily trim removes rows older than the maximum (0 disables that type's history); the minimum is protected from size-based eviction (below)." That help text states the general rule; **Captured Plans** behaves differently — see [Behaviors](#behaviors) below.
+2. In **Retention Windows**, edit **Min retention (days)** (the protected floor) and **Max retention (days)** (the trim window) for any history type. The form is prefilled with the values currently in effect. On-page help: "Each history type is kept between its minimum and maximum days. The daily trim removes rows older than the maximum; the minimum is protected from size-based eviction (below)." That help text states the general rule; **Captured Plans** behaves differently — see [Behaviors](#behaviors) below.
 3. In **Store Size Limit**, set **Whole-store size ceiling (MB)**. The hint reads "0 = disabled (no size-based eviction)", and the section help reads "When the store file exceeds this cap, daily maintenance evicts each type's oldest rows, never below its minimum retention. 0 disables."
 4. Click **Save Retention Policies**. One Save persists both sections. Blank fields mean "leave unchanged" — only the fields you fill in are sent.
 5. A dialog confirms "Retention policies saved. Changes take effect at the next daily trim." The form then re-prefills from the store, so it shows what was actually persisted.
@@ -96,7 +97,7 @@ Rows appear in alphabetical order by display label, as they do on the page. Inde
 ![The Retention Policies page after a save, with the confirmation message](images/13-5-15/retention-policies-saved.png)
 *After the save the page reloads its values from the store and reports "Saved. Windows take effect at the next daily trim."*
 
-![Editing a retention window and saving it](images/13-5-15/retention-policies-save.gif)
+<video class="walkthrough" src="images/13-5-15/retention-policies-save.mp4" poster="images/13-5-15/retention-policies-save-poster.png" autoplay loop muted playsinline controls aria-label="Editing a retention window and saving it"></video>
 *Editing a window, saving, and the confirmation dialog.*
 
 ### Validation
