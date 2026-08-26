@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Lint the PostgreSQL guide pages: front matter, forbidden terms, relative links, images.
+# Lint the PostgreSQL guide pages: front matter, forbidden terms, relative links, images (markdown links and <video src/poster>).
 # Usage: scripts/lint-docs.sh [--allow-missing-images] [file ...]     (default: postgresql/*.md)
 # Exit 1 on any finding except "pending image" / "pending CONFIRM" when --allow-missing-images is set.
 set -u
@@ -30,9 +30,9 @@ for f in "${FILES[@]}"; do
     [[ "$t" =~ ^(https?:|mailto:|/) ]] && continue
     p="$(dirname "$f")/$t"
     if [[ ! -e "$p" ]]; then
-      if [[ "$t" =~ \.(png|gif|jpg)$ && $ALLOW -eq 1 ]]; then echo "$f: pending image $t"
+      if [[ "$t" =~ \.(png|gif|jpg|mp4)$ && $ALLOW -eq 1 ]]; then echo "$f: pending image $t"
       else echo "$f: broken link $t"; rc=1; fi
     fi
-  done < <(grep -oE '\]\([^)]+\)' "$f" | sed -E 's/^\]\((.*)\)$/\1/; s/ "[^"]*"$//')
+  done < <({ grep -oE '\]\([^)]+\)' "$f" | sed -E 's/^\]\((.*)\)$/\1/; s/ "[^"]*"$//'; grep -oE '(src|poster)="[^"]+"' "$f" | sed -E 's/^(src|poster)="(.*)"$/\2/'; })
 done
 exit $rc

@@ -78,7 +78,7 @@ The plug-in never runs any of it. There is no apply action anywhere on this page
 ![The recommendation SQL dialog with the full CREATE INDEX CONCURRENTLY statement and a Copy to Clipboard button](images/13-5-15/index-advisor-sql-dialog.png)
 *Every SQL cell opens the same dialog: read it, copy it, run it yourself.*
 
-![Clicking a Recommended SQL cell, copying the statement, and closing the dialog](images/13-5-15/index-advisor-copy-sql.gif)
+<video class="walkthrough" src="images/13-5-15/index-advisor-copy-sql.mp4" poster="images/13-5-15/index-advisor-copy-sql-poster.png" autoplay loop muted playsinline controls aria-label="Clicking a Recommended SQL cell, copying the statement, and closing the dialog"></video>
 *Nothing is applied automatically — the DBA owns every execution decision.*
 
 Two statements deserve a second look before they go anywhere near a change ticket. The HOT-inhibiting `DROP` is advisory: the index may still be serving reads, and only you know whether the write cost is worth paying. The catalog-native Missing skeleton is deliberately incomplete — finish the column list from the What-If or predicate-stats evidence, or from what you know about the query that scans the table.
