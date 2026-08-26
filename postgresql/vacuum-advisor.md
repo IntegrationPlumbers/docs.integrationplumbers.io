@@ -187,9 +187,9 @@ The collector excludes its own session, so it never reports itself as the blocke
 3. Copy its **Suggested Action**, review it, and run it in your own session if it is safe to do so. The page has no action buttons by design.
 4. Watch the row disappear on the next refresh, then look at what becomes the new **Is Horizon = 1**. Blockers are often layered.
 
-![Releasing an xmin horizon holder and watching the next blocker surface](images/13-5-15/vacuum-xmin-horizon.gif)
+![The xmin Horizon holder table with the blocking session first and its release command in Suggested Action](images/13-5-15/vacuum-xmin-holders.png)
 
-*The holder list after a release, with the next blocker taking its place.*
+*The holder list, oldest first: Is Horizon = 1 marks the blocker, and Suggested Action carries its release command. After a release, the next holder moves to the top.*
 
 **xmin Age** growing between refreshes means the situation is getting worse in real time. A holder sitting at xmin age 0 blocks nothing, is not counted as blocked by the KPI or the root-cause card, and is typically a transient in-flight collection. The detail table still lists it.
 
