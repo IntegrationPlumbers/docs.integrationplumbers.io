@@ -73,7 +73,7 @@ Work from the shape in the chart down to the one statement that made it.
 
 *Clicking a row in Workload Detail opens the drill-down for that statement alone.*
 
-![Changing the From and To window and watching the KPIs, chart and list re-scope](images/13-5-15/workload-history-window.gif)
+<video class="walkthrough" src="images/13-5-15/workload-history-window.mp4" poster="images/13-5-15/workload-history-window-poster.png" autoplay loop muted playsinline controls aria-label="Changing the From and To window and watching the KPIs, chart and list re-scope"></video>
 
 *Changing either picker re-scopes all three bands immediately.*
 
