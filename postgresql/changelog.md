@@ -77,7 +77,7 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 - Fixed Tables and Indexes toggle-all and clear-filter controls
 - Suppressed transient error dialogs shown when a target is DOWN on the Overview and Configuration pages
 - Fixed License banner handling when no license is configured
-- Fixed silent job-failure bugs in Backup, Restore, Switchover, and Custom Query job wrappers (Perl wrappers now correctly propagate the Java exit code so failed jobs are reported as Failed in OEM)
+- Fixed silent job-failure bugs in Backup, Restore, Switchover, and Custom Query job wrappers (Perl wrappers now correctly propagate the Java exit code so failed jobs are reported as Failed in Enterprise Manager)
 - Security updates
 - Bug fixes
 
@@ -105,7 +105,7 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 
 ### 13.2.8.2.0
 
-- Fixed compatibility issues with newer versions of OEM
+- Fixed compatibility issues with newer versions of Oracle Enterprise Manager
 
 ### 13.2.8.1.0
 

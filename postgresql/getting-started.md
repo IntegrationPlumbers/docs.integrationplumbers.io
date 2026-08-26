@@ -26,7 +26,7 @@ This is the minimum for all existing monitoring. Work through the full list, inc
 - [ ] A PostgreSQL monitoring role, with a matching `pg_hba.conf` entry for the agent host. See [The monitoring role](prerequisites.md#monitoring-role).
 - [ ] `pg_stat_statements` preloaded and created in each monitored database. See [Statement statistics (pg_stat_statements)](prerequisites.md#pg-stat-statements).
 - [ ] A valid license key.
-- [ ] Agent Host Credentials set for the target under OEM Preferred Credentials. See [Preferred Credentials](prerequisites.md#preferred-credentials).
+- [ ] Agent Host Credentials set for the target under Enterprise Manager Preferred Credentials. See [Preferred Credentials](prerequisites.md#preferred-credentials).
 - [ ] Disk headroom on the agent host for the agent-local history store. See [Store size and disk reclaim](history-store-and-retention.md#store-size).
 
 **Plan Analysis** and **Plan Drift Advisor** need more than this: the `auto_explain` module and one privilege grant. Step 6 covers both.

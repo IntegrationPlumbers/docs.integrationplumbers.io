@@ -129,7 +129,7 @@ For `pgstattuple`, a monitoring role with `pg_monitor` already holds the `pg_sta
 
 ## Preferred Credentials {#preferred-credentials}
 
-Some plug-in pages read their data through Enterprise Manager jobs that run on the agent host, and those jobs need one OEM Preferred Credential set on the PostgreSQL target: **Agent Host Credentials**, an operating-system login for the host where the agent that monitors the target runs. Set it once per target:
+Some plug-in pages read their data through Enterprise Manager jobs that run on the agent host, and those jobs need one Enterprise Manager Preferred Credential set on the PostgreSQL target: **Agent Host Credentials**, an operating-system login for the host where the agent that monitors the target runs. Set it once per target:
 
 1. Go to Setup, Security, Preferred Credentials, and open the **PostgreSQL Database** target type.
 2. On the **My Preferences** tab, under **Target Preferred Credentials**, select the target's **Agent Host Credentials** row and click **Set**.
@@ -182,7 +182,7 @@ Copy the list that matches what you want from the release.
 - [ ] `GRANT pg_monitor TO "<monitoring role>";` (or equivalent read access to the statistics catalogs)
 - [ ] `track_activities` and `track_counts` on (PostgreSQL defaults)
 - [ ] `pg_stat_statements` in `shared_preload_libraries`, and `CREATE EXTENSION pg_stat_statements;` in each monitored database
-- [ ] Agent Host Credentials set for the target under OEM Preferred Credentials
+- [ ] Agent Host Credentials set for the target under Enterprise Manager Preferred Credentials
 - [ ] Disk headroom on the agent host for the agent-local history store
 
 **Full advisory capability (adds to the minimum)**

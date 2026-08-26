@@ -13,7 +13,7 @@ Every command on this page is advisory. The `ALTER TABLE` tuning statements, `SE
 > - The core page is catalog-native. It reads `pg_stat_user_tables`, `pg_class`, `pg_settings`, `pg_stat_activity`, `pg_replication_slots` and `pg_prepared_xacts` under [the monitoring role](prerequisites.md#monitoring-role), with no extension required.
 > - The **Avoidable-Growth / Bloat Estimate** section needs the `pgstattuple` extension installed on the monitored database. See [Optional extensions](prerequisites.md#optional-extensions). Without it that one section is empty and nothing else on the page changes.
 > - `pgstattuple`'s approximate function also needs the monitoring role to own the table or hold `pg_stat_scan_tables`. Tables it cannot read are skipped.
-> - The **Autovacuum runs · 24h** KPI is read through an OEM job, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target. It also needs two daily snapshots in the agent-local store before it can compute a delta.
+> - The **Autovacuum runs · 24h** KPI is read through an Enterprise Manager job, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target. It also needs two daily snapshots in the agent-local store before it can compute a delta.
 
 **Where to find it:** on a PostgreSQL Database target, **target navigation tree ▸ _database name_ ▸ Vacuum Advisor**. The same entry appears in the target menu. Two live watch pages sit under **Realtime ▸ Vacuum xmin Horizon** and **Realtime ▸ Vacuums in Progress**. The same findings alert through the target's **All Metrics**.
 
@@ -135,7 +135,7 @@ Tables that are not past their trigger get a comment instead of a statement: `--
 
 Wraparound carries its own Critical-bearing metrics, which is why this one ships with Warning only. The alert message names the table, its dead-tuple count, its trigger point and the recommendation SQL, so the ticket already contains the fix. Retune the threshold per target from the metric's own threshold settings, or fleet-wide with the shipped [monitoring templates](alerts-and-templates.md#templates). The collection schedule is editable per target in the same place.
 
-Finding detail persists to the agent-local store on every collection, under the **Vacuum Advisor** row on the [Retention Policies page](history-store-and-retention.md#retention-policies). Alert state lives in the OEM repository as usual.
+Finding detail persists to the agent-local store on every collection, under the **Vacuum Advisor** row on the [Retention Policies page](history-store-and-retention.md#retention-policies). Alert state lives in the Enterprise Manager repository as usual.
 
 ## Table bloat estimate
 
@@ -230,7 +230,7 @@ As everywhere else on this page, the plug-in never runs the freeze for you.
 
 Age history accumulates in the agent-local store from day one with no configuration. Every collection stages full-resolution rows, and the daily condense keeps each day's maximum XID and multixact ages, so trend depth builds on its own without touching the [Retention Policies page](history-store-and-retention.md#retention-policies).
 
-All four thresholds are retunable per target or through the shipped [monitoring templates](alerts-and-templates.md#templates), and alerts route through the standard OEM notification framework to whatever connector you have bound.
+All four thresholds are retunable per target or through the shipped [monitoring templates](alerts-and-templates.md#templates), and alerts route through the standard Enterprise Manager notification framework to whatever connector you have bound.
 
 ## Vacuums in Progress
 

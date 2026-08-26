@@ -89,7 +89,7 @@ Two things to keep in mind. Collection schedules and thresholds are independent:
 
 ## Monitoring templates {#templates}
 
-Three pre-built Enterprise Manager monitoring templates cover the plug-in's metrics for the `ip_postgresql_db` target type. They ship in the standard OEM export format, the same shape `emcli export_template` produces, so they behave like any template you built yourself.
+Three pre-built Enterprise Manager monitoring templates cover the plug-in's metrics for the `ip_postgresql_db` target type. They ship in the standard Enterprise Manager export format, the same shape `emcli export_template` produces, so they behave like any template you built yourself.
 
 | Template name | File | Purpose |
 |---|---|---|

@@ -10,7 +10,7 @@ If you came here from the Advisors pages, you already know where plan drift, ind
 > **Prerequisites for this page**
 > - Query Analyzer's statement list and history read from `pg_stat_statements` — see [Statement statistics (pg_stat_statements)](prerequisites.md#pg-stat-statements).
 > - Query Analyzer's Wait Events chart needs the optional `pg_wait_sampling` extension — see [Optional extensions](prerequisites.md#optional-extensions) and [Wait-event sampling](workload-history.md#wait-event-sampling).
-> - The Logs page needs a **local** OEM agent (installed on the same host as the PostgreSQL server) and a configured log file path — see [Logs](#logs), below.
+> - The Logs page needs a **local** Enterprise Manager agent (installed on the same host as the PostgreSQL server) and a configured log file path — see [Logs](#logs), below.
 > - Cluster switchover and the Cluster Events (Patroni) metric need [Patroni REST API monitoring](targets-and-properties.md#patroni) enabled on the cluster target.
 
 **Where to find it:** PostgreSQL Database target navigation tree (Overview, Configuration, and Realtime at the top level; Database, Tables, Indexes, Queries, and Query Analyzer under each database name; License Info at the bottom). PostgreSQL Cluster target: the cluster's target home page.
@@ -141,7 +141,7 @@ The pages under **Realtime** query the target live, on demand, each with an **Au
 **Logs** shows the PostgreSQL server log. A **Log Statistics (last collection)** panel reports Total Lines, Warnings, Errors, Fatals, and Panics; it refreshes every 5 minutes once the collection is enabled in Metric and Collection Settings, regardless of the Auto Refresh setting, which controls only the entries table below it. The **PostgreSQL Logs** table shows the last 500 lines of the configured log file, parsed into Timestamp, Severity, PID, Username, Database Name, and Message. An empty table means nothing new has been parsed since the last collection, or the log file path needs a second look.
 
 
-This feature works only when the OEM agent is **local** — installed on the same host as the PostgreSQL server. It does not support remote log collection.
+This feature works only when the Enterprise Manager agent is **local** — installed on the same host as the PostgreSQL server. It does not support remote log collection.
 
 #### Setup
 
@@ -167,7 +167,7 @@ The plug-in collects four schema-inventory metrics every 30 minutes: **Trigger**
 | Sequences | `sequences` | Database, schema, sequence name, sequence type, and blocks read/hit |
 | User Function | `user_functions` | Schema, function name, call count, total time, and self time. Requires `track_functions = 'all'` in `postgresql.conf` |
 
-OEM's repository persists only numeric metric columns for historical trending. Because these metrics are mostly text (names, states, identifiers), there is little for it to chart. Use the live view under **All Metrics** to inspect current state.
+Enterprise Manager's repository persists only numeric metric columns for historical trending. Because these metrics are mostly text (names, states, identifiers), there is little for it to chart. Use the live view under **All Metrics** to inspect current state.
 
 ## Cluster target
 
@@ -193,7 +193,7 @@ For clusters monitored with the Patroni API mode enabled, the cluster home page 
 
 *Confirming a switchover: promotes the selected standby, demotes the current primary.*
 
-Confirming submits an OEM job that calls the Patroni REST API to promote the selected (or Patroni-chosen) standby and demote the current primary; the cluster is briefly unavailable during the operation. Track the job like any other from Enterprise Manager's Job Activity.
+Confirming submits an Enterprise Manager job that calls the Patroni REST API to promote the selected (or Patroni-chosen) standby and demote the current primary; the cluster is briefly unavailable during the operation. Track the job like any other from Enterprise Manager's Job Activity.
 
 ### Cluster Events (Patroni) metric
 
@@ -201,7 +201,7 @@ For Patroni-managed clusters with the Patroni API mode enabled, the plug-in also
 
 1. On the cluster target, open **All Metrics** and select **Cluster Events (Patroni)**.
 2. Each row is one timeline switch, with columns Timeline, Event Timestamp, New Leader, Reason, LSN, and Event Type.
-3. Collection runs hourly; standard OEM metric-history views show the accumulated record.
+3. Collection runs hourly; standard Enterprise Manager metric-history views show the accumulated record.
 
 The metric exists only on targets with [Patroni REST API monitoring](targets-and-properties.md#patroni) enabled; with it off there's nothing to configure and no errors. If the Patroni REST API is unreachable, collection simply returns no rows for that cycle. How far back the history reaches depends on Patroni's own retained history (`max_timelines_history`; Patroni's default keeps everything). Event Type is currently always `timeline_switch` — Patroni's history doesn't reliably distinguish a planned switchover from an unplanned failover, so the plug-in doesn't guess. This metric carries no alert thresholds; it's a retrospective record, and leader-change alerting is handled by the cluster's replication/failover monitoring.
 

@@ -9,7 +9,7 @@ When an advisor page sits empty or a feature produces nothing, the cause is usua
 
 > **Prerequisites for this page**
 > - Viewing the page needs only the target's monitoring connection. Readiness is probed by a real-time metric that runs under [the monitoring role](prerequisites.md#monitoring-role), so configuration you set up yourself is detected exactly like configuration the plug-in applied.
-> - The **Configure auto_explain** action runs as OEM jobs, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target.
+> - The **Configure auto_explain** action runs as Enterprise Manager jobs, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target.
 > - [The server log read grant](prerequisites.md#log-read-grant) must be run by a superuser. The plug-in never applies it for you.
 > - [Optional extensions](prerequisites.md#optional-extensions) are installed by you through your own platform packaging. The plug-in detects them automatically and never installs them.
 
@@ -75,7 +75,7 @@ A panel's chip is the worst status among its items, with one deliberate exceptio
 
 When the **Plan Capture (auto_explain)** panel has at least one unmet item the plug-in can set itself, a **Configure auto_explain** button appears at the bottom of that panel, with the hint "Applies the plugin-settable items above to this database." The button is hidden while everything settable is already green, because there is then nothing for it to do.
 
-1. Confirm that Preferred Credentials are set for the target. The apply runs as OEM jobs; without them it fails with "Unable to run job. Verify Preferred Credentials are set for this target."
+1. Confirm that Preferred Credentials are set for the target. The apply runs as Enterprise Manager jobs; without them it fails with "Unable to run job. Verify Preferred Credentials are set for this target."
 2. Click **Configure auto_explain**. An inline confirmation opens and previews exactly what will be written, under the heading "The following will be applied to this database (new sessions only, no restart):"
    - `session_preload_libraries` — ensure `auto_explain` is loaded
    - `auto_explain.log_min_duration = <N>` (ms; the capture threshold)
