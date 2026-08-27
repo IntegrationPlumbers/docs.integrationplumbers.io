@@ -1,0 +1,37 @@
+# Navigation for the SQL Server plug-in guide. Rendered by _layouts/default.html
+# on every /mssql/ page. Mirrors the grouping of postgresql_nav.yml, with one
+# deliberate difference: postgres groups its differentiators under "Advisors",
+# and ours are console pages, so that group is "Monitoring pages" here.
+groups:
+  - name: Start here
+    pages:
+      - { title: "SQL Server Plug-in", url: /mssql/ }
+      - { title: "What's new", url: /mssql/whats-new.html }
+      - { title: "Getting started", url: /mssql/getting-started.html }
+      - { title: "Early access", url: /mssql/early-access.html }
+  - name: Set up
+    pages:
+      - { title: "Prerequisites", url: /mssql/prerequisites.html }
+      - { title: "Install and upgrade", url: /mssql/install-and-upgrade.html }
+      - { title: "Targets and properties", url: /mssql/targets-and-properties.html }
+      - { title: "Credentials", url: /mssql/credentials.html }
+      - { title: "TLS connections", url: /mssql/tls.html }
+  - name: Monitoring pages
+    pages:
+      - { title: "Overview", url: /mssql/page-overview.html }
+      - { title: "Databases", url: /mssql/page-databases.html }
+      - { title: "Performance", url: /mssql/page-performance.html }
+      - { title: "Queries", url: /mssql/page-queries.html }
+      - { title: "Deadlocks", url: /mssql/page-deadlocks.html }
+      - { title: "Indexes", url: /mssql/page-indexes.html }
+      - { title: "Analysis", url: /mssql/page-analysis.html }
+      - { title: "AG Failover Readiness", url: /mssql/page-ag-failover.html }
+  - name: Reference
+    pages:
+      - { title: "Metrics reference", url: /mssql/metrics-reference.html }
+      - { title: "Alerts and templates", url: /mssql/alerts-and-templates.html }
+      - { title: "Compliance rules", url: /mssql/compliance-rules.html }
+      - { title: "Jobs", url: /mssql/jobs.html }
+      - { title: "High availability", url: /mssql/high-availability.html }
+      - { title: "Troubleshooting", url: /mssql/troubleshooting.html }
+      - { title: "Changelog", url: /mssql/changelog.html }
