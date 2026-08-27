@@ -8,14 +8,14 @@ nav_order: 24
 The plug-in monitors AlwaysOn availability groups and failover cluster instances, and it behaves predictably on Linux where clustering is managed outside Windows.
 
 > **Prerequisites for this page**
-> - A target pointed at an instance participating in an availability group or a failover cluster. See [What to point at](targets-and-properties.html#what-to-point-at), which matters more here than anywhere else in the guide.
+> - A target pointed at an instance participating in an availability group or a failover cluster. See [What to point at](targets-and-properties.md#what-to-point-at), which matters more here than anywhere else in the guide.
 > - The monitoring login present on every replica you want reported, not only the primary.
 
 **In this page:** Availability groups · What to monitor · Failover readiness · Failover cluster instances · Linux and the Pacemaker boundary · Database mirroring
 
 ## Availability groups {#availability-groups}
 
-Availability groups are monitored through the availability-group metric families and the [AG Failover Readiness](monitoring-pages.html#ag-failover) page. Both work identically on Windows- and Linux-hosted SQL Server.
+Availability groups are monitored through the availability-group metric families and the [AG Failover Readiness](monitoring-pages.md#ag-failover) page. Both work identically on Windows- and Linux-hosted SQL Server.
 
 ## What to monitor {#what-to-monitor}
 
@@ -34,7 +34,7 @@ The point of the readiness surface is to answer a question the built-in dashboar
 
 For each database and secondary it reports the synchronisation state, the recovery point in seconds, the redo and send queue sizes, and whether the replica link is healthy — with a readiness verdict that folds those together.
 
-Thresholds ship on the recovery point, both queue sizes and the replica link. See [Alerts and thresholds](alerts-and-thresholds.html).
+Thresholds ship on the recovery point, both queue sizes and the replica link. See [Alerts and thresholds](alerts-and-thresholds.md).
 
 One deliberate design point: the critical threshold sits on the **replica link**, not on the readiness column. A healthy asynchronous-commit disaster-recovery secondary is permanently in a synchronising state, so alerting on readiness would raise a standing critical on a perfectly correct topology. Lag magnitude is covered by the queue and recovery-point thresholds instead, which measure how far behind the replica actually is.
 
@@ -60,8 +60,8 @@ Mirroring metrics are still collected for continuity with older estates, but the
 
 ## Related
 
-- [Monitoring pages](monitoring-pages.html#ag-failover) - the AG Failover Readiness page, region by region
-- [Alerts and thresholds](alerts-and-thresholds.html#thresholds) - the AG thresholds and what each one measures
-- [Targets and properties](targets-and-properties.html#what-to-point-at) - listener, virtual network name, or replica
-- [Credentials](credentials.html) - the login must exist on every replica, not only the primary
-- [Troubleshooting](troubleshooting.html#missing-data) - an AG region that stays empty
+- [Monitoring pages](monitoring-pages.md#ag-failover) - the AG Failover Readiness page, region by region
+- [Alerts and thresholds](alerts-and-thresholds.md#thresholds) - the AG thresholds and what each one measures
+- [Targets and properties](targets-and-properties.md#what-to-point-at) - listener, virtual network name, or replica
+- [Credentials](credentials.md) - the login must exist on every replica, not only the primary
+- [Troubleshooting](troubleshooting.md#missing-data) - an AG region that stays empty

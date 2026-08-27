@@ -48,7 +48,7 @@ When a threshold is crossed, the incident appears in Enterprise Manager and on t
 
 ![The Incidents and Problems region of the Overview page listing open incidents with their severity, status and age](images/overview-incidents.png)
 
-Collection intervals are set in the same place. They range from five minutes for fast-moving state to 24 hours for configuration and per-database space, so a metric you have just changed may not reflect it until its next collection.
+Collection intervals are set in the same place. They range from one minute for instance availability to 24 hours for server configuration and per-database space, so a metric you have just changed may not reflect it until its next collection.
 
 ## Applying settings across many targets {#across-targets}
 
@@ -62,14 +62,14 @@ This keeps the plug-in's defaults as a sane starting point while letting you hol
 
 ## Why some thresholds have only a critical value {#critical-only}
 
-Three of the fourteen — instance availability, the AG replica link, and one licence boundary — have a critical value and no warning. That is deliberate: they are binary conditions. An instance is up or down; a replica link is healthy or broken. There is no middle state worth a lower severity, and inventing one would only produce an alert nobody can act on differently.
+Two of the fourteen, instance availability and the AG replica link, have a critical value and no warning. That is deliberate: they are binary conditions. An instance is up or down; a replica link is healthy or broken. There is no middle state worth a lower severity, and inventing one would only produce an alert nobody can act on differently.
 
 The AG replica link threshold is also deliberately *not* placed on the readiness column. A healthy asynchronous-commit disaster-recovery secondary sits permanently in a synchronising state, so alerting on readiness would raise a standing critical on a perfectly correct topology. Replication lag is covered instead by the redo queue, send queue and recovery-point thresholds above, which measure how far behind the replica actually is.
 
 ## Related
 
-- [Monitoring pages](monitoring-pages.html) - the data the thresholds are evaluated against
-- [Monitoring pages](monitoring-pages.html#intervals) - collection intervals, set in the same place as thresholds
-- [High availability](high-availability.html#failover-readiness) - why the AG critical sits on the replica link
-- [Compliance rules](compliance-rules.html) - configuration findings, which alert differently
-- [Troubleshooting](troubleshooting.html#missing-data) - a threshold that never fires
+- [Monitoring pages](monitoring-pages.md) - the data the thresholds are evaluated against
+- [Monitoring pages](monitoring-pages.md#intervals) - collection intervals, set in the same place as thresholds
+- [High availability](high-availability.md#failover-readiness) - why the AG critical sits on the replica link
+- [Compliance rules](compliance-rules.md) - configuration findings, which alert differently
+- [Troubleshooting](troubleshooting.md#missing-data) - a threshold that never fires

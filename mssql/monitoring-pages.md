@@ -8,8 +8,8 @@ nav_order: 10
 The plug-in adds eight console pages to every SQL Server Database target. They are not a dashboard you glance at; each one answers a specific question, and knowing which page answers which question is most of the value. This page describes all eight: what each one is for, what it shows, and the things about it that are not obvious from looking at it.
 
 > **Prerequisites for this page**
-> - A SQL Server Database target that has reached **Up**. See [Targets and properties](targets-and-properties.html#new-target).
-> - Monitoring credentials that resolve, or every page here is empty. See [Credentials](credentials.html).
+> - A SQL Server Database target that has reached **Up**. See [Targets and properties](targets-and-properties.md#new-target).
+> - Monitoring credentials that resolve, or every page here is empty. See [Credentials](credentials.md).
 > - Nothing else. There is no extension to install and no per-page setup.
 
 **Where to find it:** open a SQL Server Database target. The eight pages are the left-hand tree on the target's home page, and they are also in the target menu under the target name.
@@ -40,7 +40,7 @@ Three things worth knowing:
 
 **Oldest backup shows `Never` in red when a database has no backup at all.** That is a real state, not a collection failure. A database that has genuinely never been backed up is reported as never rather than being folded in with a large day count, because the two need different responses.
 
-**The four top-row cards are read from the repository, not the instance.** On a target created within the last 24 hours some of them will be blank, because the metrics behind them collect on a 24 hour schedule. See [What a blank region means](#blank) below.
+**The top-row cards do not all populate at the same rate.** Availability history collects every minute, instance status every five, and licence data hourly, so those three are populated well within the first hour of a new target. Server configuration is on a 24 hour schedule, but the card falls back to a live read of the instance when the repository has nothing yet, so it is not blank either. The Databases card below it is the one that genuinely waits, because per-database space is a 24 hour metric with no fallback. See [What a blank region means](#blank).
 
 **Processor Utilization defaults to the 24 hour window.** Switching it to Real Time triggers a live collection against the instance rather than reading stored data, so it is the one control on the page that puts load on SQL Server when you use it.
 
@@ -48,7 +48,9 @@ Three things worth knowing:
 
 Everything about the databases on the instance, and where the backup and restore actions live.
 
-Six regions: **Space Usage (Used vs Free)**, **Database Summary**, **Database Files**, **Filegroups**, **Backup Management** and **AlwaysOn Database Replicas**. Backup, restore and delete-backup jobs are submitted from here. Those are jobs, and jobs have their own credential requirements that are separate from monitoring, so read [Jobs](jobs.html#prerequisites) before you submit one from this page.
+Six regions: **Space Usage (Used vs Free)**, **Database Summary**, **Database Files**, **Filegroups**, **Backup Management** and **AlwaysOn Database Replicas**.
+
+![The Databases page, showing the used-versus-free space chart and the per-database summary](images/databases-page.png) Backup, restore and delete-backup jobs are submitted from here. Those are jobs, and jobs have their own credential requirements that are separate from monitoring, so read [Jobs](jobs.md#prerequisites) before you submit one from this page.
 
 Per-database space is a 24 hour metric. It is the single most common reason a new target shows an empty Databases region on its first day.
 
@@ -60,11 +62,15 @@ The instance-level performance surface, and by some distance the densest page in
 - **Current-state tables.** Performance Summary, Top Processes, Database I/O Detail, Server Statistics.
 - **Raw counters.** General Statistics, SQL Statistics, Buffer Manager, Memory Manager and Plan Cache counters, taken from `sys.dm_os_performance_counters`.
 
+![The Performance page, showing the summary tiles and the processor and memory charts](images/performance-page.png)
+
 The per-interval charts are the ones to trust for rates. Several SQL Server counters are cumulative since the last service restart, and a raw cumulative value answers almost no useful question. The plug-in differences those counters between collections, and for anything collected per database it differences each database separately before summing, so a database being attached or detached between two samples cannot masquerade as a spike or a lull.
 
 ## Queries {#queries}
 
 Five regions: **Top Queries by CPU**, **Top Queries by Execution Count**, **Currently Blocked Queries**, **Query Plan Statistics (Plan Cache)** and **Performance History Comparison**.
+
+![The Queries page, showing top queries by CPU with executions, average and total CPU, and logical reads](images/queries-page.png)
 
 The first two read the plan cache, which means they show what SQL Server currently remembers, not a complete history. A query that ran expensively an hour ago and has since been evicted will not appear. Anything evicted between collections is gone; the page does not reconstruct it.
 
@@ -73,6 +79,8 @@ Currently Blocked Queries is the region to reach for during a live incident, sin
 ## Deadlocks {#deadlocks}
 
 Three regions: **Deadlock Rate** over time, **Deadlock Summary (current)**, and **Recent Deadlocks** with the participating processes.
+
+![The Deadlocks page, showing the deadlock rate chart and the current summary](images/deadlocks-page.png)
 
 Deadlock detail comes from the `system_health` Extended Events session, which SQL Server runs by default. If someone has disabled that session on the instance, the rate will still be collected but the detail regions will be empty, and that is a configuration state on the instance rather than a plug-in fault.
 
@@ -90,6 +98,8 @@ Missing Indexes reports what SQL Server's own optimiser recorded as a missing in
 
 Three regions: **Database Capacity (used / free)**, **Volume Free Space** and **File Growth Settings**.
 
+![The Analysis page, showing per-database capacity and volume free space](images/analysis-page.png)
+
 This is the capacity-planning page rather than a performance one. File Growth Settings is the region most worth reading on a new instance, because percentage-based autogrowth on a large data file is a common inherited default and a bad one: each growth event gets larger than the last, and the pauses grow with it.
 
 ## AG Failover Readiness {#ag-failover}
@@ -100,29 +110,29 @@ One region, **DR Readiness**, with a row per database per secondary replica. It 
 
 Readiness, availability group, database, secondary replica, synchronisation state, recovery point in seconds, recovery time in seconds, redo queue and send queue. The readiness verdict folds the others together into Ready or Not ready.
 
-The critical threshold sits on the replica link rather than on the readiness verdict, which is a deliberate design decision with a real consequence for what alerts you. [High availability](high-availability.html#failover-readiness) explains why.
+The critical threshold sits on the replica link rather than on the readiness verdict, which is a deliberate design decision with a real consequence for what alerts you. [High availability](high-availability.md#failover-readiness) explains why.
 
 ## What a blank region means {#blank}
 
 A blank region is one of three things, and they are worth telling apart before raising a support request.
 
-1. **The metric has not collected yet.** Configuration, per-database space and licence data are on a 24 hour schedule, so a target created this morning will not have them until tomorrow. Check the target's **All Metrics** page: a `Last Upload` of `N/A` means it has not run, and there is nothing wrong.
+1. **The metric has not collected yet.** Server configuration and per-database space are on a 24 hour schedule, so a target created this morning may not have them until tomorrow. Most other things arrive far sooner: availability every minute, instance status every five, licence and backup age hourly. Check the target's **All Metrics** page: a `Last Upload` of `N/A` means it has not run, and there is nothing wrong.
 2. **There is genuinely nothing to report.** An instance with no availability group shows an empty AlwaysOn region. An instance with no index over 1000 pages shows an empty Index Fragmentation region. Both are correct.
-3. **Collection is failing.** The target will normally not be Up in this case. See [Troubleshooting](troubleshooting.html).
+3. **Collection is failing.** The target will normally not be Up in this case. See [Troubleshooting](troubleshooting.md).
 
 The first case is the one that catches people out, because a brand new target is exactly when someone is most likely to be looking at the console and least likely to assume the answer is "wait".
 
 ## Collection intervals {#intervals}
 
-Intervals range from five minutes for fast-moving state to 24 hours for configuration, licence and per-database space. They are visible and changeable per target under **Monitoring** then **Metric and Collection Settings**, in the same place as the thresholds. See [Alerts and thresholds](alerts-and-thresholds.html#changing).
+Intervals range from one minute for instance availability to 24 hours for server configuration and per-database space, with most performance and query families on 15 minutes. They are visible and changeable per target under **Monitoring** then **Metric and Collection Settings**, in the same place as the thresholds. See [Alerts and thresholds](alerts-and-thresholds.md#changing).
 
 Shortening a 24 hour collection to get a page populated sooner is possible and occasionally reasonable on a lab instance. It is a poor idea on a production one: those metrics are on a long schedule because the queries behind them are the expensive ones.
 
 ## Related
 
-- [Getting started](getting-started.html#first-look) - which page to read first on a new target
-- [Alerts and thresholds](alerts-and-thresholds.html) - what alerts you on the data these pages show
-- [High availability](high-availability.html) - availability groups, failover clusters, and the readiness surface
-- [Jobs](jobs.html) - the backup and restore actions on the Databases page, and their credential requirements
-- [Compliance rules](compliance-rules.html) - the configuration findings that complement the Analysis page
-- [Troubleshooting](troubleshooting.html) - when a page is empty and it is not one of the expected reasons
+- [Getting started](getting-started.md#first-look) - which page to read first on a new target
+- [Alerts and thresholds](alerts-and-thresholds.md) - what alerts you on the data these pages show
+- [High availability](high-availability.md) - availability groups, failover clusters, and the readiness surface
+- [Jobs](jobs.md) - the backup and restore actions on the Databases page, and their credential requirements
+- [Compliance rules](compliance-rules.md) - the configuration findings that complement the Analysis page
+- [Troubleshooting](troubleshooting.md) - when a page is empty and it is not one of the expected reasons

@@ -58,7 +58,7 @@ Kerberos is not part of this release.
 
 ## Truststore credentials {#truststore}
 
-If a target verifies the server certificate, the truststore's location, type and password are held as a second credential set on that target, separate from the login above. [TLS connections](tls.html) covers it.
+If a target verifies the server certificate, the truststore's location, type and password are held as a second credential set on that target, separate from the login above. [TLS connections](tls.md) covers it.
 
 Worth knowing if you redeploy the plug-in: a deploy cycle can reset a target's truststore credentials to placeholder values, at which point that target goes Down with a certificate-path error until they are re-applied. If a verifying target fails right after a plug-in upgrade, check these before anything else.
 
@@ -70,8 +70,8 @@ A monitoring login with the grants above can read the state of the instance and 
 
 ## Related
 
-- [Prerequisites](prerequisites.html#monitoring-login) - where the monitoring login fits in the setup
-- [Targets and properties](targets-and-properties.html#credentials) - applying credentials to a target
-- [TLS connections](tls.html#setup) - the truststore credential set and what it is for
-- [Jobs](jobs.html#prerequisites) - why job credentials are separate from monitoring credentials
-- [Troubleshooting](troubleshooting.html#target-down) - what a credential failure looks like
+- [Prerequisites](prerequisites.md#monitoring-login) - where the monitoring login fits in the setup
+- [Targets and properties](targets-and-properties.md#credentials) - applying credentials to a target
+- [TLS connections](tls.md#setup) - the truststore credential set and what it is for
+- [Jobs](jobs.md#prerequisites) - why job credentials are separate from monitoring credentials
+- [Troubleshooting](troubleshooting.md#target-down) - what a credential failure looks like

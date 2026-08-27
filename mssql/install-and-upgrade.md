@@ -49,11 +49,13 @@ Track either deploy with `emcli get_plugin_deployment_status -plugin=<plug-in id
 
 There is no separate driver step. The Microsoft JDBC driver is inside the plug-in's collection JAR.
 
-Once the agent deploy finishes you can add targets — see [Targets and properties](targets-and-properties.html).
+Once the agent deploy finishes you can add targets — see [Targets and properties](targets-and-properties.md).
 
 ## Upgrading {#upgrading}
 
 Import the newer archive and deploy it the same way. Existing targets, their credentials and any thresholds you have tuned are preserved.
+
+This describes the general release. **During Early Access there is no supported in-place upgrade between beta drops** - see [Early access](early-access.md#not-verified). It is a fresh plug-in with no earlier build to upgrade from, so the upgrade path has not been exercised.
 
 Two things worth knowing:
 
@@ -77,12 +79,12 @@ The archive also stays in the Software Library after undeploy. Remove it from th
 
 Deploying the plug-in touches Enterprise Manager, not your databases. It creates no objects on the monitored instance, runs no DDL, and changes no SQL Server configuration. Everything it reads, it reads through the monitoring login's read-only grants.
 
-The only SQL Server-side writes this plug-in ever performs are the ones you explicitly ask for by running a job — a backup, a restore, an index creation — and those are covered in [Jobs](jobs.html).
+The only SQL Server-side writes this plug-in ever performs are the ones you explicitly ask for by running a job — a backup, a restore, an index creation — and those are covered in [Jobs](jobs.md).
 
 ## Related
 
-- [Prerequisites](prerequisites.html#enterprise-manager) - supported Enterprise Manager and agent versions
-- [Early access](early-access.html) - what the beta build is, and how it is numbered
-- [Targets and properties](targets-and-properties.html) - the next step after deploying
-- [Troubleshooting](troubleshooting.html#import-deploy) - import and deploy failures
-- [Getting started](getting-started.html) - the whole path, of which this is one step
+- [Prerequisites](prerequisites.md#enterprise-manager) - supported Enterprise Manager and agent versions
+- [Early access](early-access.md) - what the beta build is, and how it is numbered
+- [Targets and properties](targets-and-properties.md) - the next step after deploying
+- [Troubleshooting](troubleshooting.md#import-deploy) - import and deploy failures
+- [Getting started](getting-started.md) - the whole path, of which this is one step

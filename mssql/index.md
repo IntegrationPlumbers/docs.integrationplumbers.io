@@ -37,13 +37,13 @@ One plug-in and one target type cover every supported version and both agent pla
 
 | If you want to | Go to |
 | :--- | :--- |
-| See whether your estate is ready | [Prerequisites](prerequisites.html) |
-| Install it | [Install and upgrade](install-and-upgrade.html) |
-| Add your first instance | [Targets and properties](targets-and-properties.html) |
-| Understand what a page is telling you | [Monitoring pages](monitoring-pages.html) |
-| Know what changed | [What's new](whats-new.html) |
-| Tune what alerts you | [Alerts and thresholds](alerts-and-thresholds.html) |
-| Take part in the beta | [Early access](early-access.html) |
+| See whether your estate is ready | [Prerequisites](prerequisites.md) |
+| Install it | [Install and upgrade](install-and-upgrade.md) |
+| Add your first instance | [Targets and properties](targets-and-properties.md) |
+| Understand what a page is telling you | [Monitoring pages](monitoring-pages.md) |
+| Know what changed | [What's new](whats-new.md) |
+| Tune what alerts you | [Alerts and thresholds](alerts-and-thresholds.md) |
+| Take part in the beta | [Early access](early-access.md) |
 
 ## Supported versions
 
@@ -54,8 +54,8 @@ One plug-in and one target type cover every supported version and both agent pla
 | Management Agent platforms | Linux x86-64, Windows x86-64 |
 | SQL Server host platforms | Windows and Linux, monitored remotely or locally |
 
-SQL Server 2016 and 2017 collect every metric family, with two families returning less detail than on 2019 and later. [Prerequisites](prerequisites.html) has the specifics.
+SQL Server 2016 and 2017 collect every metric family, with one family returning less detail than on 2019 and later. [Prerequisites](prerequisites.md) has the specifics.
 
 ## A note on Early Access
 
-This is pre-release software. It is not licensed for production use, and there is no production support commitment during the beta. [Early access](early-access.html) covers what has been verified, what has not, and how to report what you find.
+This is pre-release software. It is not licensed for production use, and there is no production support commitment during the beta. [Early access](early-access.md) covers what has been verified, what has not, and how to report what you find.

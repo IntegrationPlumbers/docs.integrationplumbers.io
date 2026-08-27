@@ -79,7 +79,7 @@ This matters because the plug-in also flags `xp_cmdshell` as a compliance findin
 
 ## Related
 
-- [Credentials](credentials.html#grants) - the monitoring login, and why jobs need more than it
-- [TLS connections](tls.html) - the truststore every job resolves, whether or not you use TLS
-- [Monitoring pages](monitoring-pages.html#databases) - the Databases page, where backup and restore are submitted
-- [Troubleshooting](troubleshooting.html#jobs) - a job that fails with no obvious cause
+- [Credentials](credentials.md#grants) - the monitoring login, and why jobs need more than it
+- [TLS connections](tls.md) - the truststore every job resolves, whether or not you use TLS
+- [Monitoring pages](monitoring-pages.md#databases) - the Databases page, where backup and restore are submitted
+- [Troubleshooting](troubleshooting.md#jobs) - a job that fails with no obvious cause

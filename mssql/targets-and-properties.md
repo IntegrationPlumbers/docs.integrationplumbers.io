@@ -6,8 +6,8 @@ nav_order: 7
 # Targets and properties
 
 > **Prerequisites for this page**
-> - The plug-in deployed to both the OMS and the agent that will monitor the instance. See [Install and upgrade](install-and-upgrade.html).
-> - The monitoring login created on the SQL Server instance. See [Credentials](credentials.html#creating).
+> - The plug-in deployed to both the OMS and the agent that will monitor the instance. See [Install and upgrade](install-and-upgrade.md).
+> - The monitoring login created on the SQL Server instance. See [Credentials](credentials.md#creating).
 
 **In this page:** Adding a target · Properties · Credentials · What to point at · Collection schedules · A new target looks sparse at first
 
@@ -31,7 +31,7 @@ Then apply credentials to the target — see [Credentials](#credentials) below, 
 | Instance | Instance name for a named instance; leave at the default otherwise |
 | TLS mode | Whether the connection is encrypted, and whether the certificate is verified |
 
-For certificate verification you also supply the truststore location, type and password. [TLS connections](tls.html) covers the detail.
+For certificate verification you also supply the truststore location, type and password. [TLS connections](tls.md) covers the detail.
 
 ## Credentials {#credentials}
 
@@ -86,9 +86,9 @@ This is normal on a new target and is not a fault. If a surface is still empty a
 
 ## Related
 
-- [Credentials](credentials.html) - setting the monitoring credentials a new target needs
-- [Prerequisites](prerequisites.html#network) - connectivity the agent needs to the instance
-- [TLS connections](tls.html) - the two encryption modes and which property selects them
-- [High availability](high-availability.html) - what to point a target at in an AG or cluster
-- [Monitoring pages](monitoring-pages.html#blank) - why a new target looks sparse on its first day
-- [Troubleshooting](troubleshooting.html#target-down) - a target that will not come Up
+- [Credentials](credentials.md) - setting the monitoring credentials a new target needs
+- [Prerequisites](prerequisites.md#network) - connectivity the agent needs to the instance
+- [TLS connections](tls.md) - the two encryption modes and which property selects them
+- [High availability](high-availability.md) - what to point a target at in an AG or cluster
+- [Monitoring pages](monitoring-pages.md#blank) - why a new target looks sparse on its first day
+- [Troubleshooting](troubleshooting.md#target-down) - a target that will not come Up

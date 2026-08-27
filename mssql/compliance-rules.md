@@ -44,7 +44,7 @@ The version end-of-support rule is the one most estates should look at first —
 
 Rules read values from collected metrics rather than querying the instance themselves. Two consequences worth knowing:
 
-- A rule cannot produce a result before the metric it depends on has collected. On a newly added target, configuration-derived rules stay unevaluated until the first configuration collection — up to 24 hours. See [Targets and properties](targets-and-properties.html#new-target).
+- A rule cannot produce a result before the metric it depends on has collected. On a newly added target, configuration-derived rules stay unevaluated until the first configuration collection — up to 24 hours. See [Targets and properties](targets-and-properties.md#new-target).
 - Turning off a collection turns off the rules that depend on it.
 
 The end-of-support rule fires on SQL Server 2016 and earlier. Releases still inside their support lifecycle do not trigger it, so a clean result on a 2019 instance is a correct result rather than a rule that failed to run.
@@ -57,7 +57,7 @@ This is worth stating plainly because some monitoring tools require the very set
 
 ## Related
 
-- [Monitoring pages](monitoring-pages.html#analysis) - the Analysis page, which covers adjacent ground
-- [Alerts and thresholds](alerts-and-thresholds.html) - metric thresholds, which are a separate mechanism
-- [Credentials](credentials.html#why-not-sysadmin) - the least-privilege position the rules assume
-- [Prerequisites](prerequisites.html#supported-versions) - the versions the end-of-support rule checks against
+- [Monitoring pages](monitoring-pages.md#analysis) - the Analysis page, which covers adjacent ground
+- [Alerts and thresholds](alerts-and-thresholds.md) - metric thresholds, which are a separate mechanism
+- [Credentials](credentials.md#why-not-sysadmin) - the least-privilege position the rules assume
+- [Prerequisites](prerequisites.md#supported-versions) - the versions the end-of-support rule checks against

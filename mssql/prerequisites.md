@@ -18,7 +18,7 @@ Most of this is already in place if you monitor SQL Server today. There are thre
 | Management Agent | Linux x86-64, Windows x86-64 |
 | SQL Server host | Windows or Linux |
 
-Every declared version has been collected against on a live instance. On SQL Server 2016 and 2017 two metric families return less detail than they do on 2019 and later — TempDB contention collects, but the allocation-page and metadata-page waiter counts read zero because the underlying view does not expose them on those releases. Everything else is identical across versions.
+Every declared version has been collected against on a live instance. On SQL Server 2016 and 2017 one metric family returns less detail than it does on 2019 and later: TempDB contention collects, but its allocation-page and metadata-page waiter counts read zero, because the view that classifies a page by type does not exist on those releases. Everything else is identical across versions.
 
 ## Enterprise Manager and agents {#enterprise-manager}
 
@@ -26,7 +26,7 @@ You need a working Enterprise Manager environment — management server and repo
 
 The agent does **not** have to run on the SQL Server host. Remote monitoring from a Linux agent to a SQL Server on Windows is a supported and common arrangement, and it is how much of this plug-in was certified. Local agents work equally well.
 
-Enterprise Manager will only accept a plug-in built for its own release, so use the build that matches: the `24.1.x` artifact for 24ai, the `13.5.x` artifact for 13.5. See [Install and upgrade](install-and-upgrade.html).
+Enterprise Manager will only accept a plug-in built for its own release, so use the build that matches: the `24.1.x` artifact for 24ai, the `13.5.x` artifact for 13.5. See [Install and upgrade](install-and-upgrade.md).
 
 ## Network and connectivity {#network}
 
@@ -55,10 +55,12 @@ Create the login once per instance as a `sysadmin`, then give the plug-in only t
 
 The plug-in connects with encryption by default. Two modes are available and the difference matters:
 
-- **Encrypted** — the connection is encrypted, but the server's certificate is not validated. Works with a self-signed certificate and needs nothing on the agent.
-- **Encrypted and verified** — the certificate is validated against a truststore you supply. This is the stronger setting and needs the certificate chain in a truststore the agent can read.
+- **`required`** (the default) - the connection is encrypted, but the server's certificate is not validated. Works with a self-signed certificate and needs nothing on the agent.
+- **`verify`** - the certificate is validated against a truststore you supply. This is the stronger setting and needs the certificate chain in a truststore the agent can read.
 
-Choose per target when you add it. [TLS connections](tls.html) covers both, including what to do when validation fails.
+A third value, `disabled`, turns encryption off for instances that do not offer it.
+
+Choose per target when you add it. [TLS connections](tls.md) covers both, including what to do when validation fails.
 
 ## What you do not need {#not-needed}
 
@@ -78,8 +80,8 @@ Choose per target when you add it. [TLS connections](tls.html) covers both, incl
 
 ## Related
 
-- [Install and upgrade](install-and-upgrade.html) - the next step once the checklist passes
-- [Credentials](credentials.html) - creating the monitoring login and granting it
-- [TLS connections](tls.html) - if the instance requires encrypted connections
-- [Targets and properties](targets-and-properties.html) - adding the first target
-- [Getting started](getting-started.html) - the whole path, start to finish
+- [Install and upgrade](install-and-upgrade.md) - the next step once the checklist passes
+- [Credentials](credentials.md) - creating the monitoring login and granting it
+- [TLS connections](tls.md) - if the instance requires encrypted connections
+- [Targets and properties](targets-and-properties.md) - adding the first target
+- [Getting started](getting-started.md) - the whole path, start to finish

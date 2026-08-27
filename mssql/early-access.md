@@ -31,7 +31,7 @@ It carries its own identity in Enterprise Manager — a distinct plug-in and tar
 
 - **Scale.** The largest instance tested holds a normal developer database count. Behaviour and collection overhead at a hundred or more databases on one instance is not yet measured.
 - **Windows Integrated Authentication.** Supported on a Windows agent, but not exercised in our lab. SQL authentication is fully exercised on both platforms.
-- **Upgrade between builds.** There is no supported in-place upgrade during Early Access; see below.
+- **Upgrade between builds.** There is no supported in-place upgrade during Early Access. It is a fresh plug-in with no earlier build to upgrade from, so that path has not been exercised. See [Install and upgrade](install-and-upgrade.md#upgrading).
 
 ## Not for production {#not-production}
 
@@ -43,7 +43,7 @@ Deploy it where a clean install later costs you nothing.
 
 ## Reporting what you find {#reporting}
 
-The most useful reports include your Enterprise Manager release, your SQL Server version and edition, the host operating system, what you did, and what happened. [Troubleshooting](troubleshooting.html#reporting) has the full list.
+The most useful reports include your Enterprise Manager release, your SQL Server version and edition, the host operating system, what you did, and what happened. [Troubleshooting](troubleshooting.md#reporting) has the full list.
 
 Especially valuable during Early Access:
 
@@ -62,7 +62,7 @@ Anything you tuned on a beta target — thresholds, credentials, schedules — h
 
 ## Related
 
-- [Install and upgrade](install-and-upgrade.html#which-build) - which artifact matches your Enterprise Manager release
-- [Prerequisites](prerequisites.html) - what to have in place before deploying the beta
-- [Troubleshooting](troubleshooting.html#reporting) - what to send when you report something
-- [SQL Server Plug-in](index.html) - what the plug-in does, and where to start
+- [Install and upgrade](install-and-upgrade.md#which-build) - which artifact matches your Enterprise Manager release
+- [Prerequisites](prerequisites.md) - what to have in place before deploying the beta
+- [Troubleshooting](troubleshooting.md#reporting) - what to send when you report something
+- [SQL Server Plug-in](index.md) - what the plug-in does, and where to start

@@ -12,16 +12,21 @@ The plug-in connects with encryption by default. What you choose per target is w
 > - The CA certificate chain that signed the SQL Server certificate, for the agent truststore.
 > - Host access to the agent, to place the truststore file.
 
-**In this page:** The two modes · Choosing a mode · Setting up verification · When verification fails · After a plug-in upgrade
+**In this page:** The three modes · Choosing a mode · Setting up verification · When verification fails · After a plug-in upgrade
 
-## The two modes {#modes}
+## The three modes {#modes}
 
-| Mode | Encrypted | Certificate verified | Needs a truststore |
+The target property is **TLS Mode**. It takes one of three values, and left blank it defaults to `required`.
+
+| Value | Encrypted | Certificate verified | Needs a truststore |
 | :--- | :--- | :--- | :--- |
-| Required | Yes | No | No |
-| Verify | Yes | Yes | Yes |
+| `disabled` | No | No | No |
+| `required` (default) | Yes | No | No |
+| `verify` | Yes | Yes | Yes |
 
-**Required** encrypts the connection but accepts whatever certificate the server presents, including a self-signed one. It protects the traffic; it does not prove you are talking to the right server.
+**`required`** encrypts the connection but accepts whatever certificate the server presents, including a self-signed one. It protects the traffic; it does not prove you are talking to the right server.
+
+**`disabled`** turns encryption off. It exists for instances that do not offer TLS at all, and it is not a setting to reach for otherwise.
 
 **Verify** validates the certificate chain against a truststore you provide, and checks the name. This is the stronger setting and the one to use where the instance holds anything sensitive.
 
@@ -62,8 +67,8 @@ If a verifying target fails immediately after a plug-in upgrade, re-apply its tr
 
 ## Related
 
-- [Prerequisites](prerequisites.html#tls) - deciding whether you need encryption at all
-- [Credentials](credentials.html#truststore) - the truststore credential set
-- [Targets and properties](targets-and-properties.html#properties) - the property that selects the mode
-- [Jobs](jobs.html) - jobs use the same truststore, and fail without it
-- [Troubleshooting](troubleshooting.html#certificates) - certificate and PKIX errors
+- [Prerequisites](prerequisites.md#tls) - deciding whether you need encryption at all
+- [Credentials](credentials.md#truststore) - the truststore credential set
+- [Targets and properties](targets-and-properties.md#properties) - the property that selects the mode
+- [Jobs](jobs.md) - jobs use the same truststore, and fail without it
+- [Troubleshooting](troubleshooting.md#certificates) - certificate and PKIX errors
