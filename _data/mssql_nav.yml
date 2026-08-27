@@ -29,7 +29,14 @@ groups:
   - name: Reference
     pages:
       - { title: "Metrics reference", url: /mssql/metrics-reference.html }
-      - { title: "Alerts and templates", url: /mssql/alerts-and-templates.html }
+      # "Alerts and thresholds", not "Alerts and templates" as postgres has it:
+      # this plug-in ships default WARNING/CRITICAL conditions in its collection
+      # metadata, enabled per target on creation. It does NOT ship an Enterprise
+      # Manager Monitoring Template - the exportable artifact an administrator
+      # applies across many targets. Naming the page after templates would
+      # promise something that is not in the box. Confirmed out of scope for the
+      # beta, 2026-08-27.
+      - { title: "Alerts and thresholds", url: /mssql/alerts-and-thresholds.html }
       - { title: "Compliance rules", url: /mssql/compliance-rules.html }
       - { title: "Jobs", url: /mssql/jobs.html }
       - { title: "High availability", url: /mssql/high-availability.html }
