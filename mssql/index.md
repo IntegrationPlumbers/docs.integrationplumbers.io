@@ -31,6 +31,8 @@ It monitors Microsoft SQL Server from Oracle Enterprise Manager: availability, c
 
 One plug-in and one target type cover every supported version and both agent platforms. There is no separate build per SQL Server release, and no separate story for Windows.
 
+![The Indexes page, showing index fragmentation and index usage for a monitored instance](images/indexes-page.png)
+
 ## Where to start
 
 | If you want to | Go to |

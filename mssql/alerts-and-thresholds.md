@@ -40,6 +40,10 @@ For metrics measured as a snapshot rather than a rate, use Enterprise Manager's 
 
 From the target's menu, choose **Monitoring** then **Metric and Collection Settings**. Every threshold above appears there with its shipped value, and any change applies to that target only.
 
+When a threshold is crossed, the incident appears in Enterprise Manager and on the target's own Overview page:
+
+![The Incidents and Problems region of the Overview page listing open incidents with their severity, status and age](images/overview-incidents.png)
+
 Collection intervals are set in the same place. They range from five minutes for fast-moving state to 24 hours for configuration and per-database space, so a metric you have just changed may not reflect it until its next collection.
 
 ## Applying settings across many targets {#across-targets}

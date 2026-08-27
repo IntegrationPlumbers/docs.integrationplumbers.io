@@ -36,6 +36,12 @@ The target should reach **Up** within a few minutes. If it does not, see [If som
 
 Then open its **Overview** page. Server configuration, availability, instance status and the database list should all be populated.
 
+![The Overview page of a healthy target, showing the server configuration, availability history, instance status, monitoring and licence, database space, availability group and processor utilisation cards](images/overview-page.png)
+
+The cards below those show the sessions consuming the most CPU, and every open incident on the target.
+
+![The Top Sessions by CPU region of the Overview page](images/overview-top-sessions.png)
+
 ## What to look at first {#first-look}
 
 | Look at | For |

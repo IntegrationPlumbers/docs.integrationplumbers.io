@@ -34,6 +34,8 @@ Thresholds ship on the recovery point, both queue sizes and the replica link. Se
 
 One deliberate design point: the critical threshold sits on the **replica link**, not on the readiness column. A healthy asynchronous-commit disaster-recovery secondary is permanently in a synchronising state, so alerting on readiness would raise a standing critical on a perfectly correct topology. Lag magnitude is covered by the queue and recovery-point thresholds instead, which measure how far behind the replica actually is.
 
+![The AG Failover Readiness page, one row per database and secondary, with readiness, availability group, database, secondary replica, synchronisation state, recovery point, recovery time, redo queue and send queue](images/ag-failover-readiness.png)
+
 ## Failover cluster instances {#fci}
 
 On a Windows Server Failover Cluster, the plug-in reports the node list and which node currently owns the instance. Point the target at the virtual network name and it follows the instance across a failover.
