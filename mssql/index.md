@@ -40,7 +40,7 @@ One plug-in and one target type cover every supported version and both agent pla
 | See whether your estate is ready | [Prerequisites](prerequisites.html) |
 | Install it | [Install and upgrade](install-and-upgrade.html) |
 | Add your first instance | [Targets and properties](targets-and-properties.html) |
-| Understand what a page is telling you | [Monitoring pages](page-overview.html) |
+| Understand what a page is telling you | [Monitoring pages](monitoring-pages.html) |
 | Know what changed | [What's new](whats-new.html) |
 | Tune what alerts you | [Alerts and thresholds](alerts-and-thresholds.html) |
 | Take part in the beta | [Early access](early-access.html) |

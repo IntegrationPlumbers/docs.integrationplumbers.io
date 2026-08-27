@@ -7,6 +7,11 @@ nav_order: 22
 
 The plug-in ships ten Enterprise Manager job types, so the things you find on a monitoring page can be acted on from the same console — with Enterprise Manager's own scheduling, credentials and audit trail.
 
+> **Prerequisites for this page**
+> - Job credentials set on the target. These are separate from monitoring credentials: a target that is Up and collecting tells you nothing about whether its jobs will run. See [Before jobs will run](#prerequisites).
+> - The truststore credential set resolved on every target, including targets with no truststore, where it takes the literal value `none`.
+> - Grants beyond the monitoring login for most jobs. See [Grants each job needs](#grants).
+
 **In this page:** The jobs · Before jobs will run · Grants each job needs · Two things that catch people out · Backups use native T-SQL
 
 ## The jobs {#the-jobs}
@@ -71,3 +76,10 @@ A log backup additionally needs the database in the full recovery model with a p
 The backup and restore jobs use native T-SQL backup and restore. They do not use `xp_cmdshell`, and the plug-in never asks you to enable it.
 
 This matters because the plug-in also flags `xp_cmdshell` as a compliance finding. It would be poor form to warn about a setting and then require it — so it does not.
+
+## Related
+
+- [Credentials](credentials.html#grants) - the monitoring login, and why jobs need more than it
+- [TLS connections](tls.html) - the truststore every job resolves, whether or not you use TLS
+- [Monitoring pages](monitoring-pages.html#databases) - the Databases page, where backup and restore are submitted
+- [Troubleshooting](troubleshooting.html#jobs) - a job that fails with no obvious cause

@@ -7,6 +7,10 @@ nav_order: 3
 
 This release is pre-release software. This page is what that means in practice.
 
+> **Prerequisites for this page**
+> - An Early-Access build of the plug-in, supplied through your Early-Access channel.
+> - A non-production Enterprise Manager and a non-production SQL Server instance. See [Not for production](#not-production).
+
 **In this page:** What Early Access is · What has been verified · What has not · Not for production · Reporting what you find · Moving to the general release
 
 ## What Early Access is {#what-it-is}
@@ -55,3 +59,10 @@ Route it through the Early Access channel provided with your build. Support is b
 Install the general release alongside, add your targets to it, and remove the Early Access plug-in when you are satisfied. Because the two are separate plug-ins, they can coexist while you transition.
 
 Anything you tuned on a beta target — thresholds, credentials, schedules — has to be set again on the general-release target. Worth keeping a note of your changes as you make them.
+
+## Related
+
+- [Install and upgrade](install-and-upgrade.html#which-build) - which artifact matches your Enterprise Manager release
+- [Prerequisites](prerequisites.html) - what to have in place before deploying the beta
+- [Troubleshooting](troubleshooting.html#reporting) - what to send when you report something
+- [SQL Server Plug-in](index.html) - what the plug-in does, and where to start

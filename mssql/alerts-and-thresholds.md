@@ -7,6 +7,10 @@ nav_order: 20
 
 The plug-in ships curated WARNING and CRITICAL thresholds. They are enabled the moment a target is created — there is nothing to import and nothing to switch on — and every one of them is editable per target in the Enterprise Manager console.
 
+> **Prerequisites for this page**
+> - A target that is collecting. Thresholds are live from the moment the target exists, but they cannot fire on a metric that has never collected.
+> - Enterprise Manager access to Metric and Collection Settings, to change any of them.
+
 **In this page:** What ships enabled · The thresholds · Changing a threshold · Applying settings across many targets · Why some thresholds have only a critical value
 
 ## What ships enabled {#what-ships}
@@ -61,3 +65,11 @@ This keeps the plug-in's defaults as a sane starting point while letting you hol
 Three of the fourteen — instance availability, the AG replica link, and one licence boundary — have a critical value and no warning. That is deliberate: they are binary conditions. An instance is up or down; a replica link is healthy or broken. There is no middle state worth a lower severity, and inventing one would only produce an alert nobody can act on differently.
 
 The AG replica link threshold is also deliberately *not* placed on the readiness column. A healthy asynchronous-commit disaster-recovery secondary sits permanently in a synchronising state, so alerting on readiness would raise a standing critical on a perfectly correct topology. Replication lag is covered instead by the redo queue, send queue and recovery-point thresholds above, which measure how far behind the replica actually is.
+
+## Related
+
+- [Monitoring pages](monitoring-pages.html) - the data the thresholds are evaluated against
+- [Monitoring pages](monitoring-pages.html#intervals) - collection intervals, set in the same place as thresholds
+- [High availability](high-availability.html#failover-readiness) - why the AG critical sits on the replica link
+- [Compliance rules](compliance-rules.html) - configuration findings, which alert differently
+- [Troubleshooting](troubleshooting.html#missing-data) - a threshold that never fires

@@ -5,6 +5,10 @@ nav_order: 6
 
 # Install and upgrade
 
+> **Prerequisites for this page**
+> - `emcli` available on the OMS host, logged in as a user that can import and deploy plug-ins.
+> - The right artifact for your Enterprise Manager release. A 24ai OPAR is refused at import on a 13.5 OMS. See [Which build you need](#which-build).
+
 **In this page:** Which build you need · Installing · Upgrading · Removing · What a plug-in deploy does not change
 
 ## Which build you need {#which-build}
@@ -74,3 +78,11 @@ The archive also stays in the Software Library after undeploy. Remove it from th
 Deploying the plug-in touches Enterprise Manager, not your databases. It creates no objects on the monitored instance, runs no DDL, and changes no SQL Server configuration. Everything it reads, it reads through the monitoring login's read-only grants.
 
 The only SQL Server-side writes this plug-in ever performs are the ones you explicitly ask for by running a job — a backup, a restore, an index creation — and those are covered in [Jobs](jobs.html).
+
+## Related
+
+- [Prerequisites](prerequisites.html#enterprise-manager) - supported Enterprise Manager and agent versions
+- [Early access](early-access.html) - what the beta build is, and how it is numbered
+- [Targets and properties](targets-and-properties.html) - the next step after deploying
+- [Troubleshooting](troubleshooting.html#import-deploy) - import and deploy failures
+- [Getting started](getting-started.html) - the whole path, of which this is one step

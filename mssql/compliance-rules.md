@@ -7,6 +7,10 @@ nav_order: 21
 
 The plug-in ships fourteen compliance rules. They evaluate against data already collected, so they cost nothing extra to run against the instance.
 
+> **Prerequisites for this page**
+> - The compliance standard associated with the target. See [Where results appear](#where).
+> - The monitoring login. The rules evaluate against configuration the plug-in already collects, and need no additional grants.
+
 **In this page:** The rules · Where results appear · How they evaluate · A note on xp_cmdshell
 
 ## The rules {#the-rules}
@@ -50,3 +54,10 @@ The end-of-support rule fires on SQL Server 2016 and earlier. Releases still ins
 The plug-in flags `xp_cmdshell` as a finding, and it does not ask you to enable it. Its own backup and restore jobs use native T-SQL.
 
 This is worth stating plainly because some monitoring tools require the very setting they warn you about. This one does not.
+
+## Related
+
+- [Monitoring pages](monitoring-pages.html#analysis) - the Analysis page, which covers adjacent ground
+- [Alerts and thresholds](alerts-and-thresholds.html) - metric thresholds, which are a separate mechanism
+- [Credentials](credentials.html#why-not-sysadmin) - the least-privilege position the rules assume
+- [Prerequisites](prerequisites.html#supported-versions) - the versions the end-of-support rule checks against

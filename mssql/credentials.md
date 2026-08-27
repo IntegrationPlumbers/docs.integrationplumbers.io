@@ -7,6 +7,12 @@ nav_order: 8
 
 The plug-in connects with a read-only monitoring login. It never needs `sysadmin`, `db_owner` or `CONTROL SERVER`, and it creates nothing on the instance.
 
+> **Prerequisites for this page**
+> - The ability to create a login on the SQL Server instance, or someone who can run the script for you.
+> - Enterprise Manager access that can set monitoring credentials on a target.
+>
+> Credentials must be applied after the target exists. Supplying them inline when the target is created does not work, and the target comes up Down with no obvious reason why.
+
 **In this page:** The grants · Creating the login · Applying credentials to a target · Windows Integrated Authentication · Truststore credentials · Why not sysadmin
 
 ## The grants {#grants}
@@ -61,3 +67,11 @@ Worth knowing if you redeploy the plug-in: a deploy cycle can reset a target's t
 Because it is not needed, and monitoring credentials are stored, rotated and occasionally mislaid.
 
 A monitoring login with the grants above can read the state of the instance and nothing else. If it leaks, the exposure is metadata. The plug-in is built so that the account it runs as day to day has no power to change anything — the jobs that *do* change things run under credentials you supply at the time you run them, not under the monitoring login.
+
+## Related
+
+- [Prerequisites](prerequisites.html#monitoring-login) - where the monitoring login fits in the setup
+- [Targets and properties](targets-and-properties.html#credentials) - applying credentials to a target
+- [TLS connections](tls.html#setup) - the truststore credential set and what it is for
+- [Jobs](jobs.html#prerequisites) - why job credentials are separate from monitoring credentials
+- [Troubleshooting](troubleshooting.html#target-down) - what a credential failure looks like

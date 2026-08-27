@@ -7,6 +7,11 @@ nav_order: 9
 
 The plug-in connects with encryption by default. What you choose per target is whether the server's certificate is also **verified**.
 
+> **Prerequisites for this page**
+> - A SQL Server instance configured for encrypted connections, if you intend to use verification mode.
+> - The CA certificate chain that signed the SQL Server certificate, for the agent truststore.
+> - Host access to the agent, to place the truststore file.
+
 **In this page:** The two modes · Choosing a mode · Setting up verification · When verification fails · After a plug-in upgrade
 
 ## The two modes {#modes}
@@ -54,3 +59,11 @@ Setting the target back to Required is a legitimate way to confirm the problem i
 A deploy cycle can reset a target's truststore credentials to placeholder values. The target then goes Down with a certificate-path error even though nothing about the certificate changed.
 
 If a verifying target fails immediately after a plug-in upgrade, re-apply its truststore credentials before investigating anything else. Targets on Required are unaffected, because they have no truststore to lose.
+
+## Related
+
+- [Prerequisites](prerequisites.html#tls) - deciding whether you need encryption at all
+- [Credentials](credentials.html#truststore) - the truststore credential set
+- [Targets and properties](targets-and-properties.html#properties) - the property that selects the mode
+- [Jobs](jobs.html) - jobs use the same truststore, and fail without it
+- [Troubleshooting](troubleshooting.html#certificates) - certificate and PKIX errors

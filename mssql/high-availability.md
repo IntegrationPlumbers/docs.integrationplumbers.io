@@ -7,11 +7,15 @@ nav_order: 24
 
 The plug-in monitors AlwaysOn availability groups and failover cluster instances, and it behaves predictably on Linux where clustering is managed outside Windows.
 
+> **Prerequisites for this page**
+> - A target pointed at an instance participating in an availability group or a failover cluster. See [What to point at](targets-and-properties.html#what-to-point-at), which matters more here than anywhere else in the guide.
+> - The monitoring login present on every replica you want reported, not only the primary.
+
 **In this page:** Availability groups · What to monitor · Failover readiness · Failover cluster instances · Linux and the Pacemaker boundary · Database mirroring
 
 ## Availability groups {#availability-groups}
 
-Availability groups are monitored through the availability-group metric families and the [AG Failover Readiness](page-ag-failover.html) page. Both work identically on Windows- and Linux-hosted SQL Server.
+Availability groups are monitored through the availability-group metric families and the [AG Failover Readiness](monitoring-pages.html#ag-failover) page. Both work identically on Windows- and Linux-hosted SQL Server.
 
 ## What to monitor {#what-to-monitor}
 
@@ -53,3 +57,11 @@ If you monitor Linux-hosted SQL Server under Pacemaker, an empty cluster-node ta
 ## Database mirroring {#mirroring}
 
 Mirroring metrics are still collected for continuity with older estates, but there is no dedicated page. Microsoft deprecated mirroring in favour of availability groups from SQL Server 2012, and new deployments should not be using it.
+
+## Related
+
+- [Monitoring pages](monitoring-pages.html#ag-failover) - the AG Failover Readiness page, region by region
+- [Alerts and thresholds](alerts-and-thresholds.html#thresholds) - the AG thresholds and what each one measures
+- [Targets and properties](targets-and-properties.html#what-to-point-at) - listener, virtual network name, or replica
+- [Credentials](credentials.html) - the login must exist on every replica, not only the primary
+- [Troubleshooting](troubleshooting.html#missing-data) - an AG region that stays empty

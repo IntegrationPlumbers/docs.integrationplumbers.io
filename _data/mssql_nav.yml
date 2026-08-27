@@ -1,7 +1,11 @@
 # Navigation for the SQL Server plug-in guide. Rendered by _layouts/default.html
-# on every /mssql/ page. Mirrors the grouping of postgresql_nav.yml, with one
-# deliberate difference: postgres groups its differentiators under "Advisors",
-# and ours are console pages, so that group is "Monitoring pages" here.
+# on every /mssql/ page. Mirrors the grouping of postgresql_nav.yml.
+#
+# The console pages are covered by ONE page, mssql/monitoring-pages.md, with a
+# section per console page. That matches postgresql/monitoring-pages.md, which
+# covers every postgres console page the same way. An earlier draft of this nav
+# gave each of our eight console pages its own file; that diverged from the
+# template and left eight pages unwritten for the beta instead of one.
 groups:
   - name: Start here
     pages:
@@ -16,18 +20,9 @@ groups:
       - { title: "Targets and properties", url: /mssql/targets-and-properties.html }
       - { title: "Credentials", url: /mssql/credentials.html }
       - { title: "TLS connections", url: /mssql/tls.html }
-  - name: Monitoring pages
-    pages:
-      - { title: "Overview", url: /mssql/page-overview.html }
-      - { title: "Databases", url: /mssql/page-databases.html }
-      - { title: "Performance", url: /mssql/page-performance.html }
-      - { title: "Queries", url: /mssql/page-queries.html }
-      - { title: "Deadlocks", url: /mssql/page-deadlocks.html }
-      - { title: "Indexes", url: /mssql/page-indexes.html }
-      - { title: "Analysis", url: /mssql/page-analysis.html }
-      - { title: "AG Failover Readiness", url: /mssql/page-ag-failover.html }
   - name: Reference
     pages:
+      - { title: "Monitoring pages", url: /mssql/monitoring-pages.html }
       - { title: "Metrics reference", url: /mssql/metrics-reference.html }
       # "Alerts and thresholds", not "Alerts and templates" as postgres has it:
       # this plug-in ships default WARNING/CRITICAL conditions in its collection

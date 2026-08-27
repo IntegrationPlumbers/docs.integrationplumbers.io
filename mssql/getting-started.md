@@ -7,6 +7,11 @@ nav_order: 2
 
 The shortest path from a fresh plug-in to a target you can look at. Each step links to the page with the detail.
 
+> **Prerequisites for this page**
+> - OMS access that can import an OPAR and deploy plug-ins, for example `sysman`. See [Prerequisites](prerequisites.html#enterprise-manager).
+> - A Management Agent that can reach the SQL Server instance on its TCP port, by default 1433.
+> - A SQL Server login for monitoring. See [Credentials](credentials.html#grants) for the grants it needs.
+
 **In this page:** Before you start · Install · Add your first target · Check it worked · What to look at first · If something is wrong
 
 ## Before you start {#before}
@@ -49,7 +54,7 @@ The cards below those show the sessions consuming the most CPU, and every open i
 | Overview | Whether the instance is healthy right now |
 | Compliance results | The settings worth changing on a new instance — start with the end-of-support rule |
 | [Alerts and thresholds](alerts-and-thresholds.html) | What will alert you, and at what values, before it does |
-| [AG Failover Readiness](page-ag-failover.html) | If the instance is in an availability group |
+| [AG Failover Readiness](monitoring-pages.html#ag-failover) | If the instance is in an availability group |
 
 Reading the thresholds page early is worth the five minutes. Fourteen thresholds are live from the moment the target exists, and it is better to know what they are than to meet them at 3am.
 
@@ -64,3 +69,13 @@ Reading the thresholds page early is worth the five minutes. Fourteen thresholds
 **A job fails on a target that is monitoring fine.** Jobs use a different credential path. See [Jobs](jobs.html#prerequisites).
 
 More in [Troubleshooting](troubleshooting.html).
+
+## Related
+
+- [Prerequisites](prerequisites.html) - what to check before you begin
+- [Install and upgrade](install-and-upgrade.html) - importing and deploying the plug-in
+- [Targets and properties](targets-and-properties.html) - what each target property means
+- [Credentials](credentials.html) - the monitoring login and its grants
+- [Monitoring pages](monitoring-pages.html) - what each console page is telling you
+- [Alerts and thresholds](alerts-and-thresholds.html) - what will alert you, and at what values
+- [Troubleshooting](troubleshooting.html) - when a step above does not go as described

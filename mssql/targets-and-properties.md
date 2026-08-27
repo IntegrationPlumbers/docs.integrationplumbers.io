@@ -5,6 +5,10 @@ nav_order: 7
 
 # Targets and properties
 
+> **Prerequisites for this page**
+> - The plug-in deployed to both the OMS and the agent that will monitor the instance. See [Install and upgrade](install-and-upgrade.html).
+> - The monitoring login created on the SQL Server instance. See [Credentials](credentials.html#creating).
+
 **In this page:** Adding a target · Properties · Credentials · What to point at · Collection schedules · A new target looks sparse at first
 
 ## Adding a target {#adding}
@@ -79,3 +83,12 @@ Because configuration and space are on 24-hour schedules, a target added in the 
 The Overview page works around the two slowest by taking a one-off live reading, so server configuration and the database list appear straight away, marked as a live read. Everything else fills in as its schedule comes round.
 
 This is normal on a new target and is not a fault. If a surface is still empty after 24 hours, that is worth reporting.
+
+## Related
+
+- [Credentials](credentials.html) - setting the monitoring credentials a new target needs
+- [Prerequisites](prerequisites.html#network) - connectivity the agent needs to the instance
+- [TLS connections](tls.html) - the two encryption modes and which property selects them
+- [High availability](high-availability.html) - what to point a target at in an AG or cluster
+- [Monitoring pages](monitoring-pages.html#blank) - why a new target looks sparse on its first day
+- [Troubleshooting](troubleshooting.html#target-down) - a target that will not come Up

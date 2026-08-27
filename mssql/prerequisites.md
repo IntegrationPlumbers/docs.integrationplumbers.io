@@ -75,3 +75,11 @@ Choose per target when you add it. [TLS connections](tls.html) covers both, incl
 - [ ] A monitoring login on each instance with the grants above
 - [ ] For certificate validation, the chain in a truststore the agent can read
 - [ ] The instance's port and, for a named instance, its instance name
+
+## Related
+
+- [Install and upgrade](install-and-upgrade.html) - the next step once the checklist passes
+- [Credentials](credentials.html) - creating the monitoring login and granting it
+- [TLS connections](tls.html) - if the instance requires encrypted connections
+- [Targets and properties](targets-and-properties.html) - adding the first target
+- [Getting started](getting-started.html) - the whole path, start to finish
