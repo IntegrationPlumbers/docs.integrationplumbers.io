@@ -1,0 +1,39 @@
+# Navigation for the SQL Server plug-in guide. Rendered by _layouts/default.html
+# on every /mssql/ page. Mirrors the grouping of postgresql_nav.yml.
+#
+# The console pages are covered by ONE page, mssql/monitoring-pages.md, with a
+# section per console page. That matches postgresql/monitoring-pages.md, which
+# covers every postgres console page the same way. An earlier draft of this nav
+# gave each of our eight console pages its own file; that diverged from the
+# template and left eight pages unwritten for the beta instead of one.
+groups:
+  - name: Start here
+    pages:
+      - { title: "SQL Server Plug-in", url: /mssql/ }
+      - { title: "What's new", url: /mssql/whats-new.html }
+      - { title: "Getting started", url: /mssql/getting-started.html }
+      - { title: "Early access", url: /mssql/early-access.html }
+  - name: Set up
+    pages:
+      - { title: "Prerequisites", url: /mssql/prerequisites.html }
+      - { title: "Install and upgrade", url: /mssql/install-and-upgrade.html }
+      - { title: "Targets and properties", url: /mssql/targets-and-properties.html }
+      - { title: "Credentials", url: /mssql/credentials.html }
+      - { title: "TLS connections", url: /mssql/tls.html }
+  - name: Reference
+    pages:
+      - { title: "Monitoring pages", url: /mssql/monitoring-pages.html }
+      - { title: "Metrics reference", url: /mssql/metrics-reference.html }
+      # "Alerts and thresholds", not "Alerts and templates" as postgres has it:
+      # this plug-in ships default WARNING/CRITICAL conditions in its collection
+      # metadata, enabled per target on creation. It does NOT ship an Enterprise
+      # Manager Monitoring Template - the exportable artifact an administrator
+      # applies across many targets. Naming the page after templates would
+      # promise something that is not in the box. Confirmed out of scope for the
+      # beta, 2026-08-27.
+      - { title: "Alerts and thresholds", url: /mssql/alerts-and-thresholds.html }
+      - { title: "Compliance rules", url: /mssql/compliance-rules.html }
+      - { title: "Jobs", url: /mssql/jobs.html }
+      - { title: "High availability", url: /mssql/high-availability.html }
+      - { title: "Troubleshooting", url: /mssql/troubleshooting.html }
+      - { title: "Changelog", url: /mssql/changelog.html }
