@@ -9,7 +9,7 @@ nav_order: 0
 
 ### Oracle Enterprise Manager Plug-in for Microsoft SQL Server User Guide
 
-*Early Access (beta) · `24.1.9.N.0` for Enterprise Manager 24ai · `13.5.9.N.0` for Enterprise Manager 13.5*
+*Early Access (beta) · Enterprise Manager 24ai and 13.5*
 *August 2026*
 
 This release ships as two plug-in builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable — install the build that matches your Enterprise Manager. Everything in this guide applies to both.
@@ -54,7 +54,7 @@ One plug-in and one target type cover every supported version and both agent pla
 | Management Agent platforms | Linux x86-64, Windows x86-64 |
 | SQL Server host platforms | Windows and Linux, monitored remotely or locally |
 
-SQL Server 2016 and 2017 collect every metric family, with one family returning less detail than on 2019 and later. [Prerequisites](prerequisites.md) has the specifics.
+SQL Server 2016 and 2017 collect every metric family, with two families returning less detail than on 2019 and later. [Prerequisites](prerequisites.md) has the specifics.
 
 ## A note on Early Access
 
