@@ -23,7 +23,7 @@ What the plug-in needs falls into four groups: Enterprise Manager and an agent t
 
 ## Enterprise Manager and agents {#enterprise-manager}
 
-This release ships as two plug-in builds with the same features: **24.1.9.7.0** for Enterprise Manager 24ai and **13.5.9.2.0** for Enterprise Manager 13.5. Enterprise Manager refuses the build it was not compiled for at import (`Incompatible version`), so use the artifact that matches your OMS.
+This release ships as two plug-in builds with the same features: **24.1.9.8.0** for Enterprise Manager 24ai and **13.5.9.3.0** for Enterprise Manager 13.5. Enterprise Manager refuses the build it was not compiled for at import (`Incompatible version`), so use the artifact that matches your OMS.
 
 Before you add any target, import the plug-in OPAR, deploy it to the OMS, then deploy it to each agent that will monitor a Db2 database. See [Install and upgrade](install-and-upgrade.md#import).
 
