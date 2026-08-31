@@ -52,9 +52,7 @@ Rotating the password later is the same command again. The target picks it up on
 
 ## Windows Integrated Authentication {#wia}
 
-On a Windows agent, Windows Integrated Authentication is available as an alternative to a SQL login. On Linux the plug-in uses SQL authentication.
-
-Kerberos is not part of this release.
+On a Windows agent, Windows Integrated Authentication is available as an alternative to a SQL login. On Linux the plug-in uses SQL authentication. Kerberos authentication is not supported on either platform.
 
 ## Truststore credentials {#truststore}
 

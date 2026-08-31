@@ -5,15 +5,15 @@ nav_order: 1
 
 # Release notes
 
-**Topics:** 1.1 Early Access - 24.1.9.12.0 / 13.5.9.12.0 (2026-08-31)
+**Topics:** 1.1 Open Beta - 24.1.9.12.0 / 13.5.9.12.0 (2026-08-31)
 
-## 1.1 Early Access - 24.1.9.12.0 / 13.5.9.12.0 (2026-08-31)
+## 1.1 Open Beta - 24.1.9.12.0 / 13.5.9.12.0 (2026-08-31)
 
 The first release of the plug-in, and the release this guide describes. There is no earlier version, so everything below is new rather than changed.
 
-It is a **separate plug-in** from the general release to come: plug-in ID `ip.em.xmsb`, target type `ip_mssql_database_beta`. Beta and GA can be deployed to the same Enterprise Manager without colliding, and moving from beta to GA is a clean install rather than an upgrade. See [Early access](early-access.md) for the terms and [Install and upgrade](install-and-upgrade.md#which-build) for which artifact matches your Enterprise Manager release.
+It is a **separate plug-in** from the general-availability release: plug-in ID `ip.em.xmsb`, target type `ip_mssql_database_beta`. Beta and GA can be deployed to the same Enterprise Manager without colliding, and moving from beta to GA is a clean install rather than an upgrade. See the [Open Beta notice](beta-pre-release.md) for the terms and [Install and upgrade](install-and-upgrade.md#which-build) for which artifact matches your Enterprise Manager release.
 
-Two editions are built from the same commit and differ only in version number and the EDK they were built with: `24.1.9.12.0` for Enterprise Manager 24ai and `13.5.9.12.0` for Enterprise Manager 13.5. Enterprise Manager refuses a plug-in built with a newer EDK than the OMS, which is why the numbering differs; it is not a separate product line.
+Two editions are built from the same commit and differ only in version number: `24.1.9.12.0` for Enterprise Manager 24ai and `13.5.9.12.0` for Enterprise Manager 13.5 — the same features either way, not a separate product line.
 
 #### Functionality
 
@@ -31,11 +31,13 @@ Two editions are built from the same commit and differ only in version number an
 
 #### Known limitations and boundaries
 
-- **The certification matrix is not complete.** The Enterprise Manager 13.5 edition imports, deploys to the OMS and to agents, collects, and renders its console pages, verified on a live 13.5 OMS. It has not been exercised across the full SQL Server version matrix on that line. See [Early access](early-access.md#not-verified).
-- **A backup job can report Succeeded after a late failure.** If a backup or restore fails partway through, after the operation has started, the job can return without raising an error and report Succeeded while leaving an incomplete file. Failures that occur before the operation starts, such as a missing database or a permission refusal, report correctly. Until this is fixed, confirm backup files exist and are the expected size rather than relying on job status alone.
+- **The certification matrix is not complete.** The Enterprise Manager 13.5 edition imports, deploys to the OMS and to agents, collects, and renders its console pages, verified on a live 13.5 OMS. It has not been exercised across the full SQL Server version matrix on that line. See [What is not yet verified](beta-pre-release.md#not-verified).
+- **A backup job can report Succeeded after a late failure.** If a backup or restore fails partway through, after the operation has started, the job can return without raising an error and report Succeeded while leaving an incomplete file. Failures that occur before the operation starts, such as a missing database or a permission refusal, report correctly. Confirm backup files exist and are the expected size rather than relying on job status alone.
 - **Two metric families return less detail on SQL Server 2016 and 2017**, both because the view that classifies a latched page by type arrived in 2019. TempDB contention collects, but its allocation-page and metadata-page waiter counts read zero and the advice cell is blank. Cluster nodes collects node names, but status, status description and current owner are blank. Read a zero or a blank in either as "not classifiable on this version", not as "nothing to report".
 - **Volume free space collapses on Linux.** On Linux targets the Volume Free Space region on the Analysis page can report a single row with blank volume and label cells.
 - **Windows-only surfaces are empty on Linux.** Registry settings and Windows service state have no Linux equivalent and report empty there rather than erroring.
+- **Long chart windows can under-report.** On the Week and Month chart windows on the Performance page, a period containing a missed collection can render a lower value than actually occurred, or drop a series for that period. The 24 Hours window is unaffected.
+- **Two Performance page charts do not offer a Real Time window.** Those values are measured over the collection interval, and a real-time poll would change what the scheduled collection records, so the window is not offered there.
 - **Large instances are unmeasured.** The largest instance in our lab holds a normal developer database count. Collection overhead on an instance hosting a hundred or more databases has not been characterised.
 - **Thresholds and intervals are provisional.** The 14 defaults are a starting point sized for lab workloads. Review them against your own service levels before relying on them, and see [Changing a threshold](alerts-and-thresholds.md#changing).
 - **Some wide tables clip their rightmost columns** at narrower browser widths.
@@ -49,7 +51,7 @@ Moving between beta drops and moving from beta to the general release are differ
 
 ## Related
 
-- [Early access](early-access.md) - what the Early-Access programme is and what is expected of you
+- [Open Beta notice](beta-pre-release.md) - the terms of the Open Beta programme and what is expected of you
 - [Install and upgrade](install-and-upgrade.md#which-build) - which artifact matches your Enterprise Manager release
 - [Monitoring pages](monitoring-pages.md) - what each of the eight console pages shows
 - [Alerts and thresholds](alerts-and-thresholds.md) - the 14 thresholds and how to tune them

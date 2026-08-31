@@ -5,7 +5,7 @@ nav_order: 5
 
 # Install and upgrade
 
-Installing the IBM DB2 plug-in follows Oracle Enterprise Manager's standard plug-in lifecycle: import the OPAR onto the OMS, deploy it to the OMS and to each monitoring agent, then licence and add your targets. Moving between beta drops follows the same import-and-deploy sequence, but because metadata can change between drops, replacing a build within the beta line is an undeploy-then-redeploy rather than a silent in-place update — see [Upgrade from an earlier drop](#upgrade) below.
+Installing the IBM Db2 plug-in follows Oracle Enterprise Manager's standard plug-in lifecycle: import the OPAR onto the OMS, deploy it to the OMS and to each monitoring agent, then licence and add your targets. Moving between beta drops upgrades in place — import the new OPAR and deploy it over the existing one, the same sequence as a first install — see [Upgrade from an earlier drop](#upgrade) below.
 
 > **Prerequisites for this page**
 > - Your Enterprise Manager and Db2 versions are supported — see [Supported versions and platforms](prerequisites.md#supported-versions).
@@ -53,7 +53,7 @@ The equivalent `emcli` command:
 emcli deploy_plugin_on_server -plugin=ip.em.xdbb:24.1.9.8.0 -dbUser=SYS -dbPassword=<repository_SYS_password>
 ```
 
-On Enterprise Manager 24ai, `deploy_plugin_on_server` takes `-dbUser`/`-dbPassword` for the repository account — **not** `-sys_password`, which is rejected. Always pin the `:version`, on this command and on the agent deploy below, or an upgrade is silently skipped as "already deployed".
+On Enterprise Manager 24ai, `deploy_plugin_on_server` takes `-dbUser`/`-dbPassword` for the repository account — **not** `-sys_password`, which is rejected. On Enterprise Manager 13.5, use `13.5.9.3.0` in place of `24.1.9.8.0` and pass `-sys_password=<repository_SYS_password>` instead. Always pin the `:version`, on this command and on the agent deploy below, or an upgrade is silently skipped as "already deployed".
 
 To check deployment progress from either the console or `emcli`, run:
 
@@ -75,20 +75,26 @@ The equivalent `emcli` command:
 emcli deploy_plugin_on_agent -plugin=ip.em.xdbb:24.1.9.8.0 -agent_names="<host>:<port>"
 ```
 
+Use `13.5.9.3.0` in place of `24.1.9.8.0` when deploying to Enterprise Manager 13.5.
+
 `get_plugin_deployment_status` (shown above) reports agent deployment progress just as it does for the OMS. Deploy the agent side in the same maintenance window as the OMS side: until you do, metrics added by a metadata-bumping drop have nowhere to come from, and their pages stay empty while everything else keeps working.
 
 ## Upgrade from an earlier drop {#upgrade}
 
-Because metadata may change between beta drops, replacing a build within the beta line is an undeploy-then-redeploy, not an in-place update:
+Beta-to-beta upgrades in place: import the new drop's OPAR and deploy it the same way as the first install, over the existing plug-in — targets, their credentials and their collected history are kept.
 
 ```
-emcli undeploy_plugin_from_agent  -plugin=ip.em.xdbb -agent_names="<agent_host>:<agent_port>" -delete_targets
-emcli undeploy_plugin_from_server -plugin=ip.em.xdbb -dbUser=SYS -dbPassword=<repository_SYS_password>
+emcli import_update -file="/tmp/<new_version>_ip.em.xdbb_2000_0.opar" -omslocal
+emcli deploy_plugin_on_server -plugin=ip.em.xdbb:<new_version> -dbUser=SYS -dbPassword=<repository_SYS_password>
+emcli get_plugin_deployment_status -plugin=ip.em.xdbb       # wait for Success
+emcli deploy_plugin_on_agent -plugin=ip.em.xdbb:<new_version> -agent_names="<host>:<port>"
 ```
 
-Then **manually delete the old plug-in entry from Self Update** — Enterprise Manager does not remove it automatically — before importing the next drop's OPAR ([Import the OPAR](#import)) and deploying it ([Deploy to the OMS](#deploy-oms), [Deploy to agents](#deploy-agents)). `-delete_targets` removes the beta targets on that agent along with the plug-in; add new ones after the redeploy completes.
+Use `-sys_password=<repository_SYS_password>` in place of `-dbUser`/`-dbPassword` when deploying to Enterprise Manager 13.5. Always pin the `:version` on both the server and agent commands — without it, a redeploy of the same or a lower version is silently skipped as "already deployed". When a drop changes target metadata, deploy the agent side in the same maintenance window as the OMS side; until you do, metrics added by that drop have nowhere to come from and their pages stay empty while everything else keeps working.
 
-Beta-to-beta is the only in-place path this release supports. **Beta to GA is always a clean install, never a migration** — see [What's new](whats-new.md#beta-identity).
+Run, or schedule, [Purge Stale Plugin Cache](jobs-and-metric-extensions.md#purge-stale-cache) once per agent after every upgrade — see [After an upgrade](#after-upgrade).
+
+**Beta to GA is always a clean install, never a migration** — see [What's new](whats-new.md#beta-identity).
 
 ## After an upgrade {#after-upgrade}
 
@@ -110,6 +116,8 @@ If a limited-instance licence key's instance count fails to validate right after
    ```
    emcli undeploy_plugin_from_server -plugin=ip.em.xdbb -dbUser=SYS -dbPassword=<repository_SYS_password>
    ```
+
+   Use `-sys_password=<repository_SYS_password>` in place of `-dbUser`/`-dbPassword` on Enterprise Manager 13.5.
 
 4. Manually delete the plug-in entry from Self Update.
 

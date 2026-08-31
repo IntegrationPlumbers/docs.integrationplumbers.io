@@ -18,7 +18,7 @@ Most of this is already in place if you monitor SQL Server today. There are thre
 | Management Agent | Linux x86-64, Windows x86-64 |
 | SQL Server host | Windows or Linux |
 
-Every declared version has been collected against on a live instance. On SQL Server 2016 and 2017 two metric families return less detail than they do on 2019 and later, both for the same reason: the view that classifies a latched page by type arrived in 2019. TempDB contention collects, but its allocation-page and metadata-page waiter counts read zero and the advice cell is blank. Cluster nodes collects node names, but status, status description and current owner are blank. Read a zero or a blank in either as "not classifiable on this version", not as "nothing to report". Everything else is identical across versions.
+Every declared SQL Server version has been collected against on a live instance under Enterprise Manager 24ai. The Enterprise Manager 13.5 edition has been verified for import, deployment, collection and console rendering, but has not yet been exercised across this full version matrix — see [What is not yet verified](beta-pre-release.md#not-verified). On SQL Server 2016 and 2017 two metric families return less detail than they do on 2019 and later, both for the same reason: the view that classifies a latched page by type arrived in 2019. TempDB contention collects, but its allocation-page and metadata-page waiter counts read zero and the advice cell is blank. Cluster nodes collects node names, but status, status description and current owner are blank. Read a zero or a blank in either as "not classifiable on this version", not as "nothing to report". Everything else is identical across versions.
 
 ## Enterprise Manager and agents {#enterprise-manager}
 

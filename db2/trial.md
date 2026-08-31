@@ -10,7 +10,7 @@ The Open Beta *is* the trial: a beta licence key gives you the whole product aga
 > **Prerequisites for this page**
 > - Enterprise Manager 13.5 or 24ai, with an agent that can reach the Db2 databases you want to evaluate — see [Enterprise Manager and agents](prerequisites.md#enterprise-manager).
 > - Db2 LUW 11.5 or 12.1 and a least-privilege monitoring user on each instance — see [The monitoring role](prerequisites.md#monitoring-role).
-> - For the local-only jobs and HADR sections of the checklist, an agent co-located on the same host as the Db2 instance — see [Network and ports](prerequisites.md#network).
+> - For the local-only jobs section of the checklist, an agent co-located on the same host as the Db2 instance — see [Network and ports](prerequisites.md#network).
 
 **Where to find it:** the key is requested through your Integration Plumbers contact. It goes in the target's **Plugin Licence Key** property, under **Target Setup ▸ Monitoring Configuration**, and the target's **License** metric confirms it.
 
@@ -25,13 +25,13 @@ Request the key before you install anything — a valid licence key is required 
 | Your Enterprise Manager line, 13.5 or 24ai | It decides which artifact you receive, `13.5.9.3.0` or `24.1.9.8.0`. Both carry the same features. |
 | Your Db2 versions, 11.5 or 12.1 | Versions below 11.5 are not supported — see [Supported versions and platforms](prerequisites.md#supported-versions). |
 | How many databases you want to monitor | The key carries an instance count for limited keys; the beta programme's keys are typically `Trial` or `Unlimited`. |
-| Whether the agent will be local or remote to each database | Metric collection works either way. Local-only capabilities — the five administrative jobs, the Kill Application action, and diagnostic-log monitoring — need the agent on the same host as the database. See [Network and ports](prerequisites.md#network). |
+| Whether the agent will be local or remote to each database | Metric collection works either way. Local-only capabilities — the five administrative jobs and diagnostic-log monitoring — need the agent on the same host as the database. See [Network and ports](prerequisites.md#network). |
 
 While you wait, work through the [Prerequisites checklist](prerequisites.md#checklist) on the database you plan to evaluate: creating the monitoring user is the one step worth starting early, since it needs a DBA connection.
 
 ## Your beta key
 
-Beta licence keys expire `2026-11-30`. Request one through your Integration Plumbers contact; it is minted for `ip.em.xdbb` specifically, so a GA key (once GA exists) will not work on the beta build, and a beta key will not work once you move to GA — see [What's new](whats-new.md#beta-identity).
+Beta licence keys expire `2026-10-31`. Request one through your Integration Plumbers contact; it is minted for `ip.em.xdbb` specifically, so a GA key (once GA exists) will not work on the beta build, and a beta key will not work once you move to GA — see [What's new](whats-new.md#beta-identity).
 
 ### Enter the key
 
@@ -76,13 +76,13 @@ Everything here needs only the target added and the key in place.
 
 ### Day 2 to 3
 
-These need a little more time and, for two rows, an agent local to the database.
+These need a little more time.
 
 | What to do | What you should see | Page |
 | :--- | :--- | :--- |
 | Open **All Metrics** and find `Top_Queries_Cpu_Time` and `Top_Queries_Execution_Count`. | Statements keyed by a statement-ID hash, with CPU time and execution count and their per-hour rates. Numeric-only in this release — see [What's new](whats-new.md#known-limitations). | [Monitoring pages](monitoring-pages.md) |
 | If the database is in an HADR pair, open **All Metrics** and find `HADR_Status` and `HADR_Readiness`. | Role, state, sync mode, connect status, heartbeat, log positions, and a `TakeoverReady` composite. | [HADR monitoring](hadr-monitoring.md) |
-| From an agent co-located with the database, run **Purge Stale Plugin Cache** once from **Enterprise ▸ Job ▸ Activity ▸ Create Job**. | The job completes with no error even on a brand-new install — there is nothing stale to delete yet, which is the expected result. | [Jobs](jobs-and-metric-extensions.md#purge-stale-cache) |
+| From the agent monitoring the target, run **Purge Stale Plugin Cache** once from **Enterprise ▸ Job ▸ Activity ▸ Create Job**. | The job completes with no error even on a brand-new install — there is nothing stale to delete yet, which is the expected result. | [Jobs](jobs-and-metric-extensions.md#purge-stale-cache) |
 | Associate the three compliance standards with your target. | Association Count moves from 0 to 1 on each of the three standards. | [Compliance standards](compliance-standards.md#associate) |
 
 ### Week 1

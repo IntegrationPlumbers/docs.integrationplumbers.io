@@ -6,4 +6,4 @@
 
 - [Microsoft SQL Server](/mssql/)
 
-- [IBM DB2](/db2/)
+- [IBM Db2](/db2/)

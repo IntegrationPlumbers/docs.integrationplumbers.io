@@ -16,7 +16,7 @@ What the plug-in needs falls into four groups: Enterprise Manager and an agent t
 | Component | Supported |
 | :--- | :--- |
 | Oracle Enterprise Manager | 13.5 and 24ai |
-| IBM Db2 LUW | **12.1** (primary, certified) and **11.5** (supported) |
+| IBM Db2 LUW | **12.1** (primary, certified) and **11.5** (supported by design; live collection certification in progress — see [What's new](whats-new.md#beta-status)) |
 | Db2 LUW below 11.5 (9.1–10.5) | Not supported |
 | Agent platforms | Linux x86-64 (64-bit), Microsoft Windows x86-64 (64-bit) |
 | Amazon RDS for Db2 | Documentation-verified compatibility only — see [Troubleshooting](troubleshooting.md#rds-for-db2) |
@@ -98,7 +98,7 @@ See [Targets and properties](targets-and-properties.md#target-properties) for bo
 
 ## Preferred Credentials for local-only jobs {#preferred-credentials}
 
-The five local-only administrative jobs and the **Kill Application** action authenticate as an operating-system user on the Db2 host, not as the monitoring database user — effectively the Db2 instance owner. Set **Agent Host Credentials** for the target before you run one:
+The five local-only administrative jobs authenticate as an operating-system user on the Db2 host, not as the monitoring database user — effectively the Db2 instance owner. Set **Agent Host Credentials** for the target before you run one:
 
 1. Go to **Setup, Security, Preferred Credentials**, and open the **IBM DB2 Database (Beta)** target type.
 2. Under **Target Preferred Credentials**, select the target's **Agent Host Credentials** row, click **Set**, choose a named host credential for the instance-owner account, and click **Test and Save**.

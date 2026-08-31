@@ -1,10 +1,10 @@
-# Navigation for the IBM DB2 plug-in guide. Rendered by _layouts/default.html
+# Navigation for the IBM Db2 plug-in guide. Rendered by _layouts/default.html
 # on every /db2/ page. Mirrors the grouping of postgresql_nav.yml and
 # mysql_nav.yml.
 groups:
   - name: Start here
     pages:
-      - { title: "IBM DB2 Plug-in", url: /db2/ }
+      - { title: "IBM Db2 Plug-in", url: /db2/ }
       - { title: "What's new", url: /db2/whats-new.html }
       - { title: "Getting started", url: /db2/getting-started.html }
       - { title: "Trial setup", url: /db2/trial.html }

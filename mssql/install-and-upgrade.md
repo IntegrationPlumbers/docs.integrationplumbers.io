@@ -55,7 +55,7 @@ Once the agent deploy finishes you can add targets — see [Targets and properti
 
 Import the newer archive and deploy it the same way. Existing targets, their credentials and any thresholds you have tuned are preserved.
 
-This describes the general release. **During Early Access there is no supported in-place upgrade between beta drops** - see [Early access](early-access.md#not-verified). It is a fresh plug-in with no earlier build to upgrade from, so the upgrade path has not been exercised.
+This describes the general release. **During the Open Beta there is no supported in-place upgrade between beta drops** - see [What is not yet verified](beta-pre-release.md#not-verified). It is a fresh plug-in with no earlier build to upgrade from, so the upgrade path has not been exercised.
 
 Two things worth knowing:
 
@@ -84,7 +84,7 @@ The only SQL Server-side writes this plug-in ever performs are the ones you expl
 ## Related
 
 - [Prerequisites](prerequisites.md#enterprise-manager) - supported Enterprise Manager and agent versions
-- [Early access](early-access.md) - what the beta build is, and how it is numbered
+- [Open Beta notice](beta-pre-release.md) - what the beta build is, and how it is numbered
 - [Targets and properties](targets-and-properties.md) - the next step after deploying
 - [Troubleshooting](troubleshooting.md#import-deploy) - import and deploy failures
 - [Getting started](getting-started.md) - the whole path, of which this is one step

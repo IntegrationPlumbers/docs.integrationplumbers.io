@@ -9,7 +9,7 @@ nav_order: 0
 
 ### Oracle Enterprise Manager Plug-in for Microsoft SQL Server User Guide
 
-*Early Access (beta) · Enterprise Manager 24ai and 13.5*
+*Open Beta · Enterprise Manager 24ai and 13.5*
 *August 2026*
 
 This release ships as two plug-in builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable — install the build that matches your Enterprise Manager. Everything in this guide applies to both.
@@ -37,13 +37,14 @@ One plug-in and one target type cover every supported version and both agent pla
 
 | If you want to | Go to |
 | :--- | :--- |
+| Read the Open Beta terms and what is and is not verified yet | [Open Beta notice](beta-pre-release.md) |
+| Install it and see a target, quickly | [Getting started](getting-started.md) |
 | See whether your estate is ready | [Prerequisites](prerequisites.md) |
-| Install it | [Install and upgrade](install-and-upgrade.md) |
 | Add your first instance | [Targets and properties](targets-and-properties.md) |
 | Understand what a page is telling you | [Monitoring pages](monitoring-pages.md) |
 | Know what changed | [What's new](whats-new.md) |
 | Tune what alerts you | [Alerts and thresholds](alerts-and-thresholds.md) |
-| Take part in the beta | [Early access](early-access.md) |
+| Fix something that is wrong | [Troubleshooting](troubleshooting.md) |
 
 ## Supported versions
 
@@ -56,6 +57,6 @@ One plug-in and one target type cover every supported version and both agent pla
 
 SQL Server 2016 and 2017 collect every metric family, with two families returning less detail than on 2019 and later. [Prerequisites](prerequisites.md) has the specifics.
 
-## A note on Early Access
+## A note on the Open Beta
 
-This is pre-release software. It is not licensed for production use, and there is no production support commitment during the beta. [Early access](early-access.md) covers what has been verified, what has not, and how to report what you find.
+This is pre-release software. It is not licensed for production use, and there is no production support commitment during the beta. The [Open Beta notice](beta-pre-release.md) covers the terms of use, what has been verified, what has not, and how to report what you find.

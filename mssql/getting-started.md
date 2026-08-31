@@ -11,6 +11,7 @@ The shortest path from a fresh plug-in to a target you can look at. Each step li
 > - OMS access that can import an OPAR and deploy plug-ins, for example `sysman`. See [Prerequisites](prerequisites.md#enterprise-manager).
 > - A Management Agent that can reach the SQL Server instance on its TCP port, by default 1433.
 > - A SQL Server login for monitoring. See [Credentials](credentials.md#grants) for the grants it needs.
+> - A beta licence key for `ip.em.xmsb`, from your Integration Plumbers contact. See the [Open Beta notice](beta-pre-release.md#licensing).
 
 **In this page:** Before you start · Install · Add your first target · Check it worked · What to look at first · If something is wrong
 
@@ -29,9 +30,11 @@ Use the build that matches your Enterprise Manager release. The two are not inte
 ## Add your first target {#add-target}
 
 1. Create the monitoring login on the instance, with the grants in [Credentials](credentials.md).
-2. Add the target against the agent, giving the host, port and — if needed — the instance name. See [Targets and properties](targets-and-properties.md).
+2. Add the target against the agent, giving the host, port, the instance name if needed, and your beta **License Key**. See [Targets and properties](targets-and-properties.md).
 3. **Apply the credentials to the target afterwards.** They are not passed inline when the target is created; doing so is silently ignored and leaves a target that never collects.
 4. While you are there, set the two job credential sets described in [Jobs](jobs.md). They are not needed for monitoring, but setting them now means console actions work the first time somebody tries one.
+
+Without a valid key, the target still collects, but the `License` metric raises a CRITICAL incident until one is entered — see the [Open Beta notice](beta-pre-release.md#licensing).
 
 Point at the listener rather than a replica if the instance is in an availability group and you want the target to follow the primary.
 

@@ -68,4 +68,4 @@ For a target that has been up less than a day, say so — it changes what an emp
 - [TLS connections](tls.md#failures) - certificate and PKIX failures in detail
 - [Jobs](jobs.md#gotchas) - the job failures that have no obvious cause
 - [Monitoring pages](monitoring-pages.md#blank) - a blank region that is not a fault
-- [Early access](early-access.md#reporting) - reporting a defect in the beta
+- [Open Beta notice](beta-pre-release.md#reporting) - reporting a defect in the beta

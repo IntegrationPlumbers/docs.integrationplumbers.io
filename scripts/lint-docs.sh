@@ -21,6 +21,7 @@ FORBID_SHARED='\[INTERNAL|INTERNAL:|\bPRD\b|roadmap|arrives in|next release|comi
 FORBID_postgresql='Winter|\bSummer\b|24\.1\.2|Query Advisor|Plan Capture readiness|Disk Sort|Hash Batches|Expensive Node|Large Offset|encrypted at rest|Tier 0/1|Tier 2/3'
 FORBID_mssql=''
 FORBID_mysql=''
+FORBID_db2=''
 
 # Approved copy that a lint rule must not silently rewrite. A phrase listed here is
 # blanked before the file is linted, so any OTHER forbidden term on the same line is
@@ -40,6 +41,7 @@ forbid_for() {
     postgresql) printf '%s|%s' "$FORBID_SHARED" "$FORBID_postgresql" ;;
     mssql)      printf '%s' "$FORBID_SHARED" ;;
     mysql)      printf '%s' "$FORBID_SHARED" ;;
+    db2)        printf '%s' "$FORBID_SHARED" ;;
     *)          printf '%s|%s' "$FORBID_SHARED" "$FORBID_postgresql" ;;
   esac
 }
