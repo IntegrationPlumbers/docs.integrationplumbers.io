@@ -11,7 +11,7 @@ nav_order: 2.5
 |---|---|
 | Product | Integration Plumbers MySQL Plug-in for Oracle Enterprise Manager |
 | Release | Open Beta — plug-in `ip.em.xmyb`, versions `24.1.9.N.0` (EM 24ai) and `13.5.9.N.0` (EM 13.5); the exact build is in `build-info.txt` beside this file |
-| Beta period | From 2026-09-01 until general availability (planned for late 2026); beta licence keys expire 2026-11-30 |
+| Beta period | From 2026-09-01 until general availability (planned for late 2026); beta licence keys expire 2026-10-31 |
 | Intended use | Evaluation in non-production Enterprise Manager environments |
 | Reference | [MySQL plug-in User Guide](index.md) — the authoritative description of what the plug-in does |
 
@@ -26,7 +26,7 @@ The beta is a **separate plug-in from the GA release**, by design:
 | Plug-in ID | `ip.em.xmyb` | `ip.em.xmys` |
 | Target types | `ip_mysql_database_beta`, `ip_mysql_cluster_beta`, `ip_mysql_clusterset_beta` — shown as *MySQL Database (Beta)* etc. | `ip_mysql_database_beta`, `ip_mysql_cluster_beta`, `ip_mysql_clusterset_beta` |
 | Versions | `24.1.9.N.0` / `13.5.9.N.0` (N = beta drop) | `24.1.1.1.0` / `13.5.1.1.0` onward |
-| Licence keys | Issued for `ip.em.xmyb`; expire 2026-11-30 | Issued for `ip.em.xmys` |
+| Licence keys | Issued for `ip.em.xmyb`; expire 2026-10-31 | Issued for `ip.em.xmys` |
 
 - **Beta to beta:** later beta drops upgrade in place (see 4.5).
 - **Beta to GA is a clean install.** GA is a different plug-in with different target types. Nothing the beta created in your Management Repository — targets, metric history, incidents, thresholds you tuned — carries into GA, and a beta install remains identifiable as such in any audit. Plan the GA rollout as a fresh deployment alongside, then retire the beta.
@@ -41,7 +41,7 @@ The beta is a **separate plug-in from the GA release**, by design:
 > 2. **No warranty and no service level.** The software is provided "as is". There is no guarantee of availability, accuracy, fitness for a particular purpose, response time or resolution. Integration Plumbers is not liable for loss, damage or cost arising from its use during the beta.
 > 3. **Behaviour may change.** Metric names, collection intervals, default thresholds, compliance rules and console pages may change between beta drops and before GA. Changes that need action on your side are recorded in [upgrade notes](upgrade-notes.md).
 > 4. **Support is best effort.** Findings are handled through the beta feedback contact supplied with your download, on a best-effort basis during business days — not through a production support queue (section 6).
-> 5. **Licensed for the beta only.** Beta licence keys are issued for the beta plug-in, expire on 2026-11-30, and do not license the GA release. The plug-in reads the key locally on the agent host; it sends nothing outside your Enterprise Manager installation.
+> 5. **Licensed for the beta only.** Beta licence keys are issued for the beta plug-in, expire on 2026-10-31, and do not license the GA release. The plug-in reads the key locally on the agent host; it sends nothing outside your Enterprise Manager installation.
 > 6. **Your environment, your data.** You are responsible for the credentials you grant the plug-in (a read-only monitoring account is all it needs — User Guide 2.4) and for the systems you point it at.
 >
 > If you do not accept these terms, do not install the software.
