@@ -23,7 +23,6 @@ groups:
   - name: Reference
     pages:
       - { title: "Monitoring pages", url: /mssql/monitoring-pages.html }
-      - { title: "Metrics reference", url: /mssql/metrics-reference.html }
       # "Alerts and thresholds", not "Alerts and templates" as postgres has it:
       # this plug-in ships default WARNING/CRITICAL conditions in its collection
       # metadata, enabled per target on creation. It does NOT ship an Enterprise
@@ -36,4 +35,3 @@ groups:
       - { title: "Jobs", url: /mssql/jobs.html }
       - { title: "High availability", url: /mssql/high-availability.html }
       - { title: "Troubleshooting", url: /mssql/troubleshooting.html }
-      - { title: "Changelog", url: /mssql/changelog.html }
