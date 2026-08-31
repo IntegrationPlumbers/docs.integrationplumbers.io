@@ -9,10 +9,10 @@ nav_order: 0
 
 ### Oracle Enterprise Manager Plug-in for IBM Db2 User Guide
 
-*Open Beta · `24.1.9.7.0` for Enterprise Manager 24ai · `13.5.9.2.0` for Enterprise Manager 13.5*
+*Open Beta · `24.1.9.8.0` for Enterprise Manager 24ai · `13.5.9.3.0` for Enterprise Manager 13.5*
 *September 2026*
 
-This release ships as two plug-in builds with the same features: **24.1.9.7.0** for Enterprise Manager 24ai and **13.5.9.2.0** for Enterprise Manager 13.5. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable — install the build that matches your Enterprise Manager. Everything in this guide applies to both, except where a page says otherwise.
+This release ships as two plug-in builds with the same features: **24.1.9.8.0** for Enterprise Manager 24ai and **13.5.9.3.0** for Enterprise Manager 13.5. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable — install the build that matches your Enterprise Manager. Everything in this guide applies to both, except where a page says otherwise.
 
 <details>
 <summary>Legal Notice</summary>
@@ -65,7 +65,7 @@ What you get once a target is up: a 5-minute availability check; general activit
 
 **The plug-in does not require a matching driver.** The JDBC driver (type-4, `db2jcc4.jar`) is bundled and connects to both certified versions; see [Prerequisites](prerequisites.md#jdbc-driver) if your site must supply IBM's own driver or licence JAR instead.
 
-**Enterprise Manager platform maturity.** Live OMS deployment, live Db2 12.1 collection, and end-to-end licensing are lab-verified on Enterprise Manager 24ai, the platform this beta treats as its reference. The Enterprise Manager 13.5 build (`13.5.9.2.0`) is compiled from the same source and ships alongside it starting with this drop; give it the same install path in [Getting started](getting-started.md), and report anything that renders or collects differently than on 24ai — see [What's new](whats-new.md#beta-status) for the full verification matrix.
+**Enterprise Manager platform maturity.** Live OMS deployment, live Db2 12.1 collection, and end-to-end licensing are lab-verified on Enterprise Manager 24ai, the platform this beta treats as its reference. The Enterprise Manager 13.5 build (`13.5.9.3.0`) is compiled from the same source and ships alongside it starting with this drop; give it the same install path in [Getting started](getting-started.md), and report anything that renders or collects differently than on 24ai — see [What's new](whats-new.md#beta-status) for the full verification matrix.
 
 ## Beta status
 

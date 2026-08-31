@@ -22,7 +22,7 @@ Request the key before you install anything — a valid licence key is required 
 
 | What we ask for | Why it matters |
 | :--- | :--- |
-| Your Enterprise Manager line, 13.5 or 24ai | It decides which artifact you receive, `13.5.9.2.0` or `24.1.9.7.0`. Both carry the same features. |
+| Your Enterprise Manager line, 13.5 or 24ai | It decides which artifact you receive, `13.5.9.3.0` or `24.1.9.8.0`. Both carry the same features. |
 | Your Db2 versions, 11.5 or 12.1 | Versions below 11.5 are not supported — see [Supported versions and platforms](prerequisites.md#supported-versions). |
 | How many databases you want to monitor | The key carries an instance count for limited keys; the beta programme's keys are typically `Trial` or `Unlimited`. |
 | Whether the agent will be local or remote to each database | Metric collection works either way. Local-only capabilities — the five administrative jobs, the Kill Application action, and diagnostic-log monitoring — need the agent on the same host as the database. See [Network and ports](prerequisites.md#network). |

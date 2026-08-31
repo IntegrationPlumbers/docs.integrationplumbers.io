@@ -7,7 +7,7 @@ nav_order: 13
 
 This page lists what changed in each drop of the IBM DB2 plug-in, most recent first. Two identities ship from the same source: the beta line (`ip.em.xdbb`, target type `ip_db2_database_beta`, version `24.1.9.N.0` / `13.5.9.N.0`) this guide covers, and the eventual GA line (`ip.em.xdb2`, target type `ip_db2_database`, version `24.1.<n>.0.0`). Beta-to-beta upgrades in place; beta-to-GA is always a clean install — see [What's new](whats-new.md#beta-identity).
 
-## 24.1.9.7.0 (Enterprise Manager 24ai) / 13.5.9.2.0 (Enterprise Manager 13.5) — Open Beta
+## 24.1.9.8.0 (Enterprise Manager 24ai) / 13.5.9.3.0 (Enterprise Manager 13.5) — Open Beta
 
 The Open Beta drop this guide describes, and the first to make the Enterprise Manager 13.5 build available alongside 24ai.
 
@@ -37,9 +37,9 @@ The Open Beta drop this guide describes, and the first to make the Enterprise Ma
 - An OMS presenting a self-signed certificate that previously validated a limited-instance licence key's count will now fail that check — this is the certificate-validation fix above taking effect, not a regression. See [Troubleshooting](troubleshooting.md#oms-licence-count) for the fix.
 - Run, or schedule, [Purge Stale Plugin Cache](jobs-and-metric-extensions.md#purge-stale-cache) after this and every future upgrade.
 
-### Known issue in this drop
+### Also in this drop
 
-- The **DB Status** threshold on the detailed response metric ships with an inverted comparison operator — setting it to the healthy status raises a permanent CRITICAL on every healthy database. Leave it Not Defined; see [Troubleshooting](troubleshooting.md#db-status-threshold). Corrected in the next drop.
+- The **DB Status** threshold on the detailed response metric now uses deviation semantics, matching the DB Monitoring condition: enter the healthy status (for example `ACTIVE`) and the alert fires only when the database leaves it. An earlier internal build had this inverted; no published build carried it.
 
 ## Earlier beta drops
 
