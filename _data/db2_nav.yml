@@ -1,0 +1,24 @@
+# Navigation for the IBM DB2 plug-in guide. Rendered by _layouts/default.html
+# on every /db2/ page. Mirrors the grouping of postgresql_nav.yml and
+# mysql_nav.yml.
+groups:
+  - name: Start here
+    pages:
+      - { title: "IBM DB2 Plug-in", url: /db2/ }
+      - { title: "What's new", url: /db2/whats-new.html }
+      - { title: "Getting started", url: /db2/getting-started.html }
+      - { title: "Trial setup", url: /db2/trial.html }
+  - name: Set up
+    pages:
+      - { title: "Prerequisites", url: /db2/prerequisites.html }
+      - { title: "Install and upgrade", url: /db2/install-and-upgrade.html }
+      - { title: "Targets and properties", url: /db2/targets-and-properties.html }
+  - name: Reference
+    pages:
+      - { title: "Monitoring pages", url: /db2/monitoring-pages.html }
+      - { title: "HADR monitoring", url: /db2/hadr-monitoring.html }
+      - { title: "Compliance standards", url: /db2/compliance-standards.html }
+      - { title: "Alerts and thresholds", url: /db2/alerts-and-templates.html }
+      - { title: "Jobs", url: /db2/jobs-and-metric-extensions.html }
+      - { title: "Troubleshooting", url: /db2/troubleshooting.html }
+      - { title: "Changelog", url: /db2/changelog.html }
