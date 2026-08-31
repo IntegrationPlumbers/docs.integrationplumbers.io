@@ -25,7 +25,7 @@ Open Beta means the release is feature-complete for its scope and has been exerc
 | Least-privilege grant, TLS, audit-posture config | **Verified** — certified against a live Db2 12.1.4 instance; see [The monitoring role](prerequisites.md#monitoring-role). |
 | Live Db2 11.5 collection | **Not yet closed.** A full 11.5 collection run is still to be completed; 11.5 is supported by design and certification is in progress. |
 | Enterprise Manager 13.5 line | **Not yet closed.** The 13.5.9.2.0 build passes the full 13.5 EDK validation but has not yet been through the live-deploy and console verification given to 24ai — treat 24ai as the reference platform until it catches up. |
-| HADR standby pair | **Not yet closed.** HADR deep monitoring is built and metric-verified, but has not been exercised against a live primary+standby failover pair — see [HADR monitoring](hadr-monitoring.md#known-limitation). |
+| HADR standby pair | **Verified in PEER state** against a live primary+standby pair; a controlled takeover/failover exercise is still to be closed out — see [HADR monitoring](hadr-monitoring.md#known-limitation). |
 | Amazon RDS for Db2 | **Documentation-verified only.** See [Troubleshooting](troubleshooting.md#rds-for-db2). |
 
 ## Beta identity {#beta-identity}
@@ -63,7 +63,7 @@ Everything the beta covers, all new in this release:
 
 ## Known limitations
 
-- **Live Db2 11.5 collection, the Enterprise Manager 13.5 line, and an HADR standby pair are still closing out** — see [What is verified](#beta-status) above.
+- **Live Db2 11.5 collection, the Enterprise Manager 13.5 line, and an HADR takeover exercise are still closing out** — see [What is verified](#beta-status) above.
 - **Amazon RDS for Db2 is documentation-only in this release.** Compatibility, including the `rdsadmin` grant path, is doc-verified but not lab-certified. On RDS the five local administrative jobs and diagnostic-log monitoring are unavailable, because the agent cannot be co-located with the instance. See [Troubleshooting](troubleshooting.md#rds-for-db2).
 - **SQL workload analytics are numeric-only.** Top-SQL trends are keyed by a statement-ID hash; full statement-text capture is planned for a later release.
 - **Deferred to a later release:** Workload Management (WLM), lock/deadlock event capture, BLU/columnar, pureScale, AI Query Optimizer monitoring, Q Replication, auto-discovery, remote administrative operations, and Db2 for z/OS.
