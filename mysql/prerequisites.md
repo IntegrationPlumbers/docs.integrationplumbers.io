@@ -19,7 +19,7 @@ You need:
 Where the agent runs is your choice:
 
 - **Remote monitoring** is the normal case. The agent runs anywhere that can open a TCP connection to the MySQL port, and one agent can monitor many MySQL targets on many hosts.
-- **A local agent** — an agent installed on the MySQL server host itself — is required only when you want the plug-in to connect over a Unix socket instead of TCP. See 2.6.
+- **A local agent** — an agent installed on the MySQL server host itself — is required only when you want the plug-in to connect over a Unix socket instead of TCP. See [2.6](#unix-socket-connections).
 
 > **Note:** Deploying the plug-in on the OMS does not deploy it to agents. Deploy it to every agent that will monitor a MySQL target, as described in [3.3](install-and-upgrade.md#deploy-to-agents). Until you do, the MySQL target types are not offered for that agent on the Add Target page.
 

@@ -16,7 +16,7 @@ check when backup monitoring shows nothing.
 
 The plugin's monitoring user (`em_monitoring`) only ever reads history, never runs a
 backup. Already covered by the global `SELECT` grant set up in
-[the deployment guide](deploy-guide.md) (`GRANT SELECT, PROCESS, REPLICATION CLIENT ON
+[Prerequisites](prerequisites.md#the-monitoring-user) (`GRANT SELECT, PROCESS, REPLICATION CLIENT ON
 *.*`); only relevant if your policy scopes `SELECT` to named schemas instead of
 granting it globally, in which case add:
 
@@ -26,7 +26,7 @@ GRANT SELECT ON PERCONA_SCHEMA.* TO 'em_monitoring'@'%';           -- XtraBackup
 ```
 
 With the recommended global `SELECT` grant there is no missing-grant case to chase.
-What is certified is the absent-tool path: a server with no history table for a tool
+A server with no history table for a tool
 is reported as that tool **not detected**, with no alert raised. That is deliberate —
 a shop that only does logical dumps must not see a false "no backups" alarm. If your
 policy uses the scoped grant set above instead of the global one, detection needs read
@@ -36,8 +36,8 @@ access to those two history tables.
 `ip_mysql_cluster_beta` target's backup-source health metric (`BackupSource`)
 reads the same two history tables under the cluster monitoring credential —
 which may be provisioned separately from the database targets' user. Give
-that credential the same global `SELECT` grant as the database credential; a
-cluster credential without it is not a certified configuration.
+that credential the same global `SELECT` grant as the database credential;
+without it the backup-source metric has no history to read.
 
 ## Tool visibility requirements
 
@@ -87,11 +87,10 @@ user still can't connect over the socket.
 ## Cluster pattern
 
 Back up on one cluster member; monitor any member — history rows replicate like any
-other table write. **Verified on InnoDB Cluster / Group Replication**, including MEB's
-`SET SQL_LOG_BIN=OFF` backups, which still replicated as expected. This is **not**
-verified on classic asynchronous replication, where `SQL_LOG_BIN=OFF` semantics
-differ — on async replication, monitor the server that actually runs the backups,
-not an arbitrary replica.
+other table write. That holds on InnoDB Cluster / Group Replication, including MEB's
+`SET SQL_LOG_BIN=OFF` backups, which still replicate. It does **not** hold on classic
+asynchronous replication, where `SQL_LOG_BIN=OFF` semantics differ: there, monitor the
+server that actually runs the backups, not an arbitrary replica.
 
 ## Alerts
 

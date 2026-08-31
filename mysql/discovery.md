@@ -7,9 +7,9 @@ nav_order: 5.5
 
 ## Automatic discovery (self-managed, on-host MySQL)
 Enterprise Manager auto-discovers MySQL instances running on a **monitored agent host**.
-The agent-side script `ip_mysql_discovery.pl` detects local `mysqld` process(es) and
-proposes one target per instance, named **`<host>:<port>`** (stable across restarts —
-no PID in the name). Promote a proposed target and supply credentials to begin monitoring.
+The agent detects the local `mysqld` process(es) and proposes one target per instance,
+named **`<host>:<port>`** (stable across restarts — no PID in the name). Promote a
+proposed target and supply credentials to begin monitoring.
 
 Multiple instances on one host are each discovered by their listening port.
 

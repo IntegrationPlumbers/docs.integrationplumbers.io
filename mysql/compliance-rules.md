@@ -47,7 +47,6 @@ Where the results appear:
 > **Note:** Do not read a score before there is one. Confirm the Compliance Summary region names an evaluation time for the target; a standard associated minutes ago has not been evaluated yet, and an absence of violations at that point means nothing has run.
 
 ## 9.3 Rules by standard
-<!-- BEGIN GENERATED: compliance -->
 #### MySQL Administration Standard (14 rules)
 
 Groups the administration checks Integration Plumbers recommends for keeping a MySQL server's logging, storage engine, and diagnostic settings on a supportable footing.
@@ -587,4 +586,3 @@ Groups the security checks Integration Plumbers recommends for MySQL audit loggi
 **Severity:** Minor Warning
 
 **Advice:** Set the variable with SET PERSIST log_timestamps = 'UTC';, and confirm any existing log-parsing or alerting tooling that assumed local time is updated to expect UTC before the change lands.
-<!-- END GENERATED: compliance -->

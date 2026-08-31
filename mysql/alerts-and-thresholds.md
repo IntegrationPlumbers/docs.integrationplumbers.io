@@ -8,7 +8,6 @@ nav_order: 8
 This chapter lists the default thresholds the plug-in ships and how to change them.
 **Topics:** 7.1 Default thresholds · 7.2 Changing thresholds
 ## 7.1 Default thresholds
-<!-- BEGIN GENERATED: thresholds -->
 The plug-in ships 19 default metric thresholds, listed below, plus 3 availability conditions (the `Status` column of each target type's Response metric, which drive the target's Up/Down state and are not shown here).
 
 | Target type | Metric group | Column | Operator | Warning | Critical | Consecutive occurrences |
@@ -32,7 +31,6 @@ The plug-in ships 19 default metric thresholds, listed below, plus 3 availabilit
 | `ip_mysql_cluster_beta` | GrConsensus | `avg_consensus_time_us` | > | 100000 | 1000000 | 1 |
 | `ip_mysql_cluster_beta` | BackupSource | `source_offline` | > | 0 | — | 1 |
 | `ip_mysql_clusterset_beta` | ClusterSetHealth | `dr_promotion_ready` | < | — | 1 | 2 |
-<!-- END GENERATED: thresholds -->
 
 ## 7.2 Changing thresholds
 The shipped values are starting points sized for lab workloads, not tuning. Review each one against your own service levels and change the ones that do not fit.

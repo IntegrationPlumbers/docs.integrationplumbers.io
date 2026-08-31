@@ -15,7 +15,6 @@ groups:
   - name: Set up
     pages:
       - { title: "Prerequisites", url: /mysql/prerequisites.html }
-      - { title: "Deployment guide", url: /mysql/deploy-guide.html }
       - { title: "Install and upgrade", url: /mysql/install-and-upgrade.html }
       - { title: "Upgrade notes", url: /mysql/upgrade-notes.html }
       - { title: "Targets and properties", url: /mysql/targets-and-properties.html }

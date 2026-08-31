@@ -19,7 +19,7 @@ Every MySQL target is defined by the same small set of monitoring properties, wh
 - **Host (default - localhost)** (`ip_mysql_database_host`): host name or IP address of the MySQL server as the agent host reaches it. Leave it empty only for a socket connection ([2.6](prerequisites.md#unix-socket-connections)).
 - **Port (default - 3306)** (`ip_mysql_database_port`): the server's listening port.
 - **Unix Socket Path (socket connections)** (`ip_mysql_database_socket`): full path to the server's socket file. Local agent only — leave Host empty when you set it.
-- **TLS Mode (disabled / required / verify_ca / verify_identity)** (`ip_mysql_database_use_secure`): transport security for this target. See 2.5.
+- **TLS Mode (disabled / required / verify_ca / verify_identity)** (`ip_mysql_database_use_secure`): transport security for this target. See [2.5](prerequisites.md#tls).
 - **Kerberos Configuration File** (`ip_mysql_database_kerberos_config`): full path to a `krb5.conf` on the agent host, for Kerberos authentication.
 - **License Key** (`ip_mysql_database_license`): the signed licence key issued for this plug-in, pasted as one line. The console lets you add the target without it, but nothing except availability collects until the key is accepted: the `License` metric reports the reason (`License Required` for no key) and raises a CRITICAL incident, **and every other metric group on the target reports a collection error — `Collection stopped by license status: …` — until the status is `Active`**; availability keeps reporting, so the target stays Up rather than Down. Cluster and ClusterSet targets are containers, not licensed targets, and are never stopped. The key is checked entirely on the agent host — nothing is sent to the MySQL server or outside Enterprise Manager — every 15 minutes, and again as soon as the property changes. The `Status` column of the `License` metric gives the reason a key is not accepted: `Invalid Signature` (the key was altered), `Wrong Plug-in` (a key issued for the other edition of this plug-in), or `Expired`.
 
@@ -180,7 +180,7 @@ The plug-in ships five standards for `ip_mysql_database_beta` targets, collected
 | MySQL Schema Standard | `xmys_schema_standard` |
 | MySQL Security Standard | `xmys_security_standard` |
 
-All five are authored by `INTEGRATION_PLUMBERS` at version 1. Chapter 9 describes the framework and every rule in it.
+All five are authored by `INTEGRATION_PLUMBERS` at version 1. [Chapter 9](compliance-rules.md#compliance-standards) describes the framework and every rule in it.
 
 From the console:
 
@@ -200,4 +200,4 @@ Repeat the command for each of the five internal names you want evaluated on tha
 
 > **Note:** The two options take different name forms. `-name` takes the standard's *internal* name from the table above; `-target_list` takes the target *display name* alone.
 
-Results appear on the target's compliance pages once a configuration collection has run against the newly associated standards. See 9.2 for reading them.
+Results appear on the target's compliance pages once a configuration collection has run against the newly associated standards. See [9.2](compliance-rules.md#associating-standards-and-reading-results) for reading them.
