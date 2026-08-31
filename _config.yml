@@ -34,5 +34,4 @@ exclude:
   - vendor/ruby/
   - scripts/
   - docs/
-  - mysql/          # MySQL guide hidden from the published site (beta); remove this line to publish it again
   - mssql/          # SQL Server guide hidden from the published site (beta, in progress); remove this line to publish it again

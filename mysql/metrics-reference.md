@@ -1,8 +1,52 @@
+---
+title: Metrics reference
+nav_order: 7
+---
+
+# Metrics reference
+
+This chapter explains how to read the generated metrics reference.
+**Topics:** 6.1 Where the reference is · 6.2 How to read a metric group · 6.3 Naming conventions
+## 6.1 Where the reference is
+The plug-in's metric documentation is generated from the plug-in's own target metadata, for the exact build you deploy, rather than written by hand — so it cannot drift from what the plug-in actually collects.
+
+For this build it is the reference below, shipped alongside this guide. It covers all 116 metric groups: 105 on MySQL Database, 8 on MySQL Cluster and 3 on MySQL ClusterSet, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship. Where this guide and the reference differ on a column name, a unit or a threshold, the reference is authoritative ([1.4](index.md#beta-status)).
+
+> **Note:** The reference accompanies this guide: in the repository as `user-guide-metrics-reference.md`, on the documentation site as `metrics-reference.md`. Either way, use the copy that matches the build you are running.
+
+## 6.2 How to read a metric group
+Every entry in the reference has the same shape, so once you can read one you can read all of them.
+
+The heading gives the group's display name, its internal name in parentheses — the name EM CLI, thresholds and the metric browser use — and its collection schedule, for example *collected every 5 Min*. One sentence underneath says what the group collects and where the values come from. Then comes the column table:
+
+| Column | What it tells you |
+|---|---|
+| **Column** | The column's internal name, in the form EM CLI and threshold commands take. A `(key)` marker means the column is part of the group's key, so the group returns one row per distinct key value — per channel, per member, per table, per digest — rather than a single row. A group with no key column returns exactly one row per collection. |
+| **Label** | The display name shown in the console. |
+| **Unit** | The unit Enterprise Manager labels the value with, for example `MICROSEC`, `BYTE`, `SECOND` or `PERCENTAGE`. `NA` means the value carries no unit — a count, a state or a string. |
+| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 17 curated thresholds ship ([7.1](alerts-and-thresholds.md#default-thresholds)), and the reference also shows the three availability `Status` conditions, so 20 columns in the reference tables carry a default. A blank cell is not an omission and it does not stop you setting your own ([7.2](alerts-and-thresholds.md#changing-thresholds)). |
+
+Groups marked **configuration snapshot** in their heading behave differently from the rest. They collect on a 24-hour schedule into Enterprise Manager's configuration history rather than into the metric tables, which is what makes a MySQL server's settings comparable over time and against other servers under **Enterprise → Configuration**, and what the compliance rules in chapter 9 evaluate. They carry no thresholds and raise no alerts, and a `(key)` column in one of them means the snapshot holds several rows — one per account, for example — rather than one row of settings.
+
+## 6.3 Naming conventions
+Column names follow a few conventions consistently, so the name usually tells you what kind of number you are looking at.
+
+| Suffix or pattern | Meaning |
+|---|---|
+| `_delta` | The difference since the previous collection. The server counter behind the column is cumulative since startup; the `_delta` column reports the activity in the interval instead, which is what a threshold can be set against. |
+| `_pct` | A percentage, on a 0–100 scale. |
+| `_rate` | A ratio expressed as a percentage — the buffer pool hit rates, for example, which the plug-in normalizes to percent at one decimal place. It is not a per-second figure. |
+| `_per_sec` | A per-second rate. |
+| `_us` | Microseconds. Statement and wait latencies are reported in microseconds throughout. |
+| `d_` prefix | A per-interval delta on the wait and statement digest groups, the keyed equivalent of `_delta`. |
+| `*Live` group | A real-time mirror of the configuration snapshot group of the same name — the same server variables, read on demand for the console's configuration side panels ([5.1](monitoring-pages.md#mysql-database-pages)) instead of on the daily configuration schedule. Same values, different freshness. |
+
+> **Note:** The replication metric group reports two different boolean vocabularies. `replica_io_running` returns `Yes` or `No`, while `replica_sql_running` returns `true` or `false`. The shipped thresholds match those forms exactly ([7.1](alerts-and-thresholds.md#default-thresholds)); a custom threshold, compliance rule or script that reads both columns must not assume a single format.
+
 <!-- GENERATED by tools/docs/gen_reference.py — do not edit by hand -->
 
-# MySQL Plug-in — Metrics Reference
 
-Generated from the plug-in's target metadata for build 24.1.9.75.0.
+Generated from the plug-in's target metadata for build 24.1.9.78.0.
 Each metric group lists its columns, display labels, units, and the default
 warning/critical thresholds that ship (blank = no default threshold).
 Configuration snapshots are RAW metrics collected for configuration history;
@@ -2255,6 +2299,20 @@ Single-row summary of the interval's statement activity — total latency, total
 | `top_digest_latency_us` | Top Statement Latency | MICROSEC |  |  |
 | `digest_overflow_active` | Digest Table Overflowing | NA |  |  |
 | `digest_capacity_pct` | Digest Table Used | PERCENTAGE |  |  |
+
+### License (`License`) — collected every 15 Min
+
+Licence state of this plug-in installation, not of the MySQL server — the collection contacts neither the database nor the OMS. Status carries the reason (Active, Expired, Wrong Plug-in, Invalid Signature or License Required); the alert is set on the licensed column, which is 1 only when the licence is active.
+
+| Column | Label | Unit | Warning | Critical |
+|---|---|---|---|---|
+| `status` | Status | NA |  |  |
+| `licensed` | Licensed | NA |  | < 1 |
+| `days_remaining` | Days Remaining | NA | < 30 | < 7 |
+| `expiration` | Expiration | NA |  |  |
+| `license_type` | Type | NA |  |  |
+| `instances` | Instances | NA |  |  |
+| `customer` | Customer | NA |  |  |
 
 ## MySQL InnoDB Cluster (`ip_mysql_cluster`)
 
