@@ -25,7 +25,7 @@ Ordered by how often each one actually happens.
 
 **A table shows fewer rows than you expect.** Some collections are deliberately filtered — index fragmentation only covers indexes above a size worth acting on, so small indexes are absent by design.
 
-**TempDB contention reports less on SQL Server 2016 and 2017.** It collects, but its allocation-page and metadata-page waiter counts read zero, because the view that classifies a page by type does not exist on those releases. Not a fault.
+**Two families report less on SQL Server 2016 and 2017.** TempDB contention collects, but its allocation-page and metadata-page waiter counts read zero and the advice cell is blank. Cluster nodes collects node names, but status, status description and current owner are blank. Both because the view that classifies a latched page by type arrived in 2019. Read a zero or a blank as "not classifiable on this version". Not a fault.
 
 ## Certificate problems {#certificates}
 
