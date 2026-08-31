@@ -24,7 +24,7 @@ Open Beta means the release is feature-complete for its scope and has been exerc
 | Metric semantics | **Verified** against IBM Db2 12.1 documentation, with a hard rule that a metric must mean the same thing as the plug-in it replaces, so thresholds carried over from prior monitoring behave predictably. |
 | Least-privilege grant, TLS, audit-posture config | **Verified** — certified against a live Db2 12.1.4 instance; see [The monitoring role](prerequisites.md#monitoring-role). |
 | Live Db2 11.5 collection | **Not yet closed.** A full 11.5 collection run is still to be completed; 11.5 is supported by design and certification is in progress. |
-| Enterprise Manager 13.5 line | **Not yet closed.** The 13.5.9.2.0 build is EDK-valid and installs, but the same depth of live-deploy and console verification given to 24ai is still in progress — treat 24ai as the reference platform until it catches up. |
+| Enterprise Manager 13.5 line | **Not yet closed.** The 13.5.9.2.0 build passes the full 13.5 EDK validation but has not yet been through the live-deploy and console verification given to 24ai — treat 24ai as the reference platform until it catches up. |
 | HADR standby pair | **Not yet closed.** HADR deep monitoring is built and metric-verified, but has not been exercised against a live primary+standby failover pair — see [HADR monitoring](hadr-monitoring.md#known-limitation). |
 | Amazon RDS for Db2 | **Documentation-verified only.** See [Troubleshooting](troubleshooting.md#rds-for-db2). |
 
