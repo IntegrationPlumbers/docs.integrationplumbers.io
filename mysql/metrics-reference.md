@@ -52,7 +52,7 @@ warning/critical thresholds that ship (blank = no default threshold).
 Configuration snapshots are RAW metrics collected for configuration history;
 they do not carry thresholds. See the User Guide, chapter 6, for how to read this file.
 
-## MySQL Database (`ip_mysql_database`)
+## MySQL Database (`ip_mysql_database_beta`)
 
 ### Response (`Response`) — collected every 1 Min
 
@@ -2314,7 +2314,7 @@ Licence state of this plug-in installation, not of the MySQL server — the coll
 | `instances` | Instances | NA |  |  |
 | `customer` | Customer | NA |  |  |
 
-## MySQL InnoDB Cluster (`ip_mysql_cluster`)
+## MySQL InnoDB Cluster (`ip_mysql_cluster_beta`)
 
 ### Response (`Response`) — collected every 1 Min
 
@@ -2437,7 +2437,7 @@ Which cluster member the most recent successful backup was taken from, and wheth
 | `last_success_end_time` | Last Successful Backup End Time | NA |  |  |
 | `tool` | Backup Tool | NA |  |  |
 
-## MySQL InnoDB ClusterSet (`ip_mysql_clusterset`)
+## MySQL InnoDB ClusterSet (`ip_mysql_clusterset_beta`)
 
 ### Response (`Response`) — collected every 1 Min
 

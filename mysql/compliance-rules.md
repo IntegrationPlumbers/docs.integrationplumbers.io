@@ -8,7 +8,7 @@ nav_order: 10
 This chapter describes the compliance framework the plug-in ships, how to associate it, and every rule.
 **Topics:** 9.1 The MySQL Framework · 9.2 Associating standards and reading results · 9.3 Rules by standard
 ## 9.1 The MySQL Framework
-The plug-in ships finished compliance content for `ip_mysql_database` targets: one framework, five standards and 65 rules, all authored by `INTEGRATION_PLUMBERS` at version 1. There is no rule to write and nothing to import — associate the content ([9.2](#associating-standards-and-reading-results)) and it evaluates.
+The plug-in ships finished compliance content for `ip_mysql_database_beta` targets: one framework, five standards and 65 rules, all authored by `INTEGRATION_PLUMBERS` at version 1. There is no rule to write and nothing to import — associate the content ([9.2](#associating-standards-and-reading-results)) and it evaluates.
 
 The framework is **MySQL Framework (Integration Plumbers)**, and it collects all five standards:
 

@@ -88,7 +88,7 @@ Deploy a new version exactly as you deployed the first one — import it with Se
 This build moves the target metadata version of all three target types ([10.1](whats-new.md#beta-2026-08-18)), so the full cycle above is required rather than optional. Skipping the OMS restart does not fail the deploy — every step can report Success while Enterprise Manager keeps the previous metadata active — so verify after the agents are done rather than assuming. Confirm that the target types are live at their new metadata versions, and that the shipped conditions are present on a target of each type:
 
 ```
-emcli get_threshold -target_name="mysql84-prod-cluster" -target_type="ip_mysql_cluster"
+emcli get_threshold -target_name="mysql84-prod-cluster" -target_type="ip_mysql_cluster_beta"
 ```
 
 A target type whose new conditions do not appear was stored but not activated; repeat 3.2, let the OMS restart finish, and redeploy to the agents.

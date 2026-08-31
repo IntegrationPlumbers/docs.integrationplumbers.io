@@ -12,7 +12,7 @@ Every MySQL target is defined by the same small set of monitoring properties, wh
 
 **User** and **Password** are credential properties. In the console they appear in the credentials area of the Add Target page; with EM CLI they go in `-credentials` rather than in `-properties`.
 
-**MySQL Database (`ip_mysql_database`)**
+**MySQL Database (`ip_mysql_database_beta`)**
 
 - **User** (`ip_mysql_database_username`): the monitoring account from [2.4](prerequisites.md#the-monitoring-user), user name only, without the host part.
 - **Password** (`ip_mysql_database_password`): that account's password.
@@ -23,7 +23,7 @@ Every MySQL target is defined by the same small set of monitoring properties, wh
 - **Kerberos Configuration File** (`ip_mysql_database_kerberos_config`): full path to a `krb5.conf` on the agent host, for Kerberos authentication.
 - **License Key** (`ip_mysql_database_license`): the signed licence key issued for this plug-in, pasted as one line. The console lets you add the target without it, but nothing except availability collects until the key is accepted: the `License` metric reports the reason (`License Required` for no key) and raises a CRITICAL incident, **and every other metric group on the target reports a collection error — `Collection stopped by license status: …` — until the status is `Active`**; availability keeps reporting, so the target stays Up rather than Down. Cluster and ClusterSet targets are containers, not licensed targets, and are never stopped. The key is checked entirely on the agent host — nothing is sent to the MySQL server or outside Enterprise Manager — every 15 minutes, and again as soon as the property changes. The `Status` column of the `License` metric gives the reason a key is not accepted: `Invalid Signature` (the key was altered), `Wrong Plug-in` (a key issued for the other edition of this plug-in), or `Expired`.
 
-**MySQL Cluster (`ip_mysql_cluster`)**
+**MySQL Cluster (`ip_mysql_cluster_beta`)**
 
 The same properties, with the `ip_mysql_cluster_` prefix in place of `ip_mysql_database_`, and two labels that read differently:
 
@@ -31,7 +31,7 @@ The same properties, with the `ip_mysql_cluster_` prefix in place of `ip_mysql_d
 - **User** / **Password** (`ip_mysql_cluster_username`, `ip_mysql_cluster_password`): the monitoring account must carry the grants in [2.4](prerequisites.md#the-monitoring-user) on the cluster. Created on the primary, it replicates to every member.
 - **TLS Mode**, **Unix Socket Path** and **Kerberos Configuration File** behave exactly as they do for a MySQL Database target.
 
-**MySQL ClusterSet (`ip_mysql_clusterset`)**
+**MySQL ClusterSet (`ip_mysql_clusterset_beta`)**
 
 The same properties again with the `ip_mysql_clusterset_` prefix, plus one that only this type has:
 
@@ -67,9 +67,9 @@ EM CLI creates the same target as the console and is the practical route once yo
 
 | Console target type | `-type` value | Property prefix |
 |---|---|---|
-| MySQL Database | `ip_mysql_database` | `ip_mysql_database_` |
-| MySQL Cluster | `ip_mysql_cluster` | `ip_mysql_cluster_` |
-| MySQL ClusterSet | `ip_mysql_clusterset` | `ip_mysql_clusterset_` |
+| MySQL Database | `ip_mysql_database_beta` | `ip_mysql_database_` |
+| MySQL Cluster | `ip_mysql_cluster_beta` | `ip_mysql_cluster_` |
+| MySQL ClusterSet | `ip_mysql_clusterset_beta` | `ip_mysql_clusterset_` |
 
 | Console field | Key (`<prefix>` from the table above) | Option |
 |---|---|---|
@@ -88,7 +88,7 @@ Both options take `key:value` pairs separated by `;`. Log in first with `emcli l
 A MySQL Database target:
 
 ```
-emcli add_target -name="mysql84-prod-01" -type="ip_mysql_database" \
+emcli add_target -name="mysql84-prod-01" -type="ip_mysql_database_beta" \
   -host="agent-host.example.com" \
   -properties="ip_mysql_database_host:10.0.0.21;ip_mysql_database_port:3306;ip_mysql_database_use_secure:required;ip_mysql_database_license:<licence key>" \
   -credentials="ip_mysql_database_username:em_monitoring;ip_mysql_database_password:<password>"
@@ -97,7 +97,7 @@ emcli add_target -name="mysql84-prod-01" -type="ip_mysql_database" \
 A MySQL Cluster target, pointed at a Router endpoint:
 
 ```
-emcli add_target -name="mysql84-prod-cluster" -type="ip_mysql_cluster" \
+emcli add_target -name="mysql84-prod-cluster" -type="ip_mysql_cluster_beta" \
   -host="agent-host.example.com" \
   -properties="ip_mysql_cluster_host:10.0.0.30;ip_mysql_cluster_port:6446;ip_mysql_cluster_use_secure:required" \
   -credentials="ip_mysql_cluster_username:em_monitoring;ip_mysql_cluster_password:<password>"
@@ -106,7 +106,7 @@ emcli add_target -name="mysql84-prod-cluster" -type="ip_mysql_cluster" \
 A MySQL ClusterSet target, which adds the DR lag tolerance:
 
 ```
-emcli add_target -name="mysql84-prod-clusterset" -type="ip_mysql_clusterset" \
+emcli add_target -name="mysql84-prod-clusterset" -type="ip_mysql_clusterset_beta" \
   -host="agent-host.example.com" \
   -properties="ip_mysql_clusterset_host:10.0.0.30;ip_mysql_clusterset_port:6446;ip_mysql_clusterset_use_secure:required;ip_mysql_clusterset_dr_max_lag:100" \
   -credentials="ip_mysql_clusterset_username:em_monitoring;ip_mysql_clusterset_password:<password>"
@@ -115,7 +115,7 @@ emcli add_target -name="mysql84-prod-clusterset" -type="ip_mysql_clusterset" \
 Confirm the target was created:
 
 ```
-emcli get_targets -targets="mysql84-prod-01:ip_mysql_database"
+emcli get_targets -targets="mysql84-prod-01:ip_mysql_database_beta"
 ```
 
 > **Note:** `-host` names the **agent** host that will monitor the target. The MySQL endpoint goes in the `<prefix>host` property, and the two are usually different — the same agent host appears in every command when one agent monitors many servers.
@@ -155,12 +155,12 @@ To remove a target, choose the target-type menu → **Target Setup → Remove Ta
 The EM CLI equivalents:
 
 ```
-emcli modify_target -name="mysql84-prod-01" -type="ip_mysql_database" \
+emcli modify_target -name="mysql84-prod-01" -type="ip_mysql_database_beta" \
   -properties="ip_mysql_database_port:3307" -on_agent
 ```
 
 ```
-emcli delete_target -name="mysql84-prod-01" -type="ip_mysql_database"
+emcli delete_target -name="mysql84-prod-01" -type="ip_mysql_database_beta"
 ```
 
 `-on_agent` pushes the change to the agent immediately instead of waiting for the next agent resynchronization.
@@ -170,7 +170,7 @@ emcli delete_target -name="mysql84-prod-01" -type="ip_mysql_database"
 ## 4.6 Associate compliance standards
 Adding a target does not associate compliance standards with it — neither the console wizard nor emcli add_target carries an association, so a new target has no compliance evaluations until you associate the standards.
 
-The plug-in ships five standards for `ip_mysql_database` targets, collected in one framework:
+The plug-in ships five standards for `ip_mysql_database_beta` targets, collected in one framework:
 
 | Standard | Internal name |
 |---|---|

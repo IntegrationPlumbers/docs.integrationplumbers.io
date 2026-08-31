@@ -53,9 +53,9 @@ The plug-in adds three target types. Which ones you use depends on how your MySQ
 
 | Target type | What it represents | How many you add |
 |---|---|---|
-| **MySQL Database** (`ip_mysql_database`) | One MySQL server instance, standalone or a member of a cluster | One per server instance you want to monitor |
-| **MySQL Cluster** (`ip_mysql_cluster`) | One InnoDB Cluster, or the Group Replication group behind it, as a whole — membership, consensus, certification and backup source | One per cluster, pointed at a MySQL Router endpoint or at any member |
-| **MySQL ClusterSet** (`ip_mysql_clusterset`) | One InnoDB ClusterSet — a primary cluster, its replica clusters and the replication between them | One per ClusterSet, pointed at a MySQL Router endpoint or at the primary cluster |
+| **MySQL Database** (`ip_mysql_database_beta`) | One MySQL server instance, standalone or a member of a cluster | One per server instance you want to monitor |
+| **MySQL Cluster** (`ip_mysql_cluster_beta`) | One InnoDB Cluster, or the Group Replication group behind it, as a whole — membership, consensus, certification and backup source | One per cluster, pointed at a MySQL Router endpoint or at any member |
+| **MySQL ClusterSet** (`ip_mysql_clusterset_beta`) | One InnoDB ClusterSet — a primary cluster, its replica clusters and the replication between them | One per ClusterSet, pointed at a MySQL Router endpoint or at the primary cluster |
 
 The three types are independent of each other. A cluster or ClusterSet target does not create database targets for its members, and it does not need them: add whichever types match the questions you need answered. Most estates run database targets for every instance and one cluster or ClusterSet target above them, so that instance-level detail and group-level health both have somewhere to live.
 

@@ -23,13 +23,13 @@ The Open Beta drop. It is a **separate plug-in** from the Early Access build bel
 - Log4j 2.24.3 → 2.25.5.
 
 #### Upgrade notes
-- `ip_mysql_database` `META_VER` 2.4 → 2.6 (the `License` metric, then the licence-gate environment properties on every Instance metric). Deploy the agent side in the same window as the OMS side; an agent left on the previous drop shows no `License` data and raises no licence incident.
+- `ip_mysql_database_beta` `META_VER` 2.4 → 2.6 (the `License` metric, then the licence-gate environment properties on every Instance metric). Deploy the agent side in the same window as the OMS side; an agent left on the previous drop shows no `License` data and raises no licence incident.
 
 ## 10.1 24.1.9.75.0 (beta, 2026-08-18)
 This is the first beta build of the plug-in, and the release this guide describes.
 
 #### Functionality Added or Changed
-- Three target types: MySQL Database (`ip_mysql_database`), MySQL Cluster (`ip_mysql_cluster`) and MySQL ClusterSet (`ip_mysql_clusterset`) — see [1.2](index.md#target-types).
+- Three target types: MySQL Database (`ip_mysql_database_beta`), MySQL Cluster (`ip_mysql_cluster_beta`) and MySQL ClusterSet (`ip_mysql_clusterset_beta`) — see [1.2](index.md#target-types).
 - 104 metric groups on MySQL Database, 8 on MySQL Cluster and 3 on MySQL ClusterSet, including daily configuration snapshots that populate Enterprise Manager's configuration history and comparison (chapter 6).
 - 21 console pages across the three target types, among them Query Analyzer, Query Analytics Trends, Backup, InnoDB Buffer Pool, the cluster Consensus, Messaging and Certification pages, and ClusterSet DR Health (chapter 5).
 - 17 default metric thresholds ship set, plus an availability condition on each of the three target types, so a target alarms from the moment you add it ([7.1](alerts-and-thresholds.md#default-thresholds)).

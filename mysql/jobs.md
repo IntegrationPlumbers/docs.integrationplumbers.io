@@ -15,7 +15,7 @@ The plug-in adds one job type, **MySQL - Run Explain Plan** (`ip_mysql_run_expla
 | Item | Value |
 |---|---|
 | Job type | `ip_mysql_run_explain` — **MySQL - Run Explain Plan** in the job library |
-| Target type | `ip_mysql_database` |
+| Target type | `ip_mysql_database_beta` |
 | Targets per run | Exactly one |
 | **Query** (`query`) | Required. The statement to explain. Substitute real values for any `?` placeholders — a digest taken from Query Analyzer is normalized and will not explain as it stands. |
 | **Database Name** (`db_name`) | Optional. The schema to run the statement against. Supply it whenever the statement's object names are not fully qualified. |

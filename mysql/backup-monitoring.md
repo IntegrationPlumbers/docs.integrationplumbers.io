@@ -33,7 +33,7 @@ policy uses the scoped grant set above instead of the global one, detection need
 access to those two history tables.
 
 **Cluster targets need the same grant on the CLUSTER credential.** The
-`ip_mysql_cluster` target's backup-source health metric (`BackupSource`)
+`ip_mysql_cluster_beta` target's backup-source health metric (`BackupSource`)
 reads the same two history tables under the cluster monitoring credential —
 which may be provisioned separately from the database targets' user. Give
 that credential the same global `SELECT` grant as the database credential; a

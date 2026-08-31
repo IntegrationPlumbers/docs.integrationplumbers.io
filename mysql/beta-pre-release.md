@@ -24,7 +24,7 @@ The beta is a **separate plug-in from the GA release**, by design:
 | | Open Beta | General availability |
 |---|---|---|
 | Plug-in ID | `ip.em.xmyb` | `ip.em.xmys` |
-| Target types | `ip_mysql_database_beta`, `ip_mysql_cluster_beta`, `ip_mysql_clusterset_beta` — shown as *MySQL Database (Beta)* etc. | `ip_mysql_database`, `ip_mysql_cluster`, `ip_mysql_clusterset` |
+| Target types | `ip_mysql_database_beta`, `ip_mysql_cluster_beta`, `ip_mysql_clusterset_beta` — shown as *MySQL Database (Beta)* etc. | `ip_mysql_database_beta`, `ip_mysql_cluster_beta`, `ip_mysql_clusterset_beta` |
 | Versions | `24.1.9.N.0` / `13.5.9.N.0` (N = beta drop) | `24.1.1.1.0` / `13.5.1.1.0` onward |
 | Licence keys | Issued for `ip.em.xmyb`; expire 2026-11-30 | Issued for `ip.em.xmys` |
 

@@ -102,7 +102,7 @@ no host process to discover — add it manually with endpoint host + port.
 Details for both paths: [discovery.md](discovery.md).
 
 For InnoDB Cluster and ClusterSet composite targets, add the
-`ip_mysql_cluster` / `ip_mysql_clusterset` target types the same way
+`ip_mysql_cluster_beta` / `ip_mysql_clusterset_beta` target types the same way
 (manual add). A bulk-onboarding and migration chapter (EMCLI-scripted) is
 being published separately.
 
@@ -127,7 +127,7 @@ emcli associate_cs_targets -name=<internal standard name> -version=1 \
 2. **All Metrics** (target menu → Monitoring → All Metrics) shows the
    metric groups populating on their schedules.
 3. To force a collection instead of waiting, on the agent host:
-   `emctl control agent runCollection "<target name>":ip_mysql_database <MetricGroup>`
+   `emctl control agent runCollection "<target name>":ip_mysql_database_beta <MetricGroup>`
 
 ## 7. If something is wrong
 
