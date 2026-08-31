@@ -34,4 +34,3 @@ exclude:
   - vendor/ruby/
   - scripts/
   - docs/
-  - mssql/          # SQL Server guide hidden from the published site (beta, in progress); remove this line to publish it again
