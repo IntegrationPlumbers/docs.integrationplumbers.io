@@ -7,7 +7,7 @@ nav_order: 12
 
 The things beta users actually hit, what each one looks like, and what to change.
 
-**In this page:** The licence gate · Install and deploy · Connecting to Db2 · Jobs · Compliance shows nothing · Amazon RDS for Db2 · OMS licence-count connection
+**In this page:** The licence gate · Known issue: DB Status threshold · Install and deploy · Connecting to Db2 · Jobs · Compliance shows nothing · Amazon RDS for Db2 · OMS licence-count connection
 
 Nearly everything that goes wrong in the first hour with this plug-in is one of a small number of things. This page is that list rather than a general guide to Enterprise Manager.
 
@@ -36,6 +36,14 @@ Collection stopped by license status: <status>
 The key is checked on the agent host every 15 minutes, and again as soon as the property changes. Collections resume at their next interval once the key is accepted — you do not need to restart anything.
 
 **Related:** [Getting started](getting-started.md#licence-key) · [Trial setup](trial.md#your-beta-key)
+
+## Known issue: the "DB Status" detailed-response threshold {#db-status-threshold}
+
+**Symptom.** You set a Warning or Critical threshold on the **DB Status** column of the detailed response metric — typically to the healthy value, `ACTIVE` — and a CRITICAL incident fires immediately on every healthy database, and never clears.
+
+**Cause.** In `24.1.9.7.0` / `13.5.9.2.0` that condition ships with an inverted comparison operator: it alerts when the status *equals* your threshold instead of when it *deviates* from it.
+
+**Fix.** Leave that one threshold **Not Defined** in this drop — it ships that way and is harmless untouched. The equivalent db_status condition under DB Monitoring uses the correct deviation semantics and can be used instead. The operator is corrected in the next drop.
 
 ## Install and deploy {#deploy}
 

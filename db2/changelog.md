@@ -37,6 +37,10 @@ The Open Beta drop this guide describes, and the first to make the Enterprise Ma
 - An OMS presenting a self-signed certificate that previously validated a limited-instance licence key's count will now fail that check — this is the certificate-validation fix above taking effect, not a regression. See [Troubleshooting](troubleshooting.md#oms-licence-count) for the fix.
 - Run, or schedule, [Purge Stale Plugin Cache](jobs-and-metric-extensions.md#purge-stale-cache) after this and every future upgrade.
 
+### Known issue in this drop
+
+- The **DB Status** threshold on the detailed response metric ships with an inverted comparison operator — setting it to the healthy status raises a permanent CRITICAL on every healthy database. Leave it Not Defined; see [Troubleshooting](troubleshooting.md#db-status-threshold). Corrected in the next drop.
+
 ## Earlier beta drops
 
 These predate the guide and are recorded here for history only.

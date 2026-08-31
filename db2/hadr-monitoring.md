@@ -46,7 +46,7 @@ Both are ordinary Enterprise Manager metric thresholds — edit them per target 
 
 ## Known limitation {#known-limitation}
 
-HADR deep monitoring is built and its metric definitions are verified against IBM's Db2 12.1 documentation, but it has **not yet been exercised against a live primary+standby failover pair** in our lab — there is no standby pair stood up there yet. If you run this against a real HADR pair during the beta, especially through an actual failover or switchover, that observation is exactly the kind of gap report that matters most right now. See [What's new](whats-new.md#beta-status) and [Trial setup](trial.md#send-us-your-findings).
+HADR deep monitoring runs against a **live primary+standby pair in our lab** — role `PRIMARY`, state `PEER`, connected, standby registered, collected by Enterprise Manager. What has **not yet been exercised is a controlled takeover or failover**: the role change has not been observed end to end. If you run a switchover or failover against a real HADR pair during the beta, that observation is exactly the kind of gap report that matters most right now. See [What's new](whats-new.md#beta-status) and [Trial setup](trial.md#send-us-your-findings).
 
 ## Related
 
