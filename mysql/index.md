@@ -10,7 +10,7 @@ nav_order: 0
 ### Oracle Enterprise Manager Plug-in for MySQL User Guide
 
 *Open Beta · `24.1.9.N.0` for Enterprise Manager 24ai · `13.5.9.N.0` for Enterprise Manager 13.5*
-*August 2026*
+*September 2026*
 
 This release ships as two plug-in builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable — install the build that matches your Enterprise Manager. Everything in this guide applies to both.
 
