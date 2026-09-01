@@ -5,7 +5,7 @@ nav_order: 1
 
 # What's new in this release
 
-This is the Open Beta of the IBM Db2 plug-in — the first release covered by this guide. It ships as two builds with the same features, **24.1.9.8.0** for Enterprise Manager 24ai and **13.5.9.3.0** for Enterprise Manager 13.5, the first drop to make the 13.5 build available alongside 24ai. Everything below is new, because there is nothing before it: read this page as the feature list for the release, and [the beta terms](#beta-terms) as what you are agreeing to by installing it.
+This is the Open Beta of the IBM Db2 plug-in — the first release covered by this guide. It ships as two builds with the same features, **24.1.9.9.0** for Enterprise Manager 24ai and **13.5.9.4.0** for Enterprise Manager 13.5, the first drop to make the 13.5 build available alongside 24ai. Everything below is new, because there is nothing before it: read this page as the feature list for the release, and [the beta terms](#beta-terms) as what you are agreeing to by installing it.
 
 **Where to find it:** the plug-in appears under **Setup → Extensibility → Plug-ins → Databases → IBM DB2 Database (Beta)**; its pages appear in the `ip_db2_database_beta` target's own navigation tree once a target is added.
 
@@ -24,7 +24,7 @@ Open Beta means the release is feature-complete for its scope and has been exerc
 | Metric semantics | **Verified** against IBM Db2 12.1 documentation, with a hard rule that a metric must mean the same thing as the plug-in it replaces, so thresholds carried over from prior monitoring behave predictably. |
 | Least-privilege grant, TLS, audit-posture config | **Verified** — certified against a live Db2 12.1.4 instance; see [The monitoring role](prerequisites.md#monitoring-role). |
 | Live Db2 11.5 collection | **Not yet verified.** A full 11.5 collection run has not yet been completed; 11.5 is supported by design, and certification against a live 11.5 instance is in progress. |
-| Enterprise Manager 13.5 line | **Not yet verified.** The 13.5.9.3.0 build passes full validation against the 13.5 development kit but has not yet been through the live-deploy and console verification given to 24ai — treat 24ai as the reference platform until 13.5 catches up. |
+| Enterprise Manager 13.5 line | **Not yet verified.** The 13.5.9.4.0 build passes full validation against the 13.5 development kit but has not yet been through the live-deploy and console verification given to 24ai — treat 24ai as the reference platform until 13.5 catches up. |
 | HADR standby pair | **Verified in PEER state** against a live primary+standby pair; a controlled takeover/failover exercise has not yet been exercised — see [HADR monitoring](hadr-monitoring.md#known-limitation). |
 | Amazon RDS for Db2 | **Documentation-verified only.** See [Troubleshooting](troubleshooting.md#rds-for-db2). |
 

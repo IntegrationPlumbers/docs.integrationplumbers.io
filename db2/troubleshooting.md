@@ -39,7 +39,7 @@ The key is checked on the agent host every 15 minutes, and again as soon as the 
 
 ## Install and deploy {#deploy}
 
-**`Incompatible version` at import.** The beta ships one artifact per Enterprise Manager line, each built with that line's development kit, and EM refuses the other one. Use `24.1.9.8.0` on EM 24ai and `13.5.9.3.0` on EM 13.5.
+**`Incompatible version` at import.** The beta ships one artifact per Enterprise Manager line, each built with that line's development kit, and EM refuses the other one. Use `24.1.9.9.0` on EM 24ai and `13.5.9.4.0` on EM 13.5.
 
 **A new drop's metrics show no data.** Some drops move target metadata. When they do, the OMS side and the agent side must both be deployed — deploy the agent side in the same maintenance window as the OMS side. Until you do, metrics added by that drop have nowhere to come from and their pages stay empty while everything else keeps working.
 
