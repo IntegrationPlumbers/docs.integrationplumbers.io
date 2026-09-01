@@ -7,7 +7,7 @@ nav_order: 13
 
 This page lists what changed in each drop of the IBM Db2 plug-in, most recent first. Two identities ship from the same source: the beta line (`ip.em.xdbb`, target type `ip_db2_database_beta`, version `24.1.9.N.0` / `13.5.9.N.0`) this guide covers, and the eventual GA line (`ip.em.xdb2`, target type `ip_db2_database`, version `24.1.<n>.0.0`). Beta-to-beta upgrades in place; beta-to-GA is always a clean install — see [What's new](whats-new.md#beta-identity).
 
-## 24.1.9.8.0 (Enterprise Manager 24ai) / 13.5.9.3.0 (Enterprise Manager 13.5) — Open Beta
+## 24.1.9.9.0 (Enterprise Manager 24ai) / 13.5.9.4.0 (Enterprise Manager 13.5) — Open Beta
 
 The Open Beta drop this guide describes, and the first to make the Enterprise Manager 13.5 build available alongside 24ai.
 

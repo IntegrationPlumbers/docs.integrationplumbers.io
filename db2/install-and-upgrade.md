@@ -23,7 +23,7 @@ You enter the key per target, in the **Plugin Licence Key** target property (see
 
 ## Download {#download}
 
-Download details for the plug-in OPAR, including its SHA-256 checksum, come with your beta enrollment. The plug-in ships as two builds with the same features: **24.1.9.8.0** for Enterprise Manager 24ai and **13.5.9.3.0** for Enterprise Manager 13.5. Download the one that matches your Enterprise Manager — the other is refused at import with `Incompatible version`, because each is built with that Enterprise Manager line's own development kit. Verify the checksum before you import it.
+Download details for the plug-in OPAR, including its SHA-256 checksum, come with your beta enrollment. The plug-in ships as two builds with the same features: **24.1.9.9.0** for Enterprise Manager 24ai and **13.5.9.4.0** for Enterprise Manager 13.5. Download the one that matches your Enterprise Manager — the other is refused at import with `Incompatible version`, because each is built with that Enterprise Manager line's own development kit. Verify the checksum before you import it.
 
 ## Import the OPAR {#import}
 
@@ -36,7 +36,7 @@ Download details for the plug-in OPAR, including its SHA-256 checksum, come with
 2. Import the OPAR file:
 
    ```
-   emcli import_update -file="/tmp/24.1.9.8.0_ip.em.xdbb_2000_0.opar" -omslocal
+   emcli import_update -file="/tmp/24.1.9.9.0_ip.em.xdbb_2000_0.opar" -omslocal
    ```
 
    (Use `-omslocal` when the file is on the OMS host; use `-host`/`-credential_set_name` when importing from an agent host.) The plug-in then appears under **Setup → Extensibility → Plug-ins**, in the **Databases** category, as **IBM DB2 Database (Beta)**.
@@ -50,10 +50,10 @@ Download details for the plug-in OPAR, including its SHA-256 checksum, come with
 The equivalent `emcli` command:
 
 ```
-emcli deploy_plugin_on_server -plugin=ip.em.xdbb:24.1.9.8.0 -dbUser=SYS -dbPassword=<repository_SYS_password>
+emcli deploy_plugin_on_server -plugin=ip.em.xdbb:24.1.9.9.0 -dbUser=SYS -dbPassword=<repository_SYS_password>
 ```
 
-On Enterprise Manager 24ai, `deploy_plugin_on_server` takes `-dbUser`/`-dbPassword` for the repository account — **not** `-sys_password`, which is rejected. On Enterprise Manager 13.5, use `13.5.9.3.0` in place of `24.1.9.8.0` and pass `-sys_password=<repository_SYS_password>` instead. Always pin the `:version`, on this command and on the agent deploy below, or an upgrade is silently skipped as "already deployed".
+On Enterprise Manager 24ai, `deploy_plugin_on_server` takes `-dbUser`/`-dbPassword` for the repository account — **not** `-sys_password`, which is rejected. On Enterprise Manager 13.5, use `13.5.9.4.0` in place of `24.1.9.9.0` and pass `-sys_password=<repository_SYS_password>` instead. Always pin the `:version`, on this command and on the agent deploy below, or an upgrade is silently skipped as "already deployed".
 
 To check deployment progress from either the console or `emcli`, run:
 
@@ -72,10 +72,10 @@ Each deploy is asynchronous, and a drop that moves target metadata restarts the 
 The equivalent `emcli` command:
 
 ```
-emcli deploy_plugin_on_agent -plugin=ip.em.xdbb:24.1.9.8.0 -agent_names="<host>:<port>"
+emcli deploy_plugin_on_agent -plugin=ip.em.xdbb:24.1.9.9.0 -agent_names="<host>:<port>"
 ```
 
-Use `13.5.9.3.0` in place of `24.1.9.8.0` when deploying to Enterprise Manager 13.5.
+Use `13.5.9.4.0` in place of `24.1.9.9.0` when deploying to Enterprise Manager 13.5.
 
 `get_plugin_deployment_status` (shown above) reports agent deployment progress just as it does for the OMS. Deploy the agent side in the same maintenance window as the OMS side: until you do, metrics added by a metadata-bumping drop have nowhere to come from, and their pages stay empty while everything else keeps working.
 

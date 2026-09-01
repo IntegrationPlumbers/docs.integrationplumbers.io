@@ -19,7 +19,7 @@ The shortest path from a downloaded archive to a Db2 target you can actually loo
 
 ## The one thing worth knowing before you start {#licence-key}
 
-**A beta target comes Up without a licence key, then collects almost nothing.** That surprises people, because the target looks healthy in All Targets while every page except **License**, **Response**, and **Version** stays empty. This is deliberate: from `24.1.9.8.0` / `13.5.9.3.0`, an unlicensed target's other metric groups report a collection error reading `Collection stopped by license status: <status>` rather than silently going Down. Enter the key when you create the target and the question never arises — see [Step 4](#step-4-enter-the-licence-key) below, and [Troubleshooting](troubleshooting.md#licence-gate) if you meet it anyway.
+**A beta target comes Up without a licence key, then collects almost nothing.** That surprises people, because the target looks healthy in All Targets while every page except **License**, **Response**, and **Version** stays empty. This is deliberate: from `24.1.9.9.0` / `13.5.9.4.0`, an unlicensed target's other metric groups report a collection error reading `Collection stopped by license status: <status>` rather than silently going Down. Enter the key when you create the target and the question never arises — see [Step 4](#step-4-enter-the-licence-key) below, and [Troubleshooting](troubleshooting.md#licence-gate) if you meet it anyway.
 
 ## Step 1: Create the monitoring user {#step-1}
 
@@ -46,12 +46,12 @@ Import the OPAR that matches your Enterprise Manager onto the OMS, deploy it the
 ```
 emcli login -username=<em administrator>
 emcli import_update -file=/tmp/<artifact>.opar -omslocal
-emcli deploy_plugin_on_server -plugin=ip.em.xdbb:24.1.9.8.0
+emcli deploy_plugin_on_server -plugin=ip.em.xdbb:24.1.9.9.0
 emcli get_plugin_deployment_status -plugin=ip.em.xdbb      # wait for Success
-emcli deploy_plugin_on_agent -plugin=ip.em.xdbb:24.1.9.8.0 -agent_names="<agent_host>:<agent_port>"
+emcli deploy_plugin_on_agent -plugin=ip.em.xdbb:24.1.9.9.0 -agent_names="<agent_host>:<agent_port>"
 ```
 
-Use `13.5.9.3.0` in place of `24.1.9.8.0` on Enterprise Manager 13.5. On 24ai, `deploy_plugin_on_server` takes `-dbUser`/`-dbPassword` for the repository account rather than `-sys_password`.
+Use `13.5.9.4.0` in place of `24.1.9.9.0` on Enterprise Manager 13.5. On 24ai, `deploy_plugin_on_server` takes `-dbUser`/`-dbPassword` for the repository account rather than `-sys_password`.
 
 **Done when** `emcli get_plugin_deployment_status -plugin=ip.em.xdbb` reports the deployment complete for the OMS and for each agent, and **IBM DB2 Database (Beta)** appears in the Add Target list for that agent.
 
