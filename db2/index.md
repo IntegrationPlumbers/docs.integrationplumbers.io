@@ -1,9 +1,9 @@
 ---
-title: IBM DB2 Plug-in
+title: IBM Db2 Plug-in
 nav_order: 0
 ---
 
-# IBM DB2 Plugin
+# IBM Db2 Plugin
 
 ## Integration Plumbers
 
@@ -45,31 +45,31 @@ IBM and Db2 are trademarks of IBM Corporation, registered in many jurisdictions 
 
 ## What the plug-in monitors
 
-The IBM DB2 plug-in makes **IBM Db2 for Linux, UNIX, and Windows (LUW)** a first-class Enterprise Manager target. A dedicated target type, `ip_db2_database` (`ip_db2_database_beta` during the beta), models one monitored Db2 database and surfaces its availability, performance, storage, locking, high-availability, backup, and configuration posture in the same console, the same target navigation, and the same incident and notification rules you already use for the rest of your estate.
+The IBM Db2 plug-in makes **IBM Db2 for Linux, UNIX, and Windows (LUW)** a first-class Enterprise Manager target. A dedicated target type, `ip_db2_database` (`ip_db2_database_beta` during the beta), models one monitored Db2 database and surfaces its availability, performance, storage, locking, high-availability, backup, and configuration posture in the same console, the same target navigation, and the same incident and notification rules you already use for the rest of your estate.
 
 Collections run from a management agent over JDBC, entirely through Db2's `MON_GET_*` monitoring table functions and a handful of administrative catalog views — never the discontinued `SNAP_GET_*` interfaces. There is nothing to install on the database host for monitoring to work: the IBM Data Server Driver for JDBC and SQLJ ships bundled inside the plug-in's collector.
 
-What you get once a target is up: a 5-minute availability check; general activity, per-agent and per-database performance, buffer pool and cache efficiency, sort and hash memory, and transaction-log and direct I/O; transaction-log and per-tablespace storage with growth-rate forecasting; lock waits with full requester/holder detail, rolled up by table and by application; role, state, sync mode, and log-position tracking for HADR pairs, including a takeover-readiness composite; backup age plus a full backup/restore/load history feed; top SQL statements by CPU time and by execution count; a daily configuration snapshot across roughly 13 configuration groups; and the first compliance content ever shipped for a Db2 plug-in. Curated Warning and Critical thresholds ship enabled on the metrics that matter most, so a freshly added target raises real incidents without any tuning.
+What you get once a target is up: a 5-minute availability check; general activity, per-agent and per-database performance, buffer pool and cache efficiency, sort and hash memory, and transaction-log and direct I/O; transaction-log and per-tablespace storage with growth-rate forecasting; lock waits with full requester/holder detail, rolled up by table and by application; role, state, sync mode, and log-position tracking for HADR pairs, including a takeover-readiness composite; backup age plus a full backup/restore/load history feed; top SQL statements by CPU time and by execution count; a daily configuration snapshot across roughly 13 configuration groups; and configuration, audit-posture and version-lifecycle compliance content. Curated Warning and Critical thresholds ship enabled on the metrics that matter most, so a freshly added target raises real incidents without any tuning.
 
-**This is a brand-new product, not an upgrade of any prior Db2 plug-in.** Targets are added fresh — there is no migration of targets from another Db2 plug-in, Oracle's included. Because it registers under its own target-type name, it can run side by side with Oracle's bundled Db2 plug-in while you cut over database by database. See [Migrating from the Oracle Db2 plug-in](https://github.com/IntegrationPlumbers/ip-oem-db2-plugin/blob/main/docs/migration-from-oracle-plugin.md) for that path.
+**This is a brand-new product, not an upgrade of any prior Db2 plug-in.** Targets are added fresh — there is no migration of targets from another Db2 plug-in, Oracle's included. Because it registers under its own target-type name, it can run side by side with Oracle's bundled Db2 plug-in while you cut over database by database.
 
 ## Supported versions and platforms
 
 | Component | Supported |
 | :--- | :--- |
 | Oracle Enterprise Manager | 13.5 and 24ai |
-| IBM Db2 LUW | **12.1** (primary, certified) and **11.5** (supported) |
+| IBM Db2 LUW | **12.1** (primary, certified) and **11.5** (supported by design; live collection certification in progress — see [What's new](whats-new.md#beta-status)) |
 | Db2 LUW below 11.5 (9.1–10.5) | Not supported |
 | Agent platforms | Linux x86-64 (64-bit), Microsoft Windows x86-64 (64-bit) |
 | Amazon RDS for Db2 | Documentation-verified compatibility; not yet lab-certified — see [Troubleshooting](troubleshooting.md#rds-for-db2) |
 
 **The plug-in does not require a matching driver.** The JDBC driver (type-4, `db2jcc4.jar`) is bundled and connects to both certified versions; see [Prerequisites](prerequisites.md#jdbc-driver) if your site must supply IBM's own driver or licence JAR instead.
 
-**Enterprise Manager platform maturity.** Live OMS deployment, live Db2 12.1 collection, and end-to-end licensing are lab-verified on Enterprise Manager 24ai, the platform this beta treats as its reference. The Enterprise Manager 13.5 build (`13.5.9.3.0`) is compiled from the same source and ships alongside it starting with this drop; give it the same install path in [Getting started](getting-started.md), and report anything that renders or collects differently than on 24ai — see [What's new](whats-new.md#beta-status) for the full verification matrix.
+**Enterprise Manager platform maturity.** Live OMS deployment, live Db2 12.1 collection, and end-to-end licensing are verified on Enterprise Manager 24ai, the platform this beta treats as its reference. The Enterprise Manager 13.5 build (`13.5.9.3.0`) is compiled from the same source and ships alongside it starting with this drop; give it the same install path in [Getting started](getting-started.md), and report anything that renders or collects differently than on 24ai — see [What's new](whats-new.md#beta-status) for the full verification matrix.
 
 ## Beta status
 
-This is an **Open Beta** release: feature-complete for the scope in [What's new](whats-new.md), verified against a live Enterprise Manager 24ai OMS and a live Db2 12.1 database in our lab, and licensed per target so you can evaluate it against your own estate. It ships under its own plug-in identity, `ip.em.xdbb`, deliberately separate from the eventual GA plug-in (`ip.em.xdb2`) — see [What's new](whats-new.md#beta-identity) for what that means for you.
+This is an **Open Beta** release: feature-complete for the scope in [What's new](whats-new.md), verified against a live Enterprise Manager 24ai OMS and a live Db2 12.1 database, and licensed per target so you can evaluate it against your own estate. It ships under its own plug-in identity, `ip.em.xdbb`, deliberately separate from the eventual GA plug-in (`ip.em.xdb2`) — see [What's new](whats-new.md#beta-identity) for what that means for you.
 
 Beta means the release has not yet earned a production monitoring commitment, and that metric names, thresholds, and properties may still change in response to what beta users find. Give us feedback — bugs, confusing metrics, missing thresholds, unclear documentation — through your Integration Plumbers support contact, with the plug-in version (`emcli list_plugins_on_server`), the Db2 version, and the metric group or console page involved.
 
@@ -77,7 +77,7 @@ Beta means the release has not yet earned a production monitoring commitment, an
 
 ### Start here
 
-- **IBM DB2 Plug-in** (this page) — what the plug-in does, and where every topic in this guide lives.
+- **IBM Db2 Plug-in** (this page) — what the plug-in does, and where every topic in this guide lives.
 - [What's new](whats-new.md) — the beta terms, what is and is not verified yet, and everything in this release.
 - [Getting started](getting-started.md) — the shortest path from a downloaded archive to a Db2 target you can look at.
 - [Trial setup](trial.md) — request a beta licence key, enter it on each target, then work the guided evaluation checklist.
@@ -86,7 +86,7 @@ Beta means the release has not yet earned a production monitoring commitment, an
 
 - [Prerequisites](prerequisites.md) — supported versions, the JDBC driver, network paths, the least-privilege monitoring user, and optional TLS.
 - [Install and upgrade](install-and-upgrade.md) — import the OPAR, deploy it to the OMS and to each agent, and move between beta drops.
-- [Targets and properties](targets-and-properties.md) — add an `ip_db2_database` target, every target property, and the EM CLI equivalent.
+- [Targets and properties](targets-and-properties.md) — add an `ip_db2_database_beta` target, every target property, and the EM CLI equivalent.
 
 ### Reference
 
@@ -100,7 +100,7 @@ Beta means the release has not yet earned a production monitoring commitment, an
 
 ## Support
 
-If you need assistance with the IBM DB2 Plugin for Oracle Enterprise Manager:
+If you need assistance with the IBM Db2 Plugin for Oracle Enterprise Manager:
 
 - **Email:** [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io)
 - **Self-Service Portal:** [https://integrationplumbers.zohodesk.com/portal/en/signin](https://integrationplumbers.zohodesk.com/portal/en/signin)

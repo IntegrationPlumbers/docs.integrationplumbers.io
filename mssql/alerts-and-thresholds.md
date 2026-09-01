@@ -38,6 +38,8 @@ The plug-in does **not** ship an Enterprise Manager Monitoring Template. A templ
 | Connection saturation | ConnectionSaturation `connection_saturation_pct` | 80 | 90 | User connections exceed the percentage of the cap |
 | TempDB contention | TempdbContention `pagelatch_ex_waiters` | 5 | 20 | Exclusive page-latch waiters exceed the count |
 
+The `License` row watches `days_remaining`, but the metric also carries a `Status` column — `Active`, `License Required`, `Invalid Signature`, `Wrong Product`, `Expired` or `Exceeded Limit` — and raises its own CRITICAL incident whenever that status is anything but `Active`, independently of the days-remaining threshold above. See the [Open Beta notice](beta-pre-release.md#licensing) for what each status means and what to do about it.
+
 For metrics measured as a snapshot rather than a rate, use Enterprise Manager's per-threshold **number of occurrences** setting to require a condition to persist before it raises an incident. A single sample of high blocking is often noise; the same value across three consecutive collections is not.
 
 ## Changing a threshold {#changing}
@@ -73,3 +75,4 @@ The AG replica link threshold is also deliberately *not* placed on the readiness
 - [High availability](high-availability.md#failover-readiness) - why the AG critical sits on the replica link
 - [Compliance rules](compliance-rules.md) - configuration findings, which alert differently
 - [Troubleshooting](troubleshooting.md#missing-data) - a threshold that never fires
+- [Open Beta notice](beta-pre-release.md#licensing) - what each `License` status means

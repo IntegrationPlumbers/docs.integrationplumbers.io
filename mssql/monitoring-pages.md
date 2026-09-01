@@ -42,6 +42,8 @@ Three things worth knowing:
 
 **The top-row cards do not all populate at the same rate.** Availability history collects every minute, instance status every five, and licence data hourly, so those three are populated well within the first hour of a new target. Server configuration is on a 24 hour schedule, but the card falls back to a live read of the instance when the repository has nothing yet, so it is not blank either. The Databases card below it is the one that genuinely waits, because per-database space is a 24 hour metric with no fallback. See [What a blank region means](#blank).
 
+**The Monitoring and License card is what an unlicensed target looks like.** If the licence status is anything but `Active`, this card is where you see it — see the [Open Beta notice](beta-pre-release.md#licensing) for what each status means and what to do.
+
 **Processor Utilization defaults to the 24 hour window.** Switching it to Real Time triggers a live collection against the instance rather than reading stored data, so it is the one control on the page that puts load on SQL Server when you use it.
 
 ## Databases {#databases}

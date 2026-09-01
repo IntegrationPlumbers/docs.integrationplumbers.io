@@ -5,7 +5,7 @@ nav_order: 1
 
 # What's new in this release
 
-This is the Open Beta of the IBM DB2 plug-in — the first release covered by this guide. It ships as two builds with the same features, **24.1.9.8.0** for Enterprise Manager 24ai and **13.5.9.3.0** for Enterprise Manager 13.5, the first drop to make the 13.5 build available alongside 24ai. Everything below is new, because there is nothing before it: read this page as the feature list for the release, and [the beta terms](#beta-terms) as what you are agreeing to by installing it.
+This is the Open Beta of the IBM Db2 plug-in — the first release covered by this guide. It ships as two builds with the same features, **24.1.9.8.0** for Enterprise Manager 24ai and **13.5.9.3.0** for Enterprise Manager 13.5, the first drop to make the 13.5 build available alongside 24ai. Everything below is new, because there is nothing before it: read this page as the feature list for the release, and [the beta terms](#beta-terms) as what you are agreeing to by installing it.
 
 **Where to find it:** the plug-in appears under **Setup → Extensibility → Plug-ins → Databases → IBM DB2 Database (Beta)**; its pages appear in the `ip_db2_database_beta` target's own navigation tree once a target is added.
 
@@ -13,19 +13,19 @@ This is the Open Beta of the IBM DB2 plug-in — the first release covered by th
 
 ## What is verified {#beta-status}
 
-Open Beta means the release is feature-complete for its scope and has been exercised end to end against live systems — not yet a production-supported release. Read the columns below as what to trust today versus what to treat as still closing out.
+Open Beta means the release is feature-complete for its scope and has been exercised end to end against live systems — not yet a production-supported release. Read the columns below as what to trust today versus what is not yet verified.
 
 | Area | Status |
 | :--- | :--- |
-| Offline build / EDK validation | **Verified** — both the GA and beta identities build clean through Oracle's plug-in packager. |
+| Offline build validation | **Verified** — both the GA and beta identities build clean through Oracle's plug-in packager. |
 | Live OMS deployment (24ai) | **Verified** — import, server-side deploy, and agent-side deploy against a running Enterprise Manager 24ai, on both a local Linux agent and a remote Windows agent. |
 | Live Db2 12.1 collection | **Verified** — real metric collection cycles against a Db2 12.1 target. |
 | Licensing | **Verified** end to end against real keys: Active, Expired, Invalid Signature, Exceeded Limit, and the beta↔GA identity dead end in both directions. |
 | Metric semantics | **Verified** against IBM Db2 12.1 documentation, with a hard rule that a metric must mean the same thing as the plug-in it replaces, so thresholds carried over from prior monitoring behave predictably. |
 | Least-privilege grant, TLS, audit-posture config | **Verified** — certified against a live Db2 12.1.4 instance; see [The monitoring role](prerequisites.md#monitoring-role). |
-| Live Db2 11.5 collection | **Not yet closed.** A full 11.5 collection run is still to be completed; 11.5 is supported by design and certification is in progress. |
-| Enterprise Manager 13.5 line | **Not yet closed.** The 13.5.9.3.0 build passes the full 13.5 EDK validation but has not yet been through the live-deploy and console verification given to 24ai — treat 24ai as the reference platform until it catches up. |
-| HADR standby pair | **Verified in PEER state** against a live primary+standby pair; a controlled takeover/failover exercise is still to be closed out — see [HADR monitoring](hadr-monitoring.md#known-limitation). |
+| Live Db2 11.5 collection | **Not yet verified.** A full 11.5 collection run has not yet been completed; 11.5 is supported by design, and certification against a live 11.5 instance is in progress. |
+| Enterprise Manager 13.5 line | **Not yet verified.** The 13.5.9.3.0 build passes full validation against the 13.5 development kit but has not yet been through the live-deploy and console verification given to 24ai — treat 24ai as the reference platform until 13.5 catches up. |
+| HADR standby pair | **Verified in PEER state** against a live primary+standby pair; a controlled takeover/failover exercise has not yet been exercised — see [HADR monitoring](hadr-monitoring.md#known-limitation). |
 | Amazon RDS for Db2 | **Documentation-verified only.** See [Troubleshooting](troubleshooting.md#rds-for-db2). |
 
 ## Beta identity {#beta-identity}
@@ -38,7 +38,7 @@ The beta ships under its own plug-in identity, deliberately separate from the ev
 | Target type | `ip_db2_database_beta` | `ip_db2_database` |
 | Display name | IBM DB2 Database (Beta) | IBM DB2 Database |
 | Version line | `24.1.9.N.0` / `13.5.9.N.0` | `24.1.<n>.0.0` |
-| Licence keys | Issued for `ip.em.xdbb` | Issued for `ip.em.xdb2` |
+| Licence keys | Issued for `ip.em.xdbb`; expire 2026-10-31 | Issued for `ip.em.xdb2` |
 
 - **Beta to beta upgrades in place**, within the beta line — see [Install and upgrade](install-and-upgrade.md#upgrade).
 - **Beta to GA is always a clean install, never a migration.** Nothing a beta install writes to your repository — targets, metric history, tuned thresholds — carries into GA, and a beta target remains identifiable as such in any audit. Plan the GA rollout as a fresh deployment alongside the beta, then retire the beta targets.
@@ -55,7 +55,7 @@ Everything the beta covers, all new in this release:
 - **Tablespace growth forecasting.** Per-tablespace snapshots feed a growth-rate and days-to-full projection alongside auto-resize tracking.
 - **Curated default thresholds.** Sensible Warning/Critical values ship enabled on the metrics that matter, instead of arriving `Not Defined` across the board. See [Alerts and thresholds](alerts-and-templates.md).
 - **First-class TLS and least privilege.** A first-class SSL/TLS transport with client-truststore validation, DRDA AES-256 encryption as a first-class property, and a documented, certified least-privilege monitoring grant — `CONNECT` + `SQLADM`, nothing more. See [Prerequisites](prerequisites.md#monitoring-role).
-- **Compliance and advisor pack v1.** The first-ever compliance content for a Db2 plug-in: configuration best-practices, a version end-of-life advisory, and audit-posture rules. See [Compliance standards](compliance-standards.md).
+- **Compliance and advisor pack v1.** Configuration best-practices, a version end-of-life advisory, and audit-posture rules, evaluated as Enterprise Manager compliance standards. See [Compliance standards](compliance-standards.md).
 - **Native console pages.** Three MPCUI pages — Home, Analysis, Performance — with no dependency on a legacy report platform.
 - **Six administrative job types**, including a Purge Stale Plugin Cache job you should run (or schedule) after every upgrade. See [Jobs](jobs-and-metric-extensions.md#purge-stale-cache).
 - **Amazon RDS for Db2 compatibility, documented.** The JDBC metric surface is expected to work unchanged against an RDS endpoint; the local-only admin jobs and diagnostic-log monitoring are not. See [Troubleshooting](troubleshooting.md#rds-for-db2).
@@ -65,8 +65,8 @@ Everything the beta covers, all new in this release:
 
 - **Live Db2 11.5 collection, the Enterprise Manager 13.5 line, and an HADR takeover exercise are still closing out** — see [What is verified](#beta-status) above.
 - **Amazon RDS for Db2 is documentation-only in this release.** Compatibility, including the `rdsadmin` grant path, is doc-verified but not lab-certified. On RDS the five local administrative jobs and diagnostic-log monitoring are unavailable, because the agent cannot be co-located with the instance. See [Troubleshooting](troubleshooting.md#rds-for-db2).
-- **SQL workload analytics are numeric-only.** Top-SQL trends are keyed by a statement-ID hash; full statement-text capture is planned for a later release.
-- **Deferred to a later release:** Workload Management (WLM), lock/deadlock event capture, BLU/columnar, pureScale, AI Query Optimizer monitoring, Q Replication, auto-discovery, remote administrative operations, and Db2 for z/OS.
+- **SQL workload analytics are numeric-only.** Top-SQL trends are keyed by a statement-ID hash and carry CPU-time and execution-count trends; statement text is not collected in this release.
+- **Out of scope for this release:** Workload Management (WLM), lock/deadlock event capture, BLU/columnar, pureScale, AI Query Optimizer monitoring, Q Replication, auto-discovery, remote administrative operations, and Db2 for z/OS.
 
 ## Beta terms {#beta-terms}
 
@@ -75,7 +75,7 @@ By installing, deploying, or using this build you accept the following.
 1. **Not for production.** Deploy it to a non-production Enterprise Manager and monitor non-critical Db2 databases. Do not use it for production monitoring, for compliance-of-record, or as the basis for operational decisions until the general-availability release.
 2. **No warranty and no service level.** The software is provided "as is". There is no guarantee of availability, accuracy, fitness for a particular purpose, response time, or resolution.
 3. **Behaviour may change.** Metric names, collection intervals, default thresholds, and console pages may change between beta drops and before GA. Changes that need action on your side are recorded in this page's [changelog](changelog.md).
-4. **A licence key is required.** Each target needs a beta licence key entered on it, or it reports `License Required` and stops collecting everything but Response, Version, and its own License metric. See [Getting started](getting-started.md#licence-key).
+4. **Licensed for the beta only.** Each target needs a beta licence key entered on it, or it reports `License Required` and stops collecting everything but Response, Version, and its own License metric. Beta licence keys expire 2026-10-31 and do not license the GA release. See [Getting started](getting-started.md#licence-key).
 5. **Support is best effort.** Beta issues are handled through your Integration Plumbers support contact, not a production support queue.
 
 ## Feedback

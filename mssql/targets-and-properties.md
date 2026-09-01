@@ -17,7 +17,7 @@ Targets are added against the Management Agent that will monitor the instance. T
 
 ```
 emcli add_target -name="<target name>" -type="<target type>" -host="<agent host>" \
-  -properties="<host>;<port>;<instance>;<tls mode>"
+  -properties="<host>;<port>;<instance>;<tls mode>;<license key>"
 ```
 
 Then apply credentials to the target — see [Credentials](#credentials) below, and read that section before you run the command above, because the order matters.
@@ -30,6 +30,7 @@ Then apply credentials to the target — see [Credentials](#credentials) below, 
 | Port | TCP port, 1433 by default |
 | Instance | Instance name for a named instance; leave at the default otherwise |
 | TLS mode | Whether the connection is encrypted, and whether the certificate is verified |
+| License Key | The beta licence key for this target (`ip_mssql_database_license`). See the [Open Beta notice](beta-pre-release.md#licensing) for what each status means. |
 
 For certificate verification you also supply the truststore location, type and password. [TLS connections](tls.md) covers the detail.
 

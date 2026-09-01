@@ -56,7 +56,7 @@ Three parts of the metric surface do not have a dedicated page region in this re
 - **SQL workload trends.** `Top_Queries_Cpu_Time` and `Top_Queries_Execution_Count` are periodic top-SQL delta snapshots, keyed by a statement-ID hash, with CPU-time and execution-count trends per statement. Numeric-only in this release — see [What's new](whats-new.md#known-limitations).
 - **The full HADR column set.** Home's HADR Status table shows the essentials; every column, plus the takeover-readiness composite and log-gap trending, is on [HADR monitoring](hadr-monitoring.md).
 
-To open any of these: target menu → **Monitoring → All Metrics**, then pick the metric group by name. See [Alerts and thresholds](alerts-and-templates.md) for the metric groups' shipped thresholds, and the [DB2 project's metrics reference](https://github.com/IntegrationPlumbers/ip-oem-db2-plugin/blob/main/docs/user-guide.md#6-metrics-reference) for the full column-by-column detail behind every group in this section.
+To open any of these: target menu → **Monitoring → All Metrics**, then pick the metric group by name. See [Alerts and thresholds](alerts-and-templates.md) for the metric groups' shipped thresholds.
 
 ## Related
 

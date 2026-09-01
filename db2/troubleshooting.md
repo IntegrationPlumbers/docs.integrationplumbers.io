@@ -45,7 +45,7 @@ The key is checked on the agent host every 15 minutes, and again as soon as the 
 
 **The OMS restarted during deployment.** Expected on drops that move target metadata. `emcli get_plugin_deployment_status -plugin=ip.em.xdbb` tells you when it is back.
 
-**Replacing a beta drop does not behave like an in-place upgrade.** Beta-to-beta moves are undeploy-then-redeploy, not a silent in-place update — see [Upgrade from an earlier drop](install-and-upgrade.md#upgrade). If a drop appears "already deployed" and did not actually update, confirm you pinned the `:version` on both the server and agent deploy commands.
+**A beta-to-beta upgrade appears "already deployed" and did not actually update.** Beta-to-beta upgrades are in place — see [Upgrade from an earlier drop](install-and-upgrade.md#upgrade). Confirm you pinned the `:version` on both the server and agent deploy commands; without it, a redeploy of the same or a lower version is silently skipped.
 
 **Related:** [Install and upgrade](install-and-upgrade.md)
 
@@ -81,7 +81,7 @@ The key is checked on the agent host every 15 minutes, and again as soon as the 
 
 ## Amazon RDS for Db2 {#rds-for-db2}
 
-**The five administrative jobs, the Kill Application action, and diagnostic-log monitoring are unavailable on RDS.** This is expected, not a defect: RDS gives you no host shell, no local `db2` CLI, and no filesystem access to `db2diag.log`, and all six capabilities depend on exactly that. All JDBC-based metric collection — performance, availability, storage, locks, HADR, backup, top-SQL, and configuration — continues to work against an RDS endpoint over the network.
+**The five administrative jobs and diagnostic-log monitoring are unavailable on RDS.** This is expected, not a defect: RDS gives you no host shell, no local `db2` CLI, and no filesystem access to `db2diag.log`, and all six capabilities depend on exactly that. All JDBC-based metric collection — performance, availability, storage, locks, HADR, backup, top-SQL, and configuration — continues to work against an RDS endpoint over the network.
 
 **Compatibility with RDS is documentation-verified only in this release**, not lab-certified. The `CONNECT` + `SQLADM` grant path is expected to work unchanged, since the master user's database-scoped authority can issue both grants without `SYSADM`, but this has not been confirmed against a live RDS instance. If you are evaluating against RDS, findings here are especially valuable — see [What's new](whats-new.md#beta-status) and [Trial setup](trial.md#send-us-your-findings).
 
@@ -103,7 +103,7 @@ An `Unlimited` licence key never contacts the OMS at all, so this only affects t
 
 ## Support
 
-If you need assistance with the IBM DB2 Plugin for Oracle Enterprise Manager:
+If you need assistance with the IBM Db2 Plugin for Oracle Enterprise Manager:
 
 - **Email:** [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io)
 - **Self-Service Portal:** [https://integrationplumbers.zohodesk.com/portal/en/signin](https://integrationplumbers.zohodesk.com/portal/en/signin)

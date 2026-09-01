@@ -12,7 +12,7 @@ groups:
       - { title: "SQL Server Plug-in", url: /mssql/ }
       - { title: "What's new", url: /mssql/whats-new.html }
       - { title: "Getting started", url: /mssql/getting-started.html }
-      - { title: "Early access", url: /mssql/early-access.html }
+      - { title: "Open Beta notice", url: /mssql/beta-pre-release.html }
   - name: Set up
     pages:
       - { title: "Prerequisites", url: /mssql/prerequisites.html }

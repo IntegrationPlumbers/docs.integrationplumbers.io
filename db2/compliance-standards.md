@@ -5,7 +5,7 @@ nav_order: 9
 
 # Compliance standards
 
-This is the first compliance content ever shipped for a Db2 plug-in. It contains three standards, evaluated entirely under the same least-privilege `SQLADM` monitoring user everything else in this guide uses — no extra grant needed for two of the three, and one narrow grant for the third only on a hardened installation. Deploying the plug-in installs the content; it does not evaluate anything until you associate a standard with your targets.
+This release ships three compliance standards for Db2 databases, evaluated entirely under the same least-privilege `SQLADM` monitoring user everything else in this guide uses — no extra grant needed for two of the three, and one narrow grant for the third only on a hardened installation. Deploying the plug-in installs the content; it does not evaluate anything until you associate a standard with your targets.
 
 > **Prerequisites for this page**
 > - The plug-in deployed to the OMS — deploying it installs the compliance content automatically, with no separate registration step.
