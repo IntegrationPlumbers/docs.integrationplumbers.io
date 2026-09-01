@@ -40,7 +40,7 @@ The beta is a **separate plug-in from the GA release**, by design:
 > 1. **Not for production.** Deploy it to a non-production Enterprise Manager and monitor non-critical MySQL servers. Do not use it for production monitoring, for compliance-of-record, or as the basis for operational decisions about production systems until the general-availability release.
 > 2. **No warranty and no service level.** The software is provided "as is". There is no guarantee of availability, accuracy, fitness for a particular purpose, response time or resolution. Integration Plumbers is not liable for loss, damage or cost arising from its use during the beta.
 > 3. **Behaviour may change.** Metric names, collection intervals, default thresholds, compliance rules and console pages may change between beta drops and before GA. Changes that need action on your side are recorded in [upgrade notes](upgrade-notes.md).
-> 4. **Support is best effort.** Findings are handled through the beta feedback contact supplied with your download, on a best-effort basis during business days — not through a production support queue (section 6).
+> 4. **Support is best effort.** Findings go to **helpdesk@integrationplumbers.io** — every email opens a ticket you can follow in the [customer portal](https://integrationplumbers.zohodesk.com/portal/en/home) — and are handled on a best-effort basis during business days, not through a production support queue (section 6).
 > 5. **Licensed for the beta only.** Beta licence keys are issued for the beta plug-in, expire on 2026-10-31, and do not license the GA release. The plug-in reads the key locally on the agent host; it sends nothing outside your Enterprise Manager installation.
 > 6. **Your environment, your data.** You are responsible for the credentials you grant the plug-in (a read-only monitoring account is all it needs — User Guide 2.4) and for the systems you point it at.
 >
@@ -120,7 +120,7 @@ Undeploy from the agents (`emcli undeploy_plugin_from_agent -plugin=ip.em.xmyb -
 
 ## 6. Feedback and support during the beta
 
-The beta exists for your findings: bugs, metrics that look wrong or differ from what your previous tooling reported, thresholds that fire when they should not (or stay quiet when they should fire), console pages that render badly in your browser, unclear documentation. Send them to the **beta feedback contact supplied with your download**. Include the plug-in version (`emcli list_plugins_on_server`), your EM version (24ai or 13.5), the MySQL version and edition, the metric group or page involved, and any deploy log, agent log or collection-error text.
+The beta exists for your findings: bugs, metrics that look wrong or differ from what your previous tooling reported, thresholds that fire when they should not (or stay quiet when they should fire), console pages that render badly in your browser, unclear documentation. Send them to **helpdesk@integrationplumbers.io** — every email opens a ticket you can follow in the [customer portal](https://integrationplumbers.zohodesk.com/portal/en/home), or open the ticket there directly. Include the plug-in version (`emcli list_plugins_on_server`), your EM version (24ai or 13.5), the MySQL version and edition, the metric group or page involved, and any deploy log, agent log or collection-error text.
 
 Support during the beta is **best effort, during business days, with no service level**: we read everything, fix what we can in the next drop, and tell you when we cannot. Findings feed directly into GA certification.
 
