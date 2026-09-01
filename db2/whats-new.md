@@ -70,13 +70,7 @@ Everything the beta covers, all new in this release:
 
 ## Beta terms {#beta-terms}
 
-By installing, deploying, or using this build you accept the following.
-
-1. **Not for production.** Deploy it to a non-production Enterprise Manager and monitor non-critical Db2 databases. Do not use it for production monitoring, for compliance-of-record, or as the basis for operational decisions until the general-availability release.
-2. **No warranty and no service level.** The software is provided "as is". There is no guarantee of availability, accuracy, fitness for a particular purpose, response time, or resolution.
-3. **Behaviour may change.** Metric names, collection intervals, default thresholds, and console pages may change between beta drops and before GA. Changes that need action on your side are recorded in this page's [changelog](changelog.md).
-4. **Licensed for the beta only.** Each target needs a beta licence key entered on it, or it reports `License Required` and stops collecting everything but Response, Version, and its own License metric. Beta licence keys expire 2026-10-31 and do not license the GA release. See [Getting started](getting-started.md#licence-key).
-5. **Support is best effort.** Beta issues are handled through your Integration Plumbers support contact, not a production support queue.
+The full terms of use for this Open Beta — what installing it means you accept, before you install, licensing during the beta, and feedback and support — now live on their own page, in the same format as the SQL Server and MySQL plug-ins' Open Beta notices: [Open Beta notice](beta-pre-release.md). Read it before installing.
 
 ## Feedback
 
