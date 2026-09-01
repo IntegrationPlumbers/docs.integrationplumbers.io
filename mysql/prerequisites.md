@@ -12,14 +12,14 @@ The plug-in runs inside Enterprise Manager and reaches MySQL from a management a
 
 You need:
 
-- **An Enterprise Manager 24ai (24.1) OMS** with the plug-in deployed on the OMS. The build described in this guide is for Enterprise Manager 24ai. An EM 13.5 edition of the plug-in exists, but it is not certified in this beta — see chapters 1 and 10.
-- **At least one Enterprise Manager 24ai management agent** with the plug-in deployed on it. The agent runs every collection, so it needs a network path to each MySQL endpoint it monitors.
+- **An Enterprise Manager 24ai (24.1) or 13.5 OMS** with the plug-in deployed on the OMS. Both the EM 24ai and EM 13.5 editions of the plug-in are certified in this beta — see chapters 1 and 10.
+- **At least one Enterprise Manager 24ai or 13.5 management agent** with the plug-in deployed on it. The agent runs every collection, so it needs a network path to each MySQL endpoint it monitors.
 - **Nothing else staged on the agent host** for MySQL Database and MySQL Cluster targets. The MySQL JDBC driver ships inside the plug-in — there is no driver to download or copy. MySQL ClusterSet targets have one extra prerequisite; see [2.2](#mysql-shell-for-clusterset-targets).
 
 Where the agent runs is your choice:
 
 - **Remote monitoring** is the normal case. The agent runs anywhere that can open a TCP connection to the MySQL port, and one agent can monitor many MySQL targets on many hosts.
-- **A local agent** — an agent installed on the MySQL server host itself — is required only when you want the plug-in to connect over a Unix socket instead of TCP. See 2.6.
+- **A local agent** — an agent installed on the MySQL server host itself — is required only when you want the plug-in to connect over a Unix socket instead of TCP. See [2.6](#unix-socket-connections).
 
 > **Note:** Deploying the plug-in on the OMS does not deploy it to agents. Deploy it to every agent that will monitor a MySQL target, as described in [3.3](install-and-upgrade.md#deploy-to-agents). Until you do, the MySQL target types are not offered for that agent on the Add Target page.
 

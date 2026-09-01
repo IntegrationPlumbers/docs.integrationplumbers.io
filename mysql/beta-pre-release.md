@@ -24,7 +24,7 @@ The beta is a **separate plug-in from the GA release**, by design:
 | | Open Beta | General availability |
 |---|---|---|
 | Plug-in ID | `ip.em.xmyb` | `ip.em.xmys` |
-| Target types | `ip_mysql_database_beta`, `ip_mysql_cluster_beta`, `ip_mysql_clusterset_beta` — shown as *MySQL Database (Beta)* etc. | `ip_mysql_database_beta`, `ip_mysql_cluster_beta`, `ip_mysql_clusterset_beta` |
+| Target types | `ip_mysql_database_beta`, `ip_mysql_cluster_beta`, `ip_mysql_clusterset_beta` — shown as *MySQL Database (Beta)* etc. | `ip_mysql_database`, `ip_mysql_cluster`, `ip_mysql_clusterset` |
 | Versions | `24.1.9.N.0` / `13.5.9.N.0` (N = beta drop) | `24.1.1.1.0` / `13.5.1.1.0` onward |
 | Licence keys | Issued for `ip.em.xmyb`; expire 2026-10-31 | Issued for `ip.em.xmys` |
 
@@ -105,9 +105,9 @@ Undeploy from the agents (`emcli undeploy_plugin_from_agent -plugin=ip.em.xmyb -
 | MySQL 9.5 / 9.6 / 26.x innovation releases | — | Expected to work; not yet certified |
 | InnoDB Cluster (Group Replication, 8.4) | — | **Certified** (cluster target with member stats) |
 | InnoDB ClusterSet | — | Validated on MySQL 9.5 commercial; 8.4 ClusterSet not yet certified |
-| RDS / Aurora / Cloud SQL | — | Supported — added manually, see 4.4; not yet certified |
+| RDS / Aurora / Cloud SQL | — | Supported — added manually, see 4.3; not yet certified |
 | EM 24ai (24.1) | — | **Certified**, including the UI |
-| EM 13.5 | — | Collection + compliance certified; console home and chart pages verified on `13.5.9.34.0` (2026-08-25); the 13.5 edition (`13.5.9.N.0`) is built from the same source and available with the beta |
+| EM 13.5 | — | Collection + compliance certified; console home and chart pages verified on `13.5.9.9.0` (2026-08-25); the 13.5 edition (`13.5.9.N.0`) is built from the same source and available with the beta |
 
 **The plug-in does not block MySQL versions it has not seen.** MySQL releases are, in our experience, backward compatible for monitoring purposes, so a newer server than the matrix above is expected to work: the plug-in attempts full monitoring, and if an uncertified version misbehaves, individual metric groups degrade to collection errors on that group without taking monitoring down as a whole. We certify versions as we validate them, prioritising LTS releases.
 
@@ -115,7 +115,7 @@ Undeploy from the agents (`emcli undeploy_plugin_from_agent -plugin=ip.em.xmyb -
 
 1. **ClusterSet TLS verify modes fail closed.** `VERIFY_CA` / `VERIFY_IDENTITY` connection modes for ClusterSet health checks require truststore credential support, planned for a later release; until then those modes report `TLS_TRUSTSTORE_REQUIRED` rather than silently downgrading security. `REQUIRED` and `DISABLED` modes work fully.
 2. **ClusterSet health requires MySQL Shell on the agent host** (`mysqlsh` on the agent's PATH). Without it, ClusterSet targets fall back to repository-rollup health — and the rollup cannot assess promotion readiness, so `dr_promotion_ready` reads 0 and the DR Promotion Ready alert raises CRITICAL until `mysqlsh` is installed.
-3. **Query Analytics freshness on idle servers.** Like all EM keyed metrics, the query-digest tables retain their last collected rows when a collection window has no new activity; the `active_digest_count` column is the freshness signal. The statement-digest overflow row (`DIGEST IS NULL`) handling is implemented but has not been observed live in validation.
+3. **Query Analytics freshness on idle servers.** Like all EM keyed metrics, the query-digest tables retain their last collected rows when a collection window has no new activity; the `active_digest_count` column is the freshness signal. The statement-digest overflow row (`DIGEST IS NULL`), which the server uses once its digest table is full, is handled and does not appear as a statement.
 4. **Backup failure detection is tool-asymmetric.** MySQL Enterprise Backup records failed runs; Percona XtraBackup does not, so for XtraBackup-only estates the backup-age threshold is the failure signal. Details and the optional scoped grants: [backup monitoring](backup-monitoring.md).
 
 ## 6. Feedback and support during the beta

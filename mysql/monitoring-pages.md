@@ -12,9 +12,9 @@ A MySQL Database target has sixteen pages. The home page is the default; every o
 
 > **Note:** History-backed charts populate as collections accumulate — allow about an hour after the target is added before expecting trend data.
 
-Most chart regions carry their own time-window selector — Real Time, 24 Hours, Week, Month — and a **Last Week** shortcut, so one region can be widened without disturbing the rest of the page. Grid columns can be sorted and the wide ones scroll horizontally; note the numeric-sort boundary in [10.1](whats-new.md#beta-2026-08-18).
+Most chart regions carry their own time-window selector — Real Time, 24 Hours, Week, Month — and a **Last Week** shortcut, so one region can be widened without disturbing the rest of the page. Grid columns can be sorted — numeric columns sort by value, not as text — and the wide ones scroll horizontally.
 
-Each page below lists its regions and the metric groups behind them. Chapter 6 and the generated metrics reference describe those groups column by column.
+Each page below lists its regions and the metric groups behind them. [Chapter 6](metrics-reference.md#metrics-reference) and the generated metrics reference describe those groups column by column.
 
 #### Home
 ![MySQL Database home page](images/db-home.png)
@@ -80,7 +80,7 @@ Ranks the server's statement digests three ways and lets you take a plan for any
 | Query Analyzer | The statement digests, with a **Sort by** selector that switches the grid between **Latency**, **Exec Count** and **First Seen**. Each row shows the normalized statement, schema, execution count, total, average, maximum and lock latency, rows examined and sent, whether a full scan was used, and when it was last seen. |
 | Explain Plan | A schema field, a query field and the **Use Selected Query** and **Explain** buttons, above the returned plan: ID, select type, table, partitions, access type, possible keys, key, key length, ref, rows, filtered and extra. |
 
-Select a statement row and click **Use Selected Query** to copy its text and schema into the Explain Plan region, substitute real values for the `?` placeholders a digest carries, then click **Explain** — the console submits the Run EXPLAIN job (chapter 8) for you and renders the plan it returns. Explaining a statement does not execute it.
+Select a statement row and click **Use Selected Query** to copy its text and schema into the Explain Plan region, substitute real values for the `?` placeholders a digest carries, then click **Explain** — the console submits the Run EXPLAIN job ([chapter 8](jobs.md#jobs)) for you and renders the plan it returns. Explaining a statement does not execute it.
 
 Source: `SysStatementByLatency`, `SysStatementByExecCount` and `SysStatementByFirstSeen` — the top 25 digests by each ranking, from `sys.x$statement_analysis`. The plan comes from the `ip_mysql_run_explain` job ([8.1](jobs.md#run-explain)).
 
@@ -94,7 +94,7 @@ Turns the same statement-digest data into a trend: how latency and execution vol
 | Executions & Active Digests per Collection | Execution count and `active_digest_count` per collection over the selected window. |
 | Top Statements Over Window | The window's heaviest statements, ranked by **Latency**, **Executions** or **No-Index Executions**, with executions, total, average and lock time, rows examined and sent, the examined-to-sent ratio, and no-index executions. |
 
-The window aggregate is built from the top 25 statements of each 5-minute collection, so a statement outside every collection's top 25 contributes nothing to it. Read `active_digest_count` as the freshness signal: the digest tables retain their last rows when a collection window sees no activity, while the summary row is always current ([10.1](whats-new.md#beta-2026-08-18)).
+The window aggregate is built from the top 25 statements of each 5-minute collection, so a statement outside every collection's top 25 contributes nothing to it. Read `active_digest_count` as the freshness signal: the digest tables retain their last rows when a collection window sees no activity, while the summary row is always current ([10.1](whats-new.md#early-access-build-2026-08-18)).
 
 Source: `StatementDigestProfileSummary` and `StatementDigestProfile`, from `performance_schema.events_statements_summary_by_digest`.
 
@@ -291,7 +291,7 @@ Answers one question — can this ClusterSet be failed over right now — and sh
 
 **DR Promotion Ready is the plug-in's own gate, not a MySQL Shell field.** It requires at least one replica cluster, a ClusterSet status of HEALTHY, a positively identified healthy primary, every replica cluster healthy with its replication channel up and its transaction set consistent, no errant transactions, and a known GTID lag at or under the target's **DR Max Tolerated GTID Lag** ([4.1](targets-and-properties.md#target-properties)). The verdict is never shown without **Assessed By** beside it, and a value that was not measured renders as an em dash or as a phrase saying why — never as `0`, `No` or `OK`.
 
-**Under a network partition the status words alone look fine.** MySQL Shell can report the ClusterSet as HEALTHY, with the affected cluster's global status OK, while the ClusterSet replication channel sits in `CONNECTING` — the Shell suppresses the underlying connection error for as long as a channel is connecting, so nothing in those states says replication has stopped. A deliberately stopped channel is what reports `OK_NOT_REPLICATING`; a partition does not. The plug-in therefore gates DR readiness on replication heartbeat freshness rather than on the channel state, and reports the ClusterSet as not promotion-ready under a partition even while the Shell's own words read healthy. This behavior was measured on MySQL 9.5 commercial; see the boundary in [10.1](whats-new.md#beta-2026-08-18).
+**Under a network partition the status words alone look fine.** MySQL Shell can report the ClusterSet as HEALTHY, with the affected cluster's global status OK, while the ClusterSet replication channel sits in `CONNECTING` — the Shell suppresses the underlying connection error for as long as a channel is connecting, so nothing in those states says replication has stopped. A deliberately stopped channel is what reports `OK_NOT_REPLICATING`; a partition does not. The plug-in therefore gates DR readiness on replication heartbeat freshness rather than on the channel state, and reports the ClusterSet as not promotion-ready under a partition even while the Shell's own words read healthy. This behavior was measured on MySQL 9.5 commercial; see the boundary in [10.1](whats-new.md#early-access-build-2026-08-18).
 
 **Without MySQL Shell the page degrades deliberately.** If `mysqlsh` is not on the agent user's PATH, the plug-in falls back to a repository rollup: **Assessed By** names the rollup rather than the MySQL Shell AdminAPI, **Why Not MySQL Shell** reads `MYSQLSH_NOT_FOUND`, the Clusters table is empty because nothing could be read — not because every cluster is fine — and `dr_promotion_ready` reads 0, so the DR Promotion Ready alert raises CRITICAL until MySQL Shell is installed. Treat that combination as a missing prerequisite on the agent host, not as a disaster-recovery problem ([2.2](prerequisites.md#mysql-shell-for-clusterset-targets)).
 

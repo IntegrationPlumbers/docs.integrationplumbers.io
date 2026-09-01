@@ -86,7 +86,7 @@ Open the target's home page and work down the left-hand navigation:
 
 1. **Overview** — availability, configuration summary, connections and buffer-pool usage at a glance.
 2. **Connections → Database Processes** — who is connected and what they are running right now. The fastest way to confirm the plug-in is seeing your real workload.
-3. **Performance → Query Analyzer** — the statement digests, ordered by the cost you care about. This is the page most beta feedback has been about, so it is worth forming an opinion early.
+3. **Performance → Query Analyzer** — the statement digests, ordered by the cost you care about. It is the page that will tell you fastest whether the plug-in is worth your time, so it is worth forming an opinion on early.
 4. **Performance → InnoDB Buffer Pool** — hit rate and usage, and the source of two of the shipped alert thresholds.
 
 Every page is described in [Monitoring pages](monitoring-pages.md), and every metric in the [Metrics reference](metrics-reference.md).

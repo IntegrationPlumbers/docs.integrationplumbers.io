@@ -5,13 +5,13 @@ nav_order: 13
 
 # Troubleshooting
 
-The things beta users actually hit, what each one looks like, and what to change.
+The things that go wrong most often, what each one looks like, and what to change.
 
 **In this page:** The licence gate · Install and deploy · Connecting to MySQL · ClusterSet health · Jobs · Metrics that look wrong
 
-Nearly everything that goes wrong in the first hour with this plug-in is one of a small number of things, and after a few beta deployments we know which. This page is that list rather than a general guide to Enterprise Manager.
+Nearly everything that goes wrong in the first hour with this plug-in is one of a small number of things. This page is that list rather than a general guide to Enterprise Manager.
 
-**If a beta target is Up but its pages are empty, it is the licence key.** That single cause accounts for more first-hour reports than everything else here combined, so it is the first section.
+**If a beta target is Up but its pages are empty, it is the licence key.** That is the first thing to check on a new target, so it is the first section.
 
 Six areas follow: the licence gate, install and deploy, connecting to MySQL, ClusterSet health, jobs, and metrics that look wrong but are not.
 
