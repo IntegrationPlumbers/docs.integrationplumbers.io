@@ -7,6 +7,7 @@ groups:
       - { title: "IBM Db2 Plug-in", url: /db2/ }
       - { title: "What's new", url: /db2/whats-new.html }
       - { title: "Getting started", url: /db2/getting-started.html }
+      - { title: "Open Beta notice", url: /db2/beta-pre-release.html }
       - { title: "Trial setup", url: /db2/trial.html }
   - name: Set up
     pages:
