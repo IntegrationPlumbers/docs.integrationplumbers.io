@@ -12,8 +12,8 @@ The plug-in runs inside Enterprise Manager and reaches MySQL from a management a
 
 You need:
 
-- **An Enterprise Manager 24ai (24.1) OMS** with the plug-in deployed on the OMS. The build described in this guide is for Enterprise Manager 24ai. An EM 13.5 edition of the plug-in exists, but it is not certified in this beta — see chapters 1 and 10.
-- **At least one Enterprise Manager 24ai management agent** with the plug-in deployed on it. The agent runs every collection, so it needs a network path to each MySQL endpoint it monitors.
+- **An Enterprise Manager 24ai (24.1) or 13.5 OMS** with the plug-in deployed on the OMS. Both the EM 24ai and EM 13.5 editions of the plug-in are certified in this beta — see chapters 1 and 10.
+- **At least one Enterprise Manager 24ai or 13.5 management agent** with the plug-in deployed on it. The agent runs every collection, so it needs a network path to each MySQL endpoint it monitors.
 - **Nothing else staged on the agent host** for MySQL Database and MySQL Cluster targets. The MySQL JDBC driver ships inside the plug-in — there is no driver to download or copy. MySQL ClusterSet targets have one extra prerequisite; see [2.2](#mysql-shell-for-clusterset-targets).
 
 Where the agent runs is your choice:

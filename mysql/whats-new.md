@@ -41,7 +41,7 @@ The Early Access build: the first build of the plug-in put in front of customers
 - Unix-socket connections for a local agent, and a Kerberos configuration-file property on all three target types ([2.6](prerequisites.md#unix-socket-connections), 4.1).
 - Autodiscovery of MySQL server instances on any host whose agent has the plug-in deployed ([4.4](targets-and-properties.md#autodiscovery)).
 - Import through Self Update, then deploy to the OMS and to agents with the standard Enterprise Manager flow ([chapter 3](install-and-upgrade.md#installing-the-plug-in)).
-- An Enterprise Manager 13.5 edition of this build was available on request; it is outside the beta certification ([1.3](index.md#supported-mysql-versions-and-platforms)).
+- An Enterprise Manager 13.5 edition of this build, built from the same source as the EM 24ai edition, is certified in this beta ([1.3](index.md#supported-mysql-versions-and-platforms)).
 
 #### Bugs Fixed
 - Unix-socket authentication: the junixsocket native libraries are now packaged, so socket connections no longer fail with UnsatisfiedLinkError. Socket targets connect.
@@ -62,6 +62,6 @@ The Early Access build: the first build of the plug-in put in front of customers
 - **The default thresholds are starting points, not tuning.** All 17 were verified as present on freshly created targets in our lab, sized for lab workloads; review them against your own service levels before you rely on them ([7.2](alerts-and-thresholds.md#changing-thresholds)).
 - **Unix-socket connections are new in this build.** A target that has both **Host** and **Unix Socket Path** set connects over TCP ([2.6](prerequisites.md#unix-socket-connections)).
 - **RDS, Aurora and Cloud SQL are supported by manual target add, not certified.** Managed services expose a subset of the underlying server, so individual metric groups may report collection errors.
-- **Enterprise Manager 13.5 is not certified in this beta.** Collection and compliance are certified on 13.5 in our lab, but the console pages have not been certified there, so treat the 13.5 edition as evaluation only.
+- **Enterprise Manager 13.5 is certified in this beta.** Collection and compliance are certified on 13.5 in our lab, and the console's home and chart pages were verified on `13.5.9.9.0` (2026-08-25); the remaining console pages have not been individually walked on 13.5, so treat 24ai as the reference platform and report any 13.5 rendering difference you see.
 - **An in-place upgrade keeps your targets.** Upgrading from one build to the next carries every target, its monitoring properties and any threshold you customized forward, and collection resumes. Where a build moves target metadata, the OMS restart in the middle of the cycle is what activates it — follow the procedure in [3.4](install-and-upgrade.md#upgrading) in full, and report anything that does not behave as it describes ([1.4](index.md#beta-status)).
 - **MySQL versions outside the matrix are not blocked, only uncertified.** A newer server than 1.3 lists is expected to work; if an uncertified version misbehaves, the affected metric group degrades to a collection error on that group rather than taking the target down.
