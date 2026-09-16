@@ -23,7 +23,7 @@ You enter the key per target, in the `Plugin License` target property (see [Data
 
 ## Download {#download}
 
-Download details for the plug-in OPAR and the three monitoring template files (`.template.xml`), including their SHA-256 checksums, are provided during the order process or trial enrollment. The plug-in ships as two plug-in builds with the same features: **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.15.0.0** for Enterprise Manager 13.5; download the one that matches your Enterprise Manager (the 13.5.15.0.0 build also installs on 24ai, but the 24.1.1.0.0 build does not install on 13.5). If you need access to the download, email [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io) or contact us through [integrationplumbers.io](https://integrationplumbers.io). Verify the checksum of each file before you import it.
+Download details for the plug-in OPAR and the three monitoring template files (`.template.xml`), including their SHA-256 checksums, are provided during the order process or trial enrollment. The plug-in ships as two plug-in builds with the same features: **24.1.2.0.0** for Enterprise Manager 24ai and **13.5.16.0.0** for Enterprise Manager 13.5; download the one that matches your Enterprise Manager (the 13.5.16.0.0 build also installs on 24ai, but the 24.1.2.0.0 build does not install on 13.5). If you need access to the download, email [helpdesk@integrationplumbers.io](mailto:helpdesk@integrationplumbers.io) or contact us through [integrationplumbers.io](https://integrationplumbers.io). Verify the checksum of each file before you import it.
 
 ## Import the OPAR {#import}
 
@@ -52,7 +52,7 @@ Download details for the plug-in OPAR and the three monitoring template files (`
 3. From the Actions menu, click Deploy On → Management Servers and follow the on-screen instructions.
 
 ![The Plug-ins page showing the PostgreSQL plug-in after import](images/13-5-15/plugins-page.png)
-*The Plug-ins page after the OPAR is imported. The version shown is the build you imported, here 13.5.15.0.0.*
+*The Plug-ins page after the OPAR is imported. The version shown is the build you imported; the screenshot shows an earlier build, 13.5.15.0.0.*
 
 The equivalent `emcli` command:
 

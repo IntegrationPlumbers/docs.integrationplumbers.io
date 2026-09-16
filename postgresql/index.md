@@ -11,10 +11,10 @@ nav_order: 0
 
 ### Oracle Enterprise Manager Plugin for PostgreSQL User Guide
 
-*Release 24.1.1.0.0 for Enterprise Manager 24ai · 13.5.15.0.0 for Enterprise Manager 13.5*  
-*August 2026*
+*Release 24.1.2.0.0 for Enterprise Manager 24ai · 13.5.16.0.0 for Enterprise Manager 13.5*  
+*September 2026*
 
-This release ships as two plug-in builds with the same features: **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.15.0.0** for Enterprise Manager 13.5. Install the build that matches your Enterprise Manager; everything in this guide applies to both.
+This release ships as two plug-in builds with the same features: **24.1.2.0.0** for Enterprise Manager 24ai and **13.5.16.0.0** for Enterprise Manager 13.5. Install the build that matches your Enterprise Manager; everything in this guide applies to both.
 
 <details>
 <summary>Legal Notice</summary>
