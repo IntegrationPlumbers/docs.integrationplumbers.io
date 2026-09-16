@@ -23,11 +23,13 @@ The plug-in adds one job type, **MySQL - Run Explain Plan** (`ip_mysql_run_expla
 **Credentials.** The job needs two, and they do different things:
 
 - **The target's monitoring credential** — the MySQL account from [2.4](prerequisites.md#the-monitoring-user), held in the target's MySQL Database monitoring credential set. This is what connects to MySQL and asks for the plan.
-- **A Host Preferred Credential on the target** — a named host credential whose run-as is the management agent's operating-system user. This is what lets the agent start the plug-in's own program on the agent host.
+- **A Host Preferred Credential on the target** — a named host credential whose run-as is the management agent's operating-system user. This is what lets the agent start the plug-in's own program on the agent host. That user must be able to read the Connector/J jar in the agent's `ip_plugin/xmyb/lib` directory ([2.9](prerequisites.md#mysql-connectorj-on-agent-hosts)), and when the credential switches user through `sudo` it must keep the agent's environment: a sudo rule with `env_reset` and no `env_keep` makes the job fail with a message that says `EMSTATE is not set in the job step`.
 
 Set the host credential once per target, under **Setup → Security → Preferred Credentials**: select the **MySQL Database** target type, open **Manage Preferred Credentials**, and set the target's host credential set to a named credential that runs as the agent's operating-system user.
 
 > **Note:** Without a Host Preferred Credential on the target the job fails with `Unable to get credentials for defaultHostCred`. The agent's own operating-system credential is not resolved automatically for this job type, so a named host credential is required rather than optional.
+
+> **Note:** The job starts the plug-in through the same launcher as the collections, so a missing or unusable Connector/J fails the job before any program starts, with the same one-line message the collections show ([2.9](prerequisites.md#mysql-connectorj-on-agent-hosts)). An agent still on an earlier plug-in version than the OMS fails the job with Perl's `Can't open perl script`; that agent's collections are unaffected. Upgrade the agent ([3.4](install-and-upgrade.md#upgrading)).
 
 To run the job:
 
