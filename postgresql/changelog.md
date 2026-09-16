@@ -7,6 +7,29 @@ nav_order: 18
 
 This page lists what changed in each release of the PostgreSQL plug-in, most recent first.
 
+## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.16.0.0 (Enterprise Manager 13.5)
+
+One release, two builds with the same content: 24.1.2.0.0 installs on Enterprise Manager 24ai, 13.5.16.0.0 on Enterprise Manager 13.5. A maintenance release: no new pages, jobs, templates, or target properties. Upgrading uses the same three steps as any plug-in update; see [Upgrade from an earlier release](install-and-upgrade.md#upgrade).
+
+**Fixed**
+
+- Failover detection on the PostgreSQL Database target works. The **Replication Failover** metric's Failover Status could never become true, and Replication Role Change read true one collection after every agent restart and stayed true. Both columns now report from the server's write-ahead-log timeline and recovery state, so the `ip_xpgs_production_critical` template's failover alert fires on a real failover and clears afterwards.
+- The PostgreSQL Cluster target's **Replication Failover** roll-up reports one failover once. A standby only sees a new timeline at its next restartpoint, so it can report the same failover one collection after the primary; the roll-up now follows the member that reports itself primary instead of re-raising on the standby's late report.
+- The navigation tree lists every database on the target again. It could fall back to the primary database alone when the database list was still loading, which affected multi-database targets most. Template databases stay hidden.
+- **Blocked Queries** and the Realtime **Locks** page count only sessions actually waiting on another session. They previously counted every session sharing a lock object, including the lock holder and concurrent readers.
+- **Query Analyzer** Mean Time (ms) is the cumulative mean per call. It was always 0.
+- The **Tables** metric's *Hours Since Last Vacuum / Autovacuum / Analyze / Autoanalyze* columns report the full elapsed hours. Past one day they reported only the hour-of-day part, so three days read as 0.
+- Tables and Databases report Total Rows Fetched, and their summed counters no longer wrap past 2,147,483,647.
+- The **Replication** metric's Sent, Write, Flush, and Replay LSN columns are populated. They were always blank on PostgreSQL 10 and later.
+- Realtime **Vacuums in Progress** shows Percent Vacuumed while a vacuum runs. It read 0 until the vacuum finished.
+- On PostgreSQL 17 and later, the Background Writer's *Buffers Backend* and *Buffers Backend Fsync* rates are left blank instead of showing 0; PostgreSQL no longer reports those counters there.
+
+**Changed**
+
+- Every metric column carries a unit and unit category, shown under All Metrics and reported to Enterprise Manager's MCP server.
+- Clearer column labels throughout: interval rates end in "(Interval Avg)", read-from-disk is distinguished from buffer-cache hit, bare "Status" columns say what they report, and time columns carry their unit.
+- Two redundant columns are retired: *Blocked PIDs (No Locks Granted)* and its count on **Blocked Queries** (the waiting-session count already covers them), and *Average Execution Time per Second* on **SQL Statements** (it always equalled Average Execution Time per Call). A monitoring template or report that referenced either should use the remaining column.
+
 ## 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.15.0.0 (Enterprise Manager 13.5)
 
 One release, two builds with the same content: 24.1.1.0.0 installs on Enterprise Manager 24ai, 13.5.15.0.0 on Enterprise Manager 13.5.
