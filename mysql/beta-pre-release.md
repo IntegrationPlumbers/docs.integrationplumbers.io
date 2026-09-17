@@ -111,7 +111,7 @@ GA reads its own driver directory, `ip_plugin/xmys/lib`, so when you move to GA 
 | Amazon RDS for MySQL 8.4 | Comprehensive | **Certified** (2026-09-09, RDS MySQL 8.4.11) — added manually, see 4.3 |
 | Aurora MySQL / Cloud SQL / Azure Database for MySQL | — | Supported — added manually, see 4.3; not yet certified |
 | EM 24ai (24.1) | — | **Certified**, including the UI |
-| EM 13.5 | — | Collection + compliance certified; console home and chart pages verified on `13.5.9.10.0` (2026-08-25); the 13.5 edition (`13.5.9.N.0`) is built from the same source and available with the beta |
+| EM 13.5 | — | Collection + compliance certified; console home and chart pages verified on the drop 10 build (2026-09-16); the 13.5 edition (`13.5.9.N.0`) is built from the same source and available with the beta |
 
 **The plug-in does not block MySQL versions it has not seen.** MySQL releases are, in our experience, backward compatible for monitoring purposes, so a newer server than the matrix above is expected to work: the plug-in attempts full monitoring, and if an uncertified version misbehaves, individual metric groups degrade to collection errors on that group without taking monitoring down as a whole. We certify versions as we validate them, prioritising LTS releases.
 
