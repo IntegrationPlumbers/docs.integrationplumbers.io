@@ -17,7 +17,10 @@ FILES=("$@")
 #
 # SHARED + FORBID_postgresql is exactly the single list this replaced, so the
 # PostgreSQL gate is unchanged.
-FORBID_SHARED='\[INTERNAL|INTERNAL:|\bPRD\b|roadmap|arrives in|next release|coming soon|planned for|\bTBD\b|\bTODO\b|Lorem ipsum|one-click|\bOEM\b'
+# Internal identifiers never belong on a public page either: Monday links and 11-digit task ids, PR numbers,
+# paths into the private plug-in repos, lab host names and lab addresses (first seen in the MySQL drop-10
+# republish, 2026-09-16, where the generated migration chapter carried all of them).
+FORBID_SHARED='\[INTERNAL|INTERNAL:|\bPRD\b|roadmap|arrives in|next release|coming soon|planned for|\bTBD\b|\bTODO\b|Lorem ipsum|one-click|\bOEM\b|monday\.com|\b1[23][0-9]{9}\b|\bPR #[0-9]+|uat-findings/|docs/superpowers/|docs/plans/|testlab\.lan|\b172\.17\.[0-9]+\.[0-9]+|\bem(24|13)-(mcp|demo|dev)[0-9]'
 FORBID_postgresql='Winter|\bSummer\b|24\.1\.2|Query Advisor|Plan Capture readiness|Disk Sort|Hash Batches|Expensive Node|Large Offset|encrypted at rest|Tier 0/1|Tier 2/3'
 FORBID_mssql=''
 FORBID_mysql=''

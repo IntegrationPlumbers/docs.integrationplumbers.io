@@ -47,6 +47,16 @@ The key is checked on the agent host every 15 minutes, and again as soon as the 
 
 **The OMS restarted during deployment.** Expected on drops that move target metadata. `emcli get_plugin_deployment_status -plugin=ip.em.xmyb` tells you when it is back.
 
+**`MySQL Connector/J not found: no mysql-connector-j-*.jar in <directory>; files present: ...`** Every collection on that agent, and Run EXPLAIN, reports this until the driver is in place; the target is not showing a MySQL problem. The message names the directory the plug-in looked in, `<agentStateDir>/ip_plugin/xmyb/lib`, and lists what it found there. Put exactly one Connector/J jar in that directory (8.4.0 is the tested version; the prerequisites page covers later ones), readable by the agent user; the next collection uses it. If the message says the directory was missing and has been created, the agent had never had a driver staged. See [Prerequisites](prerequisites.md#mysql-connectorj-on-agent-hosts).
+
+**`MySQL Connector/J: N mysql-connector-j-*.jar files in <directory> (...); keep exactly one.`** Two or more drivers were left in the directory, typically after an upgrade. Remove all but the one you mean to use.
+
+**`MySQL Connector/J: <jar> is not usable by this plug-in - it lacks <class> ...`** The file is not a Connector/J release the plug-in can link against: a legacy `mysql-connector-java` build renamed, a corrupt download, or a release outside the tested range. Replace it with `mysql-connector-j-8.4.0.jar` and compare its SHA-256 with the value in the prerequisites.
+
+**Collections stop after installing a newer Connector/J.** Connector/J 8.4.0 is the tested version; later 8.4.x and 9.x releases are expected to work but are not certified for this release. Go back to 8.4.0 and send us the version that failed.
+
+**`MySQL Connector/J: cannot locate <agentStateDir>/ip_plugin/xmyb/lib - agentStateDir did not resolve on this agent`.** The agent did not hand the plug-in its instance directory. Check `emctl status agent` on that agent shows an **Agent Home**, and that the plug-in was deployed to the agent after the agent was last upgraded.
+
 **Windows agents.** Not supported in this release. The agent doing the monitoring must be Linux; the MySQL server it monitors can be anywhere it can reach.
 
 ## 3. Connecting to MySQL {#connecting}
@@ -63,11 +73,25 @@ If an anonymous row exists and your agent connects locally, either remove it (`D
 
 **Socket connections.** A local agent can use the Unix socket instead of TCP, which changes the host-clause rules — see [Prerequisites](prerequisites.md#unix-socket-connections).
 
+**`Access denied` over a Unix socket right after `mysqld` restarted, for an account using `caching_sha2_password`.** MySQL refuses the full authentication exchange over a socket until the account's password has been cached by a login, and drops that cache on restart. This release completes the exchange itself, so a socket target recovers on its next collection with no human login. If you still see it, the driver in `ip_plugin/xmyb/lib` is not the tested Connector/J release: the fix lives in the plug-in's own authentication code, which links against Connector/J 8.4.0.
+
+**Kerberos (JDBC path) fails while the same account works from the `mysql` client.** The collections authenticate through the Java runtime's Kerberos libraries, not the system ones, so they read the credential cache and `krb5.conf` the agent's Java sees. Set the target's Kerberos Configuration File (4.1) to a file the agent user can read, keep the ticket refreshed for the agent's operating-system user, and check that the agent's Java trusts the realm's encryption types.
+
 ## 4. ClusterSet health {#clusterset}
 
 **`dr_promotion_ready` reads 0 and the DR Promotion Ready alert is CRITICAL.** ClusterSet health needs **MySQL Shell** (`mysqlsh`) on the agent host, on the agent's PATH. Without it the plug-in falls back to a repository rollup, and the rollup cannot assess promotion readiness — so the value is 0 and the alert fires until `mysqlsh` is installed. This is a missing prerequisite, not a sick cluster. See [Prerequisites](prerequisites.md#mysql-shell-for-clusterset-targets).
 
 **`TLS_TRUSTSTORE_REQUIRED`.** The `VERIFY_CA` and `VERIFY_IDENTITY` connection modes for ClusterSet health checks need truststore credential support, which this release does not provide. Rather than quietly downgrading to a weaker mode, the check fails closed and reports this status. `REQUIRED` and `DISABLED` modes work fully.
+
+**`MEMBER_UNREACHABLE`.** MySQL Shell connected successfully through one of the target's listed endpoints, but then failed reaching a *different* member — `Can't connect to MySQL server on '<host>:<port>'` — while reading the ClusterSet-wide status. The AdminAPI opens its own session to every member Group Replication still considers online, regardless of which member Shell is connected through, so this can happen even when the endpoint list itself worked. Retrying a different listed endpoint will not fix it: the same member is unreachable either way. Open the agent host's network path to that member too — every member of every cluster needs a path from the agent host, on its MySQL port, not only the members configured on the target (see [Prerequisites](prerequisites.md#network-and-ports)).
+
+**`KERBEROS_TICKET`.** The ClusterSet target uses Kerberos, and the Kerberos exchange failed before any member saw a credential. MySQL Shell reports every such failure as no more than `Unknown MySQL error`, so the plug-in names the family for you; the usual cause is the agent operating-system user's credential cache being missing or expired, but an unreachable KDC, clock skew between the agent host and the KDC, or a member without a `mysql/<host>` service principal produce the same text. Start with `klist` as the agent's operating-system user on the agent host; if it shows no ticket or an expired one, restore the unattended refresh (`k5start`, or a scheduled `kinit -kt <keytab> <principal>`) described in [Prerequisites](prerequisites.md). If the ticket is fine, `kinit` and a manual `mysql --default-auth=authentication_kerberos_client` against the member will show the real error. Do not read the target's other collections as proof either way: MySQL Shell resolves the credential through the system Kerberos libraries and the JDBC collections through the Java runtime, which can read different caches, so one path can authenticate while the other does not.
+
+**`KERBEROS_CLIENT_UNAVAILABLE`.** MySQL Shell on the agent host could not load its Kerberos client plug-in (`Authentication plugin 'authentication_kerberos_client' cannot be loaded`). Install the MySQL Shell package that ships its client plug-ins, and the Kerberos client libraries it links against, on the agent host; `mysqlsh --version` alone does not prove the plug-in is present.
+
+**`KERBEROS_CONFIG_UNREADABLE`.** The Kerberos Configuration File set on the target is not readable by the agent's operating-system user, so the plug-in did not run MySQL Shell at all. MySQL Shell would otherwise fall back to `/etc/krb5.conf` silently, while the JDBC collections fail on the same path, and the two would disagree. Check the path in the target's properties and the file's permissions on the agent host.
+
+**`KERBEROS_NOT_SUPPORTED`.** The endpoint refused the Kerberos client plug-in (`Authentication method authentication_kerberos_client is not supported`). That is what a MySQL Router port answers: Kerberos does not pass through Router, a MySQL limitation. Configure the ClusterSet target with member endpoints (a node list) instead of a Router port, or use password authentication for a Router-fronted target.
 
 ## 5. Jobs {#jobs}
 
@@ -77,6 +101,10 @@ If an anonymous row exists and your agent connects locally, either remove it (`D
 - a **Host Preferred Credential** on the target — a named host credential whose run-as is the agent's operating-system user, which lets the agent start the plug-in's program on the agent host.
 
 The agent's own OS credential is not resolved automatically for this job type, so a named host credential is required rather than optional. Set it once per target under **Setup → Security → Preferred Credentials**: select the **MySQL Database** target type, open **Manage Preferred Credentials**, and set the host credential set to a named credential running as the agent's OS user.
+
+**Run EXPLAIN fails with `MySQL Connector/J not found ...` or `cannot locate <agentStateDir>/ip_plugin/xmyb/lib - EMSTATE is not set in the job step`.** The job runs under the target's Host Preferred Credential and reads the same driver directory as the collections. The first message means the driver is missing on that agent host or unreadable by the credential's operating-system user (the jar and the directory must be readable by it). The second means the credential switched user without keeping the agent's environment, usually a `sudo` rule with `env_reset` and no `env_keep`; allow the environment through, or use a credential that runs directly as the agent user.
+
+**Run EXPLAIN fails with `the job step's javaHome=... does not name a JVM`.** The Java runtime Enterprise Manager resolved for the job is not there. This points at the agent installation rather than the plug-in; `emctl status agent` on that agent and the agent's own upgrade history are the place to look.
 
 **Run EXPLAIN returns a syntax error on a statement copied from Query Analyzer.** Query Analyzer shows normalized digests, with literals replaced by `?`. A digest will not explain as it stands — substitute real values for the placeholders first. See [Jobs](jobs.md#run-explain).
 
@@ -95,3 +123,7 @@ The agent's own OS credential is not resolved automatically for this job type, s
 If you find something that is not on this page, please send it to the beta feedback contact supplied with your download — a symptom we have not seen is more valuable to us than one we have, and this page grows from what you tell us.
 
 That was the six areas promised at the top: licence, install and deploy, connecting, ClusterSet, jobs, and metrics that look wrong. If none of them fit, [Getting started](getting-started.md#wrong) lists what to include in a report so we can act on it quickly.
+
+## 7. Collections stop reaching the repository {#overload}
+
+**The 24 Hours window stops advancing, Week and Month stay empty, and `emctl status oms -details` says "PBS may not be up" while the console works.** The repository cannot absorb the metric load, usually because the agent hosting the MySQL targets shares a host with the Management Service or the repository database, or carries more targets than its cores allow. Confirm with the WebLogic server log (`[STUCK] ExecuteThread` stacks ending in `MetricLoadShared.flushRows` on a JDBC commit) and the repository's wait profile (`log file sync` in seconds). Relief and the sizing rule are in the user guide, 2.8: blackout what you can spare, restart the OMS, then spread the targets or lower the high-cardinality schedules before lifting the blackout.

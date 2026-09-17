@@ -8,7 +8,7 @@ nav_order: 6
 This chapter describes each page of the three target types.
 **Topics:** 5.1 MySQL Database pages · 5.2 MySQL Cluster pages · 5.3 MySQL ClusterSet pages
 ## 5.1 MySQL Database pages
-A MySQL Database target has sixteen pages. The home page is the default; every other page is one click away in the navigation tree down the left of each page, grouped as Overview, Backup, Connections and Performance, and the same pages are also listed on the **MySQL Database** target menu.
+A MySQL Database target has seventeen pages. The home page is the default; every other page is one click away in the navigation tree down the left of each page, grouped as Overview, Backup, Connections and Performance, and the same pages are also listed on the **MySQL Database** target menu.
 
 > **Note:** History-backed charts populate as collections accumulate — allow about an hour after the target is added before expecting trend data.
 
@@ -27,7 +27,7 @@ The default page for a MySQL Database target, and the one to open first: it puts
 | Connections | Threads connected, threads cached and max used connections over the selected window. |
 | InnoDB Buffer Pool Usage (pages) | Buffer pool pages split into data, dirty, free and misc. |
 | Top SQL by Response Time | The statement digests with the highest latency, with their schema, execution count, and average and maximum latency. |
-| Top Waits | The busiest wait event, its class, the interval's total wait time and the number of active events, over a table of wait events by count, time and average wait. |
+| Top Waits | The busiest wait event, its class, the interval's total wait time and the number of active events, over a table of wait events by count, time and average wait (the Top Waits page in the Performance group shows the same data over a window). |
 | Incidents | Open incidents for the target, from Enterprise Manager's incident manager. |
 | Activity | Transaction, statement and row activity, drawn as per-interval deltas of the server's cumulative counters rather than as the counters themselves. |
 
@@ -94,9 +94,25 @@ Turns the same statement-digest data into a trend: how latency and execution vol
 | Executions & Active Digests per Collection | Execution count and `active_digest_count` per collection over the selected window. |
 | Top Statements Over Window | The window's heaviest statements, ranked by **Latency**, **Executions** or **No-Index Executions**, with executions, total, average and lock time, rows examined and sent, the examined-to-sent ratio, and no-index executions. |
 
-The window aggregate is built from the top 25 statements of each 5-minute collection, so a statement outside every collection's top 25 contributes nothing to it. Read `active_digest_count` as the freshness signal: the digest tables retain their last rows when a collection window sees no activity, while the summary row is always current ([10.1](whats-new.md#early-access-build-2026-08-18)).
+The window aggregate is built from the top 25 statements of each 5-minute collection, so a statement outside every collection's top 25 contributes nothing to it. The 24 Hours window is exact. Week and Month windows are served pre-rolled (hourly for the week, daily for the month), each sample an average per-collection value; the table's executions, latencies, lock time, row counts and no-index counts are scaled by the sample span in 5-minute collections (twelve per hourly sample, 288 per daily one, or the window's own cadence while the window holds only one rolled-up sample, typically a newly added target), so they are estimates and remain approximate — the same rule as the Top Waits page. Averages and ratios are unaffected. Two limits of the estimate are worth knowing: it assumes the shipped 5-minute schedule (if you change the `StatementDigestProfile` collection interval in Metric and Collection Settings, Week and Month totals scale by the wrong factor), and a rolled-up average per statement covers only the collections that statement was in the top 25 for, so a statement active in part of a bucket is over-counted in proportion — a one-off query can look heavier in the Month window than it was. Use the 24 Hours window when the exact figure matters. Read `active_digest_count` as the freshness signal: the digest tables retain their last rows when a collection window sees no activity, while the summary row is always current ([10.1](whats-new.md#early-access-build-2026-08-18)).
 
 Source: `StatementDigestProfileSummary` and `StatementDigestProfile`, from `performance_schema.events_statements_summary_by_digest`.
+
+#### Top Waits
+Shows where the server spent its wait time over a chosen window, by wait class and by wait event. Use it after an incident to tell file I/O from lock contention from internal synchronisation, and to see whether a class that dominates the last minute has been dominating all day. The Home page's Top Waits region shows the current minute; this page shows the window.
+
+| Name | Description |
+|---|---|
+| Latest Collection | The most recent minute's top wait event, its class, the minute's total wait time and active-event count, plus the window's socket wait time and the number of collections in the window. |
+| Wait Time by Class per Collection | Stacked wait time per class (io, lock, synch and the rest) per collection (averaged into buckets on long windows). |
+| Wait Classes Over Window | One row per class: total wait time, share of the non-socket total, wait count and average wait over the window. |
+| Top Wait Events Over Window | The window's 25 heaviest wait events ranked by **Wait Time**, **Wait Count** or **Avg Wait**, with class, total time, count and average. |
+
+Socket waits (`wait/io/socket/*`, the server waiting on its clients) are excluded from the chart and the rankings so that contention inside the server is not flattened by network time; their window total is the Socket Wait Time tile. The 24 Hours window is exact. Week and Month windows are served pre-rolled (hourly for the week, daily for the month), each sample an average per-collection value; totals and the collection count are scaled by the sample span (or by the window's own cadence, an hour or a day, while the window holds only one rolled-up sample, typically a newly added target), so they are estimates and remain approximate. `—` means not measured in the window (for example, an average wait at zero waits).
+
+The wait class is the second element of the event name (`wait/io/...` is `io`, `wait/lock/...` is `lock`). InnoDB charges a row-lock wait to `wait/io/table/sql/handler`, so row-lock contention appears here as class `io`, not `lock`; `lock` is table locks and metadata locks. Row-lock detail is on the InnoDB Row Lock Waits page. The `wait/synch/*` instruments are disabled by default, so `synch` only appears once you enable them in the Performance Schema. See [7.1](alerts-and-thresholds.md#default-thresholds) for how the two shipped wait thresholds read these classes.
+
+Source: `WaitProfileSummary` and `WaitProfile`, from `performance_schema.events_waits_summary_global_by_event_name` (idle excluded at collection).
 
 #### Memory Usage
 Shows where the server's instrumented memory has gone, ranked by current allocation. Use it when resident memory is higher than expected, or to see which subsystem grew after a configuration change.

@@ -28,7 +28,7 @@ The beta is a **separate plug-in from the GA release**, by design:
 | Versions | `24.1.9.N.0` / `13.5.9.N.0` (N = beta drop) | `24.1.1.1.0` / `13.5.1.1.0` onward |
 | Licence keys | Issued for `ip.em.xmyb`; expire 2026-10-31 | Issued for `ip.em.xmys` |
 
-- **Beta to beta:** later beta drops upgrade in place (see 4.5).
+- **Beta to beta:** the procedure for moving to a later drop ships with that drop (see 4.5).
 - **Beta to GA is a clean install.** GA is a different plug-in with different target types. Nothing the beta created in your Management Repository — targets, metric history, incidents, thresholds you tuned — carries into GA, and a beta install remains identifiable as such in any audit. Plan the GA rollout as a fresh deployment alongside, then retire the beta.
 
 ## 2. Terms of use — installing means you accept
@@ -51,6 +51,7 @@ The beta is a **separate plug-in from the GA release**, by design:
 - **Enterprise Manager 24ai (24.1) or 13.5.** The beta ships one artifact per EM line, each built with that line's development kit; EM refuses the other one at import (`Incompatible version`). Use the artifact that matches your OMS.
 - **A Linux Management Agent** on, or with network reach to, each MySQL server. Windows agents are not supported in this release.
 - **A monitoring account** on each MySQL server with `SELECT`, `PROCESS` and `REPLICATION CLIENT` — the exact grants, and the optional backup-catalog grants, are in User Guide 2.4.
+- **MySQL Connector/J on every agent host** that will monitor MySQL, one Connector/J jar (8.4.0 is the tested version; User Guide 2.9 covers later versions) in the agent's `ip_plugin/xmyb/lib` directory, placed before the beta is deployed to that agent. The driver is not inside the plug-in (it is GPL-licensed); User Guide 2.9 has the download, the checksum and the directory.
 - **MySQL Shell (`mysqlsh`) on the agent host** if you will monitor InnoDB ClusterSets; without it ClusterSet health falls back to a repository rollup that cannot assess DR promotion readiness (section 5).
 - **Network:** the agent reaches each server's MySQL port (default 3306), or its Unix socket for a local agent (User Guide 2.3, 2.6).
 - **A beta licence key** for `ip.em.xmyb`, one per licensed MySQL Database target, from your Integration Plumbers contact.
@@ -73,7 +74,7 @@ emcli deploy_plugin_on_server -plugin=ip.em.xmyb            # EM 24ai prompts fo
 emcli get_plugin_deployment_status -plugin=ip.em.xmyb       # wait for Success
 emcli deploy_plugin_on_agent -plugin=ip.em.xmyb -agent_names="<agent host>:<port>"
 ```
-Some drops move target metadata, in which case the OMS deployment restarts the OMS; the status command tells you when it is back.
+Some drops move target metadata, in which case the OMS deployment restarts the OMS; the status command tells you when it is back. Place Connector/J on each agent host (section 3) before the `deploy_plugin_on_agent` step; an agent without it collects nothing until the jar is there.
 
 ### 4.3 Add a MySQL Database (Beta) target
 In the console, *Setup → Add Target → Add Targets Manually*, choose the **MySQL Database (Beta)** type, and fill in host, port, the monitoring credentials and the **License Key**. Include "(Beta)" in the target name — auto-discovered beta targets get that suffix automatically — so beta and GA targets never share a name in All Targets or notifications. With emcli:
@@ -88,10 +89,12 @@ emcli add_target -name="<server> (Beta)" -type=ip_mysql_database_beta -host=<age
 Within a few minutes the target shows **Up**, its home page fills in, and the **License** metric reports `Active`. If the `License` status is anything else, section 7 explains what it means and what to change.
 
 ### 4.5 Moving between beta drops
-Import the new drop and deploy it on the OMS and then on the agents (4.1–4.2); targets and their history are kept. When a drop changes target metadata, deploy the agent side in the same maintenance window as the OMS side — until then that target's new metrics show no data. [upgrade notes](upgrade-notes.md) lists every drop that needs this.
+This drop is installed fresh (section 4). When we ship a later beta drop, the procedure for moving to it comes with that drop and is recorded in [upgrade notes](upgrade-notes.md); we do not promise an in-place upgrade between beta drops in advance. The Connector/J jar you placed on each agent host stays where it is across drops.
 
 ### 4.6 Removing the beta
-Undeploy from the agents (`emcli undeploy_plugin_from_agent -plugin=ip.em.xmyb -agent_names=... -delete_targets`), then from the OMS (`emcli undeploy_plugin_from_server -plugin=ip.em.xmyb`). GA is installed fresh (section 1).
+Undeploy from the agents (`emcli undeploy_plugin_from_agent -plugin=ip.em.xmyb -agent_names=... -delete_targets`), then from the OMS (`emcli undeploy_plugin_from_server -plugin=ip.em.xmyb`). GA is installed fresh (section 1). The beta's driver directory, `ip_plugin/xmyb/lib`, is left in place; remove it once the beta is gone.
+
+GA reads its own driver directory, `ip_plugin/xmys/lib`, so when you move to GA copy the jar there on every agent host before deploying the GA plug-in to the agents; the GA release notes repeat this step.
 
 ## 5. What is verified, and known limitations
 
@@ -105,9 +108,10 @@ Undeploy from the agents (`emcli undeploy_plugin_from_agent -plugin=ip.em.xmyb -
 | MySQL 9.5 / 9.6 / 26.x innovation releases | — | Expected to work; not yet certified |
 | InnoDB Cluster (Group Replication, 8.4) | — | **Certified** (cluster target with member stats) |
 | InnoDB ClusterSet | — | Validated on MySQL 9.5 commercial; 8.4 ClusterSet not yet certified |
-| RDS / Aurora / Cloud SQL | — | Supported — added manually, see 4.3; not yet certified |
+| Amazon RDS for MySQL 8.4 | Comprehensive | **Certified** (2026-09-09, RDS MySQL 8.4.11) — added manually, see 4.3 |
+| Aurora MySQL / Cloud SQL / Azure Database for MySQL | — | Supported — added manually, see 4.3; not yet certified |
 | EM 24ai (24.1) | — | **Certified**, including the UI |
-| EM 13.5 | — | Collection + compliance certified; console home and chart pages verified on `13.5.9.9.0` (2026-08-25); the 13.5 edition (`13.5.9.N.0`) is built from the same source and available with the beta |
+| EM 13.5 | — | Collection + compliance certified; console home and chart pages verified on `13.5.9.10.0` (2026-08-25); the 13.5 edition (`13.5.9.N.0`) is built from the same source and available with the beta |
 
 **The plug-in does not block MySQL versions it has not seen.** MySQL releases are, in our experience, backward compatible for monitoring purposes, so a newer server than the matrix above is expected to work: the plug-in attempts full monitoring, and if an uncertified version misbehaves, individual metric groups degrade to collection errors on that group without taking monitoring down as a whole. We certify versions as we validate them, prioritising LTS releases.
 
@@ -116,7 +120,8 @@ Undeploy from the agents (`emcli undeploy_plugin_from_agent -plugin=ip.em.xmyb -
 1. **ClusterSet TLS verify modes fail closed.** `VERIFY_CA` / `VERIFY_IDENTITY` connection modes for ClusterSet health checks require truststore credential support, planned for a later release; until then those modes report `TLS_TRUSTSTORE_REQUIRED` rather than silently downgrading security. `REQUIRED` and `DISABLED` modes work fully.
 2. **ClusterSet health requires MySQL Shell on the agent host** (`mysqlsh` on the agent's PATH). Without it, ClusterSet targets fall back to repository-rollup health — and the rollup cannot assess promotion readiness, so `dr_promotion_ready` reads 0 and the DR Promotion Ready alert raises CRITICAL until `mysqlsh` is installed.
 3. **Query Analytics freshness on idle servers.** Like all EM keyed metrics, the query-digest tables retain their last collected rows when a collection window has no new activity; the `active_digest_count` column is the freshness signal. The statement-digest overflow row (`DIGEST IS NULL`), which the server uses once its digest table is full, is handled and does not appear as a statement.
-4. **Backup failure detection is tool-asymmetric.** MySQL Enterprise Backup records failed runs; Percona XtraBackup does not, so for XtraBackup-only estates the backup-age threshold is the failure signal. Details and the optional scoped grants: [backup monitoring](backup-monitoring.md).
+4. **You supply MySQL Connector/J.** The driver is not distributed with the plug-in; one `mysql-connector-j-*.jar` goes in each agent host's `ip_plugin/xmyb/lib` directory (section 3, User Guide 2.9). Connector/J 8.4.0 is the tested version; later 8.4.x and 9.x releases are expected to work but are not certified in this beta. Without the jar every collection on that agent reports `MySQL Connector/J not found` and nothing else.
+5. **Backup failure detection is tool-asymmetric.** MySQL Enterprise Backup records failed runs; Percona XtraBackup does not, so for XtraBackup-only estates the backup-age threshold is the failure signal. Details and the optional scoped grants: [backup monitoring](backup-monitoring.md).
 
 ## 6. Feedback and support during the beta
 

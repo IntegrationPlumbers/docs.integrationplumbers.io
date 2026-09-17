@@ -24,7 +24,7 @@ The heading gives the group's display name, its internal name in parentheses —
 | **Column** | The column's internal name, in the form EM CLI and threshold commands take. A `(key)` marker means the column is part of the group's key, so the group returns one row per distinct key value — per channel, per member, per table, per digest — rather than a single row. A group with no key column returns exactly one row per collection. |
 | **Label** | The display name shown in the console. |
 | **Unit** | The unit Enterprise Manager labels the value with, for example `MICROSEC`, `BYTE`, `SECOND` or `PERCENTAGE`. `NA` means the value carries no unit — a count, a state or a string. |
-| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 19 curated thresholds ship ([7.1](alerts-and-thresholds.md#default-thresholds)), and the reference also shows the three availability `Status` conditions, so 22 columns in the reference tables carry a default. A blank cell is not an omission and it does not stop you setting your own ([7.2](alerts-and-thresholds.md#changing-thresholds)). |
+| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 21 curated thresholds ship ([7.1](alerts-and-thresholds.md#default-thresholds)), and the reference also shows the three availability `Status` conditions, so 24 columns in the reference tables carry a default. A blank cell is not an omission and it does not stop you setting your own ([7.2](alerts-and-thresholds.md#changing-thresholds)). |
 
 Groups marked **configuration snapshot** in their heading behave differently from the rest. They collect on a 24-hour schedule into Enterprise Manager's configuration history rather than into the metric tables, which is what makes a MySQL server's settings comparable over time and against other servers under **Enterprise → Configuration**, and what the compliance rules in [chapter 9](compliance-rules.md#compliance-standards) evaluate. They carry no thresholds and raise no alerts, and a `(key)` column in one of them means the snapshot holds several rows — one per account, for example — rather than one row of settings.
 
@@ -43,7 +43,7 @@ Column names follow a few conventions consistently, so the name usually tells yo
 
 > **Note:** The replication metric group reports two different boolean vocabularies. `replica_io_running` returns `Yes` or `No`, while `replica_sql_running` returns `true` or `false`. The shipped thresholds match those forms exactly ([7.1](alerts-and-thresholds.md#default-thresholds)); a custom threshold, compliance rule or script that reads both columns must not assume a single format.
 
-Generated from the plug-in's target metadata for build 24.1.9.9.0.
+Generated from the plug-in's target metadata for build 24.1.9.10.0.
 Each metric group lists its columns, display labels, units, and the default
 warning/critical thresholds that ship (blank = no default threshold).
 Configuration snapshots are RAW metrics collected for configuration history;
@@ -2253,7 +2253,7 @@ Top wait events by time consumed during the collection interval, as deltas from 
 | `wait_class` | Wait Class | NA |  |  |
 | `d_count` | Wait Count | NA |  |  |
 | `d_time_us` | Wait Time | MICROSEC |  |  |
-| `avg_wait_us` | Avg Wait | MICROSEC |  |  |
+| `avg_wait_us` | Avg Wait | MICROSEC | > 1000000 | > 5000000 |
 
 ### Wait Profile Summary (`WaitProfileSummary`) — collected every 1 Min
 
@@ -2265,7 +2265,7 @@ Single-row summary of the interval's wait activity — total wait time, number o
 | `active_event_count` | Active Wait Events | NA |  |  |
 | `top_wait_event` | Top Wait Event | NA |  |  |
 | `top_wait_time_us` | Top Wait Time | MICROSEC |  |  |
-| `top_wait_class` | Top Wait Class | NA |  |  |
+| `top_wait_class` | Top Wait Class | NA | = lock |  |
 
 ### Query Analytics (Statement Digest Deltas) (`StatementDigestProfile`) — collected every 5 Min
 

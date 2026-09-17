@@ -17,6 +17,7 @@ groups:
       - { title: "Prerequisites", url: /mysql/prerequisites.html }
       - { title: "Install and upgrade", url: /mysql/install-and-upgrade.html }
       - { title: "Upgrade notes", url: /mysql/upgrade-notes.html }
+      - { title: "Migrating from the Oracle MySQL plug-in", url: /mysql/migration-from-omys.html }
       - { title: "Targets and properties", url: /mysql/targets-and-properties.html }
       - { title: "Target discovery", url: /mysql/discovery.html }
   - name: Reference

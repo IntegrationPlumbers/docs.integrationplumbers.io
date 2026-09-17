@@ -10,18 +10,18 @@ This chapter describes importing and deploying the plug-in, and upgrading it.
 ## 3.1 Import with Self Update
 Enterprise Manager takes the plug-in in through Self Update, from the `.opar` archive Integration Plumbers supplies. Import it once per Enterprise Manager site; the deploy steps in [3.2](#deploy-to-the-oms) and 3.3 then work from the imported copy.
 
-Copy `24.1.9.9.0_ip.em.xmyb_2000_0.opar` to a directory on the OMS host that the Enterprise Manager software owner can read, then import it from the console:
+Copy `24.1.9.10.0_ip.em.xmyb_2000_0.opar` to a directory on the OMS host that the Enterprise Manager software owner can read, then import it from the console:
 
 1. Choose **Setup → Extensibility → Self Update**.
 2. Select the **Plug-in** folder.
 3. Choose **Actions → Import**, supply the full path to the `.opar` file on the OMS host, and confirm.
-4. Wait for the import job to complete, then confirm the **MySQL Database** row shows version **24.1.9.9.0**.
+4. Wait for the import job to complete, then confirm the **MySQL Database** row shows version **24.1.9.10.0**.
 
 Or import it with EM CLI, as the Enterprise Manager software owner on the OMS host:
 
 ```
 emcli login -username=sysman
-emcli import_update -file=/u01/stage/24.1.9.9.0_ip.em.xmyb_2000_0.opar -omslocal
+emcli import_update -file=/u01/stage/24.1.9.10.0_ip.em.xmyb_2000_0.opar -omslocal
 ```
 
 `-omslocal` tells Enterprise Manager the archive is already on the OMS host, which is the normal case. Only drop it when the file sits on a different host, and then supply that host and a credential set instead.
@@ -59,6 +59,8 @@ emcli list_plugins_on_server
 ## 3.3 Deploy to agents
 Every management agent that will monitor a MySQL target needs its own copy of the plug-in. Deploying to the OMS does not do this for you.
 
+Before you deploy to an agent, place MySQL Connector/J on that agent host ([2.9](prerequisites.md#mysql-connectorj-on-agent-hosts)). A plug-in deployed to an agent that has no driver reports the driver message on every collection until the jar is in place; nothing is lost, but nothing is collected either.
+
 From the console:
 
 1. Choose **Setup → Extensibility → Plug-ins**.
@@ -82,6 +84,8 @@ emcli list_plugins_on_agent -agent_names="agent-host.example.com:3872"
 
 ## 3.4 Upgrading
 Deploy a new version exactly as you deployed the first one — import it with Self Update ([3.1](#import-with-self-update)), deploy it to the OMS ([3.2](#deploy-to-the-oms)), then deploy it to the agents ([3.3](#deploy-to-agents)). Do not undeploy the running version first: Enterprise Manager upgrades the deployment in place, and existing targets, their monitoring properties, their thresholds and their collected history carry forward.
+
+**Connector/J first.** This is the first version that reads MySQL Connector/J from the agent host instead of carrying it ([2.9](prerequisites.md#mysql-connectorj-on-agent-hosts)). Place the driver on every agent before you deploy this version to that agent; an agent upgraded without it stops collecting every MySQL target it monitors until the jar is there. The driver directory is outside the plug-in's own directories, so later upgrades leave it alone.
 
 **Upgrade order matters: deploy the new version to the OMS first, let the OMS restart complete, then deploy to agents. Target-type metadata is activated on the OMS side; an agent running newer metadata than the OMS has activated reports collection errors until the OMS catches up.**
 

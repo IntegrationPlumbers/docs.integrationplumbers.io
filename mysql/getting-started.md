@@ -31,6 +31,7 @@ Have these to hand:
 | The MySQL server's address and port | Default `3306`. A local agent can use the Unix socket instead — see [Prerequisites](prerequisites.md#unix-socket-connections) |
 | A monitoring account on that server | `SELECT`, `PROCESS` and `REPLICATION CLIENT`. The exact statements are in [Prerequisites](prerequisites.md#the-monitoring-user) |
 | Your beta licence key | One per licensed MySQL Database target. Cluster and ClusterSet targets are containers and need no key |
+| MySQL Connector/J | One `mysql-connector-j-*.jar` (8.4.0 is the tested version) on each agent host that will monitor MySQL, in the agent's `ip_plugin/xmyb/lib` directory, placed before the plug-in is deployed to that agent. The driver is not inside the plug-in. Download, checksum and directory: [Prerequisites](prerequisites.md#mysql-connectorj-on-agent-hosts) |
 
 If you plan to monitor an InnoDB ClusterSet, also install **MySQL Shell** (`mysqlsh`) on the agent host now — see [Prerequisites](prerequisites.md#mysql-shell-for-clusterset-targets). Without it ClusterSet health falls back to a repository rollup that cannot assess DR promotion readiness.
 

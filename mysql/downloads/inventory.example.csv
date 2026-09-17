@@ -1,0 +1,4 @@
+source_type,source_name,new_name,target_type,agent_host,host,port,socket,use_secure,kerberos_config,license_key,username,password,ts_dir,ts_type,notes
+,,mysql84-prod-01,ip_mysql_database,agent-host.example.com,10.0.0.21,3306,,required,,<licence key>,em_monitoring,,,,
+,,mysql84-prod-cluster,ip_mysql_cluster,agent-host.example.com,"10.0.0.30,10.0.0.31,10.0.0.32",3306,,required,,,em_monitoring,,,,
+,,mysql84-prod-clusterset,ip_mysql_clusterset,agent-host.example.com,10.0.0.40,6446,,required,,,em_monitoring,,,,
