@@ -77,11 +77,11 @@ Certification as of this build:
 | Amazon RDS for MySQL 8.4 | Comprehensive | **Certified** (2026-09-09, RDS MySQL 8.4.11) — added manually, see [4.4](targets-and-properties.md#autodiscovery); managed-service notes there |
 | Aurora MySQL / Cloud SQL / Azure Database for MySQL | — | Supported — added manually, see [4.4](targets-and-properties.md#autodiscovery); not yet certified |
 | EM 24ai (24.1) | — | **Certified**, including the UI |
-| EM 13.5 | — | Collection + compliance certified; console home and chart pages verified on `13.5.9.10.0` (2026-08-25); the 13.5 edition (`13.5.9.N.0`) is built from the same source and available with the beta |
+| EM 13.5 | — | Collection + compliance certified; console home and chart pages verified on the drop 10 build (2026-09-16); the 13.5 edition (`13.5.9.N.0`) is built from the same source and available with the beta |
 
 **Enterprise Manager platform.** The build described in this guide is certified on Enterprise Manager 24ai (24.1), including its console pages, and that is the platform the beta covers.
 
-> **Note:** An Enterprise Manager 13.5 edition (`13.5.9.N.0`) is built from the same source as the 24ai edition and is available with the beta, as the matrix row above notes. On 13.5, collection and compliance are certified in our lab and the console's home and chart pages were verified on `13.5.9.10.0` (2026-08-25); the remaining console pages have not been individually walked on 13.5, so treat 24ai as the reference platform and report any 13.5 rendering difference you see.
+> **Note:** An Enterprise Manager 13.5 edition (`13.5.9.N.0`) is built from the same source as the 24ai edition and is available with the beta, as the matrix row above notes. On 13.5, collection and compliance are certified in our lab and the console's home and chart pages were verified on the drop 10 build (2026-09-16); the remaining console pages have not been individually walked on 13.5, so treat 24ai as the reference platform and report any 13.5 rendering difference you see.
 
 ## 1.4 Beta status
 This build is a beta. It is feature-complete for the scope listed in [10.1](whats-new.md#early-access-build-2026-08-18) — the three target types, their metric groups and pages, the shipped thresholds, the compliance framework, the Run EXPLAIN job and the connection options — and every one of those has been deployed and exercised against live MySQL targets in our lab before shipping. What remains for general availability is additive: broader certification, and features that extend this scope rather than change it. Everything we know to be incomplete or unproven is in the boundaries list at the end of 10.1 rather than left for you to discover.
