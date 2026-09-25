@@ -9,7 +9,7 @@ nav_order: 11
 
 This page is generated from the plug-in's own target metadata, for the exact build you deploy, rather than written by hand - so it cannot drift from what the plug-in actually collects. Where another page and this one disagree on a column name, a unit or a threshold, this page is authoritative.
 
-It covers all 71 metric groups and 527 columns on the `ip_mssql_database` target type, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship.
+It covers all 74 metric groups and 620 columns on the `ip_mssql_database` target type, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship.
 
 ## How to read a metric group
 
@@ -20,7 +20,7 @@ Every entry has the same shape. The heading gives the group's display name, its 
 | **Column** | The column's internal name, in the form EM CLI and threshold commands take. A `(key)` marker means the column is part of the group's key, so the group returns one row per distinct key value - per database, per index, per wait type - rather than a single row. A group with no key column returns exactly one row per collection. |
 | **Label** | The display name shown in the console. |
 | **Unit** | The unit Enterprise Manager labels the value with, for example `KB`, `SECOND`, `PERCENTAGE` or `BOOLEAN`. `NA` means the value carries no unit - a count, a state or a string. |
-| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 13 curated thresholds ship, listed on [Alerts and thresholds](alerts-and-thresholds.md). A blank cell is not an omission and it does not stop you setting your own. |
+| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 14 curated thresholds ship, listed on [Alerts and thresholds](alerts-and-thresholds.md). A blank cell is not an omission and it does not stop you setting your own. |
 
 Groups marked **configuration snapshot** in their heading behave differently. They collect into Enterprise Manager's configuration history rather than into the metric tables, which is what makes an instance's settings comparable over time and against other instances under **Enterprise -> Configuration**, and what the [compliance rules](compliance-rules.md) evaluate. They carry no thresholds and raise no alerts.
 
@@ -52,7 +52,7 @@ Host and SQL Server memory from sys.dm_os_sys_memory and sys.dm_os_process_memor
 
 ### Processor (`Processor`) - collected every 15 Min
 
-CPU counts and utilization from sys.dm_os_sys_info and the scheduler ring buffer, split into the SQL Server process, other processes, and idle. On SQL Server 2017 and later on Linux the ring buffer reports a fabricated 100% - see the known-limitations section of the Early-Access guide.
+CPU counts and utilization from sys.dm_os_sys_info and the scheduler ring buffer, split into the SQL Server process, other processes, and idle. On SQL Server 2017, 2019 and 2022 on Linux the OS idle counter is unreadable, so the three utilization columns are EMPTY rather than zero and cpu_counters_available is 0 - read that flag before treating a zero as a measurement, since an absent numeric is rendered as 0 by some clients. A genuinely saturated host reads the same way. See the known-limitations section of the Early-Access guide.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -62,6 +62,7 @@ CPU counts and utilization from sys.dm_os_sys_info and the scheduler ring buffer
 | `system_idle` | System Idle (%) | PERCENTAGE |  |  |
 | `other_process_utilization` | Other Process CPU (%) | PERCENTAGE |  |  |
 | `cpu_utilization_pct` | CPU Utilization (%) | PERCENTAGE | > 80 | > 90 |
+| `cpu_counters_available` | CPU Counters Available (1 = OS idle readable) | BOOLEAN |  |  |
 
 ### Volume Space (`VolumeSpace`) - collected every 15 Min
 
@@ -108,6 +109,7 @@ Per-database inventory from sys.databases - state, recovery model, compatibility
 | `is_read_only` | Is Read Only | BOOLEAN |  |  |
 | `containment_desc` | Containment | NA |  |  |
 | `log_reuse_wait_desc` | Log Reuse Wait | NA |  |  |
+| `owner` | Owner | NA |  |  |
 
 ### Database Settings (`DatabaseSetting`) - collected every 24 Hr
 
@@ -473,6 +475,8 @@ The flagship AlwaysOn surface: per-database recovery point and recovery time est
 | `link_healthy` | Replica Link Healthy (1/0) | BOOLEAN |  | < 1 |
 | `last_commit_primary` | Primary Last Commit | NA |  |  |
 | `last_commit_secondary` | Secondary Last Commit | NA |  |  |
+| `commit_position_known` | Commit Position Known (1 = RPO is measured) | BOOLEAN |  |  |
+| `queue_state_known` | Queue State Known (1 = queue sizes reported) | BOOLEAN |  |  |
 
 ### Database Mirroring (`MirroringMonitoring`) - collected every 15 Min
 
@@ -617,7 +621,7 @@ Individual lock requests from sys.dm_tran_locks - the session holding or waiting
 
 ### Top Queries by CPU (`TopQueriesCpu`) - collected every 15 Min
 
-Top cached statements by total CPU (worker) time, from sys.dm_exec_query_stats with the statement text - executions, total and average worker time, elapsed time, and logical and physical I/O.
+Top cached statements by total CPU (worker) time, from sys.dm_exec_query_stats with the statement text - executions, total and average worker time, elapsed time, and logical and physical I/O. These are the correct top 500, but they are stored UNORDERED: EM keys metric rows and does not preserve the query's ranking, so sort client-side rather than trusting the order you receive.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -625,19 +629,33 @@ Top cached statements by total CPU (worker) time, from sys.dm_exec_query_stats w
 | `plan_handle` (key) | Plan Handle | NA |  |  |
 | `statement_start_offset` (key) | Statement Offset | NA |  |  |
 | `statement_end_offset` (key) | Statement End Offset | NA |  |  |
-| `execution_count` | Executions | NA |  |  |
-| `total_worker_time` | Total CPU (us) | MICROSEC |  |  |
-| `avg_worker_time` | Avg CPU (us) | MICROSEC |  |  |
-| `total_elapsed_time` | Total Elapsed (us) | MICROSEC |  |  |
-| `total_logical_reads` | Logical Reads | NA |  |  |
-| `total_physical_reads` | Physical Reads | NA |  |  |
-| `total_logical_writes` | Logical Writes | NA |  |  |
+| `execution_count` | Executions (Cumulative) | NA |  |  |
+| `total_worker_time` | Cumulative CPU (us) | MICROSEC |  |  |
+| `avg_worker_time` | Avg CPU per Execution (us) | MICROSEC |  |  |
+| `total_elapsed_time` | Cumulative Elapsed (us) | MICROSEC |  |  |
+| `total_logical_reads` | Logical Reads (Cumulative) | NA |  |  |
+| `total_physical_reads` | Physical Reads (Cumulative) | NA |  |  |
+| `total_logical_writes` | Logical Writes (Cumulative) | NA |  |  |
 | `last_execution_time` | Last Execution | NA |  |  |
 | `sql_text` | SQL Text | NA |  |  |
+| `query_hash` | Query Hash | NA |  |  |
+| `query_plan_hash` | Query Plan Hash | NA |  |  |
+| `interval_execution_count` | Executions (Interval) | NA |  |  |
+| `interval_worker_time` | CPU (Interval) | MICROSEC |  |  |
+| `interval_elapsed_time` | Elapsed (Interval) | MICROSEC |  |  |
+| `interval_logical_reads` | Logical Reads (Interval) | NA |  |  |
+| `interval_physical_reads` | Physical Reads (Interval) | NA |  |  |
+| `interval_logical_writes` | Logical Writes (Interval) | NA |  |  |
+| `total_grant_mb` | Granted Memory (Cumulative) | MB |  |  |
+| `max_grant_mb` | Max Granted Memory | MB |  |  |
+| `total_used_grant_mb` | Used Memory (Cumulative) | MB |  |  |
+| `max_used_grant_mb` | Max Used Memory | MB |  |  |
+| `interval_grant_mb` | Granted Memory (Interval) | MB |  |  |
+| `interval_seconds` | Interval Length | SECOND |  |  |
 
 ### Top Queries by Executions (`TopQueriesExec`) - collected every 15 Min
 
-The same statement statistics as Top Queries by CPU, ranked by execution count instead - the queries that run most often rather than the ones that cost most per run.
+The same statement statistics as Top Queries by CPU, ranked by execution count instead - the queries that run most often rather than the ones that cost most per run. Stored unordered for the same reason; sort client-side.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -645,35 +663,97 @@ The same statement statistics as Top Queries by CPU, ranked by execution count i
 | `plan_handle` (key) | Plan Handle | NA |  |  |
 | `statement_start_offset` (key) | Statement Offset | NA |  |  |
 | `statement_end_offset` (key) | Statement End Offset | NA |  |  |
-| `execution_count` | Executions | NA |  |  |
-| `total_worker_time` | Total CPU (us) | MICROSEC |  |  |
-| `avg_worker_time` | Avg CPU (us) | MICROSEC |  |  |
-| `total_elapsed_time` | Total Elapsed (us) | MICROSEC |  |  |
-| `total_logical_reads` | Logical Reads | NA |  |  |
-| `total_physical_reads` | Physical Reads | NA |  |  |
-| `total_logical_writes` | Logical Writes | NA |  |  |
+| `execution_count` | Executions (Cumulative) | NA |  |  |
+| `total_worker_time` | Cumulative CPU (us) | MICROSEC |  |  |
+| `avg_worker_time` | Avg CPU per Execution (us) | MICROSEC |  |  |
+| `total_elapsed_time` | Cumulative Elapsed (us) | MICROSEC |  |  |
+| `total_logical_reads` | Logical Reads (Cumulative) | NA |  |  |
+| `total_physical_reads` | Physical Reads (Cumulative) | NA |  |  |
+| `total_logical_writes` | Logical Writes (Cumulative) | NA |  |  |
 | `last_execution_time` | Last Execution | NA |  |  |
 | `sql_text` | SQL Text | NA |  |  |
+| `query_hash` | Query Hash | NA |  |  |
+| `query_plan_hash` | Query Plan Hash | NA |  |  |
+| `interval_execution_count` | Executions (Interval) | NA |  |  |
+| `interval_worker_time` | CPU (Interval) | MICROSEC |  |  |
+| `interval_elapsed_time` | Elapsed (Interval) | MICROSEC |  |  |
+| `interval_logical_reads` | Logical Reads (Interval) | NA |  |  |
+| `interval_physical_reads` | Physical Reads (Interval) | NA |  |  |
+| `interval_logical_writes` | Logical Writes (Interval) | NA |  |  |
+| `total_grant_mb` | Granted Memory (Cumulative) | MB |  |  |
+| `max_grant_mb` | Max Granted Memory | MB |  |  |
+| `total_used_grant_mb` | Used Memory (Cumulative) | MB |  |  |
+| `max_used_grant_mb` | Max Used Memory | MB |  |  |
+| `interval_grant_mb` | Granted Memory (Interval) | MB |  |  |
+| `interval_seconds` | Interval Length | SECOND |  |  |
+
+### Top Queries by Memory Grant (`TopQueriesMemory`) - collected every 15 Min
+
+The same statement statistics as Top Queries by CPU, ranked by total granted memory instead - which queries the optimizer reserved the most workspace memory for, in megabytes, alongside the peak single grant and how much of it was actually used. The grant columns are blank on builds before SQL Server 2016 SP2 / 2017 CU3, which do not carry them, and on those builds this group falls back to CPU ordering. Stored unordered like the other top-N groups; sort client-side.
+
+| Column | Label | Unit | Warning | Critical |
+|---|---|---|---|---|
+| `sql_handle` (key) | SQL Handle | NA |  |  |
+| `plan_handle` (key) | Plan Handle | NA |  |  |
+| `statement_start_offset` (key) | Statement Offset | NA |  |  |
+| `statement_end_offset` (key) | Statement End Offset | NA |  |  |
+| `execution_count` | Executions (Cumulative) | NA |  |  |
+| `total_worker_time` | Cumulative CPU (us) | MICROSEC |  |  |
+| `avg_worker_time` | Avg CPU per Execution (us) | MICROSEC |  |  |
+| `total_elapsed_time` | Cumulative Elapsed (us) | MICROSEC |  |  |
+| `total_logical_reads` | Logical Reads (Cumulative) | NA |  |  |
+| `total_physical_reads` | Physical Reads (Cumulative) | NA |  |  |
+| `total_logical_writes` | Logical Writes (Cumulative) | NA |  |  |
+| `last_execution_time` | Last Execution | NA |  |  |
+| `sql_text` | SQL Text | NA |  |  |
+| `query_hash` | Query Hash | NA |  |  |
+| `query_plan_hash` | Query Plan Hash | NA |  |  |
+| `interval_execution_count` | Executions (Interval) | NA |  |  |
+| `interval_worker_time` | CPU (Interval) | MICROSEC |  |  |
+| `interval_elapsed_time` | Elapsed (Interval) | MICROSEC |  |  |
+| `interval_logical_reads` | Logical Reads (Interval) | NA |  |  |
+| `interval_physical_reads` | Physical Reads (Interval) | NA |  |  |
+| `interval_logical_writes` | Logical Writes (Interval) | NA |  |  |
+| `total_grant_mb` | Granted Memory (Cumulative) | MB |  |  |
+| `max_grant_mb` | Max Granted Memory | MB |  |  |
+| `total_used_grant_mb` | Used Memory (Cumulative) | MB |  |  |
+| `max_used_grant_mb` | Max Used Memory | MB |  |  |
+| `interval_grant_mb` | Granted Memory (Interval) | MB |  |  |
+| `interval_seconds` | Interval Length | SECOND |  |  |
 
 ### Query Plan Statistics (`QueryPlanStatistics`) - collected every 15 Min
 
-Cached execution plans aggregated per plan handle - how many statements the plan covers, executions, and the CPU, elapsed and I/O totals attributable to it.
+Cached execution plans aggregated per plan handle - how many statements the plan covers, executions, and the CPU, elapsed and I/O totals attributable to it. The top 500 by total CPU, stored UNORDERED like the other top-N groups; sort client-side.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `plan_handle` (key) | Plan Handle | NA |  |  |
 | `statement_count` | Statement Count | NA |  |  |
-| `execution_count` | Executions | NA |  |  |
-| `total_worker_time` | Total CPU (us) | MICROSEC |  |  |
-| `total_elapsed_time` | Total Elapsed (us) | MICROSEC |  |  |
-| `total_logical_reads` | Logical Reads | NA |  |  |
-| `total_physical_reads` | Physical Reads | NA |  |  |
-| `total_logical_writes` | Logical Writes | NA |  |  |
+| `execution_count` | Executions (Cumulative) | NA |  |  |
+| `total_worker_time` | Cumulative CPU (us) | MICROSEC |  |  |
+| `total_elapsed_time` | Cumulative Elapsed (us) | MICROSEC |  |  |
+| `total_logical_reads` | Logical Reads (Cumulative) | NA |  |  |
+| `total_physical_reads` | Physical Reads (Cumulative) | NA |  |  |
+| `total_logical_writes` | Logical Writes (Cumulative) | NA |  |  |
 | `last_execution_time` | Last Execution | NA |  |  |
+| `query_hash` | Query Hash | NA |  |  |
+| `query_plan_hash` | Query Plan Hash | NA |  |  |
+| `interval_execution_count` | Executions (Interval) | NA |  |  |
+| `interval_worker_time` | CPU (Interval) | MICROSEC |  |  |
+| `interval_elapsed_time` | Elapsed (Interval) | MICROSEC |  |  |
+| `interval_logical_reads` | Logical Reads (Interval) | NA |  |  |
+| `interval_physical_reads` | Physical Reads (Interval) | NA |  |  |
+| `interval_logical_writes` | Logical Writes (Interval) | NA |  |  |
+| `total_grant_mb` | Granted Memory (Cumulative) | MB |  |  |
+| `max_grant_mb` | Max Granted Memory | MB |  |  |
+| `total_used_grant_mb` | Used Memory (Cumulative) | MB |  |  |
+| `max_used_grant_mb` | Max Used Memory | MB |  |  |
+| `interval_grant_mb` | Granted Memory (Interval) | MB |  |  |
+| `interval_seconds` | Interval Length | SECOND |  |  |
 
 ### Top Sessions (`TopSessions`) - collected every 15 Min
 
-The busiest sessions from sys.dm_exec_sessions - login, host, program, status, CPU and memory use, scheduled and elapsed time, and logical and physical I/O.
+The busiest sessions from sys.dm_exec_sessions - login, host, program, status, CPU and memory use, scheduled and elapsed time, and logical and physical I/O. The top 500 by CPU, stored UNORDERED like the other top-N groups; sort client-side.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -749,20 +829,21 @@ Indexes the optimizer wanted and did not find, from the missing-index DMVs - the
 
 ### Wait Type History (`WaitTypeHistory`) - collected every 15 Min
 
-Wait statistics per wait type from sys.dm_os_wait_stats - waiting task count, total and maximum wait time, and the signal/resource split that separates waiting for a CPU from waiting for a resource.
+Wait statistics per wait type from sys.dm_os_wait_stats. The task count, wait time and the signal/resource split are PER-INTERVAL deltas against the previous collection, not lifetime totals - the DMV accumulates since server start, and differencing it at collection is what lets a wait type that stopped waiting show as quiet. Maximum wait time is a gauge. Blank on the first collection and after a restart; interval_seconds states the window each row covers.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `wait_type` (key) | Wait Type | NA |  |  |
-| `waiting_tasks_count` | Waiting Tasks | NA |  |  |
-| `wait_time_ms` | Wait Time (ms) | MILLISECONDS |  |  |
+| `waiting_tasks_count` | Waiting Tasks (Interval) | NA |  |  |
+| `wait_time_ms` | Wait Time (Interval, ms) | MILLISECONDS |  |  |
 | `max_wait_time_ms` | Max Wait (ms) | MILLISECONDS |  |  |
-| `signal_wait_time_ms` | Signal Wait (ms) | MILLISECONDS |  |  |
-| `resource_wait_time_ms` | Resource Wait (ms) | MILLISECONDS |  |  |
+| `signal_wait_time_ms` | Signal Wait (Interval, ms) | MILLISECONDS |  |  |
+| `resource_wait_time_ms` | Resource Wait (Interval, ms) | MILLISECONDS |  |  |
+| `interval_seconds` | Interval Length | SECOND |  |  |
 
 ### File I/O Statistics (`FileIoStats`) - collected every 15 Min
 
-Per-file I/O from sys.dm_io_virtual_file_stats - read and write counts and bytes, the read and write stall times that indicate storage latency, and the file's size on disk.
+Per-file I/O from sys.dm_io_virtual_file_stats. Read and write counts, bytes and stall times are PER-INTERVAL deltas against the previous collection, so an increase or decrease in a file's I/O between snapshots is visible directly; size on disk is a gauge. Blank on the first collection and after a restart; interval_seconds states the window each row covers.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -772,31 +853,33 @@ Per-file I/O from sys.dm_io_virtual_file_stats - read and write counts and bytes
 | `logical_name` | Logical Name | NA |  |  |
 | `physical_name` | Physical Name | NA |  |  |
 | `file_type` | File Type | NA |  |  |
-| `num_of_reads` | Reads | NA |  |  |
-| `num_of_writes` | Writes | NA |  |  |
-| `num_of_bytes_read` | Bytes Read | BYTE |  |  |
-| `num_of_bytes_written` | Bytes Written | BYTE |  |  |
-| `io_stall_read_ms` | Read Stall (ms) | MILLISECONDS |  |  |
-| `io_stall_write_ms` | Write Stall (ms) | MILLISECONDS |  |  |
-| `io_stall` | Total Stall (ms) | MILLISECONDS |  |  |
+| `num_of_reads` | Reads (Interval) | NA |  |  |
+| `num_of_writes` | Writes (Interval) | NA |  |  |
+| `num_of_bytes_read` | Bytes Read (Interval) | BYTE |  |  |
+| `num_of_bytes_written` | Bytes Written (Interval) | BYTE |  |  |
+| `io_stall_read_ms` | Read Stall (Interval, ms) | MILLISECONDS |  |  |
+| `io_stall_write_ms` | Write Stall (Interval, ms) | MILLISECONDS |  |  |
+| `io_stall` | Total Stall (Interval, ms) | MILLISECONDS |  |  |
 | `size_on_disk_mb` | Size on Disk (MB) | MB |  |  |
+| `interval_seconds` | Interval Length | SECOND |  |  |
 
 ### Database IOPS (`DatabaseIops`) - collected every 15 Min
 
-The same virtual file statistics rolled up per database, giving read, write and total I/O counts, bytes, and stall times without the per-file detail.
+The same virtual file statistics rolled up per database, giving read, write and total I/O counts, bytes, and stall times without the per-file detail. All of them are PER-INTERVAL deltas against the previous collection; interval_seconds states the window each row covers, and the console divides by it to chart per-second rates. Blank on the first collection and after a restart.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `database_id` (key) | Database ID | NA |  |  |
 | `database_name` | Database | NA |  |  |
-| `num_of_reads` | Reads | NA |  |  |
-| `num_of_writes` | Writes | NA |  |  |
-| `num_of_ios` | Total IOs | NA |  |  |
-| `num_of_bytes_read` | Bytes Read | BYTE |  |  |
-| `num_of_bytes_written` | Bytes Written | BYTE |  |  |
-| `io_stall_read_ms` | Read Stall (ms) | MILLISECONDS |  |  |
-| `io_stall_write_ms` | Write Stall (ms) | MILLISECONDS |  |  |
-| `io_stall` | Total Stall (ms) | MILLISECONDS |  |  |
+| `num_of_reads` | Reads (Interval) | NA |  |  |
+| `num_of_writes` | Writes (Interval) | NA |  |  |
+| `num_of_ios` | Total I/Os (Interval) | NA |  |  |
+| `num_of_bytes_read` | Bytes Read (Interval) | BYTE |  |  |
+| `num_of_bytes_written` | Bytes Written (Interval) | BYTE |  |  |
+| `io_stall_read_ms` | Read Stall (Interval, ms) | MILLISECONDS |  |  |
+| `io_stall_write_ms` | Write Stall (Interval, ms) | MILLISECONDS |  |  |
+| `io_stall` | Total Stall (Interval, ms) | MILLISECONDS |  |  |
+| `interval_seconds` | Interval Length | SECOND |  |  |
 
 ### SQL Server Backups (`Backups`) - collected every 60 Min
 
@@ -821,7 +904,7 @@ Backup history from msdb - one row per backup set with type, start and finish ti
 
 ### Last Database Backup (`LastDatabaseBackup`) - collected every 60 Min
 
-The most recent backup per database with its age in both days and hours, the last full and last log backup dates, and the recovery model. hours_since_last_backup carries the RPO threshold. A database that has never been backed up reports a sentinel age rather than a null.
+The most recent backup per database with its age in both days and hours, the last full and last log backup dates, and the recovery model. hours_since_last_backup carries the RPO threshold and is EMPTY for a database that has never been backed up - that state is reported by never_backed_up (1 or 0) and by hours_unbacked, which holds how long such a database has existed and carries the RPO threshold for the never case. days_since_last_backup reports -1 for it, which the console renders as Never.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -833,6 +916,8 @@ The most recent backup per database with its age in both days and hours, the las
 | `last_log_backup_date` | Last Log Backup Date | NA |  |  |
 | `recovery_model_desc` | Recovery Model | NA |  |  |
 | `hours_since_last_backup` | Hours Since Last Backup | HOURS | > 48 | > 168 |
+| `never_backed_up` | Never Backed Up (1 = no backup on record) | BOOLEAN |  |  |
+| `hours_unbacked` | Hours Unbacked (age of a never-backed-up database) | HOURS | > 48 | > 168 |
 
 ### Transaction Log Space (`TransactionLog`) - collected every 30 Min
 
@@ -847,22 +932,23 @@ Per-database transaction log size and the percentage of log space used, which ca
 
 ### Database I/O By Type (`DatabaseIoByType`) - collected every 15 Min
 
-Per-database I/O split by file type, so data-file and log-file activity can be told apart - the log is the write-latency-sensitive half.
+Per-database I/O split by file type, so data-file and log-file activity can be told apart - the log is the write-latency-sensitive half. The I/O counters are PER-INTERVAL deltas against the previous collection; size on disk is a gauge. Blank on the first collection and after a restart; interval_seconds states the window each row covers.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `database_id` (key) | Database ID | NA |  |  |
 | `database_name` | Database | NA |  |  |
 | `file_type` (key) | File Type | NA |  |  |
-| `num_of_reads` | Reads | NA |  |  |
-| `num_of_writes` | Writes | NA |  |  |
-| `num_of_ios` | Total I/Os | NA |  |  |
-| `num_of_bytes_read` | Bytes Read | BYTE |  |  |
-| `num_of_bytes_written` | Bytes Written | BYTE |  |  |
-| `io_stall_read_ms` | Read Stall (ms) | MILLISECONDS |  |  |
-| `io_stall_write_ms` | Write Stall (ms) | MILLISECONDS |  |  |
-| `io_stall` | Total Stall (ms) | MILLISECONDS |  |  |
+| `num_of_reads` | Reads (Interval) | NA |  |  |
+| `num_of_writes` | Writes (Interval) | NA |  |  |
+| `num_of_ios` | Total I/Os (Interval) | NA |  |  |
+| `num_of_bytes_read` | Bytes Read (Interval) | BYTE |  |  |
+| `num_of_bytes_written` | Bytes Written (Interval) | BYTE |  |  |
+| `io_stall_read_ms` | Read Stall (Interval, ms) | MILLISECONDS |  |  |
+| `io_stall_write_ms` | Write Stall (Interval, ms) | MILLISECONDS |  |  |
+| `io_stall` | Total Stall (Interval, ms) | MILLISECONDS |  |  |
 | `size_on_disk_mb` | Size on Disk (MB) | MB |  |  |
+| `interval_seconds` | Interval Length | SECOND |  |  |
 
 ### SQL Server Processes (`Processes`) - collected every 15 Min
 
@@ -1007,7 +1093,7 @@ The recent deadlock list parsed out of the system_health event file - event time
 | `resource_count` | Resources | NA |  |  |
 | `victim_process_id` | Victim Process | NA |  |  |
 | `victim_spid` | Victim SPID | NA |  |  |
-| `victim_database_id` | Victim Database ID | NA |  |  |
+| `victim_database_name` | Victim Database | NA |  |  |
 
 ### Blocked Sessions (`BlockedSessions`) - collected every 5 Min
 
@@ -1051,3 +1137,31 @@ Instance-wide worst-query costs as one numeric row per collection, which is what
 | `worst_query_max_cpu_ms` | Worst Query CPU, Slowest Execution (ms) | MILLISECONDS |  |  |
 | `cached_statements` | Cached Statements | NA |  |  |
 | `cached_executions` | Cached Executions | NA |  |  |
+
+### Associated Services (`AssociatedServices`) - collected every 5 Min
+
+The services this SQL Server instance reports - the running status, start mode, process id and service account for each. On Windows this is the database engine, the Agent and the Full-text Filter Daemon Launcher; on Linux only the Agent is reported. Services that belong to Windows rather than to SQL Server, such as the Browser and the VSS Writer, are not included.
+
+| Column | Label | Unit | Warning | Critical |
+|---|---|---|---|---|
+| `service_name` (key) | Service | NA |  |  |
+| `service_status` | Status | NA |  |  |
+| `start_mode` | Start Mode | NA |  |  |
+| `process_id` | Process ID | NA |  |  |
+| `service_account` | Service Account | NA |  |  |
+| `last_startup_time` | Last Startup Time | NA |  |  |
+| `service_path` | Service Path | NA |  |  |
+
+### Database Composition (`DatabaseComposition`) - collected every 24 Hr
+
+What each database's space is actually holding, rather than how full it is: data, indexes, reserved-but-unused and unallocated space, plus the transaction log used and its size. The page arithmetic is sp_spaceused's own, so the figures match what SQL Server reports directly.
+
+| Column | Label | Unit | Warning | Critical |
+|---|---|---|---|---|
+| `database_name` (key) | Database Name | NA |  |  |
+| `data_kb` | Data (KB) | KB |  |  |
+| `index_kb` | Indexes (KB) | KB |  |  |
+| `unused_kb` | Reserved but Unused (KB) | KB |  |  |
+| `unallocated_kb` | Unallocated (KB) | KB |  |  |
+| `log_used_kb` | Transaction Log Used (KB) | KB |  |  |
+| `log_allocated_kb` | Transaction Log Size (KB) | KB |  |  |

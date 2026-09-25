@@ -5,16 +5,16 @@ nav_order: 10
 
 # Monitoring pages
 
-The plug-in adds eight console pages to every SQL Server Database target. They are not a dashboard you glance at; each one answers a specific question, and knowing which page answers which question is most of the value. This page describes all eight: what each one is for, what it shows, and the things about it that are not obvious from looking at it.
+The plug-in adds nine console pages to every SQL Server Database target. They are not a dashboard you glance at; each one answers a specific question, and knowing which page answers which question is most of the value. This page describes all nine: what each one is for, what it shows, and the things about it that are not obvious from looking at it.
 
 > **Prerequisites for this page**
 > - A SQL Server Database target that has reached **Up**. See [Targets and properties](targets-and-properties.md#new-target).
 > - Monitoring credentials that resolve, or every page here is empty. See [Credentials](credentials.md).
 > - Nothing else. There is no extension to install and no per-page setup.
 
-**Where to find it:** open a SQL Server Database target. The eight pages are the left-hand tree on the target's home page, and they are also in the target menu under the target name.
+**Where to find it:** open a SQL Server Database target. The nine pages are the left-hand tree on the target's home page, and they are also in the target menu under the target name. The tree is grouped - Storage and Workload - and stays in place as the page scrolls, so on the longer pages you can move between pages without scrolling back to the top.
 
-**In this page:** Overview · Databases · Performance · Queries · Deadlocks · Indexes · Analysis · AG Failover Readiness · What a blank region means · Collection intervals
+**In this page:** Overview · Databases · Performance · Queries · Query History · Deadlocks · Indexes · Analysis · AG Failover Readiness · What a blank region means · Collection intervals
 
 ## Overview {#overview}
 
@@ -50,7 +50,9 @@ Three things worth knowing:
 
 Everything about the databases on the instance, and where the backup and restore actions live.
 
-Six regions: **Space Usage (Used vs Free)**, **Database Summary**, **Database Files**, **Filegroups**, **Backup Management** and **AlwaysOn Database Replicas**.
+Nine regions: **Database Summary**, **Database Composition**, **Backup Management**, **Space Usage (Used vs Free)**, **Physical Reads and Writes per Second**, **Physical Bytes Read and Written per Second**, **Database Files**, **Filegroups** and **AlwaysOn Database Replicas**.
+
+A selector at the top of the page drives every region on it. Leave it on all databases for the instance-wide view, or pick one database to narrow the whole page to it at once rather than hunting for that database's row in each region separately.
 
 ![The Databases page, showing the used-versus-free space chart and the per-database summary](images/databases-page.png) Backup, restore and delete-backup jobs are submitted from here. Those are jobs, and jobs have their own credential requirements that are separate from monitoring, so read [Jobs](jobs.md#prerequisites) before you submit one from this page.
 
@@ -70,13 +72,47 @@ The per-interval charts are the ones to trust for rates. Several SQL Server coun
 
 ## Queries {#queries}
 
-Five regions: **Top Queries by CPU**, **Top Queries by Execution Count**, **Currently Blocked Queries**, **Query Plan Statistics (Plan Cache)** and **Performance History Comparison**.
+Six regions: **Top Queries by CPU**, **Top Queries by Execution Count**, **Top Queries by Memory Grant**, **Currently Blocked Queries**, **Query Plan Statistics (Plan Cache)** and **Performance History Comparison**.
 
 ![The Queries page, showing top queries by CPU with executions, average and total CPU, and logical reads](images/queries-page.png)
 
-The first two read the plan cache, which means they show what SQL Server currently remembers, not a complete history. A query that ran expensively an hour ago and has since been evicted will not appear. Anything evicted between collections is gone; the page does not reconstruct it.
+This page answers "what is expensive right now". For "what was expensive between two times", see [Query History](#query-history) below.
+
+The top-queries regions read the plan cache, which means they show what SQL Server currently remembers, not a complete history. A query that ran expensively an hour ago and has since been evicted will not appear. Anything evicted between collections is gone; the page does not reconstruct it.
+
+**The CPU, execution and memory figures are per collection interval, not lifetime totals.** SQL Server's own counters are cumulative since the plan was compiled, which means a query that ran hard last week and has been idle since still carries a large number. The plug-in differences them between collections, so what you see is what that query cost during the interval, and a query that has stopped running falls to zero instead of staying near the top of the list forever. A query the plug-in has not seen before shows a blank rather than a guess for its first interval, because there is nothing to difference it against yet.
 
 Currently Blocked Queries is the region to reach for during a live incident, since it names the blocking session rather than only the victim.
+
+## Query History {#query-history}
+
+The only page in the plug-in that takes a time range you choose, and the one to open after the fact: which queries burned the most CPU between two times.
+
+![The Query History page, showing the Timespan panel above the top queries by CPU for the chosen range](images/query-history-page.png)
+
+Set **Start** and **End** in the Timespan panel and choose **Update**; **Reset** returns to the last two hours. The range accepts times, not just dates, so a fifteen-minute window around an incident is a reasonable thing to ask for. Results are the top 100 queries by CPU in that range, shown 20 to a page.
+
+![The foot of the Query History table, showing the pager and the row count for the chosen range](images/query-history-paging.png)
+
+For each query: the query hash, the query text, CPU in the range, average CPU per execution, executions, elapsed time, logical reads, and when it was last seen.
+
+Three things worth knowing before you rely on it.
+
+**Times are in the timezone EM has registered for the target**, not your browser's and not necessarily the SQL Server host's own clock. The panel names that timezone under the inputs, and that label is the thing to read - the two can differ, and on a monitored host running UTC they will.
+
+**The figures are sums of what each collection measured**, not a cumulative plan-cache number. That is what makes a range meaningful: a query that ran hard for ten minutes three hours ago shows those ten minutes, and a quiet range shows nothing rather than carrying a lifetime total forward.
+
+**A query is counted from the second collection it appears in.** The first has nothing to difference against, so it contributes nothing rather than a guess. Collections run every 15 minutes, which means a query that started and finished inside a single interval, and had never been seen before, can be missing from a range that covers it. A query that runs repeatedly is unaffected. This is the one question the page cannot always answer, and it is better to know it than to discover it during an incident.
+
+Ranges older than raw metric retention - `metric_values_retention`, seven days by default - are served from Enterprise Manager's hourly rollup instead. The totals stay accurate; the resolution becomes hourly, and the page says so when it happens. If a range reaches back further than the repository actually kept, the page tells you how far the history goes rather than quietly reporting a short total.
+
+If you need a cut the page does not offer - a different ranking, more rows, or a join to something it does not show - the statement behind it is not hidden. It is `XMSS_TOP_QUERIES_CPU_RANGE`, in the plug-in's MPCUI descriptor on the OMS:
+
+```
+<OMS_HOME>/plugins/ip.em.xmss.oms.plugin_<version>/metadata/mpcui/ip_mssql_database.xml
+```
+
+It reads `MGMT$METRIC_DETAILS`, `MGMT$METRIC_HOURLY` and `MGMT$METRIC_CURRENT`, and takes the target GUID, the rollup-half lower bound, the raw/rollup boundary and the end time, with dates as `yyyy-mm-dd hh24:mi:ss`. Anyone with repository read access can run it against any window. One row it returns is a sentinel whose query hash is `__XMSS_NO_ROWS__`; it exists so the result set is never empty, and you should discard it.
 
 ## Deadlocks {#deadlocks}
 
