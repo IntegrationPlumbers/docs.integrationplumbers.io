@@ -10,7 +10,7 @@ nav_order: 3
 | | |
 |---|---|
 | Product | Integration Plumbers SQL Server Plug-in for Oracle Enterprise Manager |
-| Release | Open Beta — plug-in `ip.em.xmsb`, versions `24.1.9.N.0` (EM 24ai) and `13.5.9.N.0` (EM 13.5); the current drop is `24.1.9.12.0` / `13.5.9.12.0` |
+| Release | Open Beta — plug-in `ip.em.xmsb`, versions `24.1.9.N.0` (EM 24ai) and `13.5.9.N.0` (EM 13.5); the current drop is `24.1.9.13.0` / `13.5.9.13.0` |
 | Beta period | From 2026-09-01 until general availability (expected late 2026); beta licence keys expire 2026-10-31 |
 | Intended use | Evaluation in non-production Enterprise Manager environments |
 | Reference | [SQL Server plug-in User Guide](index.md) — the authoritative description of what the plug-in does |
