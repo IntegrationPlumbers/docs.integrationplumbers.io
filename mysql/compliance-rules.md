@@ -8,7 +8,7 @@ nav_order: 10
 This chapter describes the compliance framework the plug-in ships, how to associate it, and every rule.
 **Topics:** 9.1 The MySQL Framework · 9.2 Associating standards and reading results · 9.3 Rules by standard
 ## 9.1 The MySQL Framework
-The plug-in ships finished compliance content for `ip_mysql_database_beta` targets: one framework, five standards and 65 rules, all authored by `INTEGRATION_PLUMBERS` at version 1. There is no rule to write and nothing to import — associate the content ([9.2](#associating-standards-and-reading-results)) and it evaluates.
+The plug-in ships finished compliance content for `ip_mysql_database_beta` targets: one framework, five standards and 65 rules, all authored by `INTEGRATION_PLUMBERS` at version 1. There is no rule to write and nothing to import — associate the content ([9.2](#92-associating-standards-and-reading-results)) and it evaluates.
 
 The framework is **MySQL Framework (Integration Plumbers)**, and it collects all five standards:
 
@@ -20,7 +20,7 @@ The framework is **MySQL Framework (Integration Plumbers)**, and it collects all
 | MySQL Schema Standard | `xmys_schema_standard` | 2 | Server-enforced data integrity settings. |
 | MySQL Security Standard | `xmys_security_standard` | 36 | Audit logging, account and privilege posture, password policy, transport and at-rest encryption, and file-system exposure. |
 
-Associate the framework to get all five, or a single standard when you want a narrower scope ([4.6](targets-and-properties.md#associate-compliance-standards)).
+Associate the framework to get all five, or a single standard when you want a narrower scope ([4.6](targets-and-properties.md#46-associate-compliance-standards)).
 
 Every rule carries two attributes that shape how a violation is reported:
 
@@ -29,20 +29,20 @@ Every rule carries two attributes that shape how a violation is reported:
 
 9.3 lists every rule under its standard, with the description of what the rule checks, its severity, and the advice for fixing a violation.
 
-> **Note:** Rule descriptions and advice contain placeholders written as `%variable%` — `%binlog_checksum%` and `%version%`, for example. In the console, Enterprise Manager substitutes each placeholder with that target's own collected value, so the advice reads with the server's real setting in it. This guide prints the rules as they are authored, so the placeholders appear literally in [9.3](#rules-by-standard).
+> **Note:** Rule descriptions and advice contain placeholders written as `%variable%` — `%binlog_checksum%` and `%version%`, for example. In the console, Enterprise Manager substitutes each placeholder with that target's own collected value, so the advice reads with the server's real setting in it. This guide prints the rules as they are authored, so the placeholders appear literally in [9.3](#93-rules-by-standard).
 
 ## 9.2 Associating standards and reading results
 ![Compliance Results page with MySQL standards](images/compliance-results.png)
 Compliance content evaluates only against targets it has been associated with, and adding a target creates no association: a new MySQL Database target has no compliance results until you make one.
 
-Associate the framework, or individual standards, as described in [4.6](targets-and-properties.md#associate-compliance-standards) — from **Enterprise → Compliance → Library**, or with `emcli associate_cs_targets` one standard at a time.
+Associate the framework, or individual standards, as described in [4.6](targets-and-properties.md#46-associate-compliance-standards) — from **Enterprise → Compliance → Library**, or with `emcli associate_cs_targets` one standard at a time.
 
 Where the results appear:
 
 - **Enterprise → Compliance → Results** is the full view. It lists every associated framework and standard with its compliance score and its violation counts by severity. Drill from a standard into a rule to see which targets violate it, and from a violation into that rule's description and advice.
 - **The target's home page** carries a **Compliance Summary** region once the target has been evaluated, giving its score and its open violations. This is the quickest route from a server to its own findings.
 
-**When evaluation happens.** These are configuration-based rules: they read the plug-in's configuration snapshots ([6.2](metrics-reference.md#how-to-read-a-metric-group)), which collect on a 24-hour schedule. Results therefore refresh about once a day, and a standard associated this morning produces its first score after the next configuration collection rather than immediately. To see the effect of a change sooner, refresh the target's configuration on demand — from the target-type menu, **Configuration → Last Collected**, then the page's refresh action — and let the evaluation follow that collection.
+**When evaluation happens.** These are configuration-based rules: they read the plug-in's configuration snapshots ([6.2](metrics-reference.md#62-how-to-read-a-metric-group)), which collect on a 24-hour schedule. Results therefore refresh about once a day, and a standard associated this morning produces its first score after the next configuration collection rather than immediately. To see the effect of a change sooner, refresh the target's configuration on demand — from the target-type menu, **Configuration → Last Collected**, then the page's refresh action — and let the evaluation follow that collection.
 
 > **Note:** Do not read a score before there is one. Confirm the Compliance Summary region names an evaluation time for the target; a standard associated minutes ago has not been evaluated yet, and an absence of violations at that point means nothing has run.
 

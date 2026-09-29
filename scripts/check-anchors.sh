@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Verify every relative `page.md#anchor` link in postgresql/*.md resolves to a heading in the target page.
-# Heading ids: an explicit kramdown IAL `{#id}` wins; otherwise the kramdown auto-id
-# (strip leading non-letters, drop chars other than [A-Za-z0-9 -], spaces->hyphens, lowercase).
+# Heading ids: an explicit kramdown IAL `{#id}` wins; otherwise the id GitHub Pages renders for
+# this site, which is kramdown's GFM parser's: lowercase, drop chars other than [A-Za-z0-9_ -],
+# spaces->hyphens, and LEADING DIGITS ARE KEPT ("7.1 Default thresholds" -> 71-default-thresholds).
+# Verified 2026-09-29 against every MySQL heading on the live site (322/322); the old
+# strip-leading-non-letters rule missed 56 and agreed with 162 links that resolved nowhere.
 # Usage: scripts/check-anchors.sh [file ...]   (default: postgresql/*.md). Exit 1 on any unresolved anchor.
 set -u
 cd "$(dirname "$0")/.."
@@ -13,7 +16,7 @@ ids_of() { # print all heading ids of a markdown file, one per line
       echo "${BASH_REMATCH[1]}"
     else
       t="${h#"${h%%[! #]*}"}"          # drop leading #'s and spaces
-      t="$(printf '%s' "$t" | sed -E 's/^[^A-Za-z]+//; s/[^A-Za-z0-9 -]//g; s/ /-/g' | tr '[:upper:]' '[:lower:]')"
+      t="$(printf '%s' "$t" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_ -]//g; s/ /-/g')"
       echo "$t"
     fi
   done

@@ -8,9 +8,9 @@ nav_order: 2
 The shortest path from a downloaded archive to a MySQL target you can actually look at.
 
 > **Prerequisites for this page**
-> - Enterprise Manager access that can import an OPAR and deploy plug-ins, for example `sysman`. See [Prerequisites](prerequisites.md#enterprise-manager-and-agents).
+> - Enterprise Manager access that can import an OPAR and deploy plug-ins, for example `sysman`. See [Prerequisites](prerequisites.md#21-enterprise-manager-and-agents).
 > - A **Linux** Management Agent on, or with network reach to, each MySQL server. Windows agents are not supported in this release.
-> - The ability to create an account on the MySQL server you want to monitor. See [Prerequisites](prerequisites.md#the-monitoring-user) for the exact grants.
+> - The ability to create an account on the MySQL server you want to monitor. See [Prerequisites](prerequisites.md#24-the-monitoring-user) for the exact grants.
 > - Your **beta licence key** for `ip.em.xmyb`, from your Integration Plumbers contact.
 
 **In this page:** Before you start · Install the plug-in · Add your first target · Check it worked · What to look at first · If something is wrong
@@ -28,12 +28,12 @@ Have these to hand:
 | What | Notes |
 |---|---|
 | The OPAR that matches your EM line | `24.1.9.N.0` for Enterprise Manager 24ai, `13.5.9.N.0` for 13.5. They are **not** interchangeable — EM refuses the other one at import with `Incompatible version` |
-| The MySQL server's address and port | Default `3306`. A local agent can use the Unix socket instead — see [Prerequisites](prerequisites.md#unix-socket-connections) |
-| A monitoring account on that server | `SELECT`, `PROCESS` and `REPLICATION CLIENT`. The exact statements are in [Prerequisites](prerequisites.md#the-monitoring-user) |
+| The MySQL server's address and port | Default `3306`. A local agent can use the Unix socket instead — see [Prerequisites](prerequisites.md#26-unix-socket-connections) |
+| A monitoring account on that server | `SELECT`, `PROCESS` and `REPLICATION CLIENT`. The exact statements are in [Prerequisites](prerequisites.md#24-the-monitoring-user) |
 | Your beta licence key | One per licensed MySQL Database target. Cluster and ClusterSet targets are containers and need no key |
-| MySQL Connector/J | One `mysql-connector-j-*.jar` (8.4.0 is the tested version) on each agent host that will monitor MySQL, in the agent's `ip_plugin/xmyb/lib` directory, placed before the plug-in is deployed to that agent. The driver is not inside the plug-in. Download, checksum and directory: [Prerequisites](prerequisites.md#mysql-connectorj-on-agent-hosts) |
+| MySQL Connector/J | One `mysql-connector-j-*.jar` (8.4.0 is the tested version) on each agent host that will monitor MySQL, in the agent's `ip_plugin/xmyb/lib` directory, placed before the plug-in is deployed to that agent. The driver is not inside the plug-in. Download, checksum and directory: [Prerequisites](prerequisites.md#29-mysql-connectorj-on-agent-hosts) |
 
-If you plan to monitor an InnoDB ClusterSet, also install **MySQL Shell** (`mysqlsh`) on the agent host now — see [Prerequisites](prerequisites.md#mysql-shell-for-clusterset-targets). Without it ClusterSet health falls back to a repository rollup that cannot assess DR promotion readiness.
+If you plan to monitor an InnoDB ClusterSet, also install **MySQL Shell** (`mysqlsh`) on the agent host now — see [Prerequisites](prerequisites.md#22-mysql-shell-for-clusterset-targets). Without it ClusterSet health falls back to a repository rollup that cannot assess DR promotion readiness.
 
 ## 2. Install the plug-in {#install}
 
@@ -67,7 +67,7 @@ emcli add_target -name="<server> (Beta)" -type=ip_mysql_database_beta -host=<age
 
 `-host` is the **agent** host — the machine doing the monitoring — while `ip_mysql_database_host` is the MySQL server. They are often different machines, and swapping them is the most common mistake at this step.
 
-Every property is listed in [Targets and properties](targets-and-properties.md#target-properties).
+Every property is listed in [Targets and properties](targets-and-properties.md#41-target-properties).
 
 ## 4. Check it worked {#check}
 
