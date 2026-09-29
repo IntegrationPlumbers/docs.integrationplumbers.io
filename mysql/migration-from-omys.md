@@ -52,23 +52,23 @@ the source.
    | `KERBEROS: …` | the omys target set a KDC/realm; xmys reads only a `krb5.conf` | put the path to a krb5.conf on the agent host in `kerberos_config` |
    | `LICENSE: no key on source` / `LICENSE: beta key exported` | omys has no licence; a beta key is refused by GA (`Wrong Plug-in`) | paste the GA key into `license_key` |
    | `AGENT: Windows agent` | ip.em.xmys ships a Linux agent side only | set `agent_host` to a Linux agent that reaches the server. **`modify_target` cannot move a target between agents**, so if the replacement target already exists, `emcli delete_target` it first and then re-run `apply` — a re-run alone will not move it |
-   | `TLS: source uses <mode>/truststore` | the source is set to `verify_ca` or `verify_identity`, or carries a truststore path — the modes and the client truststore credentials this release defers (guide [2.5](prerequisites.md#tls), 4.1) | set `use_secure` to `required` (or `disabled`) and clear `ts_dir` / `ts_type`. The exported values are left as the source had them so you can see what it did; `apply` refuses the row until the flag is gone, and refuses the values themselves in any case |
+   | `TLS: source uses <mode>/truststore` | the source is set to `verify_ca` or `verify_identity`, or carries a truststore path — the modes and the client truststore credentials this release defers (guide [2.5](prerequisites.md#25-tls), 4.1) | set `use_secure` to `required` (or `disabled`) and clear `ts_dir` / `ts_type`. The exported values are left as the source had them so you can see what it did; `apply` refuses the row until the flag is gone, and refuses the values themselves in any case |
    | `STATUS: source target is Down` | informational | migrate anyway, or fix the source first |
    | `NAME: …` | informational | rename in `new_name` if you like |
-   | `DRLAG: source sets dr_max_lag=<n>` | the omys ClusterSet carries a DR max tolerated GTID lag and the CSV has no column for it | informational; `apply` does not block on it. After `apply`, set **DR Max Tolerated GTID Lag (transactions)** (`ip_mysql_clusterset_dr_max_lag`) on the new ClusterSet target to the same value — through **Monitoring Configuration** ([4.5](targets-and-properties.md#modify-or-remove-a-target)) or `emcli modify_target … -properties="ip_mysql_clusterset_dr_max_lag:<n>" -on_agent`. Left alone it reverts to the shipped default and the `dr_promotion_ready` condition evaluates against that instead |
+   | `DRLAG: source sets dr_max_lag=<n>` | the omys ClusterSet carries a DR max tolerated GTID lag and the CSV has no column for it | informational; `apply` does not block on it. After `apply`, set **DR Max Tolerated GTID Lag (transactions)** (`ip_mysql_clusterset_dr_max_lag`) on the new ClusterSet target to the same value — through **Monitoring Configuration** ([4.5](targets-and-properties.md#45-modify-or-remove-a-target)) or `emcli modify_target … -properties="ip_mysql_clusterset_dr_max_lag:<n>" -on_agent`. Left alone it reverts to the shipped default and the `dr_promotion_ready` condition evaluates against that instead |
    `use_secure` accepts `disabled` and `required` only. `verify_ca` and `verify_identity` are reserved in the CSV
    schema but rejected in this release, and so is any value in the `ts_dir` / `ts_type` columns: the client
-   truststore credentials those modes depend on are deferred (guide [2.5](prerequisites.md#tls), 4.1). Use `required` where you need an
+   truststore credentials those modes depend on are deferred (guide [2.5](prerequisites.md#25-tls), 4.1). Use `required` where you need an
    encrypted session.
    Fill `username` (or pass `--username`) and, for rows that use a different account, `password` — the
-   least-privilege `em_monitoring` account and its grants are in guide [2.4](prerequisites.md#the-monitoring-user). None of `username`, `password`,
+   least-privilege `em_monitoring` account and its grants are in guide [2.4](prerequisites.md#24-the-monitoring-user). None of `username`, `password`,
    `--username` or `$MYSQL_MON_PW` may contain `;` or `:` — `emcli`'s `-credentials` option has no separator
    override, so either character silently corrupts every row it reaches. (A later release may lift this: `emcli`
    exposes a `monitoring_creds` separator name that `add_target` may accept, which a follow-up task will
    establish; until then the refusal is the whole of the answer, and the fix is a password without those two
    characters.)
    Before `apply`, place MySQL Connector/J in `<agentStateDir>/ip_plugin/xmys/lib/` on every agent named in
-   `agent_host` (guide [2.9](prerequisites.md#mysql-connectorj-on-agent-hosts)). The new targets start collecting the moment they are created, and a target created on
+   `agent_host` (guide [2.9](prerequisites.md#29-mysql-connectorj-on-agent-hosts)). The new targets start collecting the moment they are created, and a target created on
    an agent without the driver reports the driver message instead of data until the jar is there.
 3. **Apply**: `MYSQL_MON_PW='…' mysql-onboard.sh apply --csv inventory.csv --username em_monitoring --dry-run`
    prints every `emcli add_target` it would run (passwords redacted); drop `--dry-run` to create the targets.
@@ -85,7 +85,7 @@ the source.
    everything about it is right, and a CSV with N targets that never come Up takes up to N x timeout in total.
 5. **Coexist**: leave both plug-ins monitoring for as long as your change process needs — thresholds, reports and
    habits port by the tables above, not by column name.
-6. **Associate** the shipped standards: `mysql-onboard.sh associate --csv inventory.csv` (see guide [4.6](targets-and-properties.md#associate-compliance-standards) for the
+6. **Associate** the shipped standards: `mysql-onboard.sh associate --csv inventory.csv` (see guide [4.6](targets-and-properties.md#46-associate-compliance-standards) for the
    five standards; the console framework association is the alternative).
 7. **Retire** the sources: `mysql-onboard.sh retire --csv inventory.csv` prints the plan; add `--yes` to run
    `emcli delete_target` for every source whose replacement verifies Up. A source whose replacement is not Up is
@@ -106,7 +106,7 @@ contents for a tag in `-credentials`).
 One exposure remains, and it is EM CLI's, not the script's: `add_target`/`modify_target` have no file-based form for
 `-properties` (same probe), so the licence key is still inline there, visible in that `emcli` process's command line
 for the few seconds of each call to any other account with shell access to the OMS host — exactly as with the inline
-`emcli add_target` in guide [4.3](targets-and-properties.md#add-a-target-with-em-cli). Run `apply` on a host where only administrators have shell access.
+`emcli add_target` in guide [4.3](targets-and-properties.md#43-add-a-target-with-em-cli). Run `apply` on a host where only administrators have shell access.
 
 Both files the tool creates — the run log and export's `--out` CSV — are created **owner-only (mode 600)**,
 because both can carry licence keys; and the `signature=` half of every licence key is masked

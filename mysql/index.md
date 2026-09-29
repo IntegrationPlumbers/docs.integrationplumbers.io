@@ -59,7 +59,7 @@ The plug-in adds three target types. Which ones you use depends on how your MySQ
 
 The three types are independent of each other. A cluster or ClusterSet target does not create database targets for its members, and it does not need them: add whichever types match the questions you need answered. Most estates run database targets for every instance and one cluster or ClusterSet target above them, so that instance-level detail and group-level health both have somewhere to live.
 
-> **Note:** Each target carries its own monitoring properties and credentials, including its own TLS Mode. Nothing is inherited from another target. See [4.1](targets-and-properties.md#target-properties).
+> **Note:** Each target carries its own monitoring properties and credentials, including its own TLS Mode. Nothing is inherited from another target. See [4.1](targets-and-properties.md#41-target-properties).
 
 ## 1.3 Supported MySQL versions and platforms
 **The plug-in does not block MySQL versions it has not seen.** MySQL releases are, in our experience, backward compatible for monitoring purposes, so a server newer than the matrix below is expected to work: add it, and the plug-in attempts full monitoring. We certify versions in this documentation as we validate them, prioritizing LTS releases — the series MySQL publishes dedicated release repositories for. If an uncertified version misbehaves, the metric groups it affects degrade to collection errors on those groups; they do not take monitoring of the target down as a whole.
@@ -74,8 +74,8 @@ Certification as of this build:
 | MySQL 9.5 / 9.6 / 26.x innovation releases | — | Expected to work; not yet certified |
 | InnoDB Cluster (Group Replication, 8.4) | — | **Certified** (cluster target with member stats) |
 | InnoDB ClusterSet | — | Validated on MySQL 9.5 commercial; 8.4 ClusterSet not yet certified |
-| Amazon RDS for MySQL 8.4 | Comprehensive | **Certified** (2026-09-09, RDS MySQL 8.4.11) — added manually, see [4.4](targets-and-properties.md#autodiscovery); managed-service notes there |
-| Aurora MySQL / Cloud SQL / Azure Database for MySQL | — | Supported — added manually, see [4.4](targets-and-properties.md#autodiscovery); not yet certified |
+| Amazon RDS for MySQL 8.4 | Comprehensive | **Certified** (2026-09-09, RDS MySQL 8.4.11) — added manually, see [4.4](targets-and-properties.md#44-autodiscovery); managed-service notes there |
+| Aurora MySQL / Cloud SQL / Azure Database for MySQL | — | Supported — added manually, see [4.4](targets-and-properties.md#44-autodiscovery); not yet certified |
 | EM 24ai (24.1) | — | **Certified**, including the UI |
 | EM 13.5 | — | Collection + compliance certified; console home and chart pages verified on the drop 10 build (2026-09-16); the 13.5 edition (`13.5.9.N.0`) is built from the same source and available with the beta |
 
@@ -84,10 +84,10 @@ Certification as of this build:
 > **Note:** An Enterprise Manager 13.5 edition (`13.5.9.N.0`) is built from the same source as the 24ai edition and is available with the beta, as the matrix row above notes. On 13.5, collection and compliance are certified in our lab and the console's home and chart pages were verified on the drop 10 build (2026-09-16); the remaining console pages have not been individually walked on 13.5, so treat 24ai as the reference platform and report any 13.5 rendering difference you see.
 
 ## 1.4 Beta status
-This build is a beta. It is feature-complete for the scope listed in [10.1](whats-new.md#early-access-build-2026-08-18) — the three target types, their metric groups and pages, the shipped thresholds, the compliance framework, the Run EXPLAIN job and the connection options — and every one of those has been deployed and exercised against live MySQL targets in our lab before shipping. What remains for general availability is additive: broader certification, and features that extend this scope rather than change it. Everything we know to be incomplete or unproven is in the boundaries list at the end of 10.1 rather than left for you to discover.
+This build is a beta. It is feature-complete for the scope listed in [10.1](whats-new.md#101-early-access-build-2026-08-18) — the three target types, their metric groups and pages, the shipped thresholds, the compliance framework, the Run EXPLAIN job and the connection options — and every one of those has been deployed and exercised against live MySQL targets in our lab before shipping. What remains for general availability is additive: broader certification, and features that extend this scope rather than change it. Everything we know to be incomplete or unproven is in the boundaries list at the end of 10.1 rather than left for you to discover.
 
 Beta means the release has not yet earned a production monitoring commitment, and that metric names, thresholds and properties may still change in response to what beta users find. Any change that needs operator action is documented with its remediation before it ships.
 
-**Give us feedback.** Send findings — bugs, confusing metrics, missing thresholds, unclear documentation — through your Integration Plumbers support contact. Include the plug-in version (`emcli list_plugins_on_server`), the MySQL version, and the metric group or console page involved. If you hit something that is not in the boundaries list in [10.1](whats-new.md#early-access-build-2026-08-18), we especially want to hear about it.
+**Give us feedback.** Send findings — bugs, confusing metrics, missing thresholds, unclear documentation — through your Integration Plumbers support contact. Include the plug-in version (`emcli list_plugins_on_server`), the MySQL version, and the metric group or console page involved. If you hit something that is not in the boundaries list in [10.1](whats-new.md#101-early-access-build-2026-08-18), we especially want to hear about it.
 
 > **Note:** [Chapter 6](metrics-reference.md#metrics-reference) points to the generated metrics reference, which is produced from the plug-in's own metadata for this exact build. Where this guide and the reference differ on a column, a unit or a threshold, the reference is authoritative.

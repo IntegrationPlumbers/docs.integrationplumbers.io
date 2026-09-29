@@ -16,7 +16,7 @@ check when backup monitoring shows nothing.
 
 The plugin's monitoring user (`em_monitoring`) only ever reads history, never runs a
 backup. Already covered by the global `SELECT` grant set up in
-[Prerequisites](prerequisites.md#the-monitoring-user) (`GRANT SELECT, PROCESS, REPLICATION CLIENT ON
+[Prerequisites](prerequisites.md#24-the-monitoring-user) (`GRANT SELECT, PROCESS, REPLICATION CLIENT ON
 *.*`); only relevant if your policy scopes `SELECT` to named schemas instead of
 granting it globally, in which case add:
 

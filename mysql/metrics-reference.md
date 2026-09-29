@@ -10,7 +10,7 @@ This chapter explains how to read the generated metrics reference.
 ## 6.1 Where the reference is
 The plug-in's metric documentation is generated from the plug-in's own target metadata, for the exact build you deploy, rather than written by hand — so it cannot drift from what the plug-in actually collects.
 
-For this build it is the reference below, shipped alongside this guide. It covers all 116 metric groups: 105 on MySQL Database, 8 on MySQL Cluster and 3 on MySQL ClusterSet, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship. Where this guide and the reference differ on a column name, a unit or a threshold, the reference is authoritative ([1.4](index.md#beta-status)).
+For this build it is the reference below, shipped alongside this guide. It covers all 116 metric groups: 105 on MySQL Database, 8 on MySQL Cluster and 3 on MySQL ClusterSet, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship. Where this guide and the reference differ on a column name, a unit or a threshold, the reference is authoritative ([1.4](index.md#14-beta-status)).
 
 > **Note:** The reference accompanies this guide: in the repository as `user-guide-metrics-reference.md`, on the documentation site as `metrics-reference.md`. Either way, use the copy that matches the build you are running.
 
@@ -24,7 +24,7 @@ The heading gives the group's display name, its internal name in parentheses —
 | **Column** | The column's internal name, in the form EM CLI and threshold commands take. A `(key)` marker means the column is part of the group's key, so the group returns one row per distinct key value — per channel, per member, per table, per digest — rather than a single row. A group with no key column returns exactly one row per collection. |
 | **Label** | The display name shown in the console. |
 | **Unit** | The unit Enterprise Manager labels the value with, for example `MICROSEC`, `BYTE`, `SECOND` or `PERCENTAGE`. `NA` means the value carries no unit — a count, a state or a string. |
-| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 21 curated thresholds ship ([7.1](alerts-and-thresholds.md#default-thresholds)), and the reference also shows the three availability `Status` conditions, so 24 columns in the reference tables carry a default. A blank cell is not an omission and it does not stop you setting your own ([7.2](alerts-and-thresholds.md#changing-thresholds)). |
+| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 21 curated thresholds ship ([7.1](alerts-and-thresholds.md#71-default-thresholds)), and the reference also shows the three availability `Status` conditions, so 24 columns in the reference tables carry a default. A blank cell is not an omission and it does not stop you setting your own ([7.2](alerts-and-thresholds.md#72-changing-thresholds)). |
 
 Groups marked **configuration snapshot** in their heading behave differently from the rest. They collect on a 24-hour schedule into Enterprise Manager's configuration history rather than into the metric tables, which is what makes a MySQL server's settings comparable over time and against other servers under **Enterprise → Configuration**, and what the compliance rules in [chapter 9](compliance-rules.md#compliance-standards) evaluate. They carry no thresholds and raise no alerts, and a `(key)` column in one of them means the snapshot holds several rows — one per account, for example — rather than one row of settings.
 
@@ -39,9 +39,9 @@ Column names follow a few conventions consistently, so the name usually tells yo
 | `_per_sec` | A per-second rate. |
 | `_us` | Microseconds. Statement and wait latencies are reported in microseconds throughout. |
 | `d_` prefix | A per-interval delta on the wait and statement digest groups, the keyed equivalent of `_delta`. |
-| `*Live` group | A real-time mirror of the configuration snapshot group of the same name — the same server variables, read on demand for the console's configuration side panels ([5.1](monitoring-pages.md#mysql-database-pages)) instead of on the daily configuration schedule. Same values, different freshness. |
+| `*Live` group | A real-time mirror of the configuration snapshot group of the same name — the same server variables, read on demand for the console's configuration side panels ([5.1](monitoring-pages.md#51-mysql-database-pages)) instead of on the daily configuration schedule. Same values, different freshness. |
 
-> **Note:** The replication metric group reports two different boolean vocabularies. `replica_io_running` returns `Yes` or `No`, while `replica_sql_running` returns `true` or `false`. The shipped thresholds match those forms exactly ([7.1](alerts-and-thresholds.md#default-thresholds)); a custom threshold, compliance rule or script that reads both columns must not assume a single format.
+> **Note:** The replication metric group reports two different boolean vocabularies. `replica_io_running` returns `Yes` or `No`, while `replica_sql_running` returns `true` or `false`. The shipped thresholds match those forms exactly ([7.1](alerts-and-thresholds.md#71-default-thresholds)); a custom threshold, compliance rule or script that reads both columns must not assume a single format.
 
 Generated from the plug-in's target metadata for build 24.1.9.10.0.
 Each metric group lists its columns, display labels, units, and the default

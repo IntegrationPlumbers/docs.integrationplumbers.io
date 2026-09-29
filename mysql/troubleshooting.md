@@ -43,11 +43,11 @@ The key is checked on the agent host every 15 minutes, and again as soon as the 
 
 **`Incompatible version` at import.** The beta ships one artifact per Enterprise Manager line, each built with that line's development kit, and EM refuses the other one. Use `24.1.9.N.0` on EM 24ai and `13.5.9.N.0` on 13.5.
 
-**A new drop's metrics show no data.** Some drops move target metadata. When they do, the OMS side and the agent side must both be deployed — deploy the agent side in the same maintenance window as the OMS side. Until you do, metrics added by that drop have nowhere to come from and their pages stay empty while everything else keeps working. [Upgrade notes](install-and-upgrade.md#upgrading) lists every drop that needs it.
+**A new drop's metrics show no data.** Some drops move target metadata. When they do, the OMS side and the agent side must both be deployed — deploy the agent side in the same maintenance window as the OMS side. Until you do, metrics added by that drop have nowhere to come from and their pages stay empty while everything else keeps working. [Upgrade notes](install-and-upgrade.md#34-upgrading) lists every drop that needs it.
 
 **The OMS restarted during deployment.** Expected on drops that move target metadata. `emcli get_plugin_deployment_status -plugin=ip.em.xmyb` tells you when it is back.
 
-**`MySQL Connector/J not found: no mysql-connector-j-*.jar in <directory>; files present: ...`** Every collection on that agent, and Run EXPLAIN, reports this until the driver is in place; the target is not showing a MySQL problem. The message names the directory the plug-in looked in, `<agentStateDir>/ip_plugin/xmyb/lib`, and lists what it found there. Put exactly one Connector/J jar in that directory (8.4.0 is the tested version; the prerequisites page covers later ones), readable by the agent user; the next collection uses it. If the message says the directory was missing and has been created, the agent had never had a driver staged. See [Prerequisites](prerequisites.md#mysql-connectorj-on-agent-hosts).
+**`MySQL Connector/J not found: no mysql-connector-j-*.jar in <directory>; files present: ...`** Every collection on that agent, and Run EXPLAIN, reports this until the driver is in place; the target is not showing a MySQL problem. The message names the directory the plug-in looked in, `<agentStateDir>/ip_plugin/xmyb/lib`, and lists what it found there. Put exactly one Connector/J jar in that directory (8.4.0 is the tested version; the prerequisites page covers later ones), readable by the agent user; the next collection uses it. If the message says the directory was missing and has been created, the agent had never had a driver staged. See [Prerequisites](prerequisites.md#29-mysql-connectorj-on-agent-hosts).
 
 **`MySQL Connector/J: N mysql-connector-j-*.jar files in <directory> (...); keep exactly one.`** Two or more drivers were left in the directory, typically after an upgrade. Remove all but the one you mean to use.
 
@@ -61,7 +61,7 @@ The key is checked on the agent host every 15 minutes, and again as soon as the 
 
 ## 3. Connecting to MySQL {#connecting}
 
-**Target stays Down, or `Access denied` for an account you just created.** The agent connects over TCP, so the monitoring account's host clause has to match the agent's address *as MySQL sees it* — not `localhost`. An account created as `'em_monitoring'@'localhost'` will not authenticate a remote agent. See [Prerequisites](prerequisites.md#the-monitoring-user).
+**Target stays Down, or `Access denied` for an account you just created.** The agent connects over TCP, so the monitoring account's host clause has to match the agent's address *as MySQL sees it* — not `localhost`. An account created as `'em_monitoring'@'localhost'` will not authenticate a remote agent. See [Prerequisites](prerequisites.md#24-the-monitoring-user).
 
 **`Access denied` even though the account exists with the right host clause.** MySQL matches the *most specific* host entry first, and an anonymous account (`''@'localhost'`, present by default in some distributions) is more specific than `'em_monitoring'@'%'` for a connection that arrives as localhost. The anonymous entry wins, authentication is attempted against it, and it fails. Check with:
 
@@ -71,7 +71,7 @@ SELECT user, host FROM mysql.user ORDER BY user, host;
 
 If an anonymous row exists and your agent connects locally, either remove it (`DROP USER ''@'localhost';`) or connect over TCP to an address that does not match it. This costs people hours because the error names your account while the server never tried it.
 
-**Socket connections.** A local agent can use the Unix socket instead of TCP, which changes the host-clause rules — see [Prerequisites](prerequisites.md#unix-socket-connections).
+**Socket connections.** A local agent can use the Unix socket instead of TCP, which changes the host-clause rules — see [Prerequisites](prerequisites.md#26-unix-socket-connections).
 
 **`Access denied` over a Unix socket right after `mysqld` restarted, for an account using `caching_sha2_password`.** MySQL refuses the full authentication exchange over a socket until the account's password has been cached by a login, and drops that cache on restart. This release completes the exchange itself, so a socket target recovers on its next collection with no human login. If you still see it, the driver in `ip_plugin/xmyb/lib` is not the tested Connector/J release: the fix lives in the plug-in's own authentication code, which links against Connector/J 8.4.0.
 
@@ -79,11 +79,11 @@ If an anonymous row exists and your agent connects locally, either remove it (`D
 
 ## 4. ClusterSet health {#clusterset}
 
-**`dr_promotion_ready` reads 0 and the DR Promotion Ready alert is CRITICAL.** ClusterSet health needs **MySQL Shell** (`mysqlsh`) on the agent host, on the agent's PATH. Without it the plug-in falls back to a repository rollup, and the rollup cannot assess promotion readiness — so the value is 0 and the alert fires until `mysqlsh` is installed. This is a missing prerequisite, not a sick cluster. See [Prerequisites](prerequisites.md#mysql-shell-for-clusterset-targets).
+**`dr_promotion_ready` reads 0 and the DR Promotion Ready alert is CRITICAL.** ClusterSet health needs **MySQL Shell** (`mysqlsh`) on the agent host, on the agent's PATH. Without it the plug-in falls back to a repository rollup, and the rollup cannot assess promotion readiness — so the value is 0 and the alert fires until `mysqlsh` is installed. This is a missing prerequisite, not a sick cluster. See [Prerequisites](prerequisites.md#22-mysql-shell-for-clusterset-targets).
 
 **`TLS_TRUSTSTORE_REQUIRED`.** The `VERIFY_CA` and `VERIFY_IDENTITY` connection modes for ClusterSet health checks need truststore credential support, which this release does not provide. Rather than quietly downgrading to a weaker mode, the check fails closed and reports this status. `REQUIRED` and `DISABLED` modes work fully.
 
-**`MEMBER_UNREACHABLE`.** MySQL Shell connected successfully through one of the target's listed endpoints, but then failed reaching a *different* member — `Can't connect to MySQL server on '<host>:<port>'` — while reading the ClusterSet-wide status. The AdminAPI opens its own session to every member Group Replication still considers online, regardless of which member Shell is connected through, so this can happen even when the endpoint list itself worked. Retrying a different listed endpoint will not fix it: the same member is unreachable either way. Open the agent host's network path to that member too — every member of every cluster needs a path from the agent host, on its MySQL port, not only the members configured on the target (see [Prerequisites](prerequisites.md#network-and-ports)).
+**`MEMBER_UNREACHABLE`.** MySQL Shell connected successfully through one of the target's listed endpoints, but then failed reaching a *different* member — `Can't connect to MySQL server on '<host>:<port>'` — while reading the ClusterSet-wide status. The AdminAPI opens its own session to every member Group Replication still considers online, regardless of which member Shell is connected through, so this can happen even when the endpoint list itself worked. Retrying a different listed endpoint will not fix it: the same member is unreachable either way. Open the agent host's network path to that member too — every member of every cluster needs a path from the agent host, on its MySQL port, not only the members configured on the target (see [Prerequisites](prerequisites.md#23-network-and-ports)).
 
 **`KERBEROS_TICKET`.** The ClusterSet target uses Kerberos, and the Kerberos exchange failed before any member saw a credential. MySQL Shell reports every such failure as no more than `Unknown MySQL error`, so the plug-in names the family for you; the usual cause is the agent operating-system user's credential cache being missing or expired, but an unreachable KDC, clock skew between the agent host and the KDC, or a member without a `mysql/<host>` service principal produce the same text. Start with `klist` as the agent's operating-system user on the agent host; if it shows no ticket or an expired one, restore the unattended refresh (`k5start`, or a scheduled `kinit -kt <keytab> <principal>`) described in [Prerequisites](prerequisites.md). If the ticket is fine, `kinit` and a manual `mysql --default-auth=authentication_kerberos_client` against the member will show the real error. Do not read the target's other collections as proof either way: MySQL Shell resolves the credential through the system Kerberos libraries and the JDBC collections through the Java runtime, which can read different caches, so one path can authenticate while the other does not.
 
@@ -106,7 +106,7 @@ The agent's own OS credential is not resolved automatically for this job type, s
 
 **Run EXPLAIN fails with `the job step's javaHome=... does not name a JVM`.** The Java runtime Enterprise Manager resolved for the job is not there. This points at the agent installation rather than the plug-in; `emctl status agent` on that agent and the agent's own upgrade history are the place to look.
 
-**Run EXPLAIN returns a syntax error on a statement copied from Query Analyzer.** Query Analyzer shows normalized digests, with literals replaced by `?`. A digest will not explain as it stands — substitute real values for the placeholders first. See [Jobs](jobs.md#run-explain).
+**Run EXPLAIN returns a syntax error on a statement copied from Query Analyzer.** Query Analyzer shows normalized digests, with literals replaced by `?`. A digest will not explain as it stands — substitute real values for the placeholders first. See [Jobs](jobs.md#81-run-explain).
 
 ## 6. Metrics that look wrong {#metrics}
 

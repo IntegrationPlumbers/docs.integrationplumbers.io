@@ -52,7 +52,7 @@ Both shipped wait thresholds therefore avoid totals:
 `wait/io/table/sql/handler`, which is class `io`. A `top_wait_class` of `lock` therefore reflects table locks
 (`wait/lock/table/sql/handler`) and metadata locks (`wait/lock/metadata/sql/mdl`) only. Both of those instruments are
 enabled by default, so the threshold fires on sustained table or metadata lock contention; row-lock contention reaches
-this signal as class `io` and is better watched on the InnoDB Row Lock Waits page ([5.1](monitoring-pages.md#mysql-database-pages)). The `wait/synch/*` instruments
+this signal as class `io` and is better watched on the InnoDB Row Lock Waits page ([5.1](monitoring-pages.md#51-mysql-database-pages)). The `wait/synch/*` instruments
 are disabled by default, which is why no `synch` threshold ships beside these two: `synch` cannot lead until you enable
 them in the Performance Schema.
 
@@ -67,7 +67,7 @@ Thresholds live on the target, and you edit them from Metric and Collection Sett
 
 1. From the target's home page, choose the target-type menu → **Monitoring → Metric and Collection Settings**.
 2. Set the **View** list to **All metrics** so that columns without a current threshold are listed too.
-3. Find the metric group and column — 7.1 gives both names for every shipped threshold, and the metrics reference ([6.1](metrics-reference.md#where-the-reference-is)) gives them for every other column.
+3. Find the metric group and column — 7.1 gives both names for every shipped threshold, and the metrics reference ([6.1](metrics-reference.md#61-where-the-reference-is)) gives them for every other column.
 4. Edit **Warning Threshold** and **Critical Threshold** on the row, or click the row's edit icon for the full editor.
 5. Set **Number of Occurrences** if the condition should have to hold for more than one collection before it raises an incident. Most shipped thresholds use one occurrence; the exceptions are `dr_promotion_ready` (two), `avg_wait_us` (three) and `top_wait_class` (five), for the reasons 7.1 gives.
 6. Click **OK** to save. The new value applies from the next collection.

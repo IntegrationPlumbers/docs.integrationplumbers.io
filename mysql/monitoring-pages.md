@@ -35,14 +35,14 @@ Source: `InstanceInfo`, `ConnectionActivity`, `InnodbActivity`, `SysStatementByL
 
 #### Backup
 ![MySQL Database backup page](images/backup.png)
-Answers whether this server's backups can be trusted right now, and shows the runs behind that answer. Use it when a backup alert fires ([7.1](alerts-and-thresholds.md#default-thresholds)), and as the evidence page when someone asks how recent the last good backup is.
+Answers whether this server's backups can be trusted right now, and shows the runs behind that answer. Use it when a backup alert fires ([7.1](alerts-and-thresholds.md#71-default-thresholds)), and as the evidence page when someone asks how recent the last good backup is.
 
 | Name | Description |
 |---|---|
 | Backup Status | Whether each backup tool is detected, whether XtraBackup history logging is on, the last backup source, the last successful backup and how long ago it ran, and the outcome of the most recent run. A banner appears above the tiles when the backup age breaches its thresholds. |
 | Backup History | Recent runs across both tools — source, type, backup ID, start and end time, run and lock time, exit state, success, end LSN, and the binary log position for point-in-time recovery. |
 
-Source: `BackupStatus` and `BackupHistory`, read from `mysql.backup_history` (MySQL Enterprise Backup) and `PERCONA_SCHEMA.xtrabackup_history` (Percona XtraBackup). A tool with no history table on the server is reported as not detected and raises no alert ([2.7](prerequisites.md#backup-tool-visibility)).
+Source: `BackupStatus` and `BackupHistory`, read from `mysql.backup_history` (MySQL Enterprise Backup) and `PERCONA_SCHEMA.xtrabackup_history` (Percona XtraBackup). A tool with no history table on the server is reported as not detected and raises no alert ([2.7](prerequisites.md#27-backup-tool-visibility)).
 
 #### Database Processes
 Shows the sessions that are doing something right now, with the statement each one is running. Use it to find the session behind a load spike, a long transaction or a lock holder.
@@ -82,7 +82,7 @@ Ranks the server's statement digests three ways and lets you take a plan for any
 
 Select a statement row and click **Use Selected Query** to copy its text and schema into the Explain Plan region, substitute real values for the `?` placeholders a digest carries, then click **Explain** — the console submits the Run EXPLAIN job ([chapter 8](jobs.md#jobs)) for you and renders the plan it returns. Explaining a statement does not execute it.
 
-Source: `SysStatementByLatency`, `SysStatementByExecCount` and `SysStatementByFirstSeen` — the top 25 digests by each ranking, from `sys.x$statement_analysis`. The plan comes from the `ip_mysql_run_explain` job ([8.1](jobs.md#run-explain)).
+Source: `SysStatementByLatency`, `SysStatementByExecCount` and `SysStatementByFirstSeen` — the top 25 digests by each ranking, from `sys.x$statement_analysis`. The plan comes from the `ip_mysql_run_explain` job ([8.1](jobs.md#81-run-explain)).
 
 #### Query Analytics Trends
 Turns the same statement-digest data into a trend: how latency and execution volume move collection by collection, and which statements dominate a chosen window. Use it to tell a genuine regression from a busy afternoon, and to see whether the Performance Schema digest table is overflowing.
@@ -94,7 +94,7 @@ Turns the same statement-digest data into a trend: how latency and execution vol
 | Executions & Active Digests per Collection | Execution count and `active_digest_count` per collection over the selected window. |
 | Top Statements Over Window | The window's heaviest statements, ranked by **Latency**, **Executions** or **No-Index Executions**, with executions, total, average and lock time, rows examined and sent, the examined-to-sent ratio, and no-index executions. |
 
-The window aggregate is built from the top 25 statements of each 5-minute collection, so a statement outside every collection's top 25 contributes nothing to it. The 24 Hours window is exact. Week and Month windows are served pre-rolled (hourly for the week, daily for the month), each sample an average per-collection value; the table's executions, latencies, lock time, row counts and no-index counts are scaled by the sample span in 5-minute collections (twelve per hourly sample, 288 per daily one, or the window's own cadence while the window holds only one rolled-up sample, typically a newly added target), so they are estimates and remain approximate — the same rule as the Top Waits page. Averages and ratios are unaffected. Two limits of the estimate are worth knowing: it assumes the shipped 5-minute schedule (if you change the `StatementDigestProfile` collection interval in Metric and Collection Settings, Week and Month totals scale by the wrong factor), and a rolled-up average per statement covers only the collections that statement was in the top 25 for, so a statement active in part of a bucket is over-counted in proportion — a one-off query can look heavier in the Month window than it was. Use the 24 Hours window when the exact figure matters. Read `active_digest_count` as the freshness signal: the digest tables retain their last rows when a collection window sees no activity, while the summary row is always current ([10.1](whats-new.md#early-access-build-2026-08-18)).
+The window aggregate is built from the top 25 statements of each 5-minute collection, so a statement outside every collection's top 25 contributes nothing to it. The 24 Hours window is exact. Week and Month windows are served pre-rolled (hourly for the week, daily for the month), each sample an average per-collection value; the table's executions, latencies, lock time, row counts and no-index counts are scaled by the sample span in 5-minute collections (twelve per hourly sample, 288 per daily one, or the window's own cadence while the window holds only one rolled-up sample, typically a newly added target), so they are estimates and remain approximate — the same rule as the Top Waits page. Averages and ratios are unaffected. Two limits of the estimate are worth knowing: it assumes the shipped 5-minute schedule (if you change the `StatementDigestProfile` collection interval in Metric and Collection Settings, Week and Month totals scale by the wrong factor), and a rolled-up average per statement covers only the collections that statement was in the top 25 for, so a statement active in part of a bucket is over-counted in proportion — a one-off query can look heavier in the Month window than it was. Use the 24 Hours window when the exact figure matters. Read `active_digest_count` as the freshness signal: the digest tables retain their last rows when a collection window sees no activity, while the summary row is always current ([10.1](whats-new.md#101-early-access-build-2026-08-18)).
 
 Source: `StatementDigestProfileSummary` and `StatementDigestProfile`, from `performance_schema.events_statements_summary_by_digest`.
 
@@ -110,7 +110,7 @@ Shows where the server spent its wait time over a chosen window, by wait class a
 
 Socket waits (`wait/io/socket/*`, the server waiting on its clients) are excluded from the chart and the rankings so that contention inside the server is not flattened by network time; their window total is the Socket Wait Time tile. The 24 Hours window is exact. Week and Month windows are served pre-rolled (hourly for the week, daily for the month), each sample an average per-collection value; totals and the collection count are scaled by the sample span (or by the window's own cadence, an hour or a day, while the window holds only one rolled-up sample, typically a newly added target), so they are estimates and remain approximate. `—` means not measured in the window (for example, an average wait at zero waits).
 
-The wait class is the second element of the event name (`wait/io/...` is `io`, `wait/lock/...` is `lock`). InnoDB charges a row-lock wait to `wait/io/table/sql/handler`, so row-lock contention appears here as class `io`, not `lock`; `lock` is table locks and metadata locks. Row-lock detail is on the InnoDB Row Lock Waits page. The `wait/synch/*` instruments are disabled by default, so `synch` only appears once you enable them in the Performance Schema. See [7.1](alerts-and-thresholds.md#default-thresholds) for how the two shipped wait thresholds read these classes.
+The wait class is the second element of the event name (`wait/io/...` is `io`, `wait/lock/...` is `lock`). InnoDB charges a row-lock wait to `wait/io/table/sql/handler`, so row-lock contention appears here as class `io`, not `lock`; `lock` is table locks and metadata locks. Row-lock detail is on the InnoDB Row Lock Waits page. The `wait/synch/*` instruments are disabled by default, so `synch` only appears once you enable them in the Performance Schema. See [7.1](alerts-and-thresholds.md#71-default-thresholds) for how the two shipped wait thresholds read these classes.
 
 Source: `WaitProfileSummary` and `WaitProfile`, from `performance_schema.events_waits_summary_global_by_event_name` (idle excluded at collection).
 
@@ -262,7 +262,7 @@ The default page for a MySQL Cluster target: who is in the group, what role and 
 Source: `GroupSummary` and `GroupMembers` (`performance_schema.replication_group_members`) for the summary and members table; `GroupMemberStats` (`performance_schema.replication_group_member_stats`) for the charts.
 
 #### Consensus
-Shows what the group's consensus protocol is costing: how many proposals each member makes, how long they take, and how often a round has to be extended. Use it when writes feel slow across the group rather than on one member, and when the consensus latency threshold ([7.1](alerts-and-thresholds.md#default-thresholds)) fires.
+Shows what the group's consensus protocol is costing: how many proposals each member makes, how long they take, and how often a round has to be extended. Use it when writes feel slow across the group rather than on one member, and when the consensus latency threshold ([7.1](alerts-and-thresholds.md#71-default-thresholds)) fires.
 
 | Name | Description |
 |---|---|
@@ -282,7 +282,7 @@ Shows the group's message traffic and round-trip times per member. Use it to sep
 Source: `GrMessaging` — the server's `Gr_*` status counters, collected as deltas over the interval.
 
 #### Certification
-Shows certification and consistency-wait activity: how much work the certifier is doing, and how long consistency guarantees are making transactions wait. Use it when the certification queue threshold ([7.1](alerts-and-thresholds.md#default-thresholds)) fires, or when a consistency level has been raised and you need its cost.
+Shows certification and consistency-wait activity: how much work the certifier is doing, and how long consistency guarantees are making transactions wait. Use it when the certification queue threshold ([7.1](alerts-and-thresholds.md#71-default-thresholds)) fires, or when a consistency level has been raised and you need its cost.
 
 | Name | Description |
 |---|---|
@@ -296,7 +296,7 @@ A MySQL ClusterSet target has one page.
 
 #### ClusterSet DR Health
 ![MySQL InnoDB ClusterSet DR Health page](images/clusterset-dr-health.png)
-Answers one question — can this ClusterSet be failed over right now — and shows every signal that went into the answer, including which tool produced it. Use it before a planned switchover, during a disaster-recovery decision, and whenever the DR Promotion Ready alert fires ([7.1](alerts-and-thresholds.md#default-thresholds)).
+Answers one question — can this ClusterSet be failed over right now — and shows every signal that went into the answer, including which tool produced it. Use it before a planned switchover, during a disaster-recovery decision, and whenever the DR Promotion Ready alert fires ([7.1](alerts-and-thresholds.md#71-default-thresholds)).
 
 | Name | Description |
 |---|---|
@@ -305,10 +305,10 @@ Answers one question — can this ClusterSet be failed over right now — and sh
 | Contributing Signals | The inputs to the verdict — Assessed By repeated, primary healthy, replica clusters healthy, ClusterSet replication channel, worst replica GTID lag and worst replica errant transactions. |
 | Clusters in this ClusterSet | One row per cluster: role, global status, ClusterSet replication status, transaction set consistency, missing and errant transaction counts, primary instance, and the missing and errant GTID sets. |
 
-**DR Promotion Ready is the plug-in's own gate, not a MySQL Shell field.** It requires at least one replica cluster, a ClusterSet status of HEALTHY, a positively identified healthy primary, every replica cluster healthy with its replication channel up and its transaction set consistent, no errant transactions, and a known GTID lag at or under the target's **DR Max Tolerated GTID Lag** ([4.1](targets-and-properties.md#target-properties)). The verdict is never shown without **Assessed By** beside it, and a value that was not measured renders as an em dash or as a phrase saying why — never as `0`, `No` or `OK`.
+**DR Promotion Ready is the plug-in's own gate, not a MySQL Shell field.** It requires at least one replica cluster, a ClusterSet status of HEALTHY, a positively identified healthy primary, every replica cluster healthy with its replication channel up and its transaction set consistent, no errant transactions, and a known GTID lag at or under the target's **DR Max Tolerated GTID Lag** ([4.1](targets-and-properties.md#41-target-properties)). The verdict is never shown without **Assessed By** beside it, and a value that was not measured renders as an em dash or as a phrase saying why — never as `0`, `No` or `OK`.
 
-**Under a network partition the status words alone look fine.** MySQL Shell can report the ClusterSet as HEALTHY, with the affected cluster's global status OK, while the ClusterSet replication channel sits in `CONNECTING` — the Shell suppresses the underlying connection error for as long as a channel is connecting, so nothing in those states says replication has stopped. A deliberately stopped channel is what reports `OK_NOT_REPLICATING`; a partition does not. The plug-in therefore gates DR readiness on replication heartbeat freshness rather than on the channel state, and reports the ClusterSet as not promotion-ready under a partition even while the Shell's own words read healthy. This behavior was measured on MySQL 9.5 commercial; see the boundary in [10.1](whats-new.md#early-access-build-2026-08-18).
+**Under a network partition the status words alone look fine.** MySQL Shell can report the ClusterSet as HEALTHY, with the affected cluster's global status OK, while the ClusterSet replication channel sits in `CONNECTING` — the Shell suppresses the underlying connection error for as long as a channel is connecting, so nothing in those states says replication has stopped. A deliberately stopped channel is what reports `OK_NOT_REPLICATING`; a partition does not. The plug-in therefore gates DR readiness on replication heartbeat freshness rather than on the channel state, and reports the ClusterSet as not promotion-ready under a partition even while the Shell's own words read healthy. This behavior was measured on MySQL 9.5 commercial; see the boundary in [10.1](whats-new.md#101-early-access-build-2026-08-18).
 
-**Without MySQL Shell the page degrades deliberately.** If `mysqlsh` is not on the agent user's PATH, the plug-in falls back to a repository rollup: **Assessed By** names the rollup rather than the MySQL Shell AdminAPI, **Why Not MySQL Shell** reads `MYSQLSH_NOT_FOUND`, the Clusters table is empty because nothing could be read — not because every cluster is fine — and `dr_promotion_ready` reads 0, so the DR Promotion Ready alert raises CRITICAL until MySQL Shell is installed. Treat that combination as a missing prerequisite on the agent host, not as a disaster-recovery problem ([2.2](prerequisites.md#mysql-shell-for-clusterset-targets)).
+**Without MySQL Shell the page degrades deliberately.** If `mysqlsh` is not on the agent user's PATH, the plug-in falls back to a repository rollup: **Assessed By** names the rollup rather than the MySQL Shell AdminAPI, **Why Not MySQL Shell** reads `MYSQLSH_NOT_FOUND`, the Clusters table is empty because nothing could be read — not because every cluster is fine — and `dr_promotion_ready` reads 0, so the DR Promotion Ready alert raises CRITICAL until MySQL Shell is installed. Treat that combination as a missing prerequisite on the agent host, not as a disaster-recovery problem ([2.2](prerequisites.md#22-mysql-shell-for-clusterset-targets)).
 
 Source: `ClusterSetHealth` and `ClusterSetClusters`, both produced by running MySQL Shell's `clusterSet.status()` AdminAPI call from the agent host, on a 5-minute collection.
