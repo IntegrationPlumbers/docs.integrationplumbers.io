@@ -7,6 +7,31 @@ nav_order: 18
 
 This page lists what changed in each release of the PostgreSQL plug-in, most recent first.
 
+## 24.1.3.0.0 (Enterprise Manager 24ai) / 13.5.17.0.0 (Enterprise Manager 13.5)
+
+One release, two builds with the same content: 24.1.3.0.0 installs on Enterprise Manager 24ai, 13.5.17.0.0 on Enterprise Manager 13.5. A maintenance release: no new pages or metrics. Upgrading uses the same three steps as any plug-in update; see [Upgrade from an earlier release](install-and-upgrade.md#upgrade). One prerequisite changed: the server log read access that plan capture needs is now a per-database `GRANT EXECUTE` on the log-file functions instead of the `pg_read_server_files` role; see **Changed** below and [The server log read grant](prerequisites.md#log-read-grant).
+
+**Fixed**
+
+- **Backup Management** can schedule backups and restores again. Every submission failed with ORA-20411 because blank optional parameters were sent as empty values; they are now omitted. A job Enterprise Manager reports as failed (for example, `pg_dump` missing on the agent host) now shows an error instead of closing the dialog as if it had succeeded. The page acts on the database selected in the navigation tree rather than always on `postgres`, the submit button is disabled while a job is in flight, and database names that the PostgreSQL client library would read as a connection string are refused.
+- Every database-scoped page follows the database selected in the navigation tree, and switching the same page between database nodes now repaints it; it previously did nothing. The Database, Tables, and Indexes pages no longer poll.
+- **Database** page: the Database Size chart plotted zeros, and a custom date range returned nothing because it sent no database key.
+- **Tables** and **Indexes**: the Table Size and Index Size donuts total the whole database, not the rendered page; the paging badge keeps Enterprise Manager's own "a–b of n" positions; the text filter applies to every row of the database and no longer misses results that arrived before the first keystroke; charts keep their time axis pinned to the selected window.
+- **Overview**: the Replication panel showed raw bytes under its "Data Lag (MB)" header.
+- **Workload History** read all zeros on busy servers because **SQL Statements** kept the top N statements by lifetime total; it now keeps the top N by activity in the collection interval.
+- **Monitoring Readiness** is probed per database, so a database whose settings differ from the primary's reports its own values; when a target is unreachable the page still renders. One failed probe no longer leaves every later item reading `undetermined`.
+- The **Configure auto_explain** job configures the selected database; a blank database defaults to the target's primary database.
+- **Vacuum Advisor**: the Bloat findings count read 1 while the bloat table was empty.
+- A monitoring role that holds `pg_read_server_files` but cannot execute the log-file functions was reported as ready for plan capture while every harvest silently failed; a role set up the other way round was told to grant the role. Readiness now checks the function grants themselves and names exactly what is missing.
+- Byte values are labelled "B", matching the KiB/MiB casing used elsewhere.
+
+**Changed**
+
+- **Server log read access.** Plan capture reads the server log with `pg_current_logfile()`, `pg_stat_file()`, and `pg_read_file()`, which PostgreSQL does not let ordinary roles execute. The monitoring role now needs EXECUTE on those functions, granted in the database the target monitors; `pg_read_server_files` is no longer required and is no longer checked. **Monitoring Readiness** shows the exact statement with your role name filled in, and a new **Monitoring role (pg_monitor)** item reports whether the role holds `pg_monitor`, which the plug-in requires. The Plan Capture Readiness metric's column is labelled "Server Log Read Access Granted".
+- **Monitoring Readiness Detail** rows are reported per database: the Item value carries the database as `item@database`, and a Database Name column was added. A report or emcli query that matched on the bare item name should match on the prefix.
+- The **Configure auto_explain** job has an optional Database parameter.
+- The download package is a zip containing the plug-in OPAR, the OPAR's SHA-256 checksum, and the three monitoring templates, with a SHA-256 checksum of the zip beside it.
+
 ## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.16.0.0 (Enterprise Manager 13.5)
 
 One release, two builds with the same content: 24.1.2.0.0 installs on Enterprise Manager 24ai, 13.5.16.0.0 on Enterprise Manager 13.5. A maintenance release: no new pages, jobs, templates, or target properties. Upgrading uses the same three steps as any plug-in update; see [Upgrade from an earlier release](install-and-upgrade.md#upgrade).

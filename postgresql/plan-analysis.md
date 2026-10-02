@@ -10,7 +10,7 @@ When a query gets slower, the useful evidence is the plan it actually ran, and t
 > **Prerequisites for this page**
 > - `auto_explain` installed on the target and configured for capture — see [Plan capture (auto_explain)](prerequisites.md#auto-explain). The plug-in configures the module but never installs it.
 > - `auto_explain.log_min_duration` set to 0 or higher, `auto_explain.log_format = json`, and `auto_explain.log_analyze = on`. Apply all three from [Configure auto_explain](monitoring-readiness.md#configure-auto-explain) on **Monitoring Readiness**.
-> - The `pg_read_server_files` grant on the monitoring role, so the plug-in can read the server log — see [The server log read grant](prerequisites.md#log-read-grant).
+> - EXECUTE on the server-log functions for the monitoring role, so the plug-in can read the server log — see [The server log read grant](prerequisites.md#log-read-grant).
 > - Every panel on this page is job-backed, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target's host. If a job aborts, the page raises "Unable to run job. Verify Preferred Credentials are set for this target." See [Unable to run job](troubleshooting.md#unable-to-run-job).
 > - A timestamp-first (`%m`-led) `log_line_prefix` and the `stderr` log destination. The harvester does not parse `csvlog` or `jsonlog`.
 > - Recommended, not required: `auto_explain.log_verbose = on` and `compute_query_id = on`, so captured plans carry real query ids — see [Statement statistics (pg_stat_statements)](prerequisites.md#pg-stat-statements).
@@ -173,7 +173,7 @@ The related `plan_drifts` metric alerts on a query running on a plan shape outsi
 - **The high-cost threshold is global for the target**, not per query, and saving it does not re-harvest anything. It reclassifies the plans already stored.
 - **Capture-window changes are not retroactive** and take effect at the next capture cycle, roughly 15 minutes.
 - **Extensions are detected, never installed.** The plug-in configures `auto_explain` through `session_preload_libraries`, which applies to new sessions only and needs no server restart, but the module itself is installed by you.
-- **The `pg_read_server_files` grant is never self-applied.** Monitoring Readiness shows the exact GRANT statement for you to run.
+- **The server log read grants are never self-applied.** Monitoring Readiness shows the exact GRANT statement for you to run.
 
 ## Related
 

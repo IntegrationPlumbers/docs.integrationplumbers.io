@@ -49,12 +49,12 @@ When an advisor page sits empty, a KPI shows a placeholder, or an action fails o
 
 **Symptoms:** A panel's status chip reads **Not functional** on **Monitoring Readiness**.
 
-**Cause:** A panel's chip is the worst status among its mandatory items. **Not functional** means a required item is unmet and the feature will not produce data until you fix it — most often `auto_explain` not loaded or not fully configured, or the `pg_read_server_files` grant missing so the harvester cannot read back the plans `auto_explain` already wrote to the log.
+**Cause:** A panel's chip is the worst status among its mandatory items. **Not functional** means a required item is unmet and the feature will not produce data until you fix it — most often `auto_explain` not loaded or not fully configured, or the server log read grants missing so the harvester cannot read back the plans `auto_explain` already wrote to the log.
 
 **Fix:**
 1. Open the panel and read its items top to bottom: each shows the value currently in effect on the server ("current: …") next to what it needs ("needs: …"), with a sentence explaining the consequence.
 2. For anything the plug-in can set itself, click **Configure auto_explain** and apply it.
-3. For the server log read grant, copy the `GRANT pg_read_server_files TO "<monitoring role>";` statement shown on that item and run it as a superuser.
+3. For the server log read grants, copy the `GRANT EXECUTE ON FUNCTION …` statement shown on that item and run it as a superuser while connected to the database the target monitors.
 4. Reload the page. Readiness is probed at page load only — there is no background polling.
 
 **Related:** [Monitoring Readiness](monitoring-readiness.md)
