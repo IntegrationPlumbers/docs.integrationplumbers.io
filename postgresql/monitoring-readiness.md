@@ -53,7 +53,7 @@ This is the panel with the most items, and the only one the plug-in can configur
 | **Run-time statistics (log_analyze)** | `on - hard capture prerequisite` | Captured plans need actual rows and timings for drift and insight detection. It adds per-query instrumentation cost, so enabling it is the per-target opt-in. |
 | **Query identifiers (log_verbose)** — optional | `on` | Without it, plans fall back to synthetic query ids. See [Query identifiers and the syn: fallback](#query-identifiers-and-the-syn-fallback). |
 | **Query id computation (compute_query_id)** — optional | `on, or auto with pg_stat_statements preloaded` | Pairs with `log_verbose` so every captured plan carries its real query id. |
-| **Server log read grant** | `pg_read_server_files granted to the monitoring role` | The harvester reads the server log file. See [The grant the plug-in never applies](#the-grant-the-plug-in-never-applies). |
+| **Server log read grants** | `EXECUTE on pg_current_logfile, pg_stat_file and pg_read_file in this database` | The harvester reads the server log file. See [The grant the plug-in never applies](#the-grant-the-plug-in-never-applies). |
 
 ## Status model
 
@@ -100,15 +100,15 @@ For items the plug-in will not set itself (the log read grant and the extension 
 
 ## The grant the plug-in never applies
 
-One item is deliberately never self-applied: the `pg_read_server_files` privilege. The plug-in reads the server log to harvest plans, and granting itself the privilege to read server files is not a change it will make on your behalf.
+One item is deliberately never self-applied: EXECUTE on the functions that read the server log. The plug-in reads the log to harvest plans, and granting itself the privilege to read server files is not a change it will make on your behalf.
 
-The **Server log read grant** item shows the exact statement to run, with your actual monitoring role name already filled in:
+The **Server log read grants** item shows the exact statement to run, with your actual monitoring role name and database already filled in, listing only the functions the role still lacks:
 
 ```sql
-GRANT pg_read_server_files TO "<monitoring role>";
+GRANT EXECUTE ON FUNCTION pg_current_logfile(), pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO "<monitoring role>";
 ```
 
-Run it as a superuser, then reload the page. Until it is granted, the item reads `not granted` and the **Plan Capture (auto_explain)** panel is **Not functional** — plans are written to the log but nothing can read them back. If the probe cannot determine the grant, the item reads `undetermined` and shows **Attention**.
+Run it as a superuser while connected to the database the target monitors (function privileges are per database), then reload the page. Until it is granted, the item reads `missing: …` and the **Plan Capture (auto_explain)** panel is **Not functional** — plans are written to the log but nothing can read them back. If the probe cannot determine the grants, the item reads `undetermined` and shows **Attention**. The **Database Connection** panel also carries a **Monitoring role (pg_monitor)** item: without `pg_monitor` several checks on this page cannot run.
 
 Extension items behave the same way. Each shows an install hint of the form `CREATE EXTENSION <name>;`, and you install the underlying package through your own platform packaging first.
 

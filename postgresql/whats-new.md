@@ -5,9 +5,9 @@ nav_order: 1
 
 # What's new in this release
 
-If you monitor PostgreSQL with 13.5.12 today, this release keeps what you already have. It ships as two builds with the same features, 24.1.2.0.0 for Enterprise Manager 24ai and 13.5.16.0.0 for Enterprise Manager 13.5 (the advisory pages below arrived in 24.1.1.0.0 / 13.5.15.0.0; the current release adds fixes, listed in the [Changelog](changelog.md)). Your targets, console, and alert routing carry forward, and on top of them the plug-in becomes advisory. It names the index worth creating and the table autovacuum is falling behind on, each with SQL for you to review and run, and it tells you when a query has left its accepted plan, with both plans side by side so you can test a rewrite or accept the new plan.
+If you monitor PostgreSQL with 13.5.12 today, this release keeps what you already have. It ships as two builds with the same features, 24.1.3.0.0 for Enterprise Manager 24ai and 13.5.17.0.0 for Enterprise Manager 13.5 (the advisory pages below arrived in 24.1.1.0.0 / 13.5.15.0.0; the current release adds fixes, listed in the [Changelog](changelog.md)). Your targets, console, and alert routing carry forward, and on top of them the plug-in becomes advisory. It names the index worth creating and the table autovacuum is falling behind on, each with SQL for you to review and run, and it tells you when a query has left its accepted plan, with both plans side by side so you can test a rewrite or accept the new plan.
 
-Everything in this release is additive. Your targets, thresholds, schedules, and credentials carry forward unchanged; a few surfaces moved, and those are listed under [What changed or moved](#what-changed-or-moved). The upgrade itself is the ordinary import-and-deploy sequence. There is one new decision to make, and it is on the database side: plan capture needs `auto_explain` configured and the `pg_read_server_files` grant on your monitoring role. Among the settings the plug-in could apply itself, that grant is the one it deliberately never does. It is needed only for the two plan pages, and everything else in this release works without it.
+Everything in this release is additive. Your targets, thresholds, schedules, and credentials carry forward unchanged; a few surfaces moved, and those are listed under [What changed or moved](#what-changed-or-moved). The upgrade itself is the ordinary import-and-deploy sequence. There is one new decision to make, and it is on the database side: plan capture needs `auto_explain` configured and EXECUTE on the server-log functions for your monitoring role. Among the settings the plug-in could apply itself, that grant is the one it deliberately never does. It is needed only for the two plan pages, and everything else in this release works without it.
 
 **Where to find it:** the new pages appear in the PostgreSQL Database target's navigation tree — **Realtime ▸ Vacuum xmin Horizon** under the Realtime group, the rest under each database name — and in the same target menu you use today. The new metrics appear under **Target menu → Monitoring → All Metrics**.
 
@@ -28,7 +28,7 @@ Everything in this release is additive. Your targets, thresholds, schedules, and
 
 ## Monitoring Readiness
 
-**Monitoring Readiness** is where to go first after the upgrade. It probes the target once when the page loads and reports, feature by feature, what that feature needs, the value live on the server now, and what happens while the two differ. Seven panels cover the monitoring connection, plan capture, `pg_stat_statements`, wait-event sampling, the two Index Advisor extensions, `pgstattuple`, and the agent-local history store, each with an **OK**, **Attention**, or **Not functional** chip. Where the plug-in can set something itself, a **Configure auto_explain** button appears and previews exactly what it will apply before you confirm; the settings take effect for new sessions with no restart. Extensions and the `pg_read_server_files` grant are never applied for you, so those rows show the statement to run in your own tooling instead.
+**Monitoring Readiness** is where to go first after the upgrade. It probes the target once when the page loads and reports, feature by feature, what that feature needs, the value live on the server now, and what happens while the two differ. Seven panels cover the monitoring connection, plan capture, `pg_stat_statements`, wait-event sampling, the two Index Advisor extensions, `pgstattuple`, and the agent-local history store, each with an **OK**, **Attention**, or **Not functional** chip. Where the plug-in can set something itself, a **Configure auto_explain** button appears and previews exactly what it will apply before you confirm; the settings take effect for new sessions with no restart. Extensions and the server log read grants are never applied for you, so those rows show the statement to run in your own tooling instead.
 
 ![The Monitoring Readiness page with its feature panels and status chips](images/13-5-15/readiness-page.png)
 
@@ -124,20 +124,20 @@ Read more: [Collection throttle](history-store-and-retention.md#collection-throt
 Nothing here is required to keep monitoring what you monitor today. Each item adds one part of the release, and **Monitoring Readiness** checks the first three live, per target.
 
 - [ ] `auto_explain` installed on the database server and configured for capture, with `log_min_duration` set to 0 or higher, `log_format = json`, and `log_analyze = on`, plus the server-side logging settings capture reads from (`logging_collector = on`, the `stderr` log destination, and a `%m`-led `log_line_prefix`), which are yours to set — see [Plan capture (auto_explain)](prerequisites.md#auto-explain). Required for **Plan Analysis** and **Plan Drift Advisor**. The plug-in applies the `auto_explain` settings for you from **Configure auto_explain**.
-- [ ] `GRANT pg_read_server_files TO "<monitoring role>";` run by a superuser, so the plug-in can read the server log — see [The server log read grant](prerequisites.md#log-read-grant). Of the plan-capture settings the plug-in could apply itself, this is the one it deliberately never does.
+- [ ] `GRANT EXECUTE ON FUNCTION pg_current_logfile(), pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO "<monitoring role>";` run by a superuser in the monitored database, so the plug-in can read the server log — see [The server log read grant](prerequisites.md#log-read-grant). Of the plan-capture settings the plug-in could apply itself, this is the one it deliberately never does.
 - [ ] Optional extensions, installed by you through your own packaging and detected automatically — see [Optional extensions](prerequisites.md#optional-extensions). `hypopg` and `pg_qualstats` for the full **Index Advisor** output, `pg_wait_sampling` for wait events, `pgstattuple` for bloat estimates.
 - [ ] Preferred Credentials set for the target, because the advisor pages read their data through Enterprise Manager jobs — see [Preferred Credentials](prerequisites.md#preferred-credentials).
 
 ## Upgrading from 13.5.12
 
-1. Import the new OPAR (13.5.16.0.0 on Enterprise Manager 13.5, 24.1.2.0.0 on 24ai) and deploy it to the OMS and to every monitoring agent, the same three steps as any plug-in update. See [Upgrade from an earlier release](install-and-upgrade.md#upgrade). Targets, thresholds, schedules, and credentials carry forward unchanged, and the agent-local history store is created automatically at the first collection after the upgrade.
+1. Import the new OPAR (13.5.17.0.0 on Enterprise Manager 13.5, 24.1.3.0.0 on 24ai) and deploy it to the OMS and to every monitoring agent, the same three steps as any plug-in update. See [Upgrade from an earlier release](install-and-upgrade.md#upgrade). Targets, thresholds, schedules, and credentials carry forward unchanged, and the agent-local history store is created automatically at the first collection after the upgrade.
 2. Allow up to 24 hours for the OMS metadata refresh. An "Error getting meta-data" message during that period clears itself. See [After an upgrade](install-and-upgrade.md#after-upgrade).
 3. Open **Monitoring Readiness** on each target and read the panels top to bottom. The panels tell you which of the new prerequisites that particular target is still missing.
-4. On the targets where you want plan capture, run the `pg_read_server_files` grant, then click **Configure auto_explain** and **Apply**. Reload the page to confirm the panel turned green.
+4. On the targets where you want plan capture, run the server log read grant, then click **Configure auto_explain** and **Apply**. Reload the page to confirm the panel turned green.
 
 ## Full changelog
 
-The [Changelog](changelog.md) lists every new page, metric, job, template, and fix in the current release (24.1.2.0.0 / 13.5.16.0.0), and the releases before it.
+The [Changelog](changelog.md) lists every new page, metric, job, template, and fix in the current release (24.1.3.0.0 / 13.5.17.0.0), and the releases before it.
 
 ## Related
 

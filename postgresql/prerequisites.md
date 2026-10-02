@@ -23,7 +23,7 @@ If you already monitor PostgreSQL with the plug-in, most of this list is in plac
 
 ## Enterprise Manager and agents {#enterprise-manager}
 
-This release ships as two plug-in builds with the same features: **24.1.2.0.0** for Enterprise Manager 24ai and **13.5.16.0.0** for Enterprise Manager 13.5. The version number tells you which Enterprise Manager the build is for, not what it does; everything in this guide applies to both.
+This release ships as two plug-in builds with the same features: **24.1.3.0.0** for Enterprise Manager 24ai and **13.5.17.0.0** for Enterprise Manager 13.5. The version number tells you which Enterprise Manager the build is for, not what it does; everything in this guide applies to both.
 
 Before you add any target, import the plug-in OPAR, deploy it to the OMS, then deploy it to each agent that will monitor a PostgreSQL instance. See [Install and upgrade](install-and-upgrade.md#import).
 
@@ -55,7 +55,7 @@ GRANT pg_monitor TO "<monitoring role>";
 
 `pg_monitor` already carries `pg_stat_scan_tables`, which is what pgstattuple's approximate function needs for the table bloat estimates on **Vacuum Advisor**, so no additional grant is needed for the estimate. A table the role somehow cannot read is skipped and logged; the collection does not fail.
 
-One capability needs more than `pg_monitor`: plan capture needs the `pg_read_server_files` grant so the plug-in can read the server log. See [The server log read grant](#log-read-grant).
+One capability needs more than `pg_monitor`: plan capture needs EXECUTE on the server-log functions so the plug-in can read the server log. See [The server log read grant](#log-read-grant).
 
 ## Statement statistics (pg_stat_statements) {#pg-stat-statements}
 
@@ -100,13 +100,13 @@ Enabling `log_verbose` and `compute_query_id` after captures already exist start
 
 ## The server log read grant {#log-read-grant}
 
-The plug-in locates the current log with `pg_current_logfile()` and reads it with `pg_read_file()` over JDBC. That needs one privilege the plug-in deliberately never applies for you. Run it as a superuser, substituting your monitoring role:
+The plug-in locates the current log with `pg_current_logfile()`, sizes it with `pg_stat_file()`, and reads it with `pg_read_file()` over JDBC. PostgreSQL does not let ordinary roles execute those functions, and this is the one privilege the plug-in deliberately never applies for you. Run it as a superuser, **connected to the database the target monitors** (function privileges are granted per database), substituting your monitoring role:
 
 ```sql
-GRANT pg_read_server_files TO "<monitoring role>";
+GRANT EXECUTE ON FUNCTION pg_current_logfile(), pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO "<monitoring role>";
 ```
 
-The **Plan Capture (auto_explain)** panel on **Monitoring Readiness** shows this statement with your actual role name already filled in, ready to copy.
+The **Plan Capture (auto_explain)** panel on **Monitoring Readiness** shows this statement with your actual role name and database already filled in, ready to copy. Membership in `pg_read_server_files` is not needed: with these grants the role can read the server log wherever `log_directory` points, and nothing else outside the data directory. (Releases before 24.1.3.0.0 / 13.5.17.0.0 asked for `pg_read_server_files` instead; a role that still holds it keeps working once the EXECUTE grants are in place, and the role membership can be revoked.)
 
 Without the grant, all other monitoring works normally and no plans are captured, so **Plan Analysis** and **Plan Drift Advisor** stay empty. If the log is unreadable, the plug-in logs a warning and skips the harvest; collection never fails.
 
@@ -197,7 +197,7 @@ Copy the list that matches what you want from the release.
 - [ ] `auto_explain.log_analyze = on`, applied together with `auto_explain.log_timing = on`
 - [ ] `auto_explain.log_verbose = on`
 - [ ] `compute_query_id = on`, or `auto` with `pg_stat_statements` preloaded
-- [ ] `GRANT pg_read_server_files TO "<monitoring role>";` run by a superuser
+- [ ] `GRANT EXECUTE ON FUNCTION pg_current_logfile(), pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO "<monitoring role>";` run by a superuser in the monitored database
 - [ ] Optional: `hypopg` and `pg_qualstats` for the full **Index Advisor** output
 - [ ] Optional: `pg_wait_sampling`, with `pg_wait_sampling.profile_queries` set to `all` or `top`
 - [ ] Optional: `pgstattuple` (no extra grant: the `pg_stat_scan_tables` it needs comes with `pg_monitor`)
