@@ -9,7 +9,7 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 
 ## 24.1.3.0.0 (Enterprise Manager 24ai) / 13.5.17.0.0 (Enterprise Manager 13.5)
 
-One release, two builds with the same content: 24.1.3.0.0 installs on Enterprise Manager 24ai, 13.5.17.0.0 on Enterprise Manager 13.5. A maintenance release: no new pages or metrics. Upgrading uses the same three steps as any plug-in update; see [Upgrade from an earlier release](install-and-upgrade.md#upgrade). One prerequisite changed: the server log read access that plan capture needs is now a per-database `GRANT EXECUTE` on the log-file functions instead of the `pg_read_server_files` role; see **Changed** below and [The server log read grant](prerequisites.md#log-read-grant).
+One release, two builds with the same content: 24.1.3.0.0 installs on Enterprise Manager 24ai, 13.5.17.0.0 on Enterprise Manager 13.5. Certified on Enterprise Manager 24ai Release Update 13 (24.1 RU 13) and Enterprise Manager 13.5 Release Update 34 (13.5 RU 34). A maintenance release: no new pages or metrics. Upgrading uses the same three steps as any plug-in update; see [Upgrade from an earlier release](install-and-upgrade.md#upgrade). One prerequisite changed: the server log read access that plan capture needs is now a per-database `GRANT EXECUTE` on the log-file functions instead of the `pg_read_server_files` role; see **Changed** below and [The server log read grant](prerequisites.md#log-read-grant).
 
 **Fixed**
 

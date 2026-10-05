@@ -15,11 +15,11 @@ When a database gets slower over two weeks rather than in a spike, the live char
 
 **Where to find it:** on a PostgreSQL Database target, **target navigation tree ▸ _database name_ ▸ Workload History**. The same entry appears in the target menu.
 
-**In this page:** Reading the page · Investigating a spike · Filtering to one database · Time handling and honest indicators · Wait-event sampling · Autovacuum runs KPI · Retention
+**In this page:** Reading the page · Investigating a spike · Switching databases · Time handling and honest indicators · Wait-event sampling · Autovacuum runs KPI · Retention
 
 ## Reading the page
 
-The page opens with the window already set to the last 24 hours in your browser's local time, and reads in three bands: a KPI band, the **Workload Trend** chart, and the **Workload Detail** list. The hint under the heading states the rule for the window: "Set an optional time window to scope the KPIs, list and trend; blank = the whole retained history. Retention is configured on the Retention Policies page."
+The page follows the database selected in the target's navigation tree: the KPIs, the chart and the list cover that database, and **History depth** covers the whole store. The page opens with the window already set to the last 24 hours in your browser's local time, and reads in three bands: a KPI band, the **Workload Trend** chart, and the **Workload Detail** list. The hint under the heading states the rule for the window: "Set an optional time window to scope the KPIs, list and trend; blank = the whole retained history. Retention is configured on the Retention Policies page."
 
 ![The Workload History page showing the KPI band, the Workload Trend chart and the Workload Detail list](images/13-5-15/workload-history-page.png)
 
@@ -29,13 +29,13 @@ The KPI band carries three figures.
 
 | KPI | What it reports |
 |---|---|
-| **History depth** | How far back the oldest retained workload snapshot goes. Shown in hours below one day, otherwise in days. A target with no snapshots yet reads "0 days". |
-| **Statements · window** | Distinct statements with activity in the selected window. |
-| **Workload vs prior window** | Total execution time in this window against the equal-length window immediately before it, as ▲/▼/▬ with a percentage. |
+| **History depth** | How far back the oldest retained workload snapshot in the target's store goes, whichever database is selected. Shown in hours below one day, otherwise in days. A target with no snapshots yet reads "0 days". |
+| **Statements · window** | Distinct statements in the selected database with activity in the selected window. |
+| **Workload vs prior window** | The selected database's total execution time in this window against the equal-length window immediately before it, as ▲/▼/▬ with a percentage. |
 
 **Workload Trend** plots one metric per collection snapshot against an x-axis of collection time. Choose it from the **Metric:** dropdown: Total Exec Time (ms), Mean Exec Time (ms), Calls, or Cache Hit Ratio. Additive metrics (Total Exec Time, Calls) are summed across statements per snapshot; rate and ratio metrics (Mean Exec Time, Cache Hit Ratio) are averaged. Beside the dropdown, a note reports the first-versus-last movement, for example "Total Exec Time (ms): ▲ +12.3% over 40 snapshots".
 
-**Workload Detail** lists the window's statements or databases. Set **Group by** to Statement or Database, **Sort** to Total Exec Time, Calls, Mean Exec Time, Rows Returned, or I/O Share (all descending), and **Limit** to 25, 50, 100, or 250. The default limit is 50. A row count sits beside the controls, reading "N rows". With no data in the window the list reads "No workload history yet for this window."
+**Workload Detail** lists the window's statements or databases. Set **Group by** to Statement or Database, **Sort** to Total Exec Time, Calls, Mean Exec Time, Rows Returned, or I/O Share (all descending), and **Limit** to 25, 50, 100, or 250. The default limit is 50. The limit applies across the target before the page narrows the list to the selected database, so on a target with several busy databases the list can show fewer rows than the limit. A row count sits beside the controls, reading "N rows". With no data in the window the list reads "No workload history yet for this window."
 
 With **Group by** set to Statement, the list carries these columns.
 
@@ -53,7 +53,7 @@ With **Group by** set to Statement, the list carries these columns.
 | I/O Share | Share of the window's shared-buffer block accesses. |
 | Trend | Total-exec-time movement across the window (first versus last snapshot), as a colored ▲/▼/▬ with a percentage. |
 
-With **Group by** set to Database, the list drops to Database, Total Exec (ms), Calls, Rows, Mean (ms), Cache Hit, and I/O Share.
+With **Group by** set to Database, the list shows the selected database's totals as one row, with the columns Database, Total Exec (ms), Calls, Rows, Mean (ms), Cache Hit, and I/O Share.
 
 An informational banner appears above the page while the collection throttle is pausing heavy collections on the agent host. It clears itself when host usage drops back below the thresholds. See [Collection throttle](history-store-and-retention.md#collection-throttle).
 
@@ -79,17 +79,11 @@ Work from the shape in the chart down to the one statement that made it.
 
 If the drill-down has nothing to plot for the statement in the current window, it reads "No per-snapshot history for this statement in the current window." That usually means the statement ran outside the window rather than that its history is missing.
 
-## Filtering to one database
+## Switching databases
 
-On a target with several busy databases the workload-wide chart can hide a single database's behavior. Pin the chart to one of them.
+Workload History follows the database selected in the target's navigation tree. To see another database's workload, select its node in the tree; the page repaints for that database, keeping the window you set.
 
-1. Set **Group by** to Database.
-2. Click the row for the database you want. The chart re-scopes to that database alone and the scope line above it reads "Chart scope: database _name_ only", followed by a **Show all databases** link.
-3. Clear the filter either with that link or by clicking the same row a second time.
-
-With no filter active, the scope line reads "Chart scope: all databases (workload-wide)" and tells you how to set one.
-
-The filter applies to the chart and its movement note. The KPI band stays workload-wide, so **Workload vs prior window** continues to answer for the whole target while the chart answers for one database.
+The scope line above the chart names the database it covers: "Chart scope: database _name_ (the database selected in the navigation tree)." **History depth** is the one figure that covers the target's whole store.
 
 ## Time handling and honest indicators
 
@@ -107,8 +101,6 @@ The page is deliberate about not showing a number it cannot support.
 | "—" in **Workload vs prior window** | The prior window has snapshots but no recorded execution time to compare against. |
 
 Two behaviors of the underlying deltas are worth knowing before you read the **Trend** column too literally. The first snapshot inside a window contributes a delta of roughly zero, because it has no predecessor inside the window, so movement is baselined on the first non-zero value instead. And a statement that runs infrequently can show −100% in **Trend** simply because the last snapshot in the window recorded no delta for it. Open the drill-down to see the true shape before acting on either.
-
-Zero-activity statements can appear in the list, because they exist in the store. Sorting by the metric under discussion pushes them out of the way.
 
 Every delta, mean, and cache-hit ratio on this page is computed by the plug-in's agent-side reader from the local history store. The page never queries the monitored database.
 
