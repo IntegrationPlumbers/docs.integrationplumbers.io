@@ -40,7 +40,7 @@ Associate the framework, or individual standards, as described in [4.6](targets-
 Where the results appear:
 
 - **Enterprise → Compliance → Results** is the full view. It lists every associated framework and standard with its compliance score and its violation counts by severity. Drill from a standard into a rule to see which targets violate it, and from a violation into that rule's description and advice.
-- **The target's home page** carries a **Compliance Summary** region once the target has been evaluated, giving its score and its open violations. This is the quickest route from a server to its own findings.
+- **The target's Overview page** carries a **Compliance Summary** region once the target has been evaluated, giving its score and its open violations. This is the quickest route from a server to its own findings.
 
 **When evaluation happens.** These are configuration-based rules: they read the plug-in's configuration snapshots ([6.2](metrics-reference.md#62-how-to-read-a-metric-group)), which collect on a 24-hour schedule. Results therefore refresh about once a day, and a standard associated this morning produces its first score after the next configuration collection rather than immediately. To see the effect of a change sooner, refresh the target's configuration on demand — from the target-type menu, **Configuration → Last Collected**, then the page's refresh action — and let the evaluation follow that collection.
 

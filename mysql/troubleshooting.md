@@ -13,11 +13,13 @@ Nearly everything that goes wrong in the first hour with this plug-in is one of 
 
 **If a beta target is Up but its pages are empty, it is the licence key.** That is the first thing to check on a new target, so it is the first section.
 
+For a target whose pages are empty or partly filled, open its Monitoring Readiness page first: it checks the privileges, `performance_schema`, the `sys` schema, the backup history tables, the licence and MySQL Shell, and shows the statement to run for each fix (see [Monitoring pages](monitoring-pages.md)). A [troubleshooting guide for AI assistants](https://docs.integrationplumbers.io/mysql/ai/troubleshooting.md) covers the same checks in a form you can load into your own assistant together with the page's results, before you raise a service request.
+
 Six areas follow: the licence gate, install and deploy, connecting to MySQL, ClusterSet health, jobs, and metrics that look wrong but are not.
 
 ## 1. The licence gate {#licence}
 
-**Symptom.** The target shows **Up**. Its home page and every metric page are empty. There is a CRITICAL incident on the `License` metric, and each metric group reports a collection error reading:
+**Symptom.** The target shows **Up**. Its Overview page and every metric page are empty. There is a CRITICAL incident on the `License` metric, and each metric group reports a collection error reading:
 
 ```
 Collection stopped by license status: <status>
@@ -79,7 +81,9 @@ If an anonymous row exists and your agent connects locally, either remove it (`D
 
 ## 4. ClusterSet health {#clusterset}
 
-**`dr_promotion_ready` reads 0 and the DR Promotion Ready alert is CRITICAL.** ClusterSet health needs **MySQL Shell** (`mysqlsh`) on the agent host, on the agent's PATH. Without it the plug-in falls back to a repository rollup, and the rollup cannot assess promotion readiness — so the value is 0 and the alert fires until `mysqlsh` is installed. This is a missing prerequisite, not a sick cluster. See [Prerequisites](prerequisites.md#22-mysql-shell-for-clusterset-targets).
+**`health_status` reads `UNKNOWN` and `dr_promotion_ready` reads -1.** Readiness was not assessed. ClusterSet health needs **MySQL Shell** (`mysqlsh`) on the agent host, on the agent's PATH, and a connection it can use. When it cannot run, the plug-in falls back to a repository rollup or, with no data to roll up, to no assessment at all, and `fallback_reason` says why. Neither can assess promotion readiness, so the verdict is UNKNOWN rather than a pass or a fail, and the DR Promotion Ready alert does not fire. `MYSQLSH_NOT_FOUND` is a missing prerequisite, not a sick cluster: see [Prerequisites](prerequisites.md#22-mysql-shell-for-clusterset-targets). The reasons below that name a fault also raise the Fallback Reason WARNING.
+
+**`dr_promotion_ready` reads 0 and the DR Promotion Ready alert is CRITICAL.** MySQL Shell assessed the ClusterSet and a readiness check failed: `health_status` reads `NOT_READY`. The ClusterSet DR Health page shows which one. A ClusterSet with no replica clusters reads 0 too, because there is nothing to fail over to.
 
 **`TLS_TRUSTSTORE_REQUIRED`.** The `VERIFY_CA` and `VERIFY_IDENTITY` connection modes for ClusterSet health checks need truststore credential support, which this release does not provide. Rather than quietly downgrading to a weaker mode, the check fails closed and reports this status. `REQUIRED` and `DISABLED` modes work fully.
 

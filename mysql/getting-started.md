@@ -71,23 +71,23 @@ Every property is listed in [Targets and properties](targets-and-properties.md#4
 
 ## 4. Check it worked {#check}
 
-Within a few minutes the target should show **Up**, its home page should fill in, and the **License** metric should report `Active`.
+Within a few minutes the target should show **Up**, its Overview page should fill in, and the **License** metric should report `Active`.
 
 Those are three separate signals and they fail independently:
 
 - **Up** means the agent reached MySQL and got a response. If it stays Down, the problem is connectivity or credentials.
 - **`License` = `Active`** means the key was accepted. Anything else stops ordinary collection — see [Troubleshooting](troubleshooting.md#licence).
-- **A populated home page** means collections are running and uploading.
+- **A populated Overview page** means collections are running and uploading.
 
-A target that is Up with an empty home page is almost always the licence key.
+A target that is Up with an empty Overview page is almost always the licence key.
 
 ## 5. What to look at first {#first-look}
 
-Open the target's home page and work down the left-hand navigation:
+Open the target's Overview page and work down the left-hand navigation:
 
-1. **Overview** — availability, configuration summary, connections and buffer-pool usage at a glance.
-2. **Connections → Database Processes** — who is connected and what they are running right now. The fastest way to confirm the plug-in is seeing your real workload.
-3. **Performance → Query Analyzer** — the statement digests, ordered by the cost you care about. It is the page that will tell you fastest whether the plug-in is worth your time, so it is worth forming an opinion on early.
+1. **Overview** — availability, version and uptime, the license, and the key indicators (sessions, statements per second, cache hit, lock waits) at a glance.
+2. **Sessions and Waits → Sessions** — who is connected and what they are running right now. The fastest way to confirm the plug-in is seeing your real workload.
+3. **SQL → Query Analyzer** — the statement digests, ordered by the cost you care about. It is the page that will tell you fastest whether the plug-in is worth your time, so it is worth forming an opinion on early.
 4. **Performance → InnoDB Buffer Pool** — hit rate and usage, and the source of two of the shipped alert thresholds.
 
 Every page is described in [Monitoring pages](monitoring-pages.md), and every metric in the [Metrics reference](metrics-reference.md).
