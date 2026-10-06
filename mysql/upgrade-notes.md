@@ -11,6 +11,75 @@ changes. One section per drop, **newest first**.
 
 Internal builds that were never shipped to a customer are not listed here.
 
+## GA (24.1.9.x)
+
+**Target metadata moves again (`META_VER`, from the last Open Beta drop: MySQL Database 2.8 to 3.3, MySQL Cluster 1.6 to 1.8, MySQL ClusterSet 1.4 to 1.7).**
+This release changes units and labels on the three target types, adds columns, and changes a default threshold, all of which
+are collection metadata. Deploy to the **OMS first, restart it, then the agents**; an agent-only deploy leaves the previously
+activated collection in place while EM reports success. GA is a fresh install: the Open Beta is a different plug-in id, and
+internal drops cannot be upgraded in place, so targets are created new at GA and get everything below from creation, with
+nothing to do. What differs from the Open Beta drops:
+
+- **Units.** Columns that carry a quantity now have their real Enterprise Manager unit (bytes, seconds, milliseconds,
+  microseconds, hours, days, percent) instead of `NA`; plain counts, flags, coded settings and identifiers stay `NA`. Collected
+  values are unchanged, so history and thresholds carry over, but a chart or report that formatted a column as a bare number
+  may now show a unit.
+- **Labels.** Labels now state what a flag's 1 means, what a coded column's values are, that `-1` means unknown or not
+  assessed, whether a value is a `(setting)` or `(current)`, and the window a computed figure covers (user guide [6.3](metrics-reference.md#63-naming-conventions)). Status-counter groups
+  are labelled `(cumulative since server start)`. Anything that matches a metric by its display label, rather than by its internal
+  name, needs the new text; internal metric and column names are unchanged.
+- **New columns.** Columns are added at the end of their groups, never reordered: an explicit "not available" flag beside
+  every column that used to report a missing value as 0 (for example `backup_history_visible`, `never_expires`,
+  `lag_measured`), and a real lock-wait age (`waiting_seconds`) on the InnoDB row lock group (from `INNODB_TRX.trx_wait_started`) and the time in the wait state on the metadata lock group (`PROCESSLIST_TIME`). Without the
+  `PROCESS` privilege, which is in the documented grant set (user guide [2.4](prerequisites.md#24-the-monitoring-user)), every lock-wait age reads -1.
+- **Monitoring Readiness metrics.** MySQL Database gains `readiness_detail`, a real-time-only metric the Monitoring Readiness
+  page reads (it is probed live and never collected or stored), and `readiness_summary`, one row collected hourly that counts
+  features by status for the Home page; MySQL ClusterSet gains `readiness_detail`. Neither carries an alert condition.
+  Targets created at GA have them from creation; there is nothing to configure. The checks are read-only: the statement that
+  would fix a check is shown on the page, and the plug-in never runs it.
+- **Tables and Indexes metrics.** MySQL Database gains three groups, `TableStorage`, `IndexStorage` and `IndexSummary`, each
+  collected hourly and kept as history, with no alert condition. `TableStorage` and `IndexStorage` hold the 500 largest tables
+  and indexes plus one `/other/` row and one `/system/` row (the MySQL-owned schemas) so totals stay complete;
+  `IndexSummary` is one row counting full-scan tables, unused indexes and redundant indexes from the sys schema. A size or
+  count the server does not expose is blank, never 0: index sizes are InnoDB only, and each `IndexSummary` count is blank
+  with a reason when the account cannot read its sys view or performance_schema table I/O is off. Targets created at GA have
+  the groups from creation. Reading them uses the certified grant; the account must be able to read `information_schema`,
+  `sys` and `mysql.innodb_index_stats` (`SELECT ON *.*` covers all three). On a server with very many tables the hourly
+  read of `information_schema` is the cost to know about; MySQL 8 serves it from its statistics cache.
+- **DR Promotion Ready does not fire on "not assessed".** `ClusterSetHealth.dr_promotion_ready` is CRITICAL on `EQ 0`
+  only, and a ClusterSet target created at GA carries that condition from creation. A ClusterSet monitored without MySQL
+  Shell, or where MySQL Shell could not be used, reports -1 (not assessed) and `health_status` `UNKNOWN` instead of a false 0.
+  One consequence: a 0 to -1 transition clears a real DR CRITICAL. If readiness was failing (0) and MySQL Shell then becomes
+  unusable, the incident clears although nothing was fixed. The clear message says only that no failure is being reported:
+  check `health_status`. The `fallback_reason` WARNING (below) is what tells you MySQL Shell has broken.
+- **New WARNING on `ClusterSetHealth.fallback_reason`.** New ClusterSet targets carry it from creation. It raises after two
+  consecutive collections when MySQL Shell could not be used for a reason an operator can fix (`AUTH_FAILED`, `TIMEOUT`,
+  `UNREACHABLE`, `MEMBER_UNREACHABLE`, `KERBEROS_TICKET`, `KERBEROS_CONFIG_UNREADABLE`, `TLS_TRUSTSTORE_REQUIRED`,
+  `PARSE_FAILED`). It stays quiet for reasons that describe how the target is set up (`MYSQLSH_NOT_FOUND`,
+  `SOCKET_CONNECTION`, `KERBEROS_NOT_SUPPORTED`, `KERBEROS_CLIENT_UNAVAILABLE`), and a target that is not part of a
+  ClusterSet (`NOT_A_CLUSTERSET`) reports no row at all. Notification rules keyed on `fallback_reason` may want it.
+- **Console-only descriptions.** Metric descriptions appear in the console and are not passed to an AI agent by Enterprise
+  Manager's MCP server (user guide [6.3](metrics-reference.md#63-naming-conventions)), which is why the meaning now sits in the label.
+
+**Last Seen removed from the three statement groups.** `SysStatementByLatency`, `SysStatementByExecCount` and
+`SysStatementByFirstSeen` no longer carry `last_seen`, and the Query Analyzer grid no longer shows a Last Seen column. It was a
+microsecond-timestamp string that changed on almost every collection, and it accounted for about 98% of this target type's rows
+in the repository's string-history table (`EM_METRIC_STRING_HISTORY`). `first_seen` stays. This ships with the `META_VER` bump
+of the same release, so deploy to the **OMS first, restart it, then the agents**.
+
+**Collection connections open with the default schema `performance_schema`.** The plug-in's JDBC metric collections now
+connect with `performance_schema` as their default schema, so the statements they run are recorded under it in the digest
+tables and Home's Top SQL and Query Analyzer hide them by default (user guide [5.1](monitoring-pages.md#51-mysql-database-pages); a checkbox shows them again). The
+certified grant (`SELECT, PROCESS, REPLICATION CLIENT ON *.*`, [Prerequisites](prerequisites.md#24-the-monitoring-user) section 3) already covers
+it, so no grant changes. If the monitoring account cannot use the `performance_schema` database (a grant that does not
+reach it) or the server has no such database, the plug-in connects with no default schema instead and its own statements
+stay visible on both pages. It tries the schema again an hour later, and the agent's plug-in log warns once per target per
+process and again at each hourly re-probe (more often while collections overlap). Sessions
+the plug-in opens now show `performance_schema` as their schema in Database Processes. Statements the plug-in ran before
+this release were recorded with no schema and stay visible until the digest table is reset
+(`TRUNCATE TABLE performance_schema.events_statements_summary_by_digest`) or MySQL restarts. Query Analytics Trends
+counts every statement, as before.
+
 ## Open Beta drop 10 (2026-09-16)
 
 The second Open Beta drop. No customer received drop 9, so this is the first drop anyone installs: a first install

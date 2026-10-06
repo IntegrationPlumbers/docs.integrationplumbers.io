@@ -8,7 +8,7 @@ nav_order: 8
 This chapter lists the default thresholds the plug-in ships and how to change them.
 **Topics:** 7.1 Default thresholds · 7.2 Changing thresholds
 ## 7.1 Default thresholds
-The plug-in ships 21 default metric thresholds, listed below, plus 3 availability conditions (the `Status` column of each target type's Response metric, which drive the target's Up/Down state and are not shown here).
+The plug-in ships 22 default metric thresholds, listed below, plus 3 availability conditions (the `Status` column of each target type's Response metric, which drive the target's Up/Down state and are not shown here).
 
 | Target type | Metric group | Column | Operator | Warning | Critical | Consecutive occurrences |
 |---|---|---|---|---|---|---|
@@ -32,7 +32,8 @@ The plug-in ships 21 default metric thresholds, listed below, plus 3 availabilit
 | `ip_mysql_cluster_beta` | GroupMemberStats | `count_transactions_in_queue` | > | 100 | 1000 | 1 |
 | `ip_mysql_cluster_beta` | GrConsensus | `avg_consensus_time_us` | > | 100000 | 1000000 | 1 |
 | `ip_mysql_cluster_beta` | BackupSource | `source_offline` | > | 0 | — | 1 |
-| `ip_mysql_clusterset_beta` | ClusterSetHealth | `dr_promotion_ready` | < | — | 1 | 2 |
+| `ip_mysql_clusterset_beta` | ClusterSetHealth | `dr_promotion_ready` | = | — | 0 | 2 |
+| `ip_mysql_clusterset_beta` | ClusterSetHealth | `fallback_reason` | matches | ^(AUTH_FAILED\|TIMEOUT\|UNREACHABLE\|MEMBER_UNREACHABLE\|KERBEROS_TICKET\|KERBEROS_CONFIG_UNREADABLE\|TLS_TRUSTSTORE_REQUIRED\|PARSE_FAILED)$ | — | 2 |
 
 **The two wait thresholds, and why they are shaped the way they are.** Wait time is the one signal on this list that scales
 with how busy a server is, so an absolute total would fire on every healthy production system and stay quiet on a small one.
@@ -59,6 +60,21 @@ them in the Performance Schema.
 Both are starting points in the sense 7.2 describes. On a server whose normal state is lock-dominated by design, raise the
 occurrence count or clear the threshold rather than living with a standing warning.
 
+**The two ClusterSet thresholds.** Both need two consecutive 5-minute collections, so one sample taken while a replication
+channel reconnects does not raise an incident.
+
+- **`ClusterSetHealth.dr_promotion_ready`** is CRITICAL when the value is 0: MySQL Shell assessed the ClusterSet and at
+  least one readiness check failed. It does not fire on -1, which means readiness was not assessed (the repository rollup,
+  or MySQL Shell could not be used; `health_status` reads `UNKNOWN`). When the value moves from 0 to -1 the incident
+  clears, and the clear message says only that no failure is being reported: check `health_status` for the current verdict.
+- **`ClusterSetHealth.fallback_reason`** is a WARNING when MySQL Shell could not be used because of a fault an operator
+  can fix, and the message names the reason. It fires for `AUTH_FAILED`, `TIMEOUT`, `UNREACHABLE`, `MEMBER_UNREACHABLE`,
+  `KERBEROS_TICKET`, `KERBEROS_CONFIG_UNREADABLE`, `TLS_TRUSTSTORE_REQUIRED` and `PARSE_FAILED`. It does
+  not fire for the reasons that describe how the target is set up rather than a failure: `MYSQLSH_NOT_FOUND`,
+  `SOCKET_CONNECTION`, `KERBEROS_NOT_SUPPORTED` and `KERBEROS_CLIENT_UNAVAILABLE`. A target that is not part of a
+  ClusterSet (`NOT_A_CLUSTERSET`) reports no row, so there is nothing for the alert to fire on. [Troubleshooting](troubleshooting.md#clusterset)
+  gives the remedy for each.
+
 
 ## 7.2 Changing thresholds
 The shipped values are starting points sized for lab workloads, not tuning. Review each one against your own service levels and change the ones that do not fit.
@@ -69,7 +85,7 @@ Thresholds live on the target, and you edit them from Metric and Collection Sett
 2. Set the **View** list to **All metrics** so that columns without a current threshold are listed too.
 3. Find the metric group and column — 7.1 gives both names for every shipped threshold, and the metrics reference ([6.1](metrics-reference.md#61-where-the-reference-is)) gives them for every other column.
 4. Edit **Warning Threshold** and **Critical Threshold** on the row, or click the row's edit icon for the full editor.
-5. Set **Number of Occurrences** if the condition should have to hold for more than one collection before it raises an incident. Most shipped thresholds use one occurrence; the exceptions are `dr_promotion_ready` (two), `avg_wait_us` (three) and `top_wait_class` (five), for the reasons 7.1 gives.
+5. Set **Number of Occurrences** if the condition should have to hold for more than one collection before it raises an incident. Most shipped thresholds use one occurrence; the exceptions are `dr_promotion_ready` and `fallback_reason` (two each), `avg_wait_us` (three) and `top_wait_class` (five), for the reasons 7.1 gives.
 6. Click **OK** to save. The new value applies from the next collection.
 
 Clearing a threshold field removes the threshold: the column keeps collecting and stops alerting. The same page changes a group's collection schedule, and can stop a group collecting altogether — use that rather than deleting a target when you want to quiet a metric group.
