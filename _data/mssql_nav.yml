@@ -36,3 +36,4 @@ groups:
       - { title: "Jobs", url: /mssql/jobs.html }
       - { title: "High availability", url: /mssql/high-availability.html }
       - { title: "Troubleshooting", url: /mssql/troubleshooting.html }
+      - { title: "AI clients and the MCP Server", url: /mssql/mcp-server.html }
