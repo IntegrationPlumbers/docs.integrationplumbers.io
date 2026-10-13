@@ -5,11 +5,35 @@ nav_order: 13
 
 # Changelog
 
-This page lists what changed in each drop of the IBM Db2 plug-in, most recent first. Two identities ship from the same source: the beta line (`ip.em.xdbb`, target type `ip_db2_database_beta`, version `24.1.9.N.0` / `13.5.9.N.0`) this guide covers, and the eventual GA line (`ip.em.xdb2`, target type `ip_db2_database`, version `24.1.<n>.0.0`). Beta-to-beta upgrades in place; beta-to-GA is always a clean install — see [What's new](whats-new.md#beta-identity).
+This page lists what changed in each release of the IBM Db2 plug-in, most recent first. The general-availability (GA) plug-in is `ip.em.xdb2`, target type `ip_db2_database`. Its Enterprise Manager 24ai and Enterprise Manager 13.5 builds are versioned independently. The Open Beta history follows the GA releases, under [Beta line](#beta-line).
 
-## 24.1.9.9.0 (Enterprise Manager 24ai) / 13.5.9.4.0 (Enterprise Manager 13.5) — Open Beta
+## 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.2.0.0 (Enterprise Manager 13.5) — GA, 2026-10-12
 
-The Open Beta drop this guide describes, and the first to make the Enterprise Manager 13.5 build available alongside 24ai.
+The first general-availability release of `ip.em.xdb2`. One release, two builds with the same content: 24.1.1.0.0 installs on Enterprise Manager 24ai, 13.5.2.0.0 on Enterprise Manager 13.5. There is no earlier GA release to upgrade from. Moving from the Open Beta is a clean install — see [Moving from the beta to GA](beta-pre-release.md). The full detail is on [What's new](whats-new.md).
+
+- Released the first general-availability version of the IBM Db2 plug-in for Oracle Enterprise Manager, for Db2 12.1 and 11.5. Moving from the Open Beta is a clean install, and the two can run side by side while you move over.
+- Added monitoring for storage-path headroom, table maintenance, open and idle units of work, lock-list use, running utilities, and the SQL text behind each statement.
+- Added a health overview on the Home page, links between the plug-in's pages, a shared time window, and runbooks for the most common Db2 alerts.
+- Added three administrative jobs (force an application, refresh table statistics, and take an online backup) that work on remotely monitored databases and run as a separate administrator account.
+- Added compliance standards with seventeen rules, and HADR monitoring that follows the primary through a takeover and reports a standby as up.
+- Renamed every administrative job type, and changed the default alert thresholds and collection intervals.
+
+**Known issue:** after one failed text lookup, Top Statements keeps showing numbers without SQL text until the time window or the ranking changes — see [What's new](whats-new.md#known-issue).
+
+**Release files and SHA-256 checksums**
+
+| Enterprise Manager | File | SHA-256 |
+| :--- | :--- | :--- |
+| 24ai | `24.1.1.0.0_ip.em.xdb2_2000_0.opar` | `afa4e2fbb38651f6cd3b699e9fd5551f51e39fa56839dff7f300281faa08aa35` |
+| 13.5 | `13.5.2.0.0_ip.em.xdb2_2000_0.opar` | `2cb83675ff82e21fd83b19c4f2294f1b8f7fd8747eefca15dd4afeb94568c7e9` |
+
+## Beta line {#beta-line}
+
+The Open Beta shipped as a separate plug-in, `ip.em.xdbb` (target type `ip_db2_database_beta`, shown as *IBM DB2 Database (Beta)*), versioned `24.1.9.N.0` for Enterprise Manager 24ai and `13.5.9.N.0` for Enterprise Manager 13.5. The beta line is closed: there are no further beta drops. These entries are kept for history.
+
+### 24.1.9.9.0 (Enterprise Manager 24ai) / 13.5.9.4.0 (Enterprise Manager 13.5) — Open Beta
+
+The last Open Beta drop, and the first to make the Enterprise Manager 13.5 build available alongside 24ai.
 
 **New in this release**
 
@@ -37,13 +61,13 @@ The Open Beta drop this guide describes, and the first to make the Enterprise Ma
 - An OMS presenting a self-signed certificate that previously validated a limited-instance licence key's count will now fail that check — this is the certificate-validation fix above taking effect, not a regression. See [Troubleshooting](troubleshooting.md#oms-licence-count) for the fix.
 - Run, or schedule, [Purge Stale Plugin Cache](jobs-and-metric-extensions.md#purge-stale-cache) after this and every future upgrade.
 
-### Also in this drop
+**Also in this drop**
 
 - The **DB Status** threshold on the detailed response metric uses deviation semantics, matching the DB Monitoring condition: enter the healthy status (for example `ACTIVE`) and the alert fires only when the database leaves it.
 
-## Earlier beta drops
+### Earlier beta drops
 
-These predate the guide and are recorded here for history only.
+These predate the beta guide and are recorded here for history only.
 
 - **24.1.9.6.0** (2026-08-31) — First release cut through a repeatable release pipeline, producing an OPAR, a customer-verifiable `SHA256SUMS`, and a `build-info.txt` naming the exact commit. Install and upgrade gates verified (Enterprise Manager 24ai only — the 13.5 line was not built for this drop).
 - **24.1.9.4.0** — Beta job types renamed so a beta install can no longer collide with a GA install on the same OMS.
@@ -52,6 +76,7 @@ These predate the guide and are recorded here for history only.
 
 ## Related
 
-- [What's new](whats-new.md) — the current release in detail, page by page, with what is and is not verified
-- [Install and upgrade](install-and-upgrade.md) — how to move between beta drops
+- [What's new](whats-new.md) — the GA release in detail
+- [Moving from the beta to GA](beta-pre-release.md) — for Open Beta users
+- [Install and upgrade](install-and-upgrade.md#download) — download, verify and install the release files
 - [IBM Db2 Plug-in](index.md) — the documentation hub for every page in this guide
