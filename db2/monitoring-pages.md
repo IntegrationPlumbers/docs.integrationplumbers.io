@@ -32,6 +32,8 @@ A region marked real time asks the agent to run its metric group's collection ag
 
 ## Home {#home}
 
+![The Home page](images/pages/01-home.jpg)
+
 **Home** is the target's landing page — open it first to see whether a database is healthy at a glance.
 
 - **Availability** — the last 24 hours, and a 7-day timeline.
@@ -44,6 +46,8 @@ A region marked real time asks the agent to run its metric group's collection ag
 - **Incidents and Problems** — Enterprise Manager's own incident region for the target.
 
 ## Analysis {#analysis}
+
+![The Analysis page](images/pages/02-analysis.jpg)
 
 **Analysis** is where you chase lock contention. Its lock regions are live: they show locks being waited on now, and rows disappear as waits clear. They are not a history of past contention — for that, use the lock alerts and the Applications Blocked on Locks runbook ([Alerts and thresholds](alerts-and-templates.md#runbooks)).
 
@@ -62,6 +66,8 @@ An empty Lock Contention table is a healthy, uncontended database, not a collect
 
 ## Performance {#performance}
 
+![The Performance page](images/pages/03-performance.jpg)
+
 **Performance** is where the buffer pool, cache, and I/O detail lives. The **Time window** selector at the top moves every region at once. **Real time (live)**, the default, has no fixed span: it starts empty and fills in, one point a minute, for as long as the page is open. **Past week (aggregated)** and **Past month (aggregated)** read Enterprise Manager's hourly aggregates, because raw data is kept for about 7 days, so short peaks show lower.
 
 - **Buffer Pool I/O** — per buffer pool, the hit ratio and logical and physical data and index reads. On a past window the table lists one row per buffer pool per collection.
@@ -73,6 +79,8 @@ An empty Lock Contention table is a healthy, uncontended database, not a collect
 
 ## Storage {#storage}
 
+![The Storage page](images/pages/04-storage.jpg)
+
 - **Tablespace Utilization (%)** — one bar per tablespace.
 - **Tablespace Detail** — type, state, utilization, used, free and usable pages, page size, number of containers, and auto-resize.
 - **Transaction Log** — log used (%), which the transaction-log alert fires on; used and available space; secondary logs in use; and the oldest transaction holding the log, with how long it has been open.
@@ -82,6 +90,8 @@ An empty Lock Contention table is a healthy, uncontended database, not a collect
 
 ## Backup History {#backup-history}
 
+![The Backup History page](images/pages/05-backup-history.jpg)
+
 - **Last Backup** — when the last successful backup ran and the days since, which is what the backup-age alert fires on; or **Never backed up**.
 - **Recovery History (Backup, Restore, Load, Reorg, Rollforward)** — Db2's recovery history with each operation's object type, start and end, status (failures in red with their SQLCODE), tablespaces, device, location and backup ID.
 - **Running Utilities** — utilities in progress now (backup, load, reorg, runstats and others): the object, who invoked it, when it started and how long it has run, the application and user, priority and detail.
@@ -89,6 +99,10 @@ An empty Lock Contention table is a healthy, uncontended database, not a collect
 - **Table Space Rebalance** — rebalance operations after storage changes: status, mode, percent complete, extents moved and left, start time, how long they have run, and the target storage group.
 
 ## SQL Analytics {#sql-analytics}
+
+![The SQL Analytics page](images/pages/06-sql-analytics.jpg)
+
+![The statement detail dialog, opened from a Top Statements row](images/pages/07-statement-detail.jpg)
 
 - **Time window** (top of the page) — **Past hour**, **Past day** (default), **Past week (aggregated)** or **Past month (aggregated)**. Every section below follows it.
 - **Top Statements** — the 20 statements with the most **CPU time** or the most **Executions** in the window (the **Rank by** selector), with their SQL text, executions, CPU time, CPU per execution, activity time and rows read. Click a statement, or press Enter on it, to open the statement detail: the SQL text, the statement hash, and its CPU time and executions over the window.
@@ -100,6 +114,8 @@ An empty Lock Contention table is a healthy, uncontended database, not a collect
 The statement hash is the same key the SQL Statement Analytics table uses, so a statement can be followed from one table to the other.
 
 ## HADR {#hadr}
+
+![The HADR page](images/pages/08-hadr.jpg)
 
 The page is meant for an HADR primary or standby; on a database with no HADR it shows no rows.
 
