@@ -70,7 +70,7 @@ Everything here needs only the target added and the key in place.
 | :--- | :--- | :--- |
 | Open the target's **Home** page. | The Health Overview, with one row per area and a link to the page behind each, plus availability, the configuration summary, the Connections and Lock & Deadlock Activity charts, Related Targets, and open incidents. | [Monitoring pages](monitoring-pages.md#home) |
 | Open **Analysis** and read **Top Waits by Blocking Application**. | The applications holding locks others wait on, with a **Kill Blocking Application** button that asks for confirmation before it submits the *Kill IBM Db2 Application* job. Empty tables mean a healthy, uncontended database — not a collection failure. | [Monitoring pages](monitoring-pages.md#analysis) |
-| Open **Performance** and pick **Past hour**. | Buffer pool I/O, cache hit ratios, transaction log I/O and SQL activity over the last hour. **Real time** starts empty and fills in, one point a minute. | [Monitoring pages](monitoring-pages.md#performance) |
+| Open **Performance** and pick **Past hour**. | Buffer pool I/O, cache hit ratios, transaction log I/O and SQL activity over the last hour. **Real time (live)** starts empty and fills in, one point a minute. | [Monitoring pages](monitoring-pages.md#performance) |
 | Open **Storage**. | Table space use, the transaction log and the transaction holding it, storage-path headroom, and the days-to-full forecast. | [Monitoring pages](monitoring-pages.md#storage) |
 | Open **Backup History**. | The last backup and the days since it, Db2's recovery history with failures highlighted, and any utilities running now. | [Monitoring pages](monitoring-pages.md#backup-history) |
 

@@ -24,10 +24,10 @@ A region marked real time asks the agent to run its metric group's collection ag
 | :--- | :--- | :--- |
 | Home | Live, no selector. The Health Overview reads Enterprise Manager's current alerts | 60 s |
 | Analysis | Live, no selector: locks being waited on right now | 60 s |
-| Performance | Selector: Real time, Latest collection, Past hour, Past day, Past week, Past month (the last two aggregated). It moves every region on the page | 60 s in real time |
-| Storage | Tables and bars live. **Trend** selector at the bottom: Past hour, Past day (default), Past week, Past month | 60 s |
+| Performance | Selector: Real time (live) (default), Latest collection, Past hour, Past day, Past week (aggregated), Past month (aggregated). It moves every region on the page | 60 s in real time |
+| Storage | Tables and bars live. **Trend** selector at the bottom: Past hour, Past day (default), Past week (aggregated), Past month (aggregated) | 60 s |
 | Backup History | Tables live. **Trend** selector, as Storage | 60 s |
-| SQL Analytics | One window for the whole page, from the past hour to the past month, with no real time (a live read would disturb the per-interval deltas) | On window change |
+| SQL Analytics | One window for the whole page: Past hour, Past day (default), Past week (aggregated), Past month (aggregated). There is no real time, because a live read would disturb the per-interval deltas | On window change |
 | HADR | Tables and bars live. **Trend** selector below the bars, as Storage; incidents at the bottom | 60 s |
 
 ## Home {#home}
@@ -62,7 +62,7 @@ An empty Lock Contention table is a healthy, uncontended database, not a collect
 
 ## Performance {#performance}
 
-**Performance** is where the buffer pool, cache, and I/O detail lives. The **Time window** selector at the top moves every region at once. **Real time** has no fixed span: it starts empty and fills in, one point a minute, for as long as the page is open. **Past week** and **Past month** read Enterprise Manager's hourly and daily aggregates.
+**Performance** is where the buffer pool, cache, and I/O detail lives. The **Time window** selector at the top moves every region at once. **Real time (live)**, the default, has no fixed span: it starts empty and fills in, one point a minute, for as long as the page is open. **Past week (aggregated)** and **Past month (aggregated)** read Enterprise Manager's hourly aggregates, because raw data is kept for about 7 days, so short peaks show lower.
 
 - **Buffer Pool I/O** — per buffer pool, the hit ratio and logical and physical data and index reads. On a past window the table lists one row per buffer pool per collection.
 - **Cache Hit Ratios (%)** — catalog- and package-cache hit ratios, with a table of the lookup counts underneath, so an idle cache (few lookups, ratio held at 100%) can be told apart from a genuinely perfect one.
@@ -90,7 +90,7 @@ An empty Lock Contention table is a healthy, uncontended database, not a collect
 
 ## SQL Analytics {#sql-analytics}
 
-- **Time window** (top of the page) — from the past hour to the past month. Every section below follows it.
+- **Time window** (top of the page) — **Past hour**, **Past day** (default), **Past week (aggregated)** or **Past month (aggregated)**. Every section below follows it.
 - **Top Statements** — the 20 statements with the most **CPU time** or the most **Executions** in the window (the **Rank by** selector), with their SQL text, executions, CPU time, CPU per execution, activity time and rows read. Click a statement, or press Enter on it, to open the statement detail: the SQL text, the statement hash, and its CPU time and executions over the window.
   - The text comes from the **SQL Statement Text** metric group, which stores each statement's text once a day, flattened to one line and cut at 2,000 characters. Statement text can contain literal values from your data — read [Statement text and your data](whats-new.md#statement-text-privacy), which also shows how to turn its collection off.
   - **Known issue:** after one failed text lookup, Top Statements keeps showing numbers without SQL text until you change the time window or the ranking. Refreshing the page does not retry the lookup; the ranking and numbers stay correct. Fixed in the first update after GA.
