@@ -110,10 +110,12 @@ Accepting the current shape is a legitimate answer to a Plan Drift alert: if the
 
 ### Audit Trail
 
-Every baseline action is recorded: **When**, **Action**, **Actor**, **Reason**, and **Label**. The actor is the Enterprise Manager user who clicked, so you can answer who certified a plan, when, and why. Actions the plug-in takes on its own are recorded with the actor `auto` and a reason that says what triggered them, such as promotion after stability or aging out after a period unseen. With no history yet the table reads "No audit events."
+The **Audit Trail** is where your baseline changes are noted as you make them. Each row carries **When**, **Action**, **Actor**, **Reason**, and **Label**. **Actor** is the Enterprise Manager user who clicked. **Label** is the label you gave the baseline when you accepted it, and **Reason** is the reason you gave when you retired one; on an accept row Reason reads `manual accept`. The **Note** you can add when accepting is kept on the baseline rather than shown here, and Pin and Unpin take no text of their own.
+
+Under the **Auto** baseline mode the plug-in writes its own rows, with the actor `auto` and a reason naming what triggered them, such as promotion after stability or aging out after a period unseen. Baselines retired by the **Set size cap** are not written here, so read the panel as the notes kept with this feature rather than a complete record of every change. With no entries yet the table reads "No audit events."
 
 ![The Audit Trail panel listing baseline actions](images/13-5-15/plan-drift-audit-trail.png)
-*The Audit Trail records who accepted, pinned, or retired each baseline, and why.*
+*The Audit Trail: your accept, pin, and retire actions, with the label and reason you entered.*
 
 ## Severity model
 
@@ -134,7 +136,7 @@ Retired baselines behave the way the name implies. A current plan that matches a
 
 ## Baseline governance
 
-**Baseline mode defaults to Manual.** No plan becomes accepted-good without a named operator action, and that action, its actor, and its rationale land in the Audit Trail. Observed shapes still accumulate as `candidate` rows in the meantime, so when you do decide to certify one, the history is already there.
+**Baseline mode defaults to Manual.** No plan becomes accepted-good without a named operator action, and the label you give it appears in the Audit Trail. Observed shapes still accumulate as `candidate` rows in the meantime, so when you do decide to certify one, the history is already there.
 
 Automatic promotion is opt-in through the **Auto** baseline mode. Under it, a candidate is promoted once it has been seen at least **Stability captures** times across at least **Stability days**, and only if its cost is at most **Auto cost guard %** of the cheapest accepted plan's cost. That guard is what stops a stable-but-worse plan from quietly certifying itself.
 
@@ -143,7 +145,7 @@ Read Auto cost guard % as a ratio rather than a deviation: 100 means a candidate
 
 Two mechanisms bound the accepted set so it does not grow without limit:
 
-- **Set size cap** — when the accepted set exceeds the cap, the least recently seen unpinned accepted baselines are retired.
+- **Set size cap** — when the accepted set exceeds the cap, the least recently seen unpinned accepted baselines are retired. These retirements are not written to the Audit Trail.
 - **Staleness days** — an accepted, unpinned baseline whose last sighting is older than this is retired automatically, with the reason recorded in the Audit Trail.
 
 **Pin** exempts a baseline from both. Pin the plan you want the query to run in production and it survives the cap and the staleness sweep.
