@@ -2,8 +2,9 @@
 # Run lint-docs.sh and check-anchors.sh over the product guides a change touches.
 # Usage: scripts/lint-changed.sh [<base-ref>]     (default: origin/main)
 #
-# A "touched" product is one with a changed page under postgresql/, mysql/, mssql/
-# or db2/. The WHOLE product directory is then linted, not just the changed pages:
+# A "touched" product is one with a changed page anywhere under postgresql/, mysql/,
+# mssql/ or db2/ (nested pages such as mysql/ai/*.md count). The WHOLE product
+# directory is then linted, not just the changed pages:
 # a page that was deleted or renamed breaks links in its neighbours, and only the
 # full-directory pass sees that. Products the change does not touch are left
 # alone, so a draft section can never hold up another product's publish.
@@ -22,7 +23,7 @@ if printf '%s\n' "$CHANGED" | grep -qE '^scripts/(lint-docs|check-anchors)\.sh$'
 else
   TOUCHED=""
   for p in $PRODUCTS; do
-    if printf '%s\n' "$CHANGED" | grep -qE "^$p/[^/]+\.md$"; then TOUCHED="$TOUCHED $p"; fi
+    if printf '%s\n' "$CHANGED" | grep -qE "^$p/.+\.md$"; then TOUCHED="$TOUCHED $p"; fi
   done
 fi
 
@@ -30,9 +31,11 @@ if [[ -z "${TOUCHED// /}" ]]; then echo "no guide pages changed against $BASE - 
 
 rc=0
 for p in $TOUCHED; do
+  # every page in the section, nested ones included (mysql/ai/*.md)
+  PAGES="$(find "$p" -name '*.md' | sort)"
   echo "== $p: lint-docs"
-  scripts/lint-docs.sh "$p"/*.md || rc=1
+  scripts/lint-docs.sh $PAGES || rc=1
   echo "== $p: check-anchors"
-  scripts/check-anchors.sh "$p"/*.md || rc=1
+  scripts/check-anchors.sh $PAGES || rc=1
 done
 exit $rc
