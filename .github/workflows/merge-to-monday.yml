@@ -1,0 +1,14 @@
+name: merge-to-monday
+
+# Thin caller — delegates to the central reusable workflow in ip-dev-plugin.
+# The real logic (feature/fix-branch task parse + Monday "Done" flip) lives once
+# at IntegrationPlumbers/ip-dev-plugin. Do not add logic to this file.
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  merge:
+    uses: IntegrationPlumbers/ip-dev-plugin/.github/workflows/merge-to-monday.yml@main
+    secrets: inherit

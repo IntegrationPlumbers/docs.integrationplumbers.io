@@ -1,0 +1,32 @@
+name: slack-notify
+
+# Thin caller — delegates to the central reusable workflow in ip-dev-plugin.
+# The real logic lives once at IntegrationPlumbers/ip-dev-plugin; changing it is
+# a single PR there, live here on the next run. Do not add logic to this file.
+#
+# permissions MUST be declared here: a reusable (called) workflow can only
+# DOWNSCOPE the caller's GITHUB_TOKEN, never elevate it. Without this block the
+# default (often read-only) token would 403 when the reusable posts the
+# slack-ts marker comment on the PR.
+#
+# on: types include synchronize + reopened so a PR opened while it has merge
+# conflicts (GitHub dispatches no run for an unbuildable test-merge commit, so
+# the card never posts at 'opened') SELF-HEALS its card on the later synchronize
+# once the conflict clears — the reusable card job is idempotent via the marker.
+# Callers subscribe broadly; the reusable's job `if:` conditions decide what runs,
+# so future event-scope changes stay a single reusable-side PR (no caller fan-out).
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  slack:
+    uses: IntegrationPlumbers/ip-dev-plugin/.github/workflows/slack-notify.yml@main
+    secrets: inherit

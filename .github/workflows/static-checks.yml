@@ -1,0 +1,41 @@
+name: static-checks
+
+# Two jobs, both advisory (main is unprotected; nothing here blocks a merge).
+#
+# checks: thin caller — delegates to the central reusable workflow in
+# ip-dev-plugin with no inputs, so it runs the secrets scan (gitleaks) only.
+# This is a PUBLIC repo serving docs.integrationplumbers.io; a leaked token or
+# lab address in a page is the one thing that must never reach main.
+#
+# docs-lint: the repo's own gate. scripts/lint-docs.sh (front matter, forbidden
+# terms, relative links, images) and scripts/check-anchors.sh (page.md#anchor
+# resolution) already exist but nothing ran them, so PR #5's broken cross-page
+# links were only caught by a manual review pass. scripts/lint-changed.sh scopes
+# both to the product guides the PR touches — a PostgreSQL publish is never
+# held up by a draft page in another product's section.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: IntegrationPlumbers/ip-dev-plugin/.github/workflows/static-checks.yml@main
+
+  docs-lint:
+    runs-on: ubuntu-latest
+    # Cap a hung step (GitHub's default is 6h). Both scripts are grep loops over
+    # a few dozen markdown files; a normal run is under 10s.
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the diff against the PR base can be computed.
+          fetch-depth: 0
+      - name: Lint the guide pages this PR changes
+        env:
+          # The PR base commit, passed as data (not interpolated into the script).
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: scripts/lint-changed.sh "$BASE_SHA"
