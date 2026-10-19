@@ -1,0 +1,27 @@
+# docs.integrationplumbers.io risk model (overlays core). TWO classes.
+# Self-merge ONLY IF every changed path matches a glob below; anything else
+# (any unmatched path) is Reviewed. A human may raise Self-merge -> Reviewed,
+# never the reverse. Read by the pr-create flow in ip-dev-plugin; CI only
+# sees the resulting risk:* label.
+#
+# This repo is a Jekyll site (GitHub Pages) serving the LIVE PostgreSQL guide
+# plus the MySQL, SQL Server and Db2 beta guides. The split is page content vs
+# shared site infrastructure:
+#
+#   self_merge - a product's own section: its pages, images, videos and nav
+#     list. A change there is visible on that product's pages only, is gated by
+#     static-checks (lint-docs + check-anchors on the touched product), and must
+#     not wait on a reviewer - a PostgreSQL release publish ships from here.
+#
+#   Reviewed (everything NOT listed) - _layouts/, _config.yml, assets/, CNAME,
+#     Gemfile, scripts/ and .github/. Each of these serves every product section
+#     at once; a bad layout or config change takes the live PostgreSQL guide
+#     down with the betas, and scripts/ IS the lint gate.
+
+self_merge:                     # author self-merges; everything else is Reviewed
+  - "postgresql/**"
+  - "mysql/**"
+  - "mssql/**"
+  - "db2/**"
+  - "_data/*_nav.yml"           # one per product; the sidebar for that section only
+  - "README.md"

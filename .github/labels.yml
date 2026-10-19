@@ -1,0 +1,14 @@
+# PR-process label set. Apply with:
+#   gh label create <name> -c <color> -d "<description>"  (or a label-sync action)
+- name: "risk:reviewed"
+  color: "FBCA04"
+  description: "Default — needs 1 approving review from a human who is not the author"
+- name: "risk:self-merge"
+  color: "0E8A16"
+  description: "Low-risk (docs/tests only) — author self-merges after a clean pre-review"
+- name: "ai-authored"
+  color: "5319E7"
+  description: "Authored or assisted by an AI agent"
+- name: "hotfix"
+  color: "D93F0B"
+  description: "Emergency fix — expedited path, evidence filed retroactively within 24h"
