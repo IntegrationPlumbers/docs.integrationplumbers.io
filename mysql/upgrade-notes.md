@@ -7,18 +7,18 @@ nav_order: 4.5
 
 Release notes for changes that need operator action beyond a routine deploy —
 security remediation, target metadata that has to be activated, breaking column
-changes. One section per drop, **newest first**.
+changes. One section per release, **newest first**.
 
 Internal builds that were never shipped to a customer are not listed here.
 
-## GA (24.1.9.x)
+## GA (24.1.10.0.0 / 13.5.10.0.0)
 
-**Target metadata moves again (`META_VER`, from the last Open Beta drop: MySQL Database 2.8 to 3.3, MySQL Cluster 1.6 to 1.8, MySQL ClusterSet 1.4 to 1.7).**
+**Target metadata moves again (`META_VER`, from the last pre-release drop: MySQL Database 2.8 to 3.4, MySQL InnoDB Cluster 1.6 to 1.8, MySQL InnoDB ClusterSet 1.4 to 1.7).**
 This release changes units and labels on the three target types, adds columns, and changes a default threshold, all of which
 are collection metadata. Deploy to the **OMS first, restart it, then the agents**; an agent-only deploy leaves the previously
-activated collection in place while EM reports success. GA is a fresh install: the Open Beta is a different plug-in id, and
-internal drops cannot be upgraded in place, so targets are created new at GA and get everything below from creation, with
-nothing to do. What differs from the Open Beta drops:
+activated collection in place while EM reports success. GA is a fresh install: no earlier build upgrades in place to it,
+so targets are created new at GA and get everything below from creation, with nothing to do (user guide [3.4](install-and-upgrade.md#34-upgrading) and 4.7).
+What differs from the last pre-release drop:
 
 - **Units.** Columns that carry a quantity now have their real Enterprise Manager unit (bytes, seconds, milliseconds,
   microseconds, hours, days, percent) instead of `NA`; plain counts, flags, coded settings and identifiers stay `NA`. Collected
@@ -26,7 +26,7 @@ nothing to do. What differs from the Open Beta drops:
   may now show a unit.
 - **Labels.** Labels now state what a flag's 1 means, what a coded column's values are, that `-1` means unknown or not
   assessed, whether a value is a `(setting)` or `(current)`, and the window a computed figure covers (user guide [6.3](metrics-reference.md#63-naming-conventions)). Status-counter groups
-  are labelled `(cumulative since server start)`. Anything that matches a metric by its display label, rather than by its internal
+  are labeled `(cumulative since server start)`. Anything that matches a metric by its display label, rather than by its internal
   name, needs the new text; internal metric and column names are unchanged.
 - **New columns.** Columns are added at the end of their groups, never reordered: an explicit "not available" flag beside
   every column that used to report a missing value as 0 (for example `backup_history_visible`, `never_expires`,
@@ -34,7 +34,7 @@ nothing to do. What differs from the Open Beta drops:
   `PROCESS` privilege, which is in the documented grant set (user guide [2.4](prerequisites.md#24-the-monitoring-user)), every lock-wait age reads -1.
 - **Monitoring Readiness metrics.** MySQL Database gains `readiness_detail`, a real-time-only metric the Monitoring Readiness
   page reads (it is probed live and never collected or stored), and `readiness_summary`, one row collected hourly that counts
-  features by status for the Home page; MySQL ClusterSet gains `readiness_detail`. Neither carries an alert condition.
+  features by status for the Home page; MySQL InnoDB ClusterSet gains `readiness_detail`. Neither carries an alert condition.
   Targets created at GA have them from creation; there is nothing to configure. The checks are read-only: the statement that
   would fix a check is shown on the page, and the plug-in never runs it.
 - **Tables and Indexes metrics.** MySQL Database gains three groups, `TableStorage`, `IndexStorage` and `IndexSummary`, each
@@ -58,6 +58,15 @@ nothing to do. What differs from the Open Beta drops:
   `PARSE_FAILED`). It stays quiet for reasons that describe how the target is set up (`MYSQLSH_NOT_FOUND`,
   `SOCKET_CONNECTION`, `KERBEROS_NOT_SUPPORTED`, `KERBEROS_CLIENT_UNAVAILABLE`), and a target that is not part of a
   ClusterSet (`NOT_A_CLUSTERSET`) reports no row at all. Notification rules keyed on `fallback_reason` may want it.
+  When MySQL Shell succeeds, `fallback_reason` reads **`NONE`** (the Open Beta drops left it empty, which Enterprise Manager
+  stores as no value, so a fired WARNING never cleared). The WARNING now clears on the first successful collection. A
+  script or rule that tested for an empty `fallback_reason` should test for `NONE`.
+- **An unreachable primary cluster is "not assessed", not "not ready".** When the agent host cannot reach any member of the
+  primary cluster, MySQL Shell still answers through a replica-cluster member, but it reports the primary's state as
+  `UNKNOWN`. The Open Beta drops counted that as an unhealthy primary and raised the DR Promotion Ready CRITICAL although
+  the ClusterSet could be healthy. GA reports it as `MEMBER_UNREACHABLE`, with `dr_promotion_ready` at -1 and
+  `health_status` `UNKNOWN`, and the `fallback_reason` WARNING names the cause. A replica cluster Shell cannot reach still
+  reads not ready (0).
 - **Console-only descriptions.** Metric descriptions appear in the console and are not passed to an AI agent by Enterprise
   Manager's MCP server (user guide [6.3](metrics-reference.md#63-naming-conventions)), which is why the meaning now sits in the label.
 
@@ -93,14 +102,14 @@ in place, and EM will report success while the new conditions never activate. Ve
 `emcli get_threshold -target_name=<target> -target_type=ip_mysql_database -metric_name=WaitProfileSummary` after the cycle.
 Existing targets keep any thresholds an operator has already edited; the new ones apply to targets created after the upgrade.
 
-*Known behaviour, by design:* `avg_wait_us` is a threshold on a keyed metric, so Enterprise Manager evaluates it per wait event
+*Known behavior, by design:* `avg_wait_us` is a threshold on a keyed metric, so Enterprise Manager evaluates it per wait event
 and can open one incident per event name. That is deliberate — the incident names the event that is stuck, which is the
 actionable detail — but on a host with several slow devices it means several incidents rather than one.
 
 ### MySQL Connector/J is no longer bundled: place it on every agent host before deploying this drop to agents
 
 The plug-in no longer carries the MySQL JDBC driver. Each agent host that monitors a MySQL target needs exactly one
-`mysql-connector-j-*.jar` in `<agentStateDir>/ip_plugin/xmyb/lib/` (user guide [2.9](prerequisites.md#29-mysql-connectorj-on-agent-hosts): `emctl status agent` prints
+`mysql-connector-j-*.jar` in `<agentStateDir>/ip_plugin/xmys/lib/` (user guide [2.9](prerequisites.md#29-mysql-connectorj-on-agent-hosts): `emctl status agent` prints
 `<agentStateDir>` as **Agent Home**; 8.4.0 is the tested version, SHA-256 in the guide). The directory is outside the
 plug-in's own directories, so it survives upgrades and undeploys.
 
@@ -143,7 +152,7 @@ that keyed on `PARSE_FAILED` or `TIMEOUT` to catch an unreachable member should 
 
 The `SecurityAccounts` configuration snapshot now reports **effective** privileges. Every `has_*` privilege flag counts the
 account's own grants plus every role it can reach (roles granted to it, at any nesting depth, and the server's
-`mandatory_roles`), and `has_mysql_schema_write` honours partial revokes on the `mysql` schema. The seven account-privilege
+`mandatory_roles`), and `has_mysql_schema_write` honors partial revokes on the `mysql` schema. The seven account-privilege
 rules in the MySQL Security Standard (Over-Privileged Accounts, Accounts With Grant Option, Accounts With File Privilege,
 Accounts With Process Privilege, Accounts With Shutdown Privilege, Accounts With Super Privilege, Accounts With MySQL Schema
 Write Access) evaluate those flags, so after the first configuration snapshot on this drop (24-hour schedule, user guide [9.2](compliance-rules.md#92-associating-standards-and-reading-results))
@@ -182,9 +191,9 @@ The first drop of the Open Beta. If this is your first install there is nothing
 to do on this page — follow [chapter 3](install-and-upgrade.md#installing-the-plug-in) of the user guide instead. What follows
 matters when you move to this drop from an earlier one.
 
-### Licence enforcement: a MySQL Database target without an Active licence stops collecting
+### License enforcement: a MySQL Database target without an Active license stops collecting
 
-From this drop every MySQL Database target needs a valid licence key in
+From this drop every MySQL Database target needs a valid license key in
 its **License Key** property (guide [4.1](targets-and-properties.md#41-target-properties)). While the `License` metric's status
 is anything but `Active`, **every other metric group on that target reports a
 collection error** (`Collection stopped by license status: …`) — each group at
@@ -195,7 +204,7 @@ Configuration snapshots stop with the rest, so configuration history and
 compliance scoring reflect the last snapshot taken while licensed (or nothing,
 for a new target) until a key is accepted. Collections resume at their next
 interval once a key is accepted. Cluster and ClusterSet targets are not
-licensed targets and are unaffected. **Action: have the licence keys to hand
+licensed targets and are unaffected. **Action: have the license keys to hand
 and enter them on every MySQL Database target as soon as its agent is
 upgraded** — keys can be set before the upgrade (the property is ignored by
 older drops), which avoids the error burst entirely.
@@ -203,7 +212,7 @@ older drops), which avoids the error burst entirely.
 ### This drop moves the MySQL Database target metadata
 
 Licensing adds the `License` metric group, its collection item and two default
-thresholds to the MySQL Database target type, and the licence check adds its
+thresholds to the MySQL Database target type, and the license check adds its
 properties to every instance metric. Enterprise Manager activates target-type
 metadata on the OMS side, so this drop needs the full cycle — **deploy to the
 OMS → let the OMS restart → deploy to agents** — rather than an agent-only

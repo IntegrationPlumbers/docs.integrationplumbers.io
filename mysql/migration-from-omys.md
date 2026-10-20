@@ -37,20 +37,22 @@ instances, or during lab verification of an xmys fix.
 
 ## Migrating with `mysql-onboard.sh`
 
-The script ([download](https://docs.integrationplumbers.io/mysql/downloads/mysql-onboard.sh)) drives the whole migration from the OMS host with standard EM CLI. Both migrations —
-Oracle `oracle.mysql.omys` → `ip.em.xmys`, and the beta `ip.em.xmyb` → `ip.em.xmys` — are re-registration of a
-different plug-in's target, never an in-place upgrade: the source and the replacement coexist until you retire
-the source.
+The script ([download](https://docs.integrationplumbers.io/mysql/downloads/mysql-onboard.sh)) drives the whole migration from the OMS host with standard EM CLI. Moving from
+Oracle `oracle.mysql.omys` to `ip.em.xmys` is re-registration of a different plug-in's target, never an in-place
+upgrade: the source and the replacement coexist until you retire the source.
+
+Moving from the Open Beta plug-in, `ip.em.xmyb`, to `ip.em.xmys` works the same way.
 
 1. **Export** the estate: `emcli login -username=<em user>` then
-   `mysql-onboard.sh export --out inventory.csv --source omys` (or `beta`, or `all`). One row per source
+   `mysql-onboard.sh export --out inventory.csv --source omys`. One row per source
    target; `new_name` is prefilled with the source name and `agent_host` with its agent.
+   For Open Beta targets use `--source beta`, or `--source all` for both kinds.
 2. **Review** the CSV. Every row that needs a decision carries a flag in `notes`; `apply` refuses the row until
    you resolve it and delete the flag:
    | Flag | Meaning | What to do |
    |---|---|---|
    | `KERBEROS: …` | the omys target set a KDC/realm; xmys reads only a `krb5.conf` | put the path to a krb5.conf on the agent host in `kerberos_config` |
-   | `LICENSE: no key on source` / `LICENSE: beta key exported` | omys has no licence; a beta key is refused by GA (`Wrong Plug-in`) | paste the GA key into `license_key` |
+   | `LICENSE: …` | the source has no key this plug-in accepts: omys has no license, and a key exported from another plug-in is refused (`Wrong Plug-in`) | paste the GA key into `license_key` |
    | `AGENT: Windows agent` | ip.em.xmys ships a Linux agent side only | set `agent_host` to a Linux agent that reaches the server. **`modify_target` cannot move a target between agents**, so if the replacement target already exists, `emcli delete_target` it first and then re-run `apply` — a re-run alone will not move it |
    | `TLS: source uses <mode>/truststore` | the source is set to `verify_ca` or `verify_identity`, or carries a truststore path — the modes and the client truststore credentials this release defers (guide [2.5](prerequisites.md#25-tls), 4.1) | set `use_secure` to `required` (or `disabled`) and clear `ts_dir` / `ts_type`. The exported values are left as the source had them so you can see what it did; `apply` refuses the row until the flag is gone, and refuses the values themselves in any case |
    | `STATUS: source target is Down` | informational | migrate anyway, or fix the source first |
@@ -104,12 +106,12 @@ a hard error such as an expired `emcli` session or an existing `--out` file with
 as soon as the call returns, with an exit trap as a backstop (EM CLI's `-input_file` option substitutes the file's
 contents for a tag in `-credentials`).
 One exposure remains, and it is EM CLI's, not the script's: `add_target`/`modify_target` have no file-based form for
-`-properties` (same probe), so the licence key is still inline there, visible in that `emcli` process's command line
+`-properties` (same probe), so the license key is still inline there, visible in that `emcli` process's command line
 for the few seconds of each call to any other account with shell access to the OMS host — exactly as with the inline
 `emcli add_target` in guide [4.3](targets-and-properties.md#43-add-a-target-with-em-cli). Run `apply` on a host where only administrators have shell access.
 
 Both files the tool creates — the run log and export's `--out` CSV — are created **owner-only (mode 600)**,
-because both can carry licence keys; and the `signature=` half of every licence key is masked
+because both can carry license keys; and the `signature=` half of every license key is masked
 (`signature=<redacted>`) wherever the tool prints or logs a command or an `emcli` reply. The key itself still
 reaches `emcli` intact, and the CSV keeps the real key — you have to be able to re-apply from it. A CSV
 holding any non-empty `password` or `license_key` cell must be `chmod 600`: `apply` refuses to read one that

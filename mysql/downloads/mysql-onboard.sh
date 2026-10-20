@@ -320,11 +320,11 @@ row_validate() {
   # a licence key is an ip_mysql_database property (build_props emits it for
   # that type alone), so a key on a cluster/ClusterSet row is a mistake worth
   # naming rather than a cell to drop in silence
-  [ "${F[$C_TYPE]}" != ip_mysql_database ] && [ -n "${F[$C_LIC]}" ] && VALIDATION_ERRS+="  $where: licence keys apply to database targets only"$'\n'
+  [ "${F[$C_TYPE]}" != ip_mysql_database ] && [ -n "${F[$C_LIC]}" ] && VALIDATION_ERRS+="  $where: license keys apply to database targets only"$'\n'
   # ... and a database row with no key is legal but nearly always an
   # oversight: the target is created and then collects nothing but License and
   # Response. A warning, not a refusal — a licence can be set later.
-  [ "${F[$C_TYPE]}" = ip_mysql_database ] && [ -z "${F[$C_LIC]}" ] && log "WARN $where: no licence key — only License/Response will collect until one is set"
+  [ "${F[$C_TYPE]}" = ip_mysql_database ] && [ -z "${F[$C_LIC]}" ] && log "WARN $where: no license key — only License/Response will collect until one is set"
   for v in "${F[@]}"; do [[ "$v" == *'~'* || "$v" == *'||'* ]] && { VALIDATION_ERRS+="  $where: a value contains '~' or '||', the emcli separators"$'\n'; break; }; done
   # -credentials always uses emcli's default ";"/":" delimiters (see
   # load_passwords for why); username/password/ts_dir/ts_type feed that
@@ -453,7 +453,7 @@ target_status() {
 }
 # license_status <name>: the License metric's "status" value (Active / License
 # Required). get_metric_data's own Entity Name/Type columns can themselves be
-# a target name with embedded spaces (e.g. "mysql84-2 (july84 SECONDARY)"),
+# a target name with embedded spaces (e.g. "mysql84-2 (cluster1 SECONDARY)"),
 # which shifts "status" off a fixed field number — parse by the literal
 # " status  Status " token pair instead of by field position. Same
 # stdout redirect as target_status, for the same command-substitution reason.
@@ -494,7 +494,7 @@ verify_row() {
   if [ "$verdict" = PASS ]; then n_created=$((n_created+1)); else n_failed=$((n_failed+1)); fi
 }
 mode_verify() {
-  printf '%-40s %-20s %-6s %-18s %-4s %5s\n' TARGET TYPE STATUS LICENCE VERDICT WAITED
+  printf '%-40s %-20s %-6s %-18s %-4s %5s\n' TARGET TYPE STATUS LICENSE VERDICT WAITED
   for_each_row "$CSV" verify_row
   # verify keeps counting in n_created/n_failed (so the exit code stays
   # n_failed) but skips the generic summary(), which would log this as

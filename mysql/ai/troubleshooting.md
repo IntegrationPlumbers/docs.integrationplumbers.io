@@ -11,10 +11,10 @@ This file is written to be loaded into an AI assistant, and to be read by a data
 | Target type | What it represents |
 |---|---|
 | MySQL Database | One MySQL server instance, standalone or a member of a cluster |
-| MySQL Cluster | One InnoDB Cluster, or the Group Replication group behind it, as a whole |
-| MySQL ClusterSet | One InnoDB ClusterSet: a primary cluster, its replica clusters and the replication between them |
+| MySQL InnoDB Cluster | One InnoDB Cluster, or the Group Replication group behind it, as a whole |
+| MySQL InnoDB ClusterSet | One InnoDB ClusterSet: a primary cluster, its replica clusters and the replication between them |
 
-**The Monitoring Readiness page.** The console has a Monitoring Readiness page for MySQL Database targets and for MySQL ClusterSet targets. It runs read-only checks under the target's monitoring credentials when it opens and each time you choose Refresh. For each check it shows a status, the current value, the required value and a detail text. The detail text can include a SQL statement to run. The page never runs a statement itself.
+**The Monitoring Readiness page.** The console has a Monitoring Readiness page for MySQL Database targets and for MySQL InnoDB ClusterSet targets. It runs read-only checks under the target's monitoring credentials when it opens and each time you choose Refresh. For each check it shows a status, the current value, the required value and a detail text. The detail text can include a SQL statement to run. The page never runs a statement itself.
 
 **To use this file with the page.**
 
@@ -25,7 +25,7 @@ This file is written to be loaded into an AI assistant, and to be read by a data
 
 **Every statement in this file is for an administrator to review and run.** The plug-in changes nothing on the server. The monitoring account has no write privilege, so a fix statement fails if you run it as that account. Run it as an account with the privilege the statement needs, after checking it against your own change process.
 
-**Remove secrets before you share anything.** Passwords and licence keys must not appear in text you send to an assistant or to support. The plug-in removes passwords it knows about from the page text, but check the text yourself.
+**Remove secrets before you share anything.** Passwords and license keys must not appear in text you send to an assistant or to support. The plug-in removes passwords it knows about from the page text, but check the text yourself.
 
 ## Status words
 
@@ -52,7 +52,7 @@ The page shows one of three Unknown states for the whole page when it has no che
 
 ## Readiness checks
 
-The checks below are the complete set the collector emits. A MySQL Database target emits sections `connection`, `performance_schema`, `sys_schema`, `backup` and `license`. A MySQL ClusterSet target emits sections `connection` and `mysql_shell`. A MySQL Cluster target has no Monitoring Readiness page.
+The checks below are the complete set the collector emits. A MySQL Database target emits sections `connection`, `performance_schema`, `sys_schema`, `backup` and `license`. A MySQL InnoDB ClusterSet target emits sections `connection` and `mysql_shell`. A MySQL InnoDB Cluster target has no Monitoring Readiness page.
 
 Each check is a row with a section id and an item id. The privilege checks are in section `connection`, shown in the panel Connection and privileges.
 
@@ -69,7 +69,7 @@ Each check is a row with a section id and an item id. The privilege checks are i
 | performance_schema (`performance_schema`) | Memory instruments (`memory_instruments`) | optional | Database |
 | sys schema (`sys_schema`) | sys schema installed (`installed`) | yes | Database |
 | Backup tool (`backup`) | Backup tool history (`backup_tool`) | optional | Database |
-| Plug-in license (`license`) | Plug-in licence (`license_active`) | yes | Database |
+| Plug-in license (`license`) | Plug-in license (`license_active`) | yes | Database |
 | MySQL Shell (`mysql_shell`) | MySQL Shell (mysqlsh) on the agent host (`mysqlsh_installed`) | optional | ClusterSet |
 | MySQL Shell (`mysql_shell`) | ClusterSet AdminAPI connection shape (`adminapi_connection_shape`) | optional | ClusterSet |
 
@@ -271,25 +271,25 @@ SELECT COUNT(*) FROM PERCONA_SCHEMA.xtrabackup_history;
 - **Fix:** none is needed when you do not use either tool. MySQL Enterprise Backup writes history by default; `--no-history-logging` turns it off. XtraBackup writes history only when the backup command includes `--history`. The documented monitoring user has a global `SELECT` grant, which already covers both tables.
 - **What it affects:** the Backup page and backup thresholds only. On Amazon RDS, backups are not visible to the server, so Unknown here is expected.
 
-### Section `license`, item `license_active`: Plug-in licence
+### Section `license`, item `license_active`: Plug-in license
 
 - **Required value:** `Active`.
 - **Status rules:**
-  - `ok`, Current `Active`: the licence is Active, and it has no expiry or more than 30 days left.
-  - `warn`, Current `Active, <n> days left` (or `1 day`): the licence is Active and expires in 30 days or fewer.
+  - `ok`, Current `Active`: the license is Active, and it has no expiry or more than 30 days left.
+  - `warn`, Current `Active, <n> days left` (or `1 day`): the license is Active and expires in 30 days or fewer.
   - `fail`, Current is the status word: `License Required`, `Invalid Signature`, `Wrong Plug-in` or `Expired`.
-  - `unknown`: `undetermined: licence status not available` (the status is missing or is not one of the five known words) or `undetermined: days remaining not understood`.
+  - `unknown`: `undetermined: license status not available` (the status is missing or is not one of the five known words) or `undetermined: days remaining not understood`.
 - **What each failing status means:**
 
 | Status | Meaning | Fix |
 |---|---|---|
 | `License Required` | No key has been entered. | Enter the key in the target's License Key property. |
 | `Invalid Signature` | The key text was altered. | Paste the key exactly as issued, as one line, with no wrapping and no trailing spaces. |
-| `Wrong Plug-in` | The key was issued for a different plug-in, for example a general-availability key on a beta install. | Use the key issued for the plug-in you installed. |
+| `Wrong Plug-in` | The key was issued for a different plug-in, for example a key from a pre-release build. | Use the key issued for the plug-in you installed. |
 | `Expired` | The expiry date has passed. | Request a new key. |
 
 - **Fix:** set the key in the target's License Key property. The key is checked on the agent host every 15 minutes, and again when the property changes. Collections resume at their next interval; nothing needs a restart. The License metric's Status column names the reason.
-- **What it affects:** every collection on that target stops while the status is anything but Active. The target stays Up, because availability keeps reporting. The signal is a critical incident on the License metric and the collection error `Collection stopped by license status: <status>`. MySQL Cluster and MySQL ClusterSet targets are not licensed and are never gated.
+- **What it affects:** every collection on that target stops while the status is anything but Active. The target stays Up, because availability keeps reporting. The signal is a critical incident on the License metric and the collection error `Collection stopped by license status: <status>`. MySQL InnoDB Cluster and MySQL InnoDB ClusterSet targets are not licensed and are never gated.
 
 ### Section `mysql_shell`, item `mysqlsh_installed`: MySQL Shell (mysqlsh) on the agent host
 
@@ -326,10 +326,10 @@ These are failures that are not on the readiness page, or that stop the page fro
 The driver is not inside the plug-in. Every collection of every MySQL target on an agent host, and every Run EXPLAIN job, stops with one message until the driver is in place. The target does not show a MySQL problem. When it is missing, the Monitoring Readiness page returns no results.
 
 - **Message:** `MySQL Connector/J not found: no mysql-connector-j-*.jar in <directory>; files present: ...`
-- **Cause and fix:** the directory is `<agentStateDir>/ip_plugin/xmyb/lib`. `<agentStateDir>` is the agent's instance directory, which `emctl status agent` prints as **Agent Home**. Put exactly one `mysql-connector-j-*.jar` there, readable by the agent's operating-system user. Connector/J 8.4.0 is the tested version. The next collection uses it; nothing needs a restart.
+- **Cause and fix:** the directory is `<agentStateDir>/ip_plugin/xmys/lib`. `<agentStateDir>` is the agent's instance directory, which `emctl status agent` prints as **Agent Home**. Put exactly one `mysql-connector-j-*.jar` there, readable by the agent's operating-system user. Connector/J 8.4.0 is the tested version. The next collection uses it; nothing needs a restart.
 - **Message:** `MySQL Connector/J: N mysql-connector-j-*.jar files in <directory> (...); keep exactly one.` Two or more jars are present, usually after an upgrade. Remove all but one.
 - **Message:** `MySQL Connector/J: <jar> is not usable by this plug-in - it lacks <class> ...` The file is not a Connector/J release the plug-in can link against: a renamed legacy `mysql-connector-java` build, a corrupt download, or a release outside the tested range. Replace it with `mysql-connector-j-8.4.0.jar`.
-- **Message:** `MySQL Connector/J: cannot locate <agentStateDir>/ip_plugin/xmyb/lib - agentStateDir did not resolve on this agent` The agent did not hand the plug-in its instance directory. Check that `emctl status agent` shows an Agent Home, and that the plug-in was deployed to the agent after the agent was last upgraded.
+- **Message:** `MySQL Connector/J: cannot locate <agentStateDir>/ip_plugin/xmys/lib - agentStateDir did not resolve on this agent` The agent did not hand the plug-in its instance directory. Check that `emctl status agent` shows an Agent Home, and that the plug-in was deployed to the agent after the agent was last upgraded.
 - **Collections stop after a newer driver:** later 8.4.x and 9.x releases are expected to work but are not certified. Go back to 8.4.0 and report the version that failed.
 - **Windows agents** are not supported. The agent must be Linux. The MySQL server can be anywhere the agent can reach.
 
@@ -343,7 +343,7 @@ SELECT user, host FROM mysql.user WHERE user = '';
 ```
 
 - **Socket targets.** A local agent can connect over the Unix socket. The account must exist as `'<user>'@'localhost'`, the Unix Socket Path must be `mysqld`'s own socket, and Host must be empty. A target with both a host and a socket path connects over TCP.
-- **TLS.** An empty TLS Mode means plaintext, the same as `disabled`. With `required`, the connection fails if the server cannot encrypt it, and the target goes Down. A value the plug-in does not recognise is treated as `required`.
+- **TLS.** An empty TLS Mode means plaintext, the same as `disabled`. The exception is the MySQL Shell session behind ClusterSet health: with TLS Mode empty it passes no ssl-mode, so MySQL Shell uses its own default, which encrypts the session without verifying the server certificate. With `required`, the connection fails if the server cannot encrypt it, and the target goes Down. A value the plug-in does not recognize is treated as `required`.
 - **Kerberos on the JDBC path fails while the `mysql` client works.** The collections use the Java runtime's Kerberos libraries, not the system ones, so they read the credential cache and `krb5.conf` that the agent's Java sees. Set the target's Kerberos Configuration File to a file the agent user can read, keep the ticket refreshed for the agent's operating-system user, and check that the agent's Java trusts the realm's encryption types.
 
 ### ClusterSet health
@@ -354,19 +354,22 @@ The ClusterSet Health metric reports `health_status` and `fallback_reason`. When
 |---|---|---|
 | `MYSQLSH_NOT_FOUND` | `mysqlsh` is not on the agent user's PATH. A missing prerequisite, not a sick cluster. | See check `mysqlsh_installed`. |
 | `TLS_TRUSTSTORE_REQUIRED` | The target's TLS Mode is `verify_ca` or `verify_identity`. | Use `required` or `disabled`. |
-| `MEMBER_UNREACHABLE` | `mysqlsh` connected through one listed endpoint, then could not reach a different member. The AdminAPI opens its own session to every member that Group Replication considers online. | Open a network path from the agent host, on the MySQL port, to every member of every cluster. The agent host must also resolve each member's host name. |
+| `MEMBER_UNREACHABLE` | `mysqlsh` connected through one listed endpoint, then could not reach a different member. The AdminAPI opens its own session to every member that Group Replication considers online. Also reported when `mysqlsh` answered but could not reach any member of the primary cluster (Shell reports the primary's state as `UNKNOWN`); readiness is then not assessed, never "not ready". | Open a network path from the agent host, on the MySQL port, to every member of every cluster. The agent host must also resolve each member's host name. |
 | `KERBEROS_TICKET` | The Kerberos exchange failed before any member saw a credential. `mysqlsh` reports every such failure as `Unknown MySQL error`. | As the agent's operating-system user, run `klist`. If there is no ticket or it is expired, restore the unattended refresh (`k5start`, or a scheduled `kinit -kt <keytab> <principal>`). Other causes: an unreachable KDC, clock skew, a member without a `mysql/<host>` service principal. |
 | `KERBEROS_CLIENT_UNAVAILABLE` | `mysqlsh` could not load `authentication_kerberos_client`. | Install the MySQL Shell package that ships its client plug-ins and the Kerberos client libraries. |
 | `KERBEROS_CONFIG_UNREADABLE` | The target's Kerberos Configuration File is not readable by the agent's operating-system user. | See check `adminapi_connection_shape`. |
-| `KERBEROS_NOT_SUPPORTED` | The endpoint refused the Kerberos client plug-in. A MySQL Router port does this: Kerberos does not pass through Router. | Configure the target with member endpoints instead of a Router port, or use password authentication. |
+| `KERBEROS_NOT_SUPPORTED` | The endpoint refused the Kerberos client plug-in. A MySQL Router port does this: MySQL Shell cannot log in with Kerberos through a Router (the JDBC collections can, so only the health source falls back). | Configure the target with member endpoints instead of a Router port, or use password authentication. |
 | `dr_promotion_ready` = 0, `health_status` `NOT_READY` | `mysqlsh` assessed the ClusterSet and a readiness check failed. A ClusterSet with no replica clusters also reads 0. | The ClusterSet DR Health page shows which check failed. |
 
 ### Run EXPLAIN job failures
 
 - **`Unable to get credentials for defaultHostCred`.** The job needs two credentials: the target's monitoring credential, and a Host Preferred Credential on the target, a named host credential that runs as the agent's operating-system user. Set it under Setup, Security, Preferred Credentials, for the MySQL Database target type.
-- **`MySQL Connector/J not found ...` or `cannot locate <agentStateDir>/ip_plugin/xmyb/lib - EMSTATE is not set in the job step`.** The first means the driver is missing or unreadable by the credential's user. The second means the credential switched user without keeping the agent's environment, usually a `sudo` rule with `env_reset` and no `env_keep`.
+- **`MySQL Connector/J not found ...` or `cannot locate <agentStateDir>/ip_plugin/xmys/lib - EMSTATE is not set in the job step`.** The first means the driver is missing or unreadable by the credential's user. The second means the credential switched user without keeping the agent's environment, usually a `sudo` rule with `env_reset` and no `env_keep`.
 - **`the job step's javaHome=... does not name a JVM`.** The Java runtime that Enterprise Manager resolved for the job is not there. Check the agent installation with `emctl status agent`.
-- **A syntax error on a statement copied from Query Analyzer.** Query Analyzer shows normalised digests with `?` in place of literals. Replace the placeholders with real values first.
+- **A syntax error on a statement copied from Query Analyzer.** Query Analyzer shows normalized digests with `?` in place of literals. Replace the placeholders with real values first.
+- **`No complete query reached the job, so nothing was explained`.** The plug-in refused the job's input rather than explain part of a statement. The `ERROR` line above it in the job output names the reason: the input did not finish arriving within 10 seconds (a heavily loaded agent host; run the job again), or the Database Name contains a line break. A multi-line query is not a cause; it is explained as typed.
+- **`… This query starts with something else, so it was not run`.** Run EXPLAIN explains only a `SELECT`, `WITH`, `TABLE`, `INSERT`, `REPLACE`, `UPDATE` or `DELETE` statement, or one opening with `(`, so that it never runs the statement. Remove anything before the statement other than comments, such as `ANALYZE` (which would make it `EXPLAIN ANALYZE` and run the query), a `FORMAT=` option or a `/*!` comment.
+- **`A connection property contains a comma, which the job cannot pass`.** The target's Host, Port, Unix Socket Path, TLS Mode or Kerberos config contains a comma, usually an endpoint list. Run EXPLAIN connects to one server; give it a single host and port.
 
 ### Metrics that look wrong
 
@@ -386,7 +389,7 @@ The ClusterSet Health metric reports `health_status` and `fallback_reason`. When
 The plug-in's own log is on the agent host that monitors the target. The plug-in writes its warnings and errors there. The file is `mysql_oem.log`, in the `logging` folder of the plug-in's directory under the agent's `plugins` directory:
 
 ```
-plugins/ip.em.xmyb.agent.plugin_<version>/logging/mysql_oem.log
+plugins/ip.em.xmys.agent.plugin_<version>/logging/mysql_oem.log
 ```
 
 `<version>` is the deployed plug-in version. `emctl status agent` on the agent host prints Agent Home. If you cannot find the `plugins` directory from there, search for the file by name:
@@ -400,13 +403,13 @@ The log rolls over at 15 MB into files named `mysql_oem-<date>-<n>.log` in the s
 Other places that the user guide names:
 
 - The collection-error text on the target's metric groups.
-- The `License` metric's Status column, for the licence state.
+- The `License` metric's Status column, for the license state.
 - The deploy log and the agent log, for install and deploy problems. `emcli get_plugin_deployment_status -plugin=<plug-in id>` shows deployment progress.
 - The WebLogic server log and the repository's wait profile, for the repository-overload pattern above.
 
 ## What to send support
 
-Send these, with passwords and licence keys removed:
+Send these, with passwords and license keys removed:
 
 - The Monitoring Readiness page results: every check, with its panel, label, status, current value, required value and detail text.
 - The plug-in version (`emcli list_plugins_on_server`).
@@ -415,7 +418,7 @@ Send these, with passwords and licence keys removed:
 - The metric group or console page involved.
 - Any deploy log, agent log or collection-error text.
 
-Do not send passwords, licence keys, keytabs or Kerberos tickets. If a statement or log line contains one, replace it with `<removed>` first.
+Do not send passwords, license keys, keytabs or Kerberos tickets. If a statement or log line contains one, replace it with `<removed>` first.
 
 ## More help
 

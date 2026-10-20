@@ -7,17 +7,17 @@ nav_order: 13
 
 The things that go wrong most often, what each one looks like, and what to change.
 
-**In this page:** The licence gate · Install and deploy · Connecting to MySQL · ClusterSet health · Jobs · Metrics that look wrong
+**In this page:** The license gate · Install and deploy · Connecting to MySQL · ClusterSet health · Jobs · Metrics that look wrong
 
 Nearly everything that goes wrong in the first hour with this plug-in is one of a small number of things. This page is that list rather than a general guide to Enterprise Manager.
 
-**If a beta target is Up but its pages are empty, it is the licence key.** That is the first thing to check on a new target, so it is the first section.
+**If a MySQL Database target is Up but its pages are empty, it is the license key.** That is the first thing to check on a new target, so it is the first section.
 
-For a target whose pages are empty or partly filled, open its Monitoring Readiness page first: it checks the privileges, `performance_schema`, the `sys` schema, the backup history tables, the licence and MySQL Shell, and shows the statement to run for each fix (see [Monitoring pages](monitoring-pages.md)). A [troubleshooting guide for AI assistants](https://docs.integrationplumbers.io/mysql/ai/troubleshooting.md) covers the same checks in a form you can load into your own assistant together with the page's results, before you raise a service request.
+For a target whose pages are empty or partly filled, open its Monitoring Readiness page first: it checks the privileges, `performance_schema`, the `sys` schema, the backup history tables, the license and MySQL Shell, and shows the statement to run for each fix (see [Monitoring pages](monitoring-pages.md)). A [troubleshooting guide for AI assistants](https://docs.integrationplumbers.io/mysql/ai/troubleshooting.md) covers the same checks in a form you can load into your own assistant together with the page's results, before you raise a service request.
 
-Six areas follow: the licence gate, install and deploy, connecting to MySQL, ClusterSet health, jobs, and metrics that look wrong but are not.
+Six areas follow: the license gate, install and deploy, connecting to MySQL, ClusterSet health, jobs, and metrics that look wrong but are not.
 
-## 1. The licence gate {#licence}
+## 1. The license gate {#license}
 
 **Symptom.** The target shows **Up**. Its Overview page and every metric page are empty. There is a CRITICAL incident on the `License` metric, and each metric group reports a collection error reading:
 
@@ -25,16 +25,16 @@ Six areas follow: the licence gate, install and deploy, connecting to MySQL, Clu
 Collection stopped by license status: <status>
 ```
 
-**Cause.** Every **MySQL Database (Beta)** target needs a beta licence key in its **License Key** property (`ip_mysql_database_license`). While the status is anything but `Active`, the plug-in stops ordinary collection on that target. Availability keeps reporting, which is why the target stays *Up* rather than going *Down* — the incident and the collection errors are the signal, not the target status.
+**Cause.** Every **MySQL Database** target needs a license key in its **License Key** property (`ip_mysql_database_license`). While the status is anything but `Active`, the plug-in stops ordinary collection on that target. Availability keeps reporting, which is why the target stays *Up* rather than going *Down* — the incident and the collection errors are the signal, not the target status.
 
 **Fix.** Read the `Status` column of the `License` metric and act on it:
 
 | Status | Meaning | What to do |
 |---|---|---|
 | `Active` | The key is genuine, issued for this plug-in, and in date | Nothing |
-| `License Required` | No key has been entered | Enter your beta key in the License Key property |
+| `License Required` | No key has been entered | Enter your license key in the License Key property |
 | `Invalid Signature` | The key text was altered | Paste the key exactly as issued, as one line — no wrapping, no trailing spaces |
-| `Wrong Plug-in` | The key was issued for a different plug-in, for example a GA key on the beta | Use the key issued for `ip.em.xmyb` |
+| `Wrong Plug-in` | The key was issued for a different plug-in, for example a key issued for a pre-release build | Use the key issued for `ip.em.xmys` |
 | `Expired` | The key's expiry date has passed | Request a new key |
 
 The key is checked on the agent host every 15 minutes, and again as soon as the property changes. Collections resume at their next interval once the key is accepted — you do not need to restart anything.
@@ -43,13 +43,13 @@ The key is checked on the agent host every 15 minutes, and again as soon as the 
 
 ## 2. Install and deploy {#deploy}
 
-**`Incompatible version` at import.** The beta ships one artifact per Enterprise Manager line, each built with that line's development kit, and EM refuses the other one. Use `24.1.9.N.0` on EM 24ai and `13.5.9.N.0` on 13.5.
+**`Incompatible version` at import.** The plug-in ships one artifact per Enterprise Manager line, each built with that line's development kit, and EM refuses the other one. Use `24.1.10.0.0` on EM 24ai and `13.5.10.0.0` on 13.5.
 
-**A new drop's metrics show no data.** Some drops move target metadata. When they do, the OMS side and the agent side must both be deployed — deploy the agent side in the same maintenance window as the OMS side. Until you do, metrics added by that drop have nowhere to come from and their pages stay empty while everything else keeps working. [Upgrade notes](install-and-upgrade.md#34-upgrading) lists every drop that needs it.
+**A new release's metrics show no data.** Some releases move target metadata. When they do, the OMS side and the agent side must both be deployed — deploy the agent side in the same maintenance window as the OMS side. Until you do, metrics added by that release have nowhere to come from and their pages stay empty while everything else keeps working. [Upgrade notes](upgrade-notes.md) lists every release that needs it.
 
-**The OMS restarted during deployment.** Expected on drops that move target metadata. `emcli get_plugin_deployment_status -plugin=ip.em.xmyb` tells you when it is back.
+**The OMS restarted during deployment.** Expected on releases that move target metadata. `emcli get_plugin_deployment_status -plugin=ip.em.xmys` tells you when it is back.
 
-**`MySQL Connector/J not found: no mysql-connector-j-*.jar in <directory>; files present: ...`** Every collection on that agent, and Run EXPLAIN, reports this until the driver is in place; the target is not showing a MySQL problem. The message names the directory the plug-in looked in, `<agentStateDir>/ip_plugin/xmyb/lib`, and lists what it found there. Put exactly one Connector/J jar in that directory (8.4.0 is the tested version; the prerequisites page covers later ones), readable by the agent user; the next collection uses it. If the message says the directory was missing and has been created, the agent had never had a driver staged. See [Prerequisites](prerequisites.md#29-mysql-connectorj-on-agent-hosts).
+**`MySQL Connector/J not found: no mysql-connector-j-*.jar in <directory>; files present: ...`** Every collection on that agent, and Run EXPLAIN, reports this until the driver is in place; the target is not showing a MySQL problem. The message names the directory the plug-in looked in, `<agentStateDir>/ip_plugin/xmys/lib`, and lists what it found there. Put exactly one Connector/J jar in that directory (8.4.0 is the tested version; the prerequisites page covers later ones), readable by the agent user; the next collection uses it. If the message says the directory was missing and has been created, the agent had never had a driver staged. See [Prerequisites](prerequisites.md#29-mysql-connectorj-on-agent-hosts).
 
 **`MySQL Connector/J: N mysql-connector-j-*.jar files in <directory> (...); keep exactly one.`** Two or more drivers were left in the directory, typically after an upgrade. Remove all but the one you mean to use.
 
@@ -57,7 +57,7 @@ The key is checked on the agent host every 15 minutes, and again as soon as the 
 
 **Collections stop after installing a newer Connector/J.** Connector/J 8.4.0 is the tested version; later 8.4.x and 9.x releases are expected to work but are not certified for this release. Go back to 8.4.0 and send us the version that failed.
 
-**`MySQL Connector/J: cannot locate <agentStateDir>/ip_plugin/xmyb/lib - agentStateDir did not resolve on this agent`.** The agent did not hand the plug-in its instance directory. Check `emctl status agent` on that agent shows an **Agent Home**, and that the plug-in was deployed to the agent after the agent was last upgraded.
+**`MySQL Connector/J: cannot locate <agentStateDir>/ip_plugin/xmys/lib - agentStateDir did not resolve on this agent`.** The agent did not hand the plug-in its instance directory. Check `emctl status agent` on that agent shows an **Agent Home**, and that the plug-in was deployed to the agent after the agent was last upgraded.
 
 **Windows agents.** Not supported in this release. The agent doing the monitoring must be Linux; the MySQL server it monitors can be anywhere it can reach.
 
@@ -75,7 +75,7 @@ If an anonymous row exists and your agent connects locally, either remove it (`D
 
 **Socket connections.** A local agent can use the Unix socket instead of TCP, which changes the host-clause rules — see [Prerequisites](prerequisites.md#26-unix-socket-connections).
 
-**`Access denied` over a Unix socket right after `mysqld` restarted, for an account using `caching_sha2_password`.** MySQL refuses the full authentication exchange over a socket until the account's password has been cached by a login, and drops that cache on restart. This release completes the exchange itself, so a socket target recovers on its next collection with no human login. If you still see it, the driver in `ip_plugin/xmyb/lib` is not the tested Connector/J release: the fix lives in the plug-in's own authentication code, which links against Connector/J 8.4.0.
+**`Access denied` over a Unix socket right after `mysqld` restarted, for an account using `caching_sha2_password`.** MySQL refuses the full authentication exchange over a socket until the account's password has been cached by a login, and drops that cache on restart. This release completes the exchange itself, so a socket target recovers on its next collection with no human login. If you still see it, the driver in `ip_plugin/xmys/lib` is not the tested Connector/J release: the fix lives in the plug-in's own authentication code, which links against Connector/J 8.4.0.
 
 **Kerberos (JDBC path) fails while the same account works from the `mysql` client.** The collections authenticate through the Java runtime's Kerberos libraries, not the system ones, so they read the credential cache and `krb5.conf` the agent's Java sees. Set the target's Kerberos Configuration File (4.1) to a file the agent user can read, keep the ticket refreshed for the agent's operating-system user, and check that the agent's Java trusts the realm's encryption types.
 
@@ -87,7 +87,7 @@ If an anonymous row exists and your agent connects locally, either remove it (`D
 
 **`TLS_TRUSTSTORE_REQUIRED`.** The `VERIFY_CA` and `VERIFY_IDENTITY` connection modes for ClusterSet health checks need truststore credential support, which this release does not provide. Rather than quietly downgrading to a weaker mode, the check fails closed and reports this status. `REQUIRED` and `DISABLED` modes work fully.
 
-**`MEMBER_UNREACHABLE`.** MySQL Shell connected successfully through one of the target's listed endpoints, but then failed reaching a *different* member — `Can't connect to MySQL server on '<host>:<port>'` — while reading the ClusterSet-wide status. The AdminAPI opens its own session to every member Group Replication still considers online, regardless of which member Shell is connected through, so this can happen even when the endpoint list itself worked. Retrying a different listed endpoint will not fix it: the same member is unreachable either way. Open the agent host's network path to that member too — every member of every cluster needs a path from the agent host, on its MySQL port, not only the members configured on the target (see [Prerequisites](prerequisites.md#23-network-and-ports)).
+**`MEMBER_UNREACHABLE`.** MySQL Shell connected successfully through one of the target's listed endpoints, but then failed reaching a *different* member — `Can't connect to MySQL server on '<host>:<port>'` — while reading the ClusterSet-wide status. The AdminAPI opens its own session to every member Group Replication still considers online, regardless of which member Shell is connected through, so this can happen even when the endpoint list itself worked. Retrying a different listed endpoint will not fix it: the same member is unreachable either way. Open the agent host's network path to that member too — every member of every cluster needs a path from the agent host, on its MySQL port, not only the members configured on the target (see [Prerequisites](prerequisites.md#23-network-and-ports)). The same reason is reported when MySQL Shell answers through a replica-cluster member but cannot reach any member of the primary cluster: Shell then reports the primary cluster's state as `UNKNOWN` instead of failing, and the plug-in reports readiness as not assessed rather than "not ready", because from the agent host a cut path and a primary cluster that is down look the same.
 
 **`KERBEROS_TICKET`.** The ClusterSet target uses Kerberos, and the Kerberos exchange failed before any member saw a credential. MySQL Shell reports every such failure as no more than `Unknown MySQL error`, so the plug-in names the family for you; the usual cause is the agent operating-system user's credential cache being missing or expired, but an unreachable KDC, clock skew between the agent host and the KDC, or a member without a `mysql/<host>` service principal produce the same text. Start with `klist` as the agent's operating-system user on the agent host; if it shows no ticket or an expired one, restore the unattended refresh (`k5start`, or a scheduled `kinit -kt <keytab> <principal>`) described in [Prerequisites](prerequisites.md). If the ticket is fine, `kinit` and a manual `mysql --default-auth=authentication_kerberos_client` against the member will show the real error. Do not read the target's other collections as proof either way: MySQL Shell resolves the credential through the system Kerberos libraries and the JDBC collections through the Java runtime, which can read different caches, so one path can authenticate while the other does not.
 
@@ -95,7 +95,7 @@ If an anonymous row exists and your agent connects locally, either remove it (`D
 
 **`KERBEROS_CONFIG_UNREADABLE`.** The Kerberos Configuration File set on the target is not readable by the agent's operating-system user, so the plug-in did not run MySQL Shell at all. MySQL Shell would otherwise fall back to `/etc/krb5.conf` silently, while the JDBC collections fail on the same path, and the two would disagree. Check the path in the target's properties and the file's permissions on the agent host.
 
-**`KERBEROS_NOT_SUPPORTED`.** The endpoint refused the Kerberos client plug-in (`Authentication method authentication_kerberos_client is not supported`). That is what a MySQL Router port answers: Kerberos does not pass through Router, a MySQL limitation. Configure the ClusterSet target with member endpoints (a node list) instead of a Router port, or use password authentication for a Router-fronted target.
+**`KERBEROS_NOT_SUPPORTED`.** The endpoint refused the Kerberos client plug-in (`Authentication method authentication_kerberos_client is not supported`). That is what a MySQL Router port answers to MySQL Shell: Shell cannot log in with Kerberos through a Router, a MySQL limitation (the plug-in's JDBC collections can, so the rest of the target keeps collecting). Configure the ClusterSet target with member endpoints (a node list) instead of a Router port, or use password authentication for a Router-fronted target.
 
 ## 5. Jobs {#jobs}
 
@@ -106,11 +106,17 @@ If an anonymous row exists and your agent connects locally, either remove it (`D
 
 The agent's own OS credential is not resolved automatically for this job type, so a named host credential is required rather than optional. Set it once per target under **Setup → Security → Preferred Credentials**: select the **MySQL Database** target type, open **Manage Preferred Credentials**, and set the host credential set to a named credential running as the agent's OS user.
 
-**Run EXPLAIN fails with `MySQL Connector/J not found ...` or `cannot locate <agentStateDir>/ip_plugin/xmyb/lib - EMSTATE is not set in the job step`.** The job runs under the target's Host Preferred Credential and reads the same driver directory as the collections. The first message means the driver is missing on that agent host or unreadable by the credential's operating-system user (the jar and the directory must be readable by it). The second means the credential switched user without keeping the agent's environment, usually a `sudo` rule with `env_reset` and no `env_keep`; allow the environment through, or use a credential that runs directly as the agent user.
+**Run EXPLAIN fails with `MySQL Connector/J not found ...` or `cannot locate <agentStateDir>/ip_plugin/xmys/lib - EMSTATE is not set in the job step`.** The job runs under the target's Host Preferred Credential and reads the same driver directory as the collections. The first message means the driver is missing on that agent host or unreadable by the credential's operating-system user (the jar and the directory must be readable by it). The second means the credential switched user without keeping the agent's environment, usually a `sudo` rule with `env_reset` and no `env_keep`; allow the environment through, or use a credential that runs directly as the agent user.
 
 **Run EXPLAIN fails with `the job step's javaHome=... does not name a JVM`.** The Java runtime Enterprise Manager resolved for the job is not there. This points at the agent installation rather than the plug-in; `emctl status agent` on that agent and the agent's own upgrade history are the place to look.
 
 **Run EXPLAIN returns a syntax error on a statement copied from Query Analyzer.** Query Analyzer shows normalized digests, with literals replaced by `?`. A digest will not explain as it stands — substitute real values for the placeholders first. See [Jobs](jobs.md#81-run-explain).
+
+**Run EXPLAIN reports `No complete query reached the job, so nothing was explained`.** The plug-in refused the job's input rather than explain part of a statement. An `ERROR` line just above it in the job output names the reason: the input did not finish arriving within 10 seconds (a heavily loaded agent host; run the job again), or a value repeated a setting the job passes itself, which happens when the **Database Name** contains a line break. Enter the database name on one line.
+
+**Run EXPLAIN reports `… This query starts with something else, so it was not run`.** The job explains only a `SELECT`, `WITH`, `TABLE`, `INSERT`, `REPLACE`, `UPDATE` or `DELETE` statement, or one opening with `(`, so that it never runs the statement. Remove anything before the statement other than comments, such as `ANALYZE`, a `FORMAT=` option or a `/*!` comment. See [Jobs](jobs.md#81-run-explain).
+
+**Run EXPLAIN reports `A connection property contains a comma, which the job cannot pass`.** The target's Host, Port, Unix Socket Path, TLS Mode or Kerberos config contains a comma, usually an endpoint list. Run EXPLAIN connects to one server: give the target a single host and port.
 
 ## 6. Metrics that look wrong {#metrics}
 
@@ -122,11 +128,11 @@ The agent's own OS credential is not resolved automatically for this job type, s
 
 ---
 
-**In short:** the licence gate explains most empty pages, a missing `mysqlsh` explains most unhappy ClusterSets, and a missing host credential explains Run EXPLAIN. Those three cover the large majority of what beta users report.
+**In short:** the license gate explains most empty pages, a missing `mysqlsh` explains most unhappy ClusterSets, and a missing host credential explains Run EXPLAIN. Those three cover the large majority of what users report.
 
-If you find something that is not on this page, please send it to the beta feedback contact supplied with your download — a symptom we have not seen is more valuable to us than one we have, and this page grows from what you tell us.
+If you find something that is not on this page, please send it to your Integration Plumbers support contact — a symptom we have not seen is more valuable to us than one we have, and this page grows from what you tell us.
 
-That was the six areas promised at the top: licence, install and deploy, connecting, ClusterSet, jobs, and metrics that look wrong. If none of them fit, [Getting started](getting-started.md#wrong) lists what to include in a report so we can act on it quickly.
+That was the six areas promised at the top: license, install and deploy, connecting, ClusterSet, jobs, and metrics that look wrong. If none of them fit, [Getting started](getting-started.md#wrong) lists what to include in a report so we can act on it quickly.
 
 ## 7. Collections stop reaching the repository {#overload}
 

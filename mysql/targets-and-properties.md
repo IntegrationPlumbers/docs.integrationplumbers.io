@@ -10,9 +10,9 @@ This chapter describes adding MySQL database, cluster and ClusterSet targets fro
 ## 4.1 Target properties
 Every MySQL target is defined by the same small set of monitoring properties, whichever way you add it. The names in bold are the labels on the console page; the names in parentheses are the property keys EM CLI takes ([4.3](#43-add-a-target-with-em-cli)).
 
-**User** and **Password** are credential properties. In the console they appear in the credentials area of the Add Target page; with EM CLI they go in `-credentials` rather than in `-properties`.
+**User** and **Password** are credential properties. In the console they appear in the credentials area of the Add Target page, labeled **MySQL User** and **MySQL Password**; with EM CLI they go in `-credentials` rather than in `-properties`.
 
-**MySQL Database (`ip_mysql_database_beta`)**
+**MySQL Database (`ip_mysql_database`)**
 
 - **User** (`ip_mysql_database_username`): the monitoring account from [2.4](prerequisites.md#24-the-monitoring-user), user name only, without the host part.
 - **Password** (`ip_mysql_database_password`): that account's password.
@@ -21,9 +21,9 @@ Every MySQL target is defined by the same small set of monitoring properties, wh
 - **Unix Socket Path (socket connections)** (`ip_mysql_database_socket`): full path to the server's socket file. Local agent only — leave Host empty when you set it.
 - **TLS Mode (disabled / required / verify_ca / verify_identity)** (`ip_mysql_database_use_secure`): transport security for this target. See [2.5](prerequisites.md#25-tls).
 - **Kerberos Configuration File** (`ip_mysql_database_kerberos_config`): full path to a `krb5.conf` on the agent host, for Kerberos authentication.
-- **License Key** (`ip_mysql_database_license`): the signed licence key issued for this plug-in, pasted as one line. The console lets you add the target without it, but nothing except availability collects until the key is accepted: the `License` metric reports the reason (`License Required` for no key) and raises a CRITICAL incident, **and every other metric group on the target reports a collection error — `Collection stopped by license status: …` — until the status is `Active`**; availability keeps reporting, so the target stays Up rather than Down. Cluster and ClusterSet targets are containers, not licensed targets, and are never stopped. The key is checked entirely on the agent host — nothing is sent to the MySQL server or outside Enterprise Manager — every 15 minutes, and again as soon as the property changes. The `Status` column of the `License` metric gives the reason a key is not accepted: `Invalid Signature` (the key was altered), `Wrong Plug-in` (a key issued for the other edition of this plug-in), or `Expired`.
+- **License Key** (`ip_mysql_database_license`): the signed license key issued for this plug-in, pasted as one line. The console lets you add the target without it, but nothing except availability collects until the key is accepted: the `License` metric reports the reason (`License Required` for no key) and raises a CRITICAL incident, **and every other metric group on the target reports a collection error — `Collection stopped by license status: …` — until the status is `Active`**; availability keeps reporting, so the target stays Up rather than Down. Cluster and ClusterSet targets are containers, not licensed targets, and are never stopped. The key is checked entirely on the agent host — nothing is sent to the MySQL server or outside Enterprise Manager — every 15 minutes, and again as soon as the property changes. The `Status` column of the `License` metric gives the reason a key is not accepted: `Invalid Signature` (the key was altered), `Wrong Plug-in` (a key issued for a different plug-in; the 24ai and 13.5 editions share one key), or `Expired`.
 
-**MySQL Cluster (`ip_mysql_cluster_beta`)**
+**MySQL InnoDB Cluster (`ip_mysql_cluster`)**
 
 The same properties, with the `ip_mysql_cluster_` prefix in place of `ip_mysql_database_`, and two labels that read differently:
 
@@ -31,17 +31,17 @@ The same properties, with the `ip_mysql_cluster_` prefix in place of `ip_mysql_d
 - **User** / **Password** (`ip_mysql_cluster_username`, `ip_mysql_cluster_password`): the monitoring account must carry the grants in [2.4](prerequisites.md#24-the-monitoring-user) on the cluster. Created on the primary, it replicates to every member.
 - **TLS Mode**, **Unix Socket Path** and **Kerberos Configuration File** behave exactly as they do for a MySQL Database target.
 
-**MySQL ClusterSet (`ip_mysql_clusterset_beta`)**
+**MySQL InnoDB ClusterSet (`ip_mysql_clusterset`)**
 
 The same properties again with the `ip_mysql_clusterset_` prefix, plus one that only this type has:
 
-- **(Router) Host** / **(Router) Port** (`ip_mysql_clusterset_host`, `ip_mysql_clusterset_port`): the Router endpoint, or a member — or a comma-separated list of members, with the same rules as the Cluster target above. Both the JDBC collections and the MySQL Shell session try the list in order; listing every member of every cluster is the configuration that survives losing any one of them. A MySQL Router port works on both paths with password authentication: the Router forwards the JDBC connections and the MySQL Shell session to the current primary, and the AdminAPI still reports the cluster-wide view, so `health_source` reads `ADMINAPI` behind a Router exactly as it does on a member. List two Routers (`router-1,router-2` with Port `6446`) to survive losing one; with Kerberos, list member endpoints instead ([2.2](prerequisites.md#22-mysql-shell-for-clusterset-targets)). Availability (the `Response` metric) is Up while any listed endpoint answers. **Whether the ClusterSet is healthy is a separate question**, answered by the `ClusterSetHealth` metric from the AdminAPI's cluster-wide view and never from the member that happened to answer — so a member of a failed cluster answering the connection cannot make the target look healthy, and a failed member cannot make a healthy ClusterSet look Down. The MySQL Shell session itself is bounded by its own process budget, separate from the JDBC connect timeout above: 60 seconds for a single endpoint (30 seconds base plus a fixed 30-second reserve for the AdminAPI's own status fan-out to every cluster member), plus the list's per-attempt budget for a list of more than one endpoint (the same 15-seconds-shared/5-second-floor figure), so a longer list is given proportionally more time to try every member before being stopped.
+- **(Router) Host** / **(Router) Port** (`ip_mysql_clusterset_host`, `ip_mysql_clusterset_port`): the Router endpoint, or a member — or a comma-separated list of members, with the same rules as the Cluster target above. Both the JDBC collections and the MySQL Shell session try the list in order; listing every member of every cluster is the configuration that survives losing any one of them. A MySQL Router port works on both paths with password authentication: the Router forwards the JDBC connections and the MySQL Shell session to the current primary, and the AdminAPI still reports the cluster-wide view, so `health_source` reads `ADMINAPI` behind a Router exactly as it does on a member. List two Routers (`router-1,router-2` with Port `6446`) to survive losing one; with Kerberos, list member endpoints instead, because MySQL Shell cannot log in with Kerberos through a Router ([2.2](prerequisites.md#22-mysql-shell-for-clusterset-targets)). Availability (the `Response` metric) is Up while any listed endpoint answers. **Whether the ClusterSet is healthy is a separate question**, answered by the `ClusterSetHealth` metric from the AdminAPI's cluster-wide view and never from the member that happened to answer — so a member of a failed cluster answering the connection cannot make the target look healthy, and a failed member cannot make a healthy ClusterSet look Down. The MySQL Shell session itself is bounded by its own process budget, separate from the JDBC connect timeout above: 60 seconds for a single endpoint (30 seconds base plus a fixed 30-second reserve for the AdminAPI's own status fan-out to every cluster member), plus the list's per-attempt budget for a list of more than one endpoint (the same 15-seconds-shared/5-second-floor figure), so a longer list is given proportionally more time to try every member before being stopped.
 - **DR Max Tolerated GTID Lag (transactions)** (`ip_mysql_clusterset_dr_max_lag`): how many transactions the replica cluster may be behind the primary cluster and still count as ready for promotion. The `dr_promotion_ready` condition ([7.1](alerts-and-thresholds.md#71-default-thresholds)) evaluates against it.
 
 > **Note:** A ClusterSet target also needs `mysqlsh` on its agent host ([2.2](prerequisites.md#22-mysql-shell-for-clusterset-targets)), and in this release its TLS Mode should be `required` or `disabled` ([2.5](prerequisites.md#25-tls)). With a Kerberos Configuration File set, MySQL Shell authenticates with the agent user's ticket and needs member endpoints rather than a Router port ([2.2](prerequisites.md#22-mysql-shell-for-clusterset-targets)).
 
 ## 4.2 Add a target manually
-![Add Target Manually — declarative property form for a MySQL Database target](images/add-target.png)
+![Add: MySQL Database page — the MySQL User and MySQL Password credentials, then the Host, Kerberos Configuration File, License Key, Port, TLS Mode and Unix Socket Path properties, with only OK and Cancel at the top right](images/add-target.png)
 Use this route for a single target, and for any endpoint autodiscovery cannot see ([4.4](#44-autodiscovery)).
 
 1. Make sure the plug-in is deployed to the agent that will monitor the target ([3.3](install-and-upgrade.md#33-deploy-to-agents)). Until it is, the MySQL target types are not offered for that agent.
@@ -50,13 +50,15 @@ Use this route for a single target, and for any endpoint autodiscovery cannot se
 4. In **Target Type**, select **MySQL Database**.
 5. In **Monitoring Agent**, select the agent that will run the collections — this is the agent host, not the MySQL server — then click **Add Manually**.
 6. Enter a **Target Name**. This is the display name used throughout the console and the name EM CLI verbs take. `<host>:<port>` is the convention autodiscovery uses and it stays readable at scale.
-7. Fill in the monitoring properties from [4.1](#41-target-properties). At minimum supply **User**, **Password**, **Host**, **Port** and the **License Key**, plus **TLS Mode** if the server requires an encrypted session. A target added without a key comes Up but collects nothing except availability until a key is accepted ([4.1](#41-target-properties)).
-8. Click **Test Connection**. A failure here is a credential, network or TLS problem; fix it before you continue, because a target added with wrong properties is added Down.
-9. Click **OK** to create the target.
+7. Fill in the monitoring properties from [4.1](#41-target-properties). At minimum supply **MySQL User** and **MySQL Password** (the credentials area, where the page asks for the password twice), **Host**, **Port** and the **License Key**, plus **TLS Mode** if the server requires an encrypted session. A target added without a key comes Up but collects nothing except availability until a key is accepted ([4.1](#41-target-properties)).
+8. Click **OK** to create the target. The page has only **OK** and **Cancel**: there is no Test Connection step for these target types, so the first check of the properties is the target's own status.
+9. Wait for the target to appear in the console, which takes a couple of minutes, and confirm that it comes **Up**. If it stays Down, the cause is a credential, network or TLS problem. Correct the credentials or properties under **Target Setup → Monitoring Configuration** ([4.5](#45-modify-or-remove-a-target)); you do not need to remove and re-add the target.
 
-Repeat for **MySQL Cluster** and **MySQL ClusterSet**, choosing that target type in step 4 and filling in the properties listed for it in [4.1](#41-target-properties).
+Repeat for **MySQL InnoDB Cluster** and **MySQL InnoDB ClusterSet**, choosing that target type in step 4 and filling in the properties listed for it in [4.1](#41-target-properties).
 
-The target appears in the console within a couple of minutes, and its metric groups populate on their own schedules.
+Once the target is Up, its metric groups populate on their own schedules.
+
+> **Note:** On an Enterprise Manager 13.5 site that also has Oracle's own MySQL plug-in deployed, the **Target Type** list shows two entries named **MySQL InnoDB Cluster** and two named **MySQL InnoDB ClusterSet**. Pick the one whose form shows the credential type `MySQLClusterCreds` (cluster) or `MySQLClusterSetCreds` (ClusterSet). Those are the Integration Plumbers types.
 
 > **Note:** Cluster and ClusterSet targets are independent of the MySQL Database targets for the same servers. You can add either without the other, and adding a cluster target does not create database targets for its members.
 
@@ -67,9 +69,9 @@ EM CLI creates the same target as the console and is the practical route once yo
 
 | Console target type | `-type` value | Property prefix |
 |---|---|---|
-| MySQL Database | `ip_mysql_database_beta` | `ip_mysql_database_` |
-| MySQL Cluster | `ip_mysql_cluster_beta` | `ip_mysql_cluster_` |
-| MySQL ClusterSet | `ip_mysql_clusterset_beta` | `ip_mysql_clusterset_` |
+| MySQL Database | `ip_mysql_database` | `ip_mysql_database_` |
+| MySQL InnoDB Cluster | `ip_mysql_cluster` | `ip_mysql_cluster_` |
+| MySQL InnoDB ClusterSet | `ip_mysql_clusterset` | `ip_mysql_clusterset_` |
 
 | Console field | Key (`<prefix>` from the table above) | Option |
 |---|---|---|
@@ -90,43 +92,52 @@ Both options take `key:value` pairs separated by `;`. Log in first with `emcli l
 A MySQL Database target:
 
 ```
-emcli add_target -name="mysql84-prod-01" -type="ip_mysql_database_beta" \
+emcli add_target -name="mysql84-prod-01" -type="ip_mysql_database" \
   -host="agent-host.example.com" \
-  -properties="ip_mysql_database_host:10.0.0.21;ip_mysql_database_port:3306;ip_mysql_database_use_secure:required;ip_mysql_database_license:<licence key>" \
+  -properties="ip_mysql_database_host:10.0.0.21;ip_mysql_database_port:3306;ip_mysql_database_use_secure:required;ip_mysql_database_license:<license key>" \
   -credentials="ip_mysql_database_username:em_monitoring;ip_mysql_database_password:<password>"
 ```
 
-A MySQL Cluster target, pointed at a Router endpoint:
+A MySQL InnoDB Cluster target, pointed at a Router endpoint:
 
 ```
-emcli add_target -name="mysql84-prod-cluster" -type="ip_mysql_cluster_beta" \
+emcli add_target -name="mysql84-prod-cluster" -type="ip_mysql_cluster" \
   -host="agent-host.example.com" \
   -properties="ip_mysql_cluster_host:10.0.0.30;ip_mysql_cluster_port:6446;ip_mysql_cluster_use_secure:required" \
   -credentials="ip_mysql_cluster_username:em_monitoring;ip_mysql_cluster_password:<password>"
 ```
 
-A MySQL ClusterSet target, which adds the DR lag tolerance:
+A MySQL InnoDB ClusterSet target, which adds the DR lag tolerance:
 
 ```
-emcli add_target -name="mysql84-prod-clusterset" -type="ip_mysql_clusterset_beta" \
+emcli add_target -name="mysql84-prod-clusterset" -type="ip_mysql_clusterset" \
   -host="agent-host.example.com" \
   -properties="ip_mysql_clusterset_host:10.0.0.30;ip_mysql_clusterset_port:6446;ip_mysql_clusterset_use_secure:required;ip_mysql_clusterset_dr_max_lag:100" \
   -credentials="ip_mysql_clusterset_username:em_monitoring;ip_mysql_clusterset_password:<password>"
 ```
 
-The same ClusterSet behind two MySQL Routers, so that losing one Router does not take the target Down (the list rules are in [4.1](#41-target-properties); password authentication, because Kerberos does not pass through Router):
+The same ClusterSet behind two MySQL Routers, so that losing one Router does not take the target Down (the list rules are in [4.1](#41-target-properties); password authentication, because MySQL Shell cannot log in with Kerberos through a Router, 2.2):
 
 ```
-emcli add_target -name="mysql84-prod-clusterset" -type="ip_mysql_clusterset_beta" \
+emcli add_target -name="mysql84-prod-clusterset" -type="ip_mysql_clusterset" \
   -host="agent-host.example.com" \
   -properties="ip_mysql_clusterset_host:router-1.example.com,router-2.example.com;ip_mysql_clusterset_port:6446;ip_mysql_clusterset_use_secure:required;ip_mysql_clusterset_dr_max_lag:100" \
   -credentials="ip_mysql_clusterset_username:em_monitoring;ip_mysql_clusterset_password:<password>"
 ```
 
+A ClusterSet target that authenticates with Kerberos lists its members, names the Kerberos configuration file, and carries the **username only**. Leave the password key out of `-credentials` altogether: `add_target` rejects an empty password value, and the ticket in the agent user's credential cache is the credential ([2.2](prerequisites.md#22-mysql-shell-for-clusterset-targets)):
+
+```
+emcli add_target -name="mysql84-prod-clusterset-krb" -type="ip_mysql_clusterset" \
+  -host="agent-host.example.com" \
+  -properties="ip_mysql_clusterset_host:mysql-a.example.com,mysql-b.example.com,mysql-c.example.com,mysql-d.example.com,mysql-e.example.com,mysql-f.example.com;ip_mysql_clusterset_port:3306;ip_mysql_clusterset_use_secure:required;ip_mysql_clusterset_kerberos_config:/etc/krb5.conf;ip_mysql_clusterset_dr_max_lag:100" \
+  -credentials="ip_mysql_clusterset_username:em_monitoring"
+```
+
 Confirm the target was created:
 
 ```
-emcli get_targets -targets="mysql84-prod-01:ip_mysql_database_beta"
+emcli get_targets -targets="mysql84-prod-01:ip_mysql_database"
 ```
 
 > **Note:** `-host` names the **agent** host that will monitor the target. The MySQL endpoint goes in the `<prefix>host` property, and the two are usually different — the same agent host appears in every command when one agent monitors many servers.
@@ -157,7 +168,7 @@ To adopt a proposed target:
 > - **TLS:** RDS MySQL 8.4 accepts plain and TLS connections by default; setting TLS Mode to `required` ([4.1](#41-target-properties)) works against the RDS endpoint. Verifying the RDS certificate chain (TLS Mode `verify_ca` / `verify_identity`) needs the truststore credential set and is not yet certified.
 > - **Aurora MySQL, Cloud SQL and Azure Database for MySQL** are expected to behave the same way but have not been run through the certification matrix yet.
 
-MySQL Cluster and MySQL ClusterSet targets are not autodiscovered either. They are added against an endpoint you choose, so create them manually.
+MySQL InnoDB Cluster and MySQL InnoDB ClusterSet targets are not autodiscovered either. They are added against an endpoint you choose, so create them manually.
 
 ## 4.5 Modify or remove a target
 Monitoring properties can be changed at any time; the change applies from the next collection.
@@ -174,12 +185,12 @@ To remove a target, choose the target-type menu → **Target Setup → Remove Ta
 The EM CLI equivalents:
 
 ```
-emcli modify_target -name="mysql84-prod-01" -type="ip_mysql_database_beta" \
+emcli modify_target -name="mysql84-prod-01" -type="ip_mysql_database" \
   -properties="ip_mysql_database_port:3307" -on_agent
 ```
 
 ```
-emcli delete_target -name="mysql84-prod-01" -type="ip_mysql_database_beta"
+emcli delete_target -name="mysql84-prod-01" -type="ip_mysql_database"
 ```
 
 `-on_agent` pushes the change to the agent immediately instead of waiting for the next agent resynchronization.
@@ -189,7 +200,7 @@ emcli delete_target -name="mysql84-prod-01" -type="ip_mysql_database_beta"
 ## 4.6 Associate compliance standards
 Adding a target does not associate compliance standards with it — neither the console wizard nor emcli add_target carries an association, so a new target has no compliance evaluations until you associate the standards.
 
-The plug-in ships five standards for `ip_mysql_database_beta` targets, collected in one framework:
+The plug-in ships five standards for `ip_mysql_database` targets, collected in one framework:
 
 | Standard | Internal name |
 |---|---|
@@ -222,9 +233,11 @@ Repeat the command for each of the five internal names you want evaluated on tha
 Results appear on the target's compliance pages once a configuration collection has run against the newly associated standards. See [9.2](compliance-rules.md#92-associating-standards-and-reading-results) for reading them.
 
 ## 4.7 Bulk onboarding and migration
-For more than a handful of targets — and for moving an estate off the Oracle MySQL plug-in or the beta — use the
+For more than a handful of targets — and for moving an estate off the Oracle MySQL plug-in — use the
 `mysql-onboard.sh` script ([download](downloads/mysql-onboard.sh), [example inventory](downloads/inventory.example.csv)).
 It exports the existing targets to a CSV, creates the replacement GA plug-in targets side by side with
-`add_target` / `modify_target -on_agent`, verifies Up and licence, associates the standards from [4.6](#46-associate-compliance-standards), and retires
+`add_target` / `modify_target -on_agent`, verifies Up and license, associates the standards from [4.6](#46-associate-compliance-standards), and retires
 the sources on request. The full sequence, the review flags and the threshold worksheet are in the
 [migration chapter](migration-from-omys.md).
+
+The same script moves targets from the Open Beta plug-in (`ip.em.xmyb`) to this release; the migration chapter covers it.
