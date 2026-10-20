@@ -5,7 +5,15 @@ nav_order: 4
 
 # Installing the plug-in
 
-This chapter describes importing and deploying the plug-in, and upgrading it.
+This chapter describes importing and deploying the plug-in, and upgrading it. The three steps run in order: import once per Enterprise Manager site, deploy to the OMS, then deploy to every agent that will monitor a MySQL target.
+
+> **Prerequisites for this page**
+> - The `.opar` archive for your Enterprise Manager line (24ai or 13.5), copied to the OMS host.
+> - An Enterprise Manager administrator who can run Self Update and deploy plug-ins, and the repository `SYS` password for the OMS deployment.
+> - MySQL Connector/J placed on every agent host before that agent's deployment ([2.9](prerequisites.md#29-mysql-connectorj-on-agent-hosts)).
+
+**Where to find it:** Setup ▸ Extensibility ▸ Self Update for the import, Setup ▸ Extensibility ▸ Plug-ins for the deployments, and Deployment Activities on the same page to follow them.
+
 **Topics:** 3.1 Import with Self Update · 3.2 Deploy to the OMS · 3.3 Deploy to agents · 3.4 Upgrading
 ## 3.1 Import with Self Update
 Enterprise Manager takes the plug-in in through Self Update, from the `.opar` archive Integration Plumbers supplies. Import it once per Enterprise Manager site; the deploy steps in [3.2](#32-deploy-to-the-oms) and 3.3 then work from the imported copy.
@@ -19,10 +27,14 @@ Copy `24.1.10.0.0_ip.em.xmys_2000_0.opar` to a directory on the OMS host that th
 
 Or import it with EM CLI, as the Enterprise Manager software owner on the OMS host:
 
-```
+```bash
 emcli login -username=sysman
 emcli import_update -file=/u01/stage/24.1.10.0.0_ip.em.xmys_2000_0.opar -omslocal
 ```
+
+**Done when** the Plug-ins page (Setup ▸ Extensibility ▸ Plug-ins) lists **MySQL Database** under Databases with the release's version in the Latest Downloaded column.
+
+![The Plug-ins page with the Databases folder expanded: the MySQL Database row shows 24.1.10.0.0 as Latest Available, Latest Downloaded and On Management Server, and two agents with the plug-in](images/plugins-page.png)
 
 `-omslocal` tells Enterprise Manager the archive is already on the OMS host, which is the normal case. Only drop it when the file sits on a different host, and then supply that host and a credential set instead.
 
@@ -41,7 +53,7 @@ From the console:
 
 With EM CLI:
 
-```
+```bash
 emcli deploy_plugin_on_server -plugin=ip.em.xmys -sys_password=<repository SYS password>
 emcli get_plugin_deployment_status -plugin=ip.em.xmys
 ```
@@ -52,9 +64,11 @@ Repeat `get_plugin_deployment_status` until it reports Success.
 
 Confirm the result:
 
-```
+```bash
 emcli list_plugins_on_server
 ```
+
+**Done when** `list_plugins_on_server` lists `ip.em.xmys` at the release's version and the Plug-ins page shows it in the On Management Server column.
 
 ## 3.3 Deploy to agents
 Every management agent that will monitor a MySQL target needs its own copy of the plug-in. Deploying to the OMS does not do this for you.
@@ -66,37 +80,41 @@ From the console:
 1. Choose **Setup → Extensibility → Plug-ins**.
 2. Select **MySQL Database**.
 3. Choose **Deploy On → Management Agent**.
-4. Add the agents that will run MySQL collections — the agent hosts, not the MySQL servers — and submit.
+4. Add the agents that will run MySQL collections (the agent hosts, not the MySQL servers) and submit.
 
 With EM CLI, naming each agent as `<host>:<port>`:
 
-```
+```bash
 emcli deploy_plugin_on_agent -agent_names="agent-host.example.com:3872" -plugin=ip.em.xmys
 ```
 
 Several agents go in one command, separated by `;`. Confirm afterwards:
 
-```
+```bash
 emcli list_plugins_on_agent -agent_names="agent-host.example.com:3872"
 ```
+
+**Done when** every agent that will monitor a MySQL target lists the plug-in, and the Add Target page offers the MySQL target types for that agent ([4.2](targets-and-properties.md#42-add-a-target-manually)).
 
 > **Note:** Until the plug-in is deployed to an agent, the MySQL target types are not offered for that agent on the Add Target page ([2.1](prerequisites.md#21-enterprise-manager-and-agents), 4.2), and agent-side autodiscovery of MySQL instances ([4.4](targets-and-properties.md#44-autodiscovery)) finds nothing on its hosts.
 
 ## 3.4 Upgrading
 **From an earlier build to this release.** No earlier build upgrades in place to this release. Install it fresh ([3.1](#31-import-with-self-update) to 3.3) and create the targets new; the onboarding script exports an existing estate and creates its targets on this release ([4.7](targets-and-properties.md#47-bulk-onboarding-and-migration)). The procedure below is for moving from this release to a later one on Enterprise Manager 24ai. On Enterprise Manager 13.5 an in-place upgrade is not proven: the 13.5 builds carry no upgrade lineage, so move a 13.5 installation to a later release by the fresh-install path above unless that release's notes say otherwise.
 
-Deploy a new version exactly as you deployed the first one — import it with Self Update ([3.1](#31-import-with-self-update)), deploy it to the OMS ([3.2](#32-deploy-to-the-oms)), then deploy it to the agents ([3.3](#33-deploy-to-agents)). Do not undeploy the running version first: Enterprise Manager upgrades the deployment in place, and existing targets, their monitoring properties, their thresholds and their collected history carry forward.
+Deploy a new version exactly as you deployed the first one: import it with Self Update ([3.1](#31-import-with-self-update)), deploy it to the OMS ([3.2](#32-deploy-to-the-oms)), then deploy it to the agents ([3.3](#33-deploy-to-agents)). Do not undeploy the running version first: Enterprise Manager upgrades the deployment in place, and existing targets, their monitoring properties, their thresholds and their collected history carry forward.
 
 **Connector/J first.** The plug-in reads MySQL Connector/J from the agent host instead of carrying it ([2.9](prerequisites.md#29-mysql-connectorj-on-agent-hosts)). Make sure the driver is in place on every agent before you deploy a new version to that agent; an agent without it stops collecting every MySQL target it monitors until the jar is there. The driver directory is outside the plug-in's own directories, so upgrades leave it alone.
 
-**Upgrade order matters: deploy the new version to the OMS first, let the OMS restart complete, then deploy to agents. Target-type metadata is activated on the OMS side; an agent running newer metadata than the OMS has activated reports collection errors until the OMS catches up.**
+**Upgrade order matters.** Deploy the new version to the OMS first, let the OMS restart complete, then deploy to agents. Target-type metadata is activated on the OMS side; an agent running newer metadata than the OMS has activated reports collection errors until the OMS catches up.
 
-A version that moves the target metadata version of a target type needs the full cycle above rather than an agent-only deploy; this release moved all three ([10.4](whats-new.md#104-general-availability-2026-10-23)). Skipping the OMS restart does not fail the deploy — every step can report Success while Enterprise Manager keeps the previous metadata active — so verify after the agents are done rather than assuming. Confirm that the target types are live at their new metadata versions, and that the shipped conditions are present on a target of each type:
+A version that moves the target metadata version of a target type needs the full cycle above rather than an agent-only deploy; this release moved all three ([10.4](whats-new.md#104-general-availability-2026-10-23)). Skipping the OMS restart does not fail the deploy (every step can report Success while Enterprise Manager keeps the previous metadata active) so verify after the agents are done rather than assuming. Confirm that the target types are live at their new metadata versions, and that the shipped conditions are present on a target of each type:
 
-```
+```bash
 emcli get_threshold -target_name="mysql84-prod-cluster" -target_type="ip_mysql_cluster"
 ```
 
 A target type whose new conditions do not appear was stored but not activated; repeat 3.2, let the OMS restart finish, and redeploy to the agents.
+
+**Done when** every target type reports its new metadata version and the shipped conditions appear on a target of each type.
 
 > **Note:** An in-place upgrade keeps what you have: every target, its monitoring properties and any threshold you customized carry forward, and collection resumes without intervention. Follow the procedure above, verify as described, and tell us if anything behaves differently ([1.4](index.md#14-release-status)).

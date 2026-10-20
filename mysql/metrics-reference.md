@@ -8,7 +8,7 @@ nav_order: 7
 This chapter explains how to read the generated metrics reference.
 **Topics:** 6.1 Where the reference is · 6.2 How to read a metric group · 6.3 Naming conventions
 ## 6.1 Where the reference is
-The plug-in's metric documentation is generated from the plug-in's own target metadata, for the exact build you deploy, rather than written by hand — so it cannot drift from what the plug-in actually collects.
+The plug-in's metric documentation is generated from the plug-in's own target metadata, for the exact build you deploy, rather than written by hand, so it cannot drift from what the plug-in actually collects.
 
 For this build it is the reference below, shipped alongside this guide. It covers all 122 metric groups: 110 on MySQL Database, 8 on MySQL InnoDB Cluster and 4 on MySQL InnoDB ClusterSet, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship. Where this guide and the reference differ on a column name, a unit or a threshold, the reference is authoritative ([1.4](index.md#14-release-status)).
 
@@ -17,16 +17,16 @@ For this build it is the reference below, shipped alongside this guide. It cover
 ## 6.2 How to read a metric group
 Every entry in the reference has the same shape, so once you can read one you can read all of them.
 
-The heading gives the group's display name, its internal name in parentheses — the name EM CLI, thresholds and the metric browser use — and its collection schedule, for example *collected every 5 Min*. One sentence underneath says what the group collects and where the values come from. Then comes the column table:
+The heading gives the group's display name, its internal name in parentheses (the name EM CLI, thresholds and the metric browser use) and its collection schedule, for example *collected every 5 Min*. One sentence underneath says what the group collects and where the values come from. Then comes the column table:
 
 | Column | What it tells you |
 |---|---|
-| **Column** | The column's internal name, in the form EM CLI and threshold commands take. A `(key)` marker means the column is part of the group's key, so the group returns one row per distinct key value — per channel, per member, per table, per digest — rather than a single row. A group with no key column returns exactly one row per collection. |
+| **Column** | The column's internal name, in the form EM CLI and threshold commands take. A `(key)` marker means the column is part of the group's key, so the group returns one row per distinct key value (per channel, per member, per table, per digest) rather than a single row. A group with no key column returns exactly one row per collection. |
 | **Label** | The display name shown in the console. Where the value's meaning is not obvious from the name, the label says it: what 1 means for a flag, which values a coded column takes, and the window a computed figure covers ([6.3](#63-naming-conventions)). |
 | **Unit** | The unit Enterprise Manager labels the value with, for example `MICROSEC`, `BYTE`, `SECOND`, `HOURS`, `DAYS` or `PERCENTAGE`. Every column that has a real unit carries it. `NA` means the value has no unit: a plain count (a number of statements, rows or connections), a 0/1 flag, a coded setting, an identifier such as a port, a server ID or an error code, or a string. Enterprise Manager's MCP server shows these as `n/a`; read what such a column counts from its label. |
 | **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 22 curated thresholds ship ([7.1](alerts-and-thresholds.md#71-default-thresholds)), and the reference also shows the three availability `Status` conditions, so 25 columns in the reference tables carry a default. A blank cell is not an omission and it does not stop you setting your own ([7.2](alerts-and-thresholds.md#72-changing-thresholds)). |
 
-Groups marked **configuration snapshot** in their heading behave differently from the rest. They collect on a 24-hour schedule into Enterprise Manager's configuration history rather than into the metric tables, which is what makes a MySQL server's settings comparable over time and against other servers under **Enterprise → Configuration**, and what the compliance rules in [chapter 9](compliance-rules.md#compliance-standards) evaluate. They carry no thresholds and raise no alerts, and a `(key)` column in one of them means the snapshot holds several rows — one per account, for example — rather than one row of settings.
+Groups marked **configuration snapshot** in their heading behave differently from the rest. They collect on a 24-hour schedule into Enterprise Manager's configuration history rather than into the metric tables, which is what makes a MySQL server's settings comparable over time and against other servers under **Enterprise → Configuration**, and what the compliance rules in [chapter 9](compliance-rules.md#compliance-standards) evaluate. They carry no thresholds and raise no alerts, and a `(key)` column in one of them means the snapshot holds several rows (one per account, for example) rather than one row of settings.
 
 ## 6.3 Naming conventions
 Column names follow a few conventions consistently, so the name usually tells you what kind of number you are looking at.
@@ -35,11 +35,11 @@ Column names follow a few conventions consistently, so the name usually tells yo
 |---|---|
 | `_delta` | The difference since the previous collection. The server counter behind the column is cumulative since startup; the `_delta` column reports the activity in the interval instead, which is what a threshold can be set against. |
 | `_pct` | A percentage, on a 0–100 scale. |
-| `_rate` | A ratio expressed as a percentage — the buffer pool hit rates, for example, which the plug-in normalizes to percent at one decimal place. It is not a per-second figure. |
+| `_rate` | A ratio expressed as a percentage (the buffer pool hit rates, for example), normalized to one decimal place. It is not a per-second figure. |
 | `_per_sec` | A per-second rate. |
 | `_us` | Microseconds. Statement and wait latencies are reported in microseconds throughout. |
 | `d_` prefix | A per-interval delta on the wait and statement digest groups, the keyed equivalent of `_delta`. |
-| `*Live` group | A real-time mirror of the configuration snapshot group of the same name — the same server variables, read on demand for the console's configuration side panels ([5.1](monitoring-pages.md#51-mysql-database-pages)) instead of on the daily configuration schedule. Same values, different freshness. |
+| `*Live` group | A real-time mirror of the configuration snapshot group of the same name, the same server variables, read on demand for the console's configuration side panels ([5.1](monitoring-pages.md#51-mysql-database-pages)) instead of on the daily configuration schedule. Same values, different freshness. |
 
 **How labels state what a value means.** A label carries what its name cannot:
 
@@ -67,7 +67,7 @@ they do not carry thresholds. See the User Guide, chapter 6, for how to read thi
 
 ## MySQL Database (`ip_mysql_database`)
 
-### Response (`Response`) — collected every 1 Min
+### Response (`Response`), collected every 1 Min
 
 Availability. EM derives the target's Up/Down state from the Status column; a Status below 1 raises the target-down event.
 
@@ -75,7 +75,7 @@ Availability. EM derives the target's Up/Down state from the Status column; a St
 |---|---|---|---|---|
 | `Status` | Status (0/1: 1 = up, 0 = down) | NA |  | < 1 |
 
-### Instance Info (`InstanceInfo`) — collected every 15 Min
+### Instance Info (`InstanceInfo`), collected every 15 Min
 
 Server version and installation directories (version, base directory, data directory, temp directory), read from global system variables.
 
@@ -86,9 +86,9 @@ Server version and installation directories (version, base directory, data direc
 | `datadir` | Data Directory | NA |  |  |
 | `tmpdir` | Temp Directory | NA |  |  |
 
-### Replication Source Config (`ReplicationSource`) — collected every 1 Hr
+### Replication Source Config (`ReplicationSource`), collected every 1 Hr
 
-Source-role replication configuration — auto-increment offsets, GTID mode, and semi-sync source settings — read from the server's global variables. One row per server.
+Source-role replication configuration (auto-increment offsets, GTID mode, and semi-sync source settings) read from the server's global variables. One row per server.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -109,9 +109,9 @@ Source-role replication configuration — auto-increment offsets, GTID mode, and
 | `server_id` | Server ID (this server) | NA |  |  |
 | `source_verify_checksum` | Source Verify Checksum | NA |  |  |
 
-### Replication Source Activity (`ReplicationSourceActivity`) — collected every 5 Min
+### Replication Source Activity (`ReplicationSourceActivity`), collected every 5 Min
 
-Source-role replication activity — binary log cache usage, semi-sync source counters, and the current binary log file, position, and executed GTID set.
+Source-role replication activity: binary log cache usage, semi-sync source counters, and the current binary log file, position, and executed GTID set.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -137,9 +137,9 @@ Source-role replication activity — binary log cache usage, semi-sync source co
 | `position` | Binary Log Position (byte offset) | NA |  |  |
 | `executed_gtid_set` | Executed GTID Set | NA |  |  |
 
-### Replication Replica Config (`ReplicationReplica`) — collected every 1 Hr
+### Replication Replica Config (`ReplicationReplica`), collected every 1 Hr
 
-Replica-role replication configuration for each replication channel — source connection details, SSL settings, filters, and relay log configuration.
+Replica-role replication configuration for each replication channel: source connection details, SSL settings, filters, and relay log configuration.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -213,9 +213,9 @@ Replica-role replication configuration for each replication channel — source c
 | `replica_transaction_retries` | Replica Transaction Retries (max) | NA |  |  |
 | `replica_type_conversions` | Replica Type Conversions | NA |  |  |
 
-### Replication Replica Activity (`ReplicationReplicaActivity`) — collected every 5 Min
+### Replication Replica Activity (`ReplicationReplicaActivity`), collected every 5 Min
 
-Replica-role replication activity per channel — I/O and SQL thread state, lag, and the most recent error. Note that replica_io_running reports Yes/No while replica_sql_running reports true/false; write any custom rule against both columns accordingly.
+Replica-role replication activity per channel: I/O and SQL thread state, lag, and the most recent error. replica_io_running reports Yes/No while replica_sql_running reports true/false; write any custom rule against both columns accordingly.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -256,7 +256,7 @@ Replica-role replication activity per channel — I/O and SQL thread state, lag,
 | `relay_log_purge` | Relay Log Purge (true \| false) | NA |  |  |
 | `lag_measured` | Lag Measured (0/1: 1 = Seconds Behind Source is real) | NA |  |  |
 
-### Log IO Latency (`LogIOLatency`) — collected every 5 Min
+### Log IO Latency (`LogIOLatency`), collected every 5 Min
 
 Binary log I/O volume and latency, aggregated from performance_schema.file_summary_by_event_name for binlog file events.
 
@@ -265,7 +265,7 @@ Binary log I/O volume and latency, aggregated from performance_schema.file_summa
 | `log_bytes_written` | Log Bytes Written (cumulative bytes) | BYTE |  |  |
 | `file_io_latency` | File IO Latency (cumulative ms) | MILLISECONDS |  |  |
 
-### Replication Connection Status (`ReplicationConnStatus`) — collected every 5 Min
+### Replication Connection Status (`ReplicationConnStatus`), collected every 5 Min
 
 Per-channel replication connection heartbeat status, from performance_schema.replication_connection_status.
 
@@ -275,9 +275,9 @@ Per-channel replication connection heartbeat status, from performance_schema.rep
 | `count_received_heartbeats` | Received Heartbeats (cumulative) | NA |  |  |
 | `last_heartbeat_timestamp` | Last Heartbeat Timestamp | NA |  |  |
 
-### Replication Connection Config (`ReplicationConnectionConfig`) — collected every 1 Hr
+### Replication Connection Config (`ReplicationConnectionConfig`), collected every 1 Hr
 
-Per-channel replication connection configuration — auto-positioning, retry interval and count, and heartbeat interval — from performance_schema.replication_connection_configuration.
+Per-channel replication connection configuration (auto-positioning, retry interval and count, and heartbeat interval) from performance_schema.replication_connection_configuration.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -289,7 +289,7 @@ Per-channel replication connection configuration — auto-positioning, retry int
 | `bound_network_interface` | Bound Network Interface | NA |  |  |
 | `source_info_storage` | Source Info Storage | NA |  |  |
 
-### Replication By Coordinator (`ReplicationByCoordinator`) — collected every 5 Min
+### Replication By Coordinator (`ReplicationByCoordinator`), collected every 5 Min
 
 Per-channel applier coordinator thread state and the most recent applier error, from performance_schema.replication_applier_status_by_coordinator.
 
@@ -301,7 +301,7 @@ Per-channel applier coordinator thread state and the most recent applier error, 
 | `last_error_number` | Last Error Number (0 = no error) | NA |  |  |
 | `last_error_timestamp` | Last Error Timestamp | NA |  |  |
 
-### Replication By Worker (`ReplicationByWorker`) — collected every 5 Min
+### Replication By Worker (`ReplicationByWorker`), collected every 5 Min
 
 Per-channel, per-worker applier thread state and the most recent applier error, from performance_schema.replication_applier_status_by_worker.
 
@@ -315,9 +315,9 @@ Per-channel, per-worker applier thread state and the most recent applier error, 
 | `last_error_number` | Last Error Number (0 = no error) | NA |  |  |
 | `last_applied_transaction` | Last Applied Transaction | NA |  |  |
 
-### InnoDB Activity (cumulative since server start) (`InnodbActivity`) — collected every 5 Min
+### InnoDB Activity (cumulative since server start) (`InnodbActivity`), collected every 5 Min
 
-InnoDB engine activity counters — buffer pool traffic, data file I/O, log I/O, double-write, and row operations — from the server's InnoDB status counters.
+InnoDB engine activity counters (buffer pool traffic, data file I/O, log I/O, double-write, and row operations) from the server's InnoDB status counters.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -371,9 +371,9 @@ InnoDB engine activity counters — buffer pool traffic, data file I/O, log I/O,
 | `innodb_truncated_status_writes` | Truncated Status Writes | NA |  |  |
 | `uptime` | Uptime | SECOND |  |  |
 
-### InnoDB Buffer Pool (cumulative since server start) (`InnodbBufferPool`) — collected every 5 Min
+### InnoDB Buffer Pool (cumulative since server start) (`InnodbBufferPool`), collected every 5 Min
 
-InnoDB buffer pool sizing and effectiveness — hit rates and page allocation from INFORMATION_SCHEMA.INNODB_BUFFER_POOL_STATS.
+InnoDB buffer pool sizing and effectiveness: hit rates and page allocation from INFORMATION_SCHEMA.INNODB_BUFFER_POOL_STATS.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -413,9 +413,9 @@ InnoDB buffer pool sizing and effectiveness — hit rates and page allocation fr
 | `compress_seconds` | Compress Seconds | SECOND |  |  |
 | `uncompress_seconds` | Uncompress Seconds | SECOND |  |  |
 
-### InnoDB Log (cumulative since server start) (`InnodbLog`) — collected every 5 Min
+### InnoDB Log (cumulative since server start) (`InnodbLog`), collected every 5 Min
 
-InnoDB redo log position and capacity — sequence, flushed, and checkpoint LSNs plus log capacity used — parsed from the InnoDB engine status output.
+InnoDB redo log position and capacity (sequence, flushed, and checkpoint LSNs plus log capacity used) parsed from the InnoDB engine status output.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -428,9 +428,9 @@ InnoDB redo log position and capacity — sequence, flushed, and checkpoint LSNs
 | `innodb_log_io_total` | Log IO Total | NA |  |  |
 | `innodb_log_io_per_sec` | Log Io/s (avg since prev. engine-status read, ~5 min) | SECOND |  |  |
 
-### InnoDB Transactions (`InnodbTransaction`) — collected every 5 Min
+### InnoDB Transactions (`InnodbTransaction`), collected every 5 Min
 
-InnoDB transaction state — counts of running, lock-waiting, committing, and rolling-back transactions, plus row-lock memory and wait totals — combining the InnoDB engine status output with INFORMATION_SCHEMA.INNODB_TRX.
+InnoDB transaction state (counts of running, lock-waiting, committing, and rolling-back transactions, plus row-lock memory and wait totals) combining the InnoDB engine status output with INFORMATION_SCHEMA.INNODB_TRX.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -446,9 +446,9 @@ InnoDB transaction state — counts of running, lock-waiting, committing, and ro
 | `rows_modified_total` | Rows Modified Total (current) | NA |  |  |
 | `row_locks_current_waits` | Row Locks Current Waits (current) | NA |  |  |
 
-### InnoDB I/O (cumulative since server start) (`InnodbIO`) — collected every 5 Min
+### InnoDB I/O (cumulative since server start) (`InnodbIO`), collected every 5 Min
 
-InnoDB file I/O activity — OS-level reads, writes, fsyncs, and pending operations — parsed from the InnoDB engine status output.
+InnoDB file I/O activity (OS-level reads, writes, fsyncs, and pending operations) parsed from the InnoDB engine status output.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -465,9 +465,9 @@ InnoDB file I/O activity — OS-level reads, writes, fsyncs, and pending operati
 | `innodb_io_syncs_per_sec` | IO Syncs/s (avg since prev. engine-status read, ~5 min) | SECOND |  |  |
 | `innodb_num_open_files` | Num Open Files (current) | NA |  |  |
 
-### InnoDB Row Operations (cumulative since server start) (`InnodbRow`) — collected every 5 Min
+### InnoDB Row Operations (cumulative since server start) (`InnodbRow`), collected every 5 Min
 
-InnoDB row operation counts and rates — inserts, updates, deletes, and reads — parsed from the InnoDB engine status output.
+InnoDB row operation counts and rates (inserts, updates, deletes, and reads) parsed from the InnoDB engine status output.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -482,7 +482,7 @@ InnoDB row operation counts and rates — inserts, updates, deletes, and reads �
 | `innodb_rows_deleted_per_sec` | Rows Deleted/s (avg since prev. engine-status read, ~5 min) | SECOND |  |  |
 | `innodb_rows_read_per_sec` | Rows Read/s (avg since prev. engine-status read, ~5 min) | SECOND |  |  |
 
-### InnoDB Insert Buffer (cumulative since server start) (`InnodbInsertBuffer`) — collected every 5 Min
+### InnoDB Insert Buffer (cumulative since server start) (`InnodbInsertBuffer`), collected every 5 Min
 
 InnoDB change buffer (insert buffer) size and merge/discard activity, parsed from the InnoDB engine status output.
 
@@ -498,7 +498,7 @@ InnoDB change buffer (insert buffer) size and merge/discard activity, parsed fro
 | `innodb_cbuf_delete_mark_discarded` | Cbuf Delete Mark Discarded | NA |  |  |
 | `innodb_cbuf_delete_discarded` | Cbuf Delete Discarded | NA |  |  |
 
-### InnoDB Adaptive Hash (`InnodbAdaptiveHash`) — collected every 5 Min
+### InnoDB Adaptive Hash (`InnodbAdaptiveHash`), collected every 5 Min
 
 InnoDB adaptive hash index size and search rates, parsed from the InnoDB engine status output.
 
@@ -509,7 +509,7 @@ InnoDB adaptive hash index size and search rates, parsed from the InnoDB engine 
 | `innodb_hash_searches_per_sec` | Hash Searches/s (avg since prev. engine-status read, ~5 min) | SECOND |  |  |
 | `innodb_non_hash_searches_per_sec` | Non Hash Searches/s (avg since prev. engine-status read, ~5 min) | SECOND |  |  |
 
-### InnoDB Threads (cumulative since server start) (`InnodbThread`) — collected every 5 Min
+### InnoDB Threads (cumulative since server start) (`InnodbThread`), collected every 5 Min
 
 InnoDB background (main) thread loop counters and current state, parsed from the InnoDB engine status output.
 
@@ -521,9 +521,9 @@ InnoDB background (main) thread loop counters and current state, parsed from the
 | `innodb_main_thd_log_flush_writes` | Main Thd Log Flush Writes | NA |  |  |
 | `innodb_row_state` | Row State | NA |  |  |
 
-### InnoDB Semaphores (cumulative since server start) (`InnodbSemaphore`) — collected every 5 Min
+### InnoDB Semaphores (cumulative since server start) (`InnodbSemaphore`), collected every 5 Min
 
-InnoDB internal synchronization activity — mutex and rw-lock spin, rounds, and OS wait counts — parsed from the InnoDB engine status output.
+InnoDB internal synchronization activity (mutex and rw-lock spin, rounds, and OS wait counts) parsed from the InnoDB engine status output.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -542,7 +542,7 @@ InnoDB internal synchronization activity — mutex and rw-lock spin, rounds, and
 | `innodb_sem_spins_per_wait_rw_excl` | Spins Per Wait RW Excl (avg since prev. engine-status read) | NA |  |  |
 | `innodb_sem_spins_per_wait_rw_sx` | Spins Per Wait RW SX (avg since prev. engine-status read) | NA |  |  |
 
-### Admin Statement Activity (cumulative since server start) (`AdminStatementActivity`) — collected every 5 Min
+### Admin Statement Activity (cumulative since server start) (`AdminStatementActivity`), collected every 5 Min
 
 Counts of the server's AdminStatementActivity statements, read as raw SHOW GLOBAL STATUS counters (cumulative since server start; a restart or FLUSH STATUS resets them), so chart a rate or a difference between readings to see activity in an interval.
 
@@ -567,7 +567,7 @@ Counts of the server's AdminStatementActivity statements, read as raw SHOW GLOBA
 | `com_replica_stop` | Com Replica Stop | NA |  |  |
 | `com_uninstall_plugin` | Com Uninstall Plugin | NA |  |  |
 
-### DDL Statement Activity (cumulative since server start) (`DdlStatementActivity`) — collected every 5 Min
+### DDL Statement Activity (cumulative since server start) (`DdlStatementActivity`), collected every 5 Min
 
 Counts of the server's DdlStatementActivity statements, read as raw SHOW GLOBAL STATUS counters (cumulative since server start; a restart or FLUSH STATUS resets them), so chart a rate or a difference between readings to see activity in an interval.
 
@@ -606,7 +606,7 @@ Counts of the server's DdlStatementActivity statements, read as raw SHOW GLOBAL 
 | `com_rename_user` | Com Rename User | NA |  |  |
 | `com_truncate` | Com Truncate | NA |  |  |
 
-### DML Statement Activity (cumulative since server start) (`DmlStatementActivity`) — collected every 5 Min
+### DML Statement Activity (cumulative since server start) (`DmlStatementActivity`), collected every 5 Min
 
 Counts of the server's DmlStatementActivity statements, read as raw SHOW GLOBAL STATUS counters (cumulative since server start; a restart or FLUSH STATUS resets them), so chart a rate or a difference between readings to see activity in an interval.
 
@@ -647,7 +647,7 @@ Counts of the server's DmlStatementActivity statements, read as raw SHOW GLOBAL 
 | `com_update` | Com Update | NA |  |  |
 | `com_update_multi` | Com Update Multi | NA |  |  |
 
-### Show Statement Activity (cumulative since server start) (`ShowStatementActivity`) — collected every 5 Min
+### Show Statement Activity (cumulative since server start) (`ShowStatementActivity`), collected every 5 Min
 
 Counts of the server's ShowStatementActivity statements, read as raw SHOW GLOBAL STATUS counters (cumulative since server start; a restart or FLUSH STATUS resets them), so chart a rate or a difference between readings to see activity in an interval.
 
@@ -694,7 +694,7 @@ Counts of the server's ShowStatementActivity statements, read as raw SHOW GLOBAL
 | `com_show_variables` | Com Show Variables | NA |  |  |
 | `com_show_warnings` | Com Show Warnings | NA |  |  |
 
-### Transaction Statement Activity (cumulative since server start) (`TransactionStatementActivity`) — collected every 5 Min
+### Transaction Statement Activity (cumulative since server start) (`TransactionStatementActivity`), collected every 5 Min
 
 Counts of the server's TransactionStatementActivity statements, read as raw SHOW GLOBAL STATUS counters (cumulative since server start; a restart or FLUSH STATUS resets them), so chart a rate or a difference between readings to see activity in an interval.
 
@@ -713,9 +713,9 @@ Counts of the server's TransactionStatementActivity statements, read as raw SHOW
 | `com_xa_rollback` | Com XA Rollback | NA |  |  |
 | `com_xa_start` | Com XA Start | NA |  |  |
 
-### Handler Activity (cumulative since server start) (`HandlerActivity`) — collected every 5 Min
+### Handler Activity (cumulative since server start) (`HandlerActivity`), collected every 5 Min
 
-Storage engine handler call counts — reads, writes, commits, and rollbacks — from the server's Handler_* status counters.
+Storage engine handler call counts (reads, writes, commits, and rollbacks) from the server's Handler_* status counters.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -739,9 +739,9 @@ Storage engine handler call counts — reads, writes, commits, and rollbacks —
 | `handler_write` | Handler Write | NA |  |  |
 | `uptime` | Uptime | SECOND |  |  |
 
-### Instance Activity (cumulative since server start) (`InstanceActivity`) — collected every 5 Min
+### Instance Activity (cumulative since server start) (`InstanceActivity`), collected every 5 Min
 
-General server activity counters — queries served, open files, prepared statements, and uptime — from the server's status counters.
+General server activity counters (queries served, open files, prepared statements, and uptime) from the server's status counters.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -756,9 +756,9 @@ General server activity counters — queries served, open files, prepared statem
 | `uptime` | Uptime | SECOND |  |  |
 | `uptime_since_flush_status` | Uptime Since Flush Status (seconds) | SECOND |  |  |
 
-### XA Activity (cumulative since server start) (`XaActivity`) — collected every 5 Min
+### XA Activity (cumulative since server start) (`XaActivity`), collected every 5 Min
 
-XA / two-phase-commit transaction coordinator log counters — page size, pages used, and page waits.
+XA / two-phase-commit transaction coordinator log counters: page size, pages used, and page waits.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -766,9 +766,9 @@ XA / two-phase-commit transaction coordinator log counters — page size, pages 
 | `tc_log_page_size` | Tc Log Page Size (setting) | BYTE |  |  |
 | `tc_log_page_waits` | Tc Log Page Waits | NA |  |  |
 
-### Connection Activity (cumulative since server start) (`ConnectionActivity`) — collected every 5 Min
+### Connection Activity (cumulative since server start) (`ConnectionActivity`), collected every 5 Min
 
-Connection-level activity counters — aborted clients and connects, bytes transferred, and thread caching — from the server's status counters; aborted_connects_delta reports the count as a delta between collections.
+Connection-level activity counters (aborted clients and connects, bytes transferred, and thread caching) from the server's status counters; aborted_connects_delta reports the count as a delta between collections.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -787,9 +787,9 @@ Connection-level activity counters — aborted clients and connects, bytes trans
 | `threads_connected` | Threads Connected (current) | NA |  |  |
 | `aborted_connects_delta` | Aborted Connects (per 5-min interval) | NA | > 10 | > 50 |
 
-### Threads Activity (cumulative since server start) (`ThreadsActivity`) — collected every 5 Min
+### Threads Activity (cumulative since server start) (`ThreadsActivity`), collected every 5 Min
 
-Thread pool activity and configuration — cached, connected, and running thread counts alongside the configured thread-handling mode and connection limit.
+Thread pool activity and configuration: cached, connected, and running thread counts alongside the configured thread-handling mode and connection limit.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -803,9 +803,9 @@ Thread pool activity and configuration — cached, connected, and running thread
 | `thread_handling` | Thread Handling | NA |  |  |
 | `connection_saturation_pct` | Connection Saturation (%, current) | PERCENTAGE | > 80 | > 95 |
 
-### Insert Delayed Activity (cumulative since server start) (`InsertDelayedActivity`) — collected every 5 Min
+### Insert Delayed Activity (cumulative since server start) (`InsertDelayedActivity`), collected every 5 Min
 
-INSERT DELAYED activity counters — errors, active delayed-insert threads, and rows not yet flushed — from the server's status counters.
+INSERT DELAYED activity counters (errors, active delayed-insert threads, and rows not yet flushed) from the server's status counters.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -814,9 +814,9 @@ INSERT DELAYED activity counters — errors, active delayed-insert threads, and 
 | `not_flushed_delayed_rows` | Not Flushed Delayed Rows (current) | NA |  |  |
 | `delayed_writes` | Delayed Writes | NA |  |  |
 
-### NDB Activity (cumulative since server start) (`NdbActivity`) — collected every 5 Min
+### NDB Activity (cumulative since server start) (`NdbActivity`), collected every 5 Min
 
-NDB Cluster storage engine status counters — conflict function usage and data node counts; empty on servers without the NDB storage engine.
+NDB Cluster storage engine status counters: conflict function usage and data node counts; empty on servers without the NDB storage engine.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -825,9 +825,9 @@ NDB Cluster storage engine status counters — conflict function usage and data 
 | `ndb_number_of_data_nodes` | Ndb Number Of Data Nodes (current) | NA |  |  |
 | `ndb_number_of_ready_data_nodes` | Ndb Number Of Ready Data Nodes (current) | NA |  |  |
 
-### Performance Schema Activity (cumulative since server start) (`PerformanceSchemaActivity`) — collected every 5 Min
+### Performance Schema Activity (cumulative since server start) (`PerformanceSchemaActivity`), collected every 5 Min
 
-Performance Schema instrumentation loss counters — how many events, instances, or classes the Performance Schema has had to discard because a configured limit was reached.
+Performance Schema instrumentation loss counters: how many events, instances, or classes the Performance Schema has had to discard because a configured limit was reached.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -855,9 +855,9 @@ Performance Schema instrumentation loss counters — how many events, instances,
 | `performance_schema_thread_classes_lost` | Performance Schema Thread Classes Lost | NA |  |  |
 | `performance_schema_thread_instances_lost` | Performance Schema Thread Instances Lost | NA |  |  |
 
-### Table Activity (cumulative since server start) (`TableActivity`) — collected every 5 Min
+### Table Activity (cumulative since server start) (`TableActivity`), collected every 5 Min
 
-Table and temporary-table activity — opened tables and definitions, on-disk vs in-memory temporary tables, sorting activity, and table lock waits; created_tmp_tables_delta and created_tmp_disk_tables_delta report those counts as deltas between collections.
+Table and temporary-table activity: opened tables and definitions, on-disk vs in-memory temporary tables, sorting activity, and table lock waits; created_tmp_tables_delta and created_tmp_disk_tables_delta report those counts as deltas between collections.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -881,9 +881,9 @@ Table and temporary-table activity — opened tables and definitions, on-disk vs
 | `created_tmp_disk_tables_delta` | Created Tmp Disk Tables (per 5-min interval) | NA |  |  |
 | `disk_tmp_table_pct` | Disk Tmp Table Ratio (%, per 5-min interval) | PERCENTAGE | > 25 | > 50 |
 
-### Secure Connections Activity (cumulative since server start) (`SecureConnectionsActivity`) — collected every 5 Min
+### Secure Connections Activity (cumulative since server start) (`SecureConnectionsActivity`), collected every 5 Min
 
-TLS/SSL connection counters and negotiated settings — accepts, renegotiations, session cache activity, cipher, and protocol version.
+TLS/SSL connection counters and negotiated settings: accepts, renegotiations, session cache activity, cipher, and protocol version.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -914,9 +914,9 @@ TLS/SSL connection counters and negotiated settings — accepts, renegotiations,
 | `ssl_verify_mode` | Ssl Verify Mode | NA |  |  |
 | `ssl_version` | Ssl Version (current) | NA |  |  |
 
-### Audit Log Activity (cumulative since server start) (`AuditLogActivity`) — collected every 5 Min
+### Audit Log Activity (cumulative since server start) (`AuditLogActivity`), collected every 5 Min
 
-MySQL Enterprise Audit event counters — events written, filtered, and dropped, and audit log size. Requires the Enterprise Audit component; the group collects an empty row when it is not installed.
+MySQL Enterprise Audit event counters: events written, filtered, and dropped, and audit log size. Requires the Enterprise Audit component; the group collects an empty row when it is not installed.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -930,9 +930,9 @@ MySQL Enterprise Audit event counters — events written, filtered, and dropped,
 | `audit_log_total_size` | Audit Log Total Size (current) | BYTE |  |  |
 | `audit_log_write_waits` | Audit Log Write Waits | NA |  |  |
 
-### Firewall Activity (cumulative since server start) (`FirewallActivity`) — collected every 5 Min
+### Firewall Activity (cumulative since server start) (`FirewallActivity`), collected every 5 Min
 
-MySQL Enterprise Firewall counters — access granted, denied, and flagged as suspicious, and cached firewall entries. Requires the Enterprise Firewall component; the group collects an empty row when it is not installed.
+MySQL Enterprise Firewall counters: access granted, denied, and flagged as suspicious, and cached firewall entries. Requires the Enterprise Firewall component; the group collects an empty row when it is not installed.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -941,7 +941,7 @@ MySQL Enterprise Firewall counters — access granted, denied, and flagged as su
 | `firewall_access_suspicious` | Firewall Access Suspicious | NA |  |  |
 | `firewall_cached_entries` | Firewall Cached Entries (current) | NA |  |  |
 
-### Sys Schema Status (`SysSchemaStatus`) — collected every 5 Min
+### Sys Schema Status (`SysSchemaStatus`), collected every 5 Min
 
 Reports whether the MySQL sys schema is present and recent enough for the plug-in's Sys Schema metric groups to collect; the other Sys groups collect empty rows when it is not.
 
@@ -951,7 +951,7 @@ Reports whether the MySQL sys schema is present and recent enough for the plug-i
 | `sys_supported` | Sys Schema Usable (0/1, 1 = supported) | NA |  | < 1 |
 | `status_message` | Sys Status Message | NA |  |  |
 
-### Sys Memory By Event (`SysMemoryByEvent`) — collected every 5 Min
+### Sys Memory By Event (`SysMemoryByEvent`), collected every 5 Min
 
 Current and high-water memory allocation per instrumented event, from sys.x$memory_global_by_current_bytes.
 
@@ -965,7 +965,7 @@ Current and high-water memory allocation per instrumented event, from sys.x$memo
 | `high_alloc` | Peak Bytes Allocated | BYTE |  |  |
 | `high_avg_alloc` | Peak Avg Bytes per Allocation | BYTE |  |  |
 
-### Sys IO By Host (`SysIoByHost`) — collected every 5 Min
+### Sys IO By Host (`SysIoByHost`), collected every 5 Min
 
 File I/O count and latency per connecting host, from sys.x$host_summary_by_file_io.
 
@@ -975,7 +975,7 @@ File I/O count and latency per connecting host, from sys.x$host_summary_by_file_
 | `ios` | IOs | NA |  |  |
 | `io_latency` | IO Latency | MICROSEC |  |  |
 
-### Sys IO By Thread (`SysIoByThread`) — collected every 5 Min
+### Sys IO By Thread (`SysIoByThread`), collected every 5 Min
 
 File I/O count and latency per thread, from sys.x$io_by_thread_by_latency.
 
@@ -990,7 +990,7 @@ File I/O count and latency per thread, from sys.x$io_by_thread_by_latency.
 | `max_latency` | Max Latency | MICROSEC |  |  |
 | `processlist_id` | Processlist Id | NA |  |  |
 
-### Sys IO By File (`SysIoByFile`) — collected every 5 Min
+### Sys IO By File (`SysIoByFile`), collected every 5 Min
 
 File I/O count and latency per file, broken down by read/write/misc activity, from sys.x$io_global_by_file_by_latency.
 
@@ -1006,7 +1006,7 @@ File I/O count and latency per file, broken down by read/write/misc activity, fr
 | `count_misc` | Count Misc | NA |  |  |
 | `misc_latency` | Misc Latency | MICROSEC |  |  |
 
-### Sys IO By Wait (`SysIoByWait`) — collected every 5 Min
+### Sys IO By Wait (`SysIoByWait`), collected every 5 Min
 
 File I/O count and latency per wait event, from sys.x$io_global_by_wait_by_latency.
 
@@ -1027,9 +1027,9 @@ File I/O count and latency per wait event, from sys.x$io_global_by_wait_by_laten
 | `total_written` | Total Written | BYTE |  |  |
 | `avg_written` | Avg Bytes per Write | BYTE |  |  |
 
-### Sys Table Statistics (`SysTableStatistics`) — collected every 5 Min
+### Sys Table Statistics (`SysTableStatistics`), collected every 5 Min
 
-Per-table I/O and DML activity — rows fetched, inserted, updated, and deleted, and I/O bytes/latency — equivalent to sys.x$schema_table_statistics, read directly from performance_schema for compatibility with least-privilege monitoring accounts.
+Per-table I/O and DML activity (rows fetched, inserted, updated, and deleted, and I/O bytes/latency) equivalent to sys.x$schema_table_statistics, read directly from performance_schema for compatibility with least-privilege monitoring accounts.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1054,9 +1054,9 @@ Per-table I/O and DML activity — rows fetched, inserted, updated, and deleted,
 | `io_misc_requests` | IO Misc Requests | NA |  |  |
 | `io_misc_latency` | IO Misc Latency | MICROSEC |  |  |
 
-### Sys User Summary (`SysUserSummary`) — collected every 5 Min
+### Sys User Summary (`SysUserSummary`), collected every 5 Min
 
-Per-user activity summary — statements, table scans, file I/O, connections, and memory — from sys.x$user_summary.
+Per-user activity summary (statements, table scans, file I/O, connections, and memory) from sys.x$user_summary.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1073,9 +1073,9 @@ Per-user activity summary — statements, table scans, file I/O, connections, an
 | `current_memory` | Current Memory | BYTE |  |  |
 | `total_memory_allocated` | Total Memory Allocated | BYTE |  |  |
 
-### Sys Host Summary (`SysHostSummary`) — collected every 5 Min
+### Sys Host Summary (`SysHostSummary`), collected every 5 Min
 
-Per-host activity summary — statements, table scans, file I/O, connections, and memory — from sys.x$host_summary.
+Per-host activity summary (statements, table scans, file I/O, connections, and memory) from sys.x$host_summary.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1092,7 +1092,7 @@ Per-host activity summary — statements, table scans, file I/O, connections, an
 | `current_memory` | Current Memory | BYTE |  |  |
 | `total_memory_allocated` | Total Memory Allocated | BYTE |  |  |
 
-### Sys Statement By Latency (`SysStatementByLatency`) — collected every 5 Min
+### Sys Statement By Latency (`SysStatementByLatency`), collected every 5 Min
 
 Top 25 statement digests by total execution latency, from sys.x$statement_analysis.
 
@@ -1116,7 +1116,7 @@ Top 25 statement digests by total execution latency, from sys.x$statement_analys
 | `tmp_disk_tables` | Temp Tables On Disk (cumulative) | NA |  |  |
 | `first_seen` | First Seen | NA |  |  |
 
-### Sys Statement By Exec Count (`SysStatementByExecCount`) — collected every 5 Min
+### Sys Statement By Exec Count (`SysStatementByExecCount`), collected every 5 Min
 
 Top 25 statement digests by execution count, from sys.x$statement_analysis.
 
@@ -1140,7 +1140,7 @@ Top 25 statement digests by execution count, from sys.x$statement_analysis.
 | `tmp_disk_tables` | Temp Tables On Disk (cumulative) | NA |  |  |
 | `first_seen` | First Seen | NA |  |  |
 
-### Sys Statement By First Seen (`SysStatementByFirstSeen`) — collected every 5 Min
+### Sys Statement By First Seen (`SysStatementByFirstSeen`), collected every 5 Min
 
 Top 25 statement digests by most recent first-seen time, from sys.x$statement_analysis.
 
@@ -1164,9 +1164,9 @@ Top 25 statement digests by most recent first-seen time, from sys.x$statement_an
 | `tmp_disk_tables` | Temp Tables On Disk (cumulative) | NA |  |  |
 | `first_seen` | First Seen | NA |  |  |
 
-### Sys InnoDB Lock Waits (`SysInnodbLockWaits`) — collected every 5 Min
+### Sys InnoDB Lock Waits (`SysInnodbLockWaits`), collected every 5 Min
 
-Current InnoDB row-lock waits — the waiting and blocking lock, transaction, and session for each — equivalent to sys.x$innodb_lock_waits, read directly from performance_schema for compatibility with least-privilege monitoring accounts.
+Current InnoDB row-lock waits (the waiting and blocking lock, transaction, and session for each) equivalent to sys.x$innodb_lock_waits, read directly from performance_schema for compatibility with least-privilege monitoring accounts.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1184,9 +1184,9 @@ Current InnoDB row-lock waits — the waiting and blocking lock, transaction, an
 | `blocking_trx_id` | Blocking Trx Id | NA |  |  |
 | `waiting_seconds` | Lock Wait Age (seconds; -1 = unknown) | SECOND |  |  |
 
-### Sys Table Lock Waits (`SysTableLockWaits`) — collected every 5 Min
+### Sys Table Lock Waits (`SysTableLockWaits`), collected every 5 Min
 
-Current metadata (table) lock waits — pending vs. granted locks and the sessions holding them — equivalent to sys.x$schema_table_lock_waits, read directly from performance_schema for compatibility with least-privilege monitoring accounts.
+Current metadata (table) lock waits: pending vs. granted locks and the sessions holding them, equivalent to sys.x$schema_table_lock_waits, read directly from performance_schema for compatibility with least-privilege monitoring accounts.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1202,7 +1202,7 @@ Current metadata (table) lock waits — pending vs. granted locks and the sessio
 | `blocking_lock_duration` | Blocking Lock Duration | NA |  |  |
 | `waiting_seconds` | Wait Time (seconds in MDL wait state; -1 = unknown) | SECOND |  |  |
 
-### Sys Processlist (`SysProcesslist`) — collected every 5 Min
+### Sys Processlist (`SysProcesslist`), collected every 5 Min
 
 Active, non-idle sessions and their current statement, from sys.x$processlist.
 
@@ -1225,7 +1225,7 @@ Active, non-idle sessions and their current statement, from sys.x$processlist.
 | `tmp_disk_tables` | Temp Tables on Disk by Statement | NA |  |  |
 | `trx_state` | Transaction State (ACTIVE \| COMMITTED \| ROLLED BACK) | NA |  |  |
 
-### Backup History (`BackupHistory`) — collected every 1 Hr
+### Backup History (`BackupHistory`), collected every 1 Hr
 
 Recent backup runs across supported backup tools. Reads MySQL Enterprise Backup's mysql.backup_history and Percona XtraBackup's PERCONA_SCHEMA.xtrabackup_history when present; an absent tool is reported as not detected and raises no alert.
 
@@ -1243,9 +1243,9 @@ Recent backup runs across supported backup tools. Reads MySQL Enterprise Backup'
 | `exit_state` | Exit State (SUCCESS \| COMPLETED \| INCOMPLETE \| ...) | NA |  |  |
 | `success` | Success (0/1: 1 = backup completed OK) | NA |  |  |
 
-### Backup Status (`BackupStatus`) — collected every 1 Hr
+### Backup Status (`BackupStatus`), collected every 1 Hr
 
-Single-row backup health summary — presence of each backup tool, the most recent backup attempt, and hours since the last success. Reads MySQL Enterprise Backup's mysql.backup_history and Percona XtraBackup's PERCONA_SCHEMA.xtrabackup_history when present; an absent tool is reported as not detected and raises no alert.
+Single-row backup health summary: presence of each backup tool, the most recent backup attempt, and hours since the last success. Reads MySQL Enterprise Backup's mysql.backup_history and Percona XtraBackup's PERCONA_SCHEMA.xtrabackup_history when present; an absent tool is reported as not detected and raises no alert.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1260,7 +1260,7 @@ Single-row backup health summary — presence of each backup tool, the most rece
 | `never_succeeded` | Never Succeeded (0/1: 1 = no success on record) | NA |  | > 0 |
 | `backup_history_visible` | Backup History Visible (0/1: 1 = backup history table present) | NA |  |  |
 
-### Character Set (`CharacterSet`) — configuration snapshot, collected every 24 Hr
+### Character Set (`CharacterSet`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Character Set settings, captured for configuration history and compliance evaluation.
 
@@ -1275,7 +1275,7 @@ Configuration snapshot of the server's Character Set settings, captured for conf
 | `SERVER` | Server | NA |  |  |
 | `SYSTEM` | System | NA |  |  |
 
-### Connection Buffers (`ConnectionBuffers`) — configuration snapshot, collected every 24 Hr
+### Connection Buffers (`ConnectionBuffers`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Connection Buffers settings, captured for configuration history and compliance evaluation.
 
@@ -1296,7 +1296,7 @@ Configuration snapshot of the server's Connection Buffers settings, captured for
 | `TRANSACTION_ALLOC_BLOCK_SIZE` | Transaction Alloc Block Size (bytes) | BYTE |  |  |
 | `TRANSACTION_PREALLOC_SIZE` | Transaction Prealloc Size (bytes) | BYTE |  |  |
 
-### Metadata (`Metadata`) — configuration snapshot, collected every 24 Hr
+### Metadata (`Metadata`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Metadata settings, captured for configuration history and compliance evaluation.
 
@@ -1309,7 +1309,7 @@ Configuration snapshot of the server's Metadata settings, captured for configura
 | `VERSION_COMPILE_MACHINE` | Version Compile Machine | NA |  |  |
 | `VERSION_COMPILE_OS` | Version Compile OS | NA |  |  |
 
-### Replication Source Configuration (`ReplicationSourceConfig`) — configuration snapshot, collected every 24 Hr
+### Replication Source Configuration (`ReplicationSourceConfig`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Replication Source Configuration settings, captured for configuration history and compliance evaluation.
 
@@ -1330,7 +1330,7 @@ Configuration snapshot of the server's Replication Source Configuration settings
 | `SERVER_ID` | Server ID (this server) | NA |  |  |
 | `SOURCE_VERIFY_CHECKSUM` | Source Verify Checksum | NA |  |  |
 
-### Replication Replica Configuration (`ReplicationReplicaConfig`) — configuration snapshot, collected every 24 Hr
+### Replication Replica Configuration (`ReplicationReplicaConfig`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Replication Replica Configuration settings, captured for configuration history and compliance evaluation.
 
@@ -1373,7 +1373,7 @@ Configuration snapshot of the server's Replication Replica Configuration setting
 | `TRANSACTION_RETRIES` | Transaction Retries (limit) | NA |  |  |
 | `TYPE_CONVERSIONS` | Type Conversions | NA |  |  |
 
-### Information Schema Configuration (`InformationSchema`) — configuration snapshot, collected every 24 Hr
+### Information Schema Configuration (`InformationSchema`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Information Schema Configuration settings, captured for configuration history and compliance evaluation.
 
@@ -1381,7 +1381,7 @@ Configuration snapshot of the server's Information Schema Configuration settings
 |---|---|---|---|---|
 | `STATS_EXPIRY` | Stats Expiry (s) | SECOND |  |  |
 
-### Data Dictionary Configuration (`DataDictionary`) — configuration snapshot, collected every 24 Hr
+### Data Dictionary Configuration (`DataDictionary`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Data Dictionary Configuration settings, captured for configuration history and compliance evaluation.
 
@@ -1392,7 +1392,7 @@ Configuration snapshot of the server's Data Dictionary Configuration settings, c
 | `TABLESPACE_DEFINITION_CACHE` | Tablespace Definition Cache (objects) | NA |  |  |
 | `STORED_PROGRAM_DEF_CACHE` | Stored Program Definition Cache (objects) | NA |  |  |
 
-### Binary Logs (`BinaryLogs`) — configuration snapshot, collected every 24 Hr
+### Binary Logs (`BinaryLogs`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Binary Logs settings, captured for configuration history and compliance evaluation.
 
@@ -1424,7 +1424,7 @@ Configuration snapshot of the server's Binary Logs settings, captured for config
 | `MAX_BINLOG_STMT_CACHE_SIZE` | Max Binlog Stmt Cache Size (bytes) | BYTE |  |  |
 | `SYNC_BINLOG` | Sync Binlog (0 = OS flush \| N = fsync every N commit groups) | NA |  |  |
 
-### Secure Connections (`SecureConnections`) — configuration snapshot, collected every 24 Hr
+### Secure Connections (`SecureConnections`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Secure Connections settings, captured for configuration history and compliance evaluation.
 
@@ -1440,7 +1440,7 @@ Configuration snapshot of the server's Secure Connections settings, captured for
 | `TLS_VERSION` | Tls Version | NA |  |  |
 | `REQUIRE_SECURE_TRANSPORT` | Require Secure Transport | NA |  |  |
 
-### Audit Log (`AuditLog`) — configuration snapshot, collected every 24 Hr
+### Audit Log (`AuditLog`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Audit Log settings, captured for configuration history and compliance evaluation.
 
@@ -1459,7 +1459,7 @@ Configuration snapshot of the server's Audit Log settings, captured for configur
 | `STMT_POLICY` | Stmt Policy | NA |  |  |
 | `STRATEGY` | Strategy | NA |  |  |
 
-### Firewall (`Firewall`) — configuration snapshot, collected every 24 Hr
+### Firewall (`Firewall`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Firewall settings, captured for configuration history and compliance evaluation.
 
@@ -1469,7 +1469,7 @@ Configuration snapshot of the server's Firewall settings, captured for configura
 | `FIREWALL_MODE` | Firewall Mode | NA |  |  |
 | `TRACE` | Trace | NA |  |  |
 
-### Connection (`Connection`) — configuration snapshot, collected every 24 Hr
+### Connection (`Connection`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Connection settings, captured for configuration history and compliance evaluation.
 
@@ -1494,9 +1494,9 @@ Configuration snapshot of the server's Connection settings, captured for configu
 | `SKIP_NAME_RESOLVE` | Skip Name Resolve | NA |  |  |
 | `WAIT_TIMEOUT` | Wait Timeout (s) | SECOND |  |  |
 
-### Connection (`ConnectionLive`) — collected on demand
+### Connection (`ConnectionLive`), collected on demand
 
-Real-time mirror of the Connection configuration snapshot — the same connection-related server variables, refreshed on demand instead of on the configuration schedule.
+Real-time mirror of the Connection configuration snapshot: the same connection-related server variables, refreshed on demand instead of on the configuration schedule.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1519,7 +1519,7 @@ Real-time mirror of the Connection configuration snapshot — the same connectio
 | `SKIP_NAME_RESOLVE` | Skip Name Resolve | NA |  |  |
 | `WAIT_TIMEOUT` | Wait Timeout (s) | SECOND |  |  |
 
-### Environment (`Environment`) — configuration snapshot, collected every 24 Hr
+### Environment (`Environment`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Environment settings, captured for configuration history and compliance evaluation.
 
@@ -1544,7 +1544,7 @@ Configuration snapshot of the server's Environment settings, captured for config
 | `SQL_MODE` | Sql Mode | NA |  |  |
 | `TMPDIR` | Tmpdir | NA |  |  |
 
-### HostCache (`HostCache`) — configuration snapshot, collected every 24 Hr
+### HostCache (`HostCache`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's HostCache settings, captured for configuration history and compliance evaluation.
 
@@ -1552,7 +1552,7 @@ Configuration snapshot of the server's HostCache settings, captured for configur
 |---|---|---|---|---|
 | `HOST_CACHE_SIZE` | Host Cache Size (entries) | NA |  |  |
 
-### Threads (`Threads`) — configuration snapshot, collected every 24 Hr
+### Threads (`Threads`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Threads settings, captured for configuration history and compliance evaluation.
 
@@ -1563,9 +1563,9 @@ Configuration snapshot of the server's Threads settings, captured for configurat
 | `SLOW_LAUNCH_TIME` | Slow Launch Time (s) | SECOND |  |  |
 | `THREAD_STACK` | Thread Stack (bytes) | BYTE |  |  |
 
-### Threads (`ThreadsLive`) — collected on demand
+### Threads (`ThreadsLive`), collected on demand
 
-Real-time mirror of the Threads configuration snapshot — the same thread-handling server variables, refreshed on demand instead of on the configuration schedule.
+Real-time mirror of the Threads configuration snapshot: the same thread-handling server variables, refreshed on demand instead of on the configuration schedule.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1574,7 +1574,7 @@ Real-time mirror of the Threads configuration snapshot — the same thread-handl
 | `SLOW_LAUNCH_TIME` | Slow Launch Time (s) | SECOND |  |  |
 | `THREAD_STACK` | Thread Stack (bytes) | BYTE |  |  |
 
-### Transactions (`Transactions`) — configuration snapshot, collected every 24 Hr
+### Transactions (`Transactions`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Transactions settings, captured for configuration history and compliance evaluation.
 
@@ -1585,7 +1585,7 @@ Configuration snapshot of the server's Transactions settings, captured for confi
 | `TRANSACTION_ISOLATION` | Transaction Isolation | NA |  |  |
 | `TRANSACTION_READ_ONLY` | Transaction Read Only | NA |  |  |
 
-### Networking (`Networking`) — configuration snapshot, collected every 24 Hr
+### Networking (`Networking`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Networking settings, captured for configuration history and compliance evaluation.
 
@@ -1597,7 +1597,7 @@ Configuration snapshot of the server's Networking settings, captured for configu
 | `SKIP_NETWORKING` | Skip Networking | NA |  |  |
 | `SOCKET` | Socket | NA |  |  |
 
-### Optimizer (`Optimizer`) — configuration snapshot, collected every 24 Hr
+### Optimizer (`Optimizer`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Optimizer settings, captured for configuration history and compliance evaluation.
 
@@ -1620,9 +1620,9 @@ Configuration snapshot of the server's Optimizer settings, captured for configur
 | `TRACE_OFFSET` | Trace Offset (traces) | NA |  |  |
 | `WINDOWING_USE_HIGH_PRECISION` | Windowing Use High Precision | NA |  |  |
 
-### Optimizer (`OptimizerLive`) — collected on demand
+### Optimizer (`OptimizerLive`), collected on demand
 
-Real-time mirror of the Optimizer configuration snapshot — the same query optimizer server variables, refreshed on demand instead of on the configuration schedule.
+Real-time mirror of the Optimizer configuration snapshot: the same query optimizer server variables, refreshed on demand instead of on the configuration schedule.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1643,7 +1643,7 @@ Real-time mirror of the Optimizer configuration snapshot — the same query opti
 | `TRACE_OFFSET` | Trace Offset (traces) | NA |  |  |
 | `WINDOWING_USE_HIGH_PRECISION` | Windowing Use High Precision | NA |  |  |
 
-### Logging (`Logging`) — configuration snapshot, collected every 24 Hr
+### Logging (`Logging`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Logging settings, captured for configuration history and compliance evaluation.
 
@@ -1658,7 +1658,7 @@ Configuration snapshot of the server's Logging settings, captured for configurat
 | `LOG_TIMESTAMPS` | Log Timestamps | NA |  |  |
 | `SQL_LOG_DISABLED` | Sql Log Disabled | NA |  |  |
 
-### Slow Query Logging (`SlowQueryLogging`) — configuration snapshot, collected every 24 Hr
+### Slow Query Logging (`SlowQueryLogging`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Slow Query Logging settings, captured for configuration history and compliance evaluation.
 
@@ -1673,7 +1673,7 @@ Configuration snapshot of the server's Slow Query Logging settings, captured for
 | `MIN_EXAMINED_ROW_LIMIT` | Min Examined Row Limit (rows) | NA |  |  |
 | `SLOW_QUERY_LOG_FILE` | Slow Query Log File | NA |  |  |
 
-### Statement Processing (`StatementProcessing`) — configuration snapshot, collected every 24 Hr
+### Statement Processing (`StatementProcessing`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Statement Processing settings, captured for configuration history and compliance evaluation.
 
@@ -1700,9 +1700,9 @@ Configuration snapshot of the server's Statement Processing settings, captured f
 | `TEMPTABLE_MAX_RAM` | TempTable Max RAM (bytes) | BYTE |  |  |
 | `WARNINGS` | Warnings | NA |  |  |
 
-### Statement Processing (`StatementProcessingLive`) — collected on demand
+### Statement Processing (`StatementProcessingLive`), collected on demand
 
-Real-time mirror of the Statement Processing configuration snapshot — the same statement-processing server variables, refreshed on demand instead of on the configuration schedule.
+Real-time mirror of the Statement Processing configuration snapshot: the same statement-processing server variables, refreshed on demand instead of on the configuration schedule.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1727,7 +1727,7 @@ Real-time mirror of the Statement Processing configuration snapshot — the same
 | `TEMPTABLE_MAX_RAM` | TempTable Max RAM (bytes) | BYTE |  |  |
 | `WARNINGS` | Warnings | NA |  |  |
 
-### MyISAM (`Myisam`) — configuration snapshot, collected every 24 Hr
+### MyISAM (`Myisam`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's MyISAM settings, captured for configuration history and compliance evaluation.
 
@@ -1749,7 +1749,7 @@ Configuration snapshot of the server's MyISAM settings, captured for configurati
 | `MYISAM_USE_MMAP` | Myisam Use Mmap | NA |  |  |
 | `SKIP_EXTERNAL_LOCKING` | Skip External Locking | NA |  |  |
 
-### MyISAM Full-Text (`MyisamFullText`) — configuration snapshot, collected every 24 Hr
+### MyISAM Full-Text (`MyisamFullText`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's MyISAM Full-Text settings, captured for configuration history and compliance evaluation.
 
@@ -1761,7 +1761,7 @@ Configuration snapshot of the server's MyISAM Full-Text settings, captured for c
 | `QUERY_EXPANSION_LIMIT` | Query Expansion Limit (rows) | NA |  |  |
 | `STOPWORD_FILE` | Stopword File | NA |  |  |
 
-### Table Configuration (`TableConfiguration`) — configuration snapshot, collected every 24 Hr
+### Table Configuration (`TableConfiguration`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Table Configuration settings, captured for configuration history and compliance evaluation.
 
@@ -1786,9 +1786,9 @@ Configuration snapshot of the server's Table Configuration settings, captured fo
 | `TMP_TABLE_SIZE` | Tmp Table Size (bytes) | BYTE |  |  |
 | `UPDATABLE_VIEWS_WITH_LIMIT` | Updatable Views With Limit | NA |  |  |
 
-### Table Configuration (`TableConfigurationLive`) — collected on demand
+### Table Configuration (`TableConfigurationLive`), collected on demand
 
-Real-time mirror of the Table Configuration configuration snapshot — the same table-handling server variables, refreshed on demand instead of on the configuration schedule.
+Real-time mirror of the Table Configuration configuration snapshot: the same table-handling server variables, refreshed on demand instead of on the configuration schedule.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1811,7 +1811,7 @@ Real-time mirror of the Table Configuration configuration snapshot — the same 
 | `TMP_TABLE_SIZE` | Tmp Table Size (bytes) | BYTE |  |  |
 | `UPDATABLE_VIEWS_WITH_LIMIT` | Updatable Views With Limit | NA |  |  |
 
-### Collation (`Collation`) — configuration snapshot, collected every 24 Hr
+### Collation (`Collation`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Collation settings, captured for configuration history and compliance evaluation.
 
@@ -1821,7 +1821,7 @@ Configuration snapshot of the server's Collation settings, captured for configur
 | `DATABASE` | Database | NA |  |  |
 | `SERVER_DEFAULT` | Server Default | NA |  |  |
 
-### Localization (`Localization`) — configuration snapshot, collected every 24 Hr
+### Localization (`Localization`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Localization settings, captured for configuration history and compliance evaluation.
 
@@ -1834,7 +1834,7 @@ Configuration snapshot of the server's Localization settings, captured for confi
 | `TIME_NAMES` | Time Names | NA |  |  |
 | `TIME_ZONE` | Time Zone | NA |  |  |
 
-### InnoDB Configuration (`InnodbConfiguration`) — configuration snapshot, collected every 24 Hr
+### InnoDB Configuration (`InnodbConfiguration`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's InnoDB Configuration settings, captured for configuration history and compliance evaluation.
 
@@ -1936,9 +1936,9 @@ Configuration snapshot of the server's InnoDB Configuration settings, captured f
 | `USE_NATIVE_AIO` | Use Native Aio | NA |  |  |
 | `WRITE_IO_THREADS` | Write I/O Threads | NA |  |  |
 
-### InnoDB Configuration (`InnodbConfigurationLive`) — collected on demand
+### InnoDB Configuration (`InnodbConfigurationLive`), collected on demand
 
-Real-time mirror of the InnoDB Configuration configuration snapshot — the same InnoDB server variables, refreshed on demand instead of on the configuration schedule.
+Real-time mirror of the InnoDB Configuration configuration snapshot: the same InnoDB server variables, refreshed on demand instead of on the configuration schedule.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2038,7 +2038,7 @@ Real-time mirror of the InnoDB Configuration configuration snapshot — the same
 | `USE_NATIVE_AIO` | Use Native Aio | NA |  |  |
 | `WRITE_IO_THREADS` | Write I/O Threads | NA |  |  |
 
-### Performance Schema (`PerformanceSchema`) — configuration snapshot, collected every 24 Hr
+### Performance Schema (`PerformanceSchema`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Performance Schema settings, captured for configuration history and compliance evaluation.
 
@@ -2089,7 +2089,7 @@ Configuration snapshot of the server's Performance Schema settings, captured for
 | `SETUP_OBJECTS_SIZE` | Setup Objects Size (rows) | NA |  |  |
 | `USERS_SIZE` | Users Size (rows) | NA |  |  |
 
-### Capabilities (`Capabilities`) — configuration snapshot, collected every 24 Hr
+### Capabilities (`Capabilities`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Capabilities settings, captured for configuration history and compliance evaluation.
 
@@ -2105,7 +2105,7 @@ Configuration snapshot of the server's Capabilities settings, captured for confi
 | `SYMLINK` | Symlink | NA |  |  |
 | `EVENT_SCHEDULER` | Event Scheduler | NA |  |  |
 
-### Binary Log Status (`BinaryLogStatus`) — configuration snapshot, collected every 24 Hr
+### Binary Log Status (`BinaryLogStatus`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Binary Log Status settings, captured for configuration history and compliance evaluation.
 
@@ -2114,7 +2114,7 @@ Configuration snapshot of the server's Binary Log Status settings, captured for 
 | `BINLOG_DO_DB` | Binlog Do DB | NA |  |  |
 | `BINLOG_IGNORE_DB` | Binlog Ignore DB | NA |  |  |
 
-### Security (`Security`) — configuration snapshot, collected every 24 Hr
+### Security (`Security`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Security settings, captured for configuration history and compliance evaluation.
 
@@ -2141,7 +2141,7 @@ Configuration snapshot of the server's Security settings, captured for configura
 | `SKIP_SHOW_DATABASE` | Skip Show Database | NA |  |  |
 | `AUTHENTICATION_POLICY` | Authentication Policy | NA |  |  |
 
-### Password Validation (`PasswordValidation`) — configuration snapshot, collected every 24 Hr
+### Password Validation (`PasswordValidation`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Password Validation settings, captured for configuration history and compliance evaluation.
 
@@ -2154,7 +2154,7 @@ Configuration snapshot of the server's Password Validation settings, captured fo
 | `POLICY` | Policy | NA |  |  |
 | `SPECIAL_CHAR_COUNT` | Min Special Characters | NA |  |  |
 
-### Security Accounts (`SecurityAccounts`) — configuration snapshot, collected every 24 Hr
+### Security Accounts (`SecurityAccounts`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Security Accounts settings, captured for configuration history and compliance evaluation.
 
@@ -2177,7 +2177,7 @@ Configuration snapshot of the server's Security Accounts settings, captured for 
 | `HAS_EMPTY_PASSWORD` | Has Empty Password (0/1: 1 = empty password) | NA |  |  |
 | `HAS_LOGIN_LOCKOUT` | Has Login Lockout (0/1: 1 = lockout configured) | NA |  |  |
 
-### Security Config Ext (`SecurityConfigExt`) — configuration snapshot, collected every 24 Hr
+### Security Config Ext (`SecurityConfigExt`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Security Config Ext settings, captured for configuration history and compliance evaluation.
 
@@ -2190,7 +2190,7 @@ Configuration snapshot of the server's Security Config Ext settings, captured fo
 | `KEYRING_AVAILABLE` | Keyring Available (0/1: 1 = plugin or component active) | NA |  |  |
 | `CONNECTION_CONTROL_INSTALLED` | Connection Control Installed (0/1: 1 = plugin active) | NA |  |  |
 
-### InnoDB Fulltext (`InnodbFulltext`) — configuration snapshot, collected every 24 Hr
+### InnoDB Fulltext (`InnodbFulltext`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's InnoDB Fulltext settings, captured for configuration history and compliance evaluation.
 
@@ -2210,7 +2210,7 @@ Configuration snapshot of the server's InnoDB Fulltext settings, captured for co
 | `TOTAL_CACHE_SIZE` | FT Total Cache Size (bytes) | BYTE |  |  |
 | `USER_STOPWORD_TABLE` | User Stopword Table | NA |  |  |
 
-### InnoDB Memcached Configuration (`InnodbMemcachedConfiguration`) — configuration snapshot, collected every 24 Hr
+### InnoDB Memcached Configuration (`InnodbMemcachedConfiguration`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's InnoDB Memcached Configuration settings, captured for configuration history and compliance evaluation.
 
@@ -2227,7 +2227,7 @@ Configuration snapshot of the server's InnoDB Memcached Configuration settings, 
 | `TRX_LEVEL` | Trx Isolation Level (0 \| 1 \| 2 \| 3) | NA |  |  |
 | `WRITE_BATCH_SIZE` | Write Batch Size (operations) | NA |  |  |
 
-### Insert Delayed (`InsertDelayed`) — configuration snapshot, collected every 24 Hr
+### Insert Delayed (`InsertDelayed`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Insert Delayed settings, captured for configuration history and compliance evaluation.
 
@@ -2238,7 +2238,7 @@ Configuration snapshot of the server's Insert Delayed settings, captured for con
 | `MAX_DELAYED_THREADS` | Max Delayed Threads (threads) | NA |  |  |
 | `QUEUE_SIZE` | Queue Size (rows) | NA |  |  |
 
-### NDB (`Ndb`) — configuration snapshot, collected every 24 Hr
+### NDB (`Ndb`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's NDB settings, captured for configuration history and compliance evaluation.
 
@@ -2247,7 +2247,7 @@ Configuration snapshot of the server's NDB settings, captured for configuration 
 | `ENGINE_CONDITION_PUSHDOWN` | Engine Condition Pushdown | NA |  |  |
 | `NDB_AUTOINC_PREFETCH` | Auto-Increment Prefetch (values) | NA |  |  |
 
-### Thread Pool (`ThreadPool`) — configuration snapshot, collected every 24 Hr
+### Thread Pool (`ThreadPool`), configuration snapshot, collected every 24 Hr
 
 Configuration snapshot of the server's Thread Pool settings, captured for configuration history and compliance evaluation.
 
@@ -2260,7 +2260,7 @@ Configuration snapshot of the server's Thread Pool settings, captured for config
 | `THREAD_POOL_SIZE` | Thread Pool Size (thread groups) | NA |  |  |
 | `STALL_LIMIT` | Stall Limit (10 ms units) | NA |  |  |
 
-### Wait Profile (Top Waits) (`WaitProfile`) — collected every 1 Min
+### Wait Profile (Top Waits) (`WaitProfile`), collected every 1 Min
 
 Top wait events by time consumed during the collection interval, as deltas from performance_schema.events_waits_summary_global_by_event_name.
 
@@ -2272,9 +2272,9 @@ Top wait events by time consumed during the collection interval, as deltas from 
 | `d_time_us` | Wait Time (since prev. collection, ~1 min) | MICROSEC |  |  |
 | `avg_wait_us` | Avg Wait (since prev. collection, ~1 min) | MICROSEC | > 1000000 | > 5000000 |
 
-### Wait Profile Summary (`WaitProfileSummary`) — collected every 1 Min
+### Wait Profile Summary (`WaitProfileSummary`), collected every 1 Min
 
-Single-row summary of the interval's wait activity — total wait time, number of active wait events, and the single busiest wait event — rolled up from the Wait Profile data. An interval with no wait activity is reported explicitly (zero totals, top event and class `idle`); only the first collection after the agent starts reports nothing.
+Single-row summary of the interval's wait activity (total wait time, number of active wait events, and the single busiest wait event) rolled up from the Wait Profile data. An interval with no wait activity is reported explicitly (zero totals, top event and class `idle`); only the first collection after the agent starts reports nothing.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2284,9 +2284,9 @@ Single-row summary of the interval's wait activity — total wait time, number o
 | `top_wait_time_us` | Top Wait Time (since prev. collection, ~1 min) | MICROSEC |  |  |
 | `top_wait_class` | Top Wait Class (since prev. collection, ~1 min) | NA | = lock |  |
 
-### Query Analytics (Statement Digest Deltas) (`StatementDigestProfile`) — collected every 5 Min
+### Query Analytics (Statement Digest Deltas) (`StatementDigestProfile`), collected every 5 Min
 
-Per-statement-digest execution deltas for the collection interval — execution count, latency, rows examined/sent, and index usage — from performance_schema.events_statements_summary_by_digest.
+Per-statement-digest execution deltas for the collection interval (execution count, latency, rows examined/sent, and index usage) from performance_schema.events_statements_summary_by_digest.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2300,9 +2300,9 @@ Per-statement-digest execution deltas for the collection interval — execution 
 | `d_rows_examined_per_sent` | Rows Examined per Row Sent (ratio, since prev. collection) | NA |  |  |
 | `d_no_index_used` | Executions Without an Index (since prev. coll., ~5 min) | NA |  |  |
 
-### Query Analytics Summary (`StatementDigestProfileSummary`) — collected every 5 Min
+### Query Analytics Summary (`StatementDigestProfileSummary`), collected every 5 Min
 
-Single-row summary of the interval's statement activity — total latency, total executions, number of active digests, and the single busiest digest — rolled up from the Statement Digest Profile data.
+Single-row summary of the interval's statement activity (total latency, total executions, number of active digests, and the single busiest digest) rolled up from the Statement Digest Profile data.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2314,9 +2314,9 @@ Single-row summary of the interval's statement activity — total latency, total
 | `digest_overflow_active` | Digest Table Overflowing (0/1, 1 = overflowing) | NA |  |  |
 | `digest_capacity_pct` | Digest Table Used (%) | PERCENTAGE |  |  |
 
-### License (`License`) — collected every 15 Min
+### License (`License`), collected every 15 Min
 
-License state of this plug-in installation, not of the MySQL server — the collection contacts neither the database nor the OMS. Status carries the reason (Active, Expired, Wrong Plug-in, Invalid Signature or License Required); the alert is set on the licensed column, which is 1 only when the license is active.
+License state of this plug-in installation, not of the MySQL server: the collection contacts neither the database nor the OMS. Status carries the reason (Active, Expired, Wrong Plug-in, Invalid Signature or License Required); the alert is set on the licensed column, which is 1 only when the license is active.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2329,9 +2329,9 @@ License state of this plug-in installation, not of the MySQL server — the coll
 | `customer` | Customer | NA |  |  |
 | `never_expires` | Never Expires (0/1: 1 = perpetual license) | NA |  |  |
 
-### Monitoring Readiness Detail (`readiness_detail`) — collected on demand
+### Monitoring Readiness Detail (`readiness_detail`), collected on demand
 
-Monitoring Readiness checks, one row per requirement, keyed by feature section and check — what each feature needs, what is in effect now, and a status of ok, warn, fail or unknown (unknown means the check could not be made, never a pass). It is probed live under the target's monitoring credentials each time the Monitoring Readiness page loads, not collected on a schedule, so nothing is stored and a change to the server shows on the next page load. Database targets are checked for the monitoring grants, performance_schema, the sys schema, a backup tool history and the plug-in license; ClusterSet targets for the connection and for MySQL Shell on the agent host. A failed connection is a row, not an error. The page is read-only: the statement that would fix a check is in its Detail, and the plug-in never runs it.
+Monitoring Readiness checks, one row per requirement, keyed by feature section and check: what each feature needs, what is in effect now, and a status of ok, warn, fail or unknown (unknown means the check could not be decided, for example because the monitoring account cannot read what it inspects). The page runs the same checks live; this collection feeds the Overview row and the hourly history.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2346,9 +2346,9 @@ Monitoring Readiness checks, one row per requirement, keyed by feature section a
 | `fixable` | Fixable by the Plug-in (0/1: always 0 in this release) | NA |  |  |
 | `detail` | Detail and Suggested Fix | NA |  |  |
 
-### Monitoring Readiness Summary (`readiness_summary`) — collected every 60 Min
+### Monitoring Readiness Summary (`readiness_summary`), collected every 60 Min
 
-Single-row rollup of the Monitoring Readiness checks for the Home page — how many features are ok, need attention (warn), are not functional (fail) or could not be checked (unknown). A feature is as bad as its worst check, and an optional check counts at most as a warning. No alert is set on it: readiness is a state to read, not a fault.
+Single-row rollup of the Monitoring Readiness checks for the Home page: how many features are ok, need attention (warn), are not functional (fail) or could not be checked (unknown). A feature is as bad as its worst check, and an optional check counts at most as a warning. No alert is set on it: readiness is a state to read, not a fault.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2357,9 +2357,9 @@ Single-row rollup of the Monitoring Readiness checks for the Home page — how m
 | `fail_count` | Features Not Functional (count of fail) | NA |  |  |
 | `unknown_count` | Features Not Checked (count of unknown) | NA |  |  |
 
-### Table Storage (`TableStorage`) — collected every 60 Min
+### Table Storage (`TableStorage`), collected every 60 Min
 
-Table sizes for the Tables page — data, index, free space, estimated rows, engine and row format per table, from INFORMATION_SCHEMA.TABLES. One row for each of the 500 largest user tables, an /other/ row totalling the tables past the cap and a /system/ row totalling the mysql, sys, information_schema and performance_schema schemas, so a total built from the rows is complete. Collected hourly and kept as history: MySQL 8 caches these figures (information_schema_stats_expiry, one day by default), so row counts and sizes can lag recent changes, and run ANALYZE TABLE for fresh numbers. A size the server does not report is blank, never 0. No alert is set on it.
+Table sizes for the Tables page: data, index, free space, estimated rows, engine and row format per table, from INFORMATION_SCHEMA.TABLES. One row for each of the 500 largest user tables, an /other/ row totalling the tables past the cap and a /system/ row totalling the mysql, sys, information_schema and performance_schema schemas, so a total built from the rows is complete. Collected hourly and kept as history: MySQL 8 caches these figures (information_schema_stats_expiry, one day by default), so row counts and sizes can lag recent changes, and run ANALYZE TABLE for fresh numbers. A size the server does not report is blank, never 0. No alert is set on it.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2376,9 +2376,9 @@ Table sizes for the Tables page — data, index, free space, estimated rows, eng
 | `row_format` | Row Format | NA |  |  |
 | `update_time` | Last Updated | NA |  |  |
 
-### Index Storage (`IndexStorage`) — collected every 60 Min
+### Index Storage (`IndexStorage`), collected every 60 Min
 
-Index sizes for the Indexes page — one row per index with its table, columns, uniqueness, primary-key flag, type and cardinality, from INFORMATION_SCHEMA.STATISTICS, capped like Table Storage (the 500 largest, an /other/ row and a /system/ row). The size is the InnoDB page count in mysql.innodb_index_stats times the server's innodb_page_size; MySQL exposes no size for other engines, for partitioned tables, for 5.7 tables whose names need file-name encoding, or when the account cannot read that table, and then the size is blank, not 0. A functional (expression) key part is listed by its expression, and a column list over 200 characters is cut and ends with "...". An InnoDB primary key is the table itself, so its size includes the rows. Collected hourly. No alert is set on it.
+Index sizes for the Indexes page: one row per index with its table, columns, uniqueness, primary-key flag, type and cardinality, from INFORMATION_SCHEMA.STATISTICS. Capped like Table Storage: the indexes of the 500 largest user tables, with an /other/ row for the rest and a system-schemas row.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2394,9 +2394,9 @@ Index sizes for the Indexes page — one row per index with its table, columns, 
 | `index_type` | Index Type (BTREE\|HASH\|FULLTEXT\|SPATIAL) | NA |  |  |
 | `index_columns` | Columns | NA |  |  |
 
-### Index Summary (`IndexSummary`) — collected every 60 Min
+### Index Summary (`IndexSummary`), collected every 60 Min
 
-Single-row figures behind the Indexes page tiles — tables read by full scan with no index, unused indexes and redundant indexes, from the sys schema views schema_tables_with_full_table_scans, schema_unused_indexes and schema_redundant_indexes — plus the number and total size of secondary indexes (the primary key is not counted, matching the size) and the server's uptime in seconds, which is how long the since-start counts have been accumulating. Every count covers user schemas only: mysql, information_schema, performance_schema and sys are not counted. The first two counts are since the server (or the performance_schema counters) last restarted, and are only reported while performance_schema table I/O instrumentation is on. A count is blank, with the reason in the matching Note column, whenever it could not be checked (the account cannot read the view, the sys schema is missing, performance_schema is off, or the statement timed out); it is never 0 for a check that did not run. Collected hourly. No alert is set on it.
+Single-row figures behind the Indexes page tiles: tables read by full scan with no index, unused indexes and redundant indexes (from the sys schema views schema_tables_with_full_table_scans, schema_unused_indexes and schema_redundant_indexes), the number and total size of secondary indexes (primary keys not counted), and the server's uptime in seconds. A figure the server cannot provide is blank, with the reason in the Indexes page tile.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2413,7 +2413,7 @@ Single-row figures behind the Indexes page tiles — tables read by full scan wi
 
 ## MySQL InnoDB Cluster (`ip_mysql_cluster`)
 
-### Response (`Response`) — collected every 1 Min
+### Response (`Response`), collected every 1 Min
 
 Availability. EM derives the target's Up/Down state from the Status column; a Status below 1 raises the target-down event.
 
@@ -2421,9 +2421,9 @@ Availability. EM derives the target's Up/Down state from the Status column; a St
 |---|---|---|---|---|
 | `Status` | Status (0/1: 1 = up, 0 = down) | NA |  | < 1 |
 
-### Group Replication Members (`GroupMembers`) — collected every 5 Min
+### Group Replication Members (`GroupMembers`), collected every 5 Min
 
-Group Replication membership — each member's host, port, role, state, and version, from performance_schema.replication_group_members.
+Group Replication membership: each member's host, port, role, state, and version, from performance_schema.replication_group_members.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2437,7 +2437,7 @@ Group Replication membership — each member's host, port, role, state, and vers
 | `is_online` | Member Online (0/1: 1 = ONLINE) | NA |  |  |
 | `is_primary` | Member Is Primary (0/1: 1 = PRIMARY) | NA |  |  |
 
-### Group Replication Member Stats (`GroupMemberStats`) — collected every 5 Min
+### Group Replication Member Stats (`GroupMemberStats`), collected every 5 Min
 
 Per-member Group Replication certification and applier queue statistics, from performance_schema.replication_group_member_stats.
 
@@ -2457,9 +2457,9 @@ Per-member Group Replication certification and applier queue statistics, from pe
 | `count_transactions_local_proposed` | Local Transactions Proposed (cumulative since member joined) | NA |  |  |
 | `count_transactions_local_rollback` | Local Transactions Rolled Back (cumulative since member joined) | NA |  |  |
 
-### Group Replication Summary (`GroupSummary`) — collected every 5 Min
+### Group Replication Summary (`GroupSummary`), collected every 5 Min
 
-Single-row rollup of Group Replication membership by state and role — online, recovering, unreachable, and offline member counts, and primary/secondary counts — derived from the group's membership view.
+Single-row rollup of Group Replication membership by state and role (online, recovering, unreachable, and offline member counts, and primary/secondary counts) derived from the group's membership view.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2472,9 +2472,9 @@ Single-row rollup of Group Replication membership by state and role — online, 
 | `primary_count` | Members with PRIMARY Role | NA |  |  |
 | `secondary_count` | Members with SECONDARY Role | NA |  |  |
 
-### Group Replication Consensus (`GrConsensus`) — collected every 5 Min
+### Group Replication Consensus (`GrConsensus`), collected every 5 Min
 
-Group Replication consensus activity for the connected member, as deltas over the collection interval — proposals, timing, and bytes sent/received — from the server's Gr_* status counters.
+Group Replication consensus activity for the connected member, as deltas over the collection interval (proposals, timing, and bytes sent/received) from the server's Gr_* status counters.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2490,9 +2490,9 @@ Group Replication consensus activity for the connected member, as deltas over th
 | `consensus_bytes_received` | Consensus Bytes Received (since prev. collection, ~5 min) | BYTE |  |  |
 | `last_consensus_end` | Last Consensus End | NA |  |  |
 
-### Group Replication Messaging (`GrMessaging`) — collected every 5 Min
+### Group Replication Messaging (`GrMessaging`), collected every 5 Min
 
-Group Replication messaging activity for the connected member, as deltas over the collection interval — control and data messages sent, bytes transferred, and round-trip time — from the server's Gr_* status counters.
+Group Replication messaging activity for the connected member, as deltas over the collection interval (control and data messages sent, bytes transferred, and round-trip time) from the server's Gr_* status counters.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2507,9 +2507,9 @@ Group Replication messaging activity for the connected member, as deltas over th
 | `data_roundtrip_time_us` | Data Roundtrip Time Total (since prev. collection, ~5 min) | MICROSEC |  |  |
 | `avg_data_roundtrip_us` | Avg Data Roundtrip per Message (since prev. collection, ~5 min) | MICROSEC |  |  |
 
-### Group Replication Certification (`GrCertification`) — collected every 5 Min
+### Group Replication Certification (`GrCertification`), collected every 5 Min
 
-Group Replication certification and consistency-wait activity for the connected member, as deltas over the collection interval — garbage collection runs and consistency-check timings — from the server's Gr_* status counters.
+Group Replication certification and consistency-wait activity for the connected member, as deltas over the collection interval (garbage collection runs and consistency-check timings) from the server's Gr_* status counters.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2523,7 +2523,7 @@ Group Replication certification and consistency-wait activity for the connected 
 | `consistency_after_termination_count` | Consistency Waits, After Termination (since prev. collection) | NA |  |  |
 | `consistency_after_termination_time_us` | Consistency Wait, After Termination (since prev. collection) | MICROSEC |  |  |
 
-### Backup Source (`BackupSource`) — collected every 15 Min
+### Backup Source (`BackupSource`), collected every 15 Min
 
 Which cluster member the most recent successful backup was taken from, and whether that member is still online in the group. Reads MySQL Enterprise Backup's mysql.backup_history joined against Group Replication membership; Percona XtraBackup backups are reported without member identity because PERCONA_SCHEMA.xtrabackup_history does not record it.
 
@@ -2538,7 +2538,7 @@ Which cluster member the most recent successful backup was taken from, and wheth
 
 ## MySQL InnoDB ClusterSet (`ip_mysql_clusterset`)
 
-### Response (`Response`) — collected every 1 Min
+### Response (`Response`), collected every 1 Min
 
 Availability. EM derives the target's Up/Down state from the Status column; a Status below 1 raises the target-down event.
 
@@ -2546,7 +2546,7 @@ Availability. EM derives the target's Up/Down state from the Status column; a St
 |---|---|---|---|---|
 | `Status` | Status (up/down) | NA |  | < 1 |
 
-### ClusterSet Health (`ClusterSetHealth`) — collected every 5 Min
+### ClusterSet Health (`ClusterSetHealth`), collected every 5 Min
 
 Single-row alertable ClusterSet health composite. Runs mysqlsh AdminAPI (clusterSet.status) from the agent host; requires mysqlsh on the agent's PATH. dr_promotion_ready is 1 when the ClusterSet can be failed over, 0 when a readiness check ran and failed, and -1 when readiness was not assessed (the repository rollup, or MySQL Shell could not be used), with health_status READY, NOT_READY or UNKNOWN to match; under a network partition the Shell reports HEALTHY with the replication channel CONNECTING, which this metric surfaces as not promotion-ready.
 
@@ -2568,9 +2568,9 @@ Single-row alertable ClusterSet health composite. Runs mysqlsh AdminAPI (cluster
 | `status_text` | Status Text | NA |  |  |
 | `health_status` | Health Status (READY \| NOT_READY \| UNKNOWN) | NA |  |  |
 
-### ClusterSet Clusters (`ClusterSetClusters`) — collected every 5 Min
+### ClusterSet Clusters (`ClusterSetClusters`), collected every 5 Min
 
-Per-cluster ClusterSet detail, keyed by cluster name — role, status, replication status, and GTID consistency versus the primary. Runs mysqlsh AdminAPI (clusterSet.status) from the agent host; requires mysqlsh on the agent's PATH.
+Per-cluster ClusterSet detail, keyed by cluster name: role, status, replication status, and GTID consistency versus the primary. Runs mysqlsh AdminAPI (clusterSet.status) from the agent host; requires mysqlsh on the agent's PATH.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2585,9 +2585,9 @@ Per-cluster ClusterSet detail, keyed by cluster name — role, status, replicati
 | `missing_gtid_set` | Missing GTID Set | NA |  |  |
 | `errant_gtid_set` | Errant GTID Set | NA |  |  |
 
-### Monitoring Readiness Detail (`readiness_detail`) — collected on demand
+### Monitoring Readiness Detail (`readiness_detail`), collected on demand
 
-Monitoring Readiness checks, one row per requirement, keyed by feature section and check — what each feature needs, what is in effect now, and a status of ok, warn, fail or unknown (unknown means the check could not be made, never a pass). It is probed live under the target's monitoring credentials each time the Monitoring Readiness page loads, not collected on a schedule, so nothing is stored and a change to the server shows on the next page load. Database targets are checked for the monitoring grants, performance_schema, the sys schema, a backup tool history and the plug-in license; ClusterSet targets for the connection and for MySQL Shell on the agent host. A failed connection is a row, not an error. The page is read-only: the statement that would fix a check is in its Detail, and the plug-in never runs it.
+Monitoring Readiness checks, one row per requirement, keyed by feature section and check: what each feature needs, what is in effect now, and a status of ok, warn, fail or unknown (unknown means the check could not be decided, for example because the monitoring account cannot read what it inspects). The page runs the same checks live; this collection feeds the Overview row and the hourly history.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|

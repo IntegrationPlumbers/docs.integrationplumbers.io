@@ -14,16 +14,16 @@ The plug-in adds one job type, **MySQL - Run Explain Plan** (`ip_mysql_run_expla
 
 | Item | Value |
 |---|---|
-| Job type | `ip_mysql_run_explain` — **MySQL - Run Explain Plan** in the job library |
+| Job type | `ip_mysql_run_explain` (**MySQL - Run Explain Plan** in the job library) |
 | Target type | `ip_mysql_database` |
 | Targets per run | Exactly one |
-| **Query** (`query`) | Required. The statement to explain: a `SELECT`, `WITH`, `TABLE`, `INSERT`, `REPLACE`, `UPDATE` or `DELETE` statement, or one opening with `(`. Anything else is refused without being run, including a query that starts with `ANALYZE`, since `EXPLAIN ANALYZE` executes the statement. It may span several lines and contain `--` or `#` comments; it is explained as typed. Substitute real values for any `?` placeholders — a digest taken from Query Analyzer is normalized and will not explain as it stands. |
+| **Query** (`query`) | Required. The statement to explain: a `SELECT`, `WITH`, `TABLE`, `INSERT`, `REPLACE`, `UPDATE` or `DELETE` statement, or one opening with `(`. Anything else is refused without being run, including a query that starts with `ANALYZE`, since `EXPLAIN ANALYZE` executes the statement. It may span several lines and contain `--` or `#` comments; it is explained as typed. Substitute real values for any `?` placeholders: a digest taken from Query Analyzer is normalized and will not explain as it stands. |
 | **Database Name** (`db_name`) | Optional. The schema to run the statement against. Supply it whenever the statement's object names are not fully qualified. |
 
 **Credentials.** The job needs two, and they do different things:
 
-- **The target's monitoring credential** — the MySQL account from [2.4](prerequisites.md#24-the-monitoring-user), held in the target's MySQL Database monitoring credential set. This is what connects to MySQL and asks for the plan.
-- **A Host Preferred Credential on the target** — a named host credential whose run-as is the management agent's operating-system user. This is what lets the agent start the plug-in's own program on the agent host. That user must be able to read the Connector/J jar in the agent's `ip_plugin/xmys/lib` directory ([2.9](prerequisites.md#29-mysql-connectorj-on-agent-hosts)), and when the credential switches user through `sudo` it must keep the agent's environment: a sudo rule with `env_reset` and no `env_keep` makes the job fail with a message that says `EMSTATE is not set in the job step`.
+- **The target's monitoring credential**, the MySQL account from [2.4](prerequisites.md#24-the-monitoring-user), held in the target's MySQL Database monitoring credential set. This is what connects to MySQL and asks for the plan.
+- **A Host Preferred Credential on the target**, a named host credential whose run-as is the management agent's operating-system user. This is what lets the agent start the plug-in's own program on the agent host. That user must be able to read the Connector/J jar in the agent's `ip_plugin/xmys/lib` directory ([2.9](prerequisites.md#29-mysql-connectorj-on-agent-hosts)), and when the credential switches user through `sudo` it must keep the agent's environment: a sudo rule with `env_reset` and no `env_keep` makes the job fail with a message that says `EMSTATE is not set in the job step`.
 
 Set the host credential once per target, under **Setup → Security → Preferred Credentials**: select the **MySQL Database** target type, open **Manage Preferred Credentials**, and set the target's host credential set to a named credential that runs as the agent's operating-system user.
 
@@ -39,6 +39,8 @@ To run the job:
 4. On the **Parameters** tab, enter the **Query** and, where the statement needs it, the **Database Name**.
 5. Check the **Credentials** tab if the target's preferred credentials are not the ones you want used.
 6. Submit.
+
+**Done when** the run shows Succeeded under Job Activity and its step output holds the plan rows.
 
 The plan comes back in the job's output: open the completed run from **Enterprise → Job → Activity**, drill into it, and open the step's output log. Both parameters are recorded with the results, so a saved job is also a record of the statement that was explained.
 
