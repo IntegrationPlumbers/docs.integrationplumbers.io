@@ -12,7 +12,7 @@ nav_order: 0
 *General Availability · `24.1.10.0.0` for Enterprise Manager 24ai · `13.5.10.0.0` for Enterprise Manager 13.5*
 *October 2026*
 
-This release ships as two plug-in builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable — install the build that matches your Enterprise Manager. Everything in this guide applies to both.
+This release ships as two plug-in builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable. Install the build that matches your Enterprise Manager. Everything in this guide applies to both.
 
 <details>
 <summary>Legal Notice</summary>
@@ -45,38 +45,48 @@ This chapter describes what the plug-in monitors and the platforms it supports.
 ## 1.1 What the plug-in monitors
 The plug-in makes MySQL a first-class Enterprise Manager target. MySQL servers, InnoDB Clusters and InnoDB ClusterSets appear in the same console, the same target navigation, the same incident and notification rules, and the same compliance results as the Oracle Database, host and middleware targets you already run. Collections run from a management agent over JDBC using an ordinary read-only MySQL account, so there is nothing to install on the database host and no second monitoring tool to operate.
 
-What you get once a target is up: availability and the reason a server is down; server and workload performance, including InnoDB buffer pool, row lock waits, memory, file I/O, connections and per-table and per-user activity; statement performance from the Performance Schema digest tables, with Query Analyzer and its trends; replication health, from asynchronous replica lag through Group Replication consensus, messaging and certification, to ClusterSet disaster-recovery readiness; backup visibility built from what MySQL Enterprise Backup and Percona XtraBackup record in the server itself; daily configuration snapshots that feed Enterprise Manager's configuration history and comparison; and a security and administration posture scored by the MySQL compliance framework the plug-in ships. Twenty-two thresholds arrive already set, so a freshly added target raises real incidents without any tuning.
+What you get once a target is up:
+
+- availability, and the reason a server is down;
+- server and workload performance: InnoDB buffer pool, row lock waits, memory, file I/O, connections, and per-table and per-user activity;
+- statement performance from the Performance Schema digest tables, with Query Analyzer and its trends;
+- replication health, from asynchronous replica lag through Group Replication consensus, messaging and certification, to ClusterSet disaster-recovery readiness;
+- backup visibility built from what MySQL Enterprise Backup and Percona XtraBackup record in the server itself;
+- daily configuration snapshots that feed Enterprise Manager's configuration history and comparison;
+- a security and administration posture scored by the MySQL compliance framework the plug-in ships.
+
+Twenty-two thresholds arrive already set, so a freshly added target raises real incidents without any tuning.
 
 ## 1.2 Target types
-The plug-in adds three target types. Which ones you use depends on how your MySQL estate is built — a standalone estate needs only the first.
+The plug-in adds three target types. Which ones you use depends on how your MySQL estate is built. A standalone estate needs only the first.
 
 | Target type | What it represents | How many you add |
 |---|---|---|
 | **MySQL Database** (`ip_mysql_database`) | One MySQL server instance, standalone or a member of a cluster | One per server instance you want to monitor |
-| **MySQL InnoDB Cluster** (`ip_mysql_cluster`) | One InnoDB Cluster, or the Group Replication group behind it, as a whole — membership, consensus, certification and backup source | One per cluster, pointed at a MySQL Router endpoint or at any member |
-| **MySQL InnoDB ClusterSet** (`ip_mysql_clusterset`) | One InnoDB ClusterSet — a primary cluster, its replica clusters and the replication between them | One per ClusterSet, pointed at a MySQL Router endpoint or at the primary cluster |
+| **MySQL InnoDB Cluster** (`ip_mysql_cluster`) | One InnoDB Cluster, or the Group Replication group behind it, as a whole: membership, consensus, certification and backup source | One per cluster, pointed at a MySQL Router endpoint or at any member |
+| **MySQL InnoDB ClusterSet** (`ip_mysql_clusterset`) | One InnoDB ClusterSet: a primary cluster, its replica clusters and the replication between them | One per ClusterSet, pointed at a MySQL Router endpoint or at the primary cluster |
 
 The three types are independent of each other. A cluster or ClusterSet target does not create database targets for its members, and it does not need them: add whichever types match the questions you need answered. Most estates run database targets for every instance and one cluster or ClusterSet target above them, so that instance-level detail and group-level health both have somewhere to live.
 
 > **Note:** Each target carries its own monitoring properties and credentials, including its own TLS Mode. Nothing is inherited from another target. See [4.1](targets-and-properties.md#41-target-properties).
 
 ## 1.3 Supported MySQL versions and platforms
-**The plug-in does not block MySQL versions it has not seen.** MySQL releases are, in our experience, backward compatible for monitoring purposes, so a server newer than the matrix below is expected to work: add it, and the plug-in attempts full monitoring. We certify versions in this documentation as we validate them, prioritizing LTS releases — the series MySQL publishes dedicated release repositories for. If an uncertified version misbehaves, the metric groups it affects degrade to collection errors on those groups; they do not take monitoring of the target down as a whole.
+**The plug-in does not block MySQL versions it has not seen.** MySQL releases are, in our experience, backward compatible for monitoring purposes, so a server newer than the matrix below is expected to work: add it, and the plug-in attempts full monitoring. We certify versions in this documentation as we validate them, prioritizing LTS releases, the series MySQL publishes dedicated release repositories for. If an uncertified version misbehaves, the metric groups it affects degrade to collection errors on those groups; they do not take monitoring of the target down as a whole.
 
 Certification as of this build:
 
 | Target | Tier | Status |
 |---|---|---|
-| MySQL 8.4 LTS | Comprehensive | **Certified** — primary reference platform |
+| MySQL 8.4 LTS | Comprehensive | **Certified** (primary reference platform) |
 | MySQL 9.7 LTS | Comprehensive | **Certified** (2026-07-28) |
-| MySQL 8.0 | Basic | Supported and continuously exercised in our lab. Note 8.0 reached end of life in April 2026 — plan your upgrade |
-| MySQL 9.5 / 9.6 / 26.x innovation releases | — | Expected to work; not yet certified |
-| InnoDB Cluster (Group Replication, 8.4) | — | **Certified** (cluster target with member stats) |
-| InnoDB ClusterSet | — | Validated on MySQL 9.5 commercial; 8.4 ClusterSet not yet certified |
-| Amazon RDS for MySQL 8.4 | Comprehensive | **Certified** (2026-09-09, RDS MySQL 8.4.11) — added manually, see [4.4](targets-and-properties.md#44-autodiscovery); managed-service notes there |
-| Aurora MySQL / Cloud SQL / Azure Database for MySQL | — | Supported — added manually, see [4.4](targets-and-properties.md#44-autodiscovery); not yet certified |
-| EM 24ai (24.1) | — | **Certified**, including the UI |
-| EM 13.5 | — | **Certified** — the MySQL Database, MySQL InnoDB Cluster and MySQL InnoDB ClusterSet target types with the same features as on 24ai; console pages checked as in the note below. Supported in GA and GA Update 1; not built for releases after that |
+| MySQL 8.0 | Basic | Supported and continuously exercised in our lab. Note 8.0 reached end of life in April 2026; plan your upgrade |
+| MySQL 9.5 / 9.6 / 26.x innovation releases | | Expected to work; not yet certified |
+| InnoDB Cluster (Group Replication, 8.4) | | **Certified** (cluster target with member stats) |
+| InnoDB ClusterSet | | Validated on MySQL 9.5 commercial; 8.4 ClusterSet not yet certified |
+| Amazon RDS for MySQL 8.4 | Comprehensive | **Certified** (2026-09-09, RDS MySQL 8.4.11), added manually, see [4.4](targets-and-properties.md#44-autodiscovery); managed-service notes there |
+| Aurora MySQL / Cloud SQL / Azure Database for MySQL | | Supported, added manually, see [4.4](targets-and-properties.md#44-autodiscovery); not yet certified |
+| EM 24ai (24.1) | | **Certified**, including the UI |
+| EM 13.5 | | **Certified**, the MySQL Database, MySQL InnoDB Cluster and MySQL InnoDB ClusterSet target types with the same features as on 24ai; console pages checked as in the note below. Supported in GA and GA Update 1; not built for releases after that |
 
 **Enterprise Manager platform.** This release is certified on Enterprise Manager 24ai (24.1), including its console pages, and on Enterprise Manager 13.5 as the note below describes. Enterprise Manager 24ai is the reference platform.
 
@@ -89,6 +99,6 @@ This is the generally available (GA) release of the plug-in. It covers the three
 
 Earlier builds do not upgrade in place to this release: install it fresh and create the targets new ([3.4](install-and-upgrade.md#34-upgrading)). The onboarding script moves an existing estate across ([4.7](targets-and-properties.md#47-bulk-onboarding-and-migration)).
 
-**Give us feedback.** Send findings — bugs, confusing metrics, missing thresholds, unclear documentation — through your Integration Plumbers support contact. Include the plug-in version (`emcli list_plugins_on_server`), the MySQL version, and the metric group or console page involved. If you hit something that is not in the boundaries list in [10.4](whats-new.md#104-general-availability-2026-10-23), we especially want to hear about it.
+**Give us feedback.** Send findings (bugs, confusing metrics, missing thresholds, unclear documentation) through your Integration Plumbers support contact. Include the plug-in version (`emcli list_plugins_on_server`), the MySQL version, and the metric group or console page involved. If you hit something that is not in the boundaries list in [10.4](whats-new.md#104-general-availability-2026-10-23), we especially want to hear about it.
 
 > **Note:** [Chapter 6](metrics-reference.md#metrics-reference) points to the generated metrics reference, which is produced from the plug-in's own metadata for this exact build. Where this guide and the reference differ on a column, a unit or a threshold, the reference is authoritative.

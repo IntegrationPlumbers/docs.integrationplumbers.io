@@ -5,7 +5,7 @@ nav_order: 4.5
 
 # Upgrade Notes
 
-Release notes for changes that need operator action beyond a routine deploy —
+Release notes for changes that need operator action beyond a routine deploy: 
 security remediation, target metadata that has to be activated, breaking column
 changes. One section per release, **newest first**.
 
@@ -37,15 +37,9 @@ What differs from the last pre-release drop:
   features by status for the Home page; MySQL InnoDB ClusterSet gains `readiness_detail`. Neither carries an alert condition.
   Targets created at GA have them from creation; there is nothing to configure. The checks are read-only: the statement that
   would fix a check is shown on the page, and the plug-in never runs it.
-- **Tables and Indexes metrics.** MySQL Database gains three groups, `TableStorage`, `IndexStorage` and `IndexSummary`, each
-  collected hourly and kept as history, with no alert condition. `TableStorage` and `IndexStorage` hold the 500 largest tables
-  and indexes plus one `/other/` row and one `/system/` row (the MySQL-owned schemas) so totals stay complete;
-  `IndexSummary` is one row counting full-scan tables, unused indexes and redundant indexes from the sys schema. A size or
-  count the server does not expose is blank, never 0: index sizes are InnoDB only, and each `IndexSummary` count is blank
-  with a reason when the account cannot read its sys view or performance_schema table I/O is off. Targets created at GA have
-  the groups from creation. Reading them uses the certified grant; the account must be able to read `information_schema`,
-  `sys` and `mysql.innodb_index_stats` (`SELECT ON *.*` covers all three). On a server with very many tables the hourly
-  read of `information_schema` is the cost to know about; MySQL 8 serves it from its statistics cache.
+- **Tables and Indexes metrics.** MySQL Database gains three groups, `TableStorage`, `IndexStorage` and `IndexSummary`, each collected hourly and kept as history, with no alert condition. `TableStorage` and `IndexStorage` hold the 500 largest tables and indexes plus one `/other/` row and one `/system/` row (the MySQL-owned schemas) so totals stay complete; `IndexSummary` is one row counting full-scan tables, unused indexes and redundant indexes from the sys schema. A size or count the server does not expose is blank, never 0: index sizes are InnoDB only, and each `IndexSummary` count is blank with a reason when the account cannot read its sys view or performance_schema table I/O is off.
+
+  Targets created at GA have the groups from creation. Reading them uses the certified grant; the account must be able to read `information_schema`, `sys` and `mysql.innodb_index_stats` (`SELECT ON *.*` covers all three). On a server with very many tables the hourly read of `information_schema` is the cost to know about; MySQL 8 serves it from its statistics cache.
 - **DR Promotion Ready does not fire on "not assessed".** `ClusterSetHealth.dr_promotion_ready` is CRITICAL on `EQ 0`
   only, and a ClusterSet target created at GA carries that condition from creation. A ClusterSet monitored without MySQL
   Shell, or where MySQL Shell could not be used, reports -1 (not assessed) and `health_status` `UNKNOWN` instead of a false 0.
@@ -76,18 +70,9 @@ microsecond-timestamp string that changed on almost every collection, and it acc
 in the repository's string-history table (`EM_METRIC_STRING_HISTORY`). `first_seen` stays. This ships with the `META_VER` bump
 of the same release, so deploy to the **OMS first, restart it, then the agents**.
 
-**Collection connections open with the default schema `performance_schema`.** The plug-in's JDBC metric collections now
-connect with `performance_schema` as their default schema, so the statements they run are recorded under it in the digest
-tables and Home's Top SQL and Query Analyzer hide them by default (user guide [5.1](monitoring-pages.md#51-mysql-database-pages); a checkbox shows them again). The
-certified grant (`SELECT, PROCESS, REPLICATION CLIENT ON *.*`, [Prerequisites](prerequisites.md#24-the-monitoring-user) section 3) already covers
-it, so no grant changes. If the monitoring account cannot use the `performance_schema` database (a grant that does not
-reach it) or the server has no such database, the plug-in connects with no default schema instead and its own statements
-stay visible on both pages. It tries the schema again an hour later, and the agent's plug-in log warns once per target per
-process and again at each hourly re-probe (more often while collections overlap). Sessions
-the plug-in opens now show `performance_schema` as their schema in Database Processes. Statements the plug-in ran before
-this release were recorded with no schema and stay visible until the digest table is reset
-(`TRUNCATE TABLE performance_schema.events_statements_summary_by_digest`) or MySQL restarts. Query Analytics Trends
-counts every statement, as before.
+**Collection connections open with the default schema `performance_schema`.** The plug-in's JDBC metric collections now connect with `performance_schema` as their default schema, so the statements they run are recorded under it in the digest tables and Home's Top SQL and Query Analyzer hide them by default (user guide [5.1](monitoring-pages.md#51-mysql-database-pages); a checkbox shows them again). The certified grant (`SELECT, PROCESS, REPLICATION CLIENT ON *.*`, [Prerequisites](prerequisites.md#24-the-monitoring-user) section 3) already covers it, so no grant changes. If the monitoring account cannot use the `performance_schema` database (a grant that does not reach it) or the server has no such database, the plug-in connects with no default schema instead and its own statements stay visible on both pages.
+
+It tries the schema again an hour later, and the agent's plug-in log warns once per target per process and again at each hourly re-probe (more often while collections overlap). Sessions the plug-in opens now show `performance_schema` as their schema in Database Processes. Statements the plug-in ran before this release were recorded with no schema and stay visible until the digest table is reset (`TRUNCATE TABLE performance_schema.events_statements_summary_by_digest`) or MySQL restarts. Query Analytics Trends counts every statement, as before.
 
 ## Open Beta drop 10 (2026-09-16)
 
