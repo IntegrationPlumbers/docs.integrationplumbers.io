@@ -10,7 +10,7 @@ This chapter explains how to read the generated metrics reference.
 ## 6.1 Where the reference is
 The plug-in's metric documentation is generated from the plug-in's own target metadata, for the exact build you deploy, rather than written by hand — so it cannot drift from what the plug-in actually collects.
 
-For this build it is the reference below, shipped alongside this guide. It covers all 119 metric groups: 107 on MySQL Database, 8 on MySQL Cluster and 4 on MySQL ClusterSet, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship. Where this guide and the reference differ on a column name, a unit or a threshold, the reference is authoritative ([1.4](index.md#14-beta-status)).
+For this build it is the reference below, shipped alongside this guide. It covers all 122 metric groups: 110 on MySQL Database, 8 on MySQL InnoDB Cluster and 4 on MySQL InnoDB ClusterSet, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship. Where this guide and the reference differ on a column name, a unit or a threshold, the reference is authoritative ([1.4](index.md#14-release-status)).
 
 > **Note:** The reference accompanies this guide: in the repository as `user-guide-metrics-reference.md`, on the documentation site as `metrics-reference.md`. Either way, use the copy that matches the build you are running.
 
@@ -24,7 +24,7 @@ The heading gives the group's display name, its internal name in parentheses —
 | **Column** | The column's internal name, in the form EM CLI and threshold commands take. A `(key)` marker means the column is part of the group's key, so the group returns one row per distinct key value — per channel, per member, per table, per digest — rather than a single row. A group with no key column returns exactly one row per collection. |
 | **Label** | The display name shown in the console. Where the value's meaning is not obvious from the name, the label says it: what 1 means for a flag, which values a coded column takes, and the window a computed figure covers ([6.3](#63-naming-conventions)). |
 | **Unit** | The unit Enterprise Manager labels the value with, for example `MICROSEC`, `BYTE`, `SECOND`, `HOURS`, `DAYS` or `PERCENTAGE`. Every column that has a real unit carries it. `NA` means the value has no unit: a plain count (a number of statements, rows or connections), a 0/1 flag, a coded setting, an identifier such as a port, a server ID or an error code, or a string. Enterprise Manager's MCP server shows these as `n/a`; read what such a column counts from its label. |
-| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 21 curated thresholds ship ([7.1](alerts-and-thresholds.md#71-default-thresholds)), and the reference also shows the three availability `Status` conditions, so 24 columns in the reference tables carry a default. A blank cell is not an omission and it does not stop you setting your own ([7.2](alerts-and-thresholds.md#72-changing-thresholds)). |
+| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 22 curated thresholds ship ([7.1](alerts-and-thresholds.md#71-default-thresholds)), and the reference also shows the three availability `Status` conditions, so 25 columns in the reference tables carry a default. A blank cell is not an omission and it does not stop you setting your own ([7.2](alerts-and-thresholds.md#72-changing-thresholds)). |
 
 Groups marked **configuration snapshot** in their heading behave differently from the rest. They collect on a 24-hour schedule into Enterprise Manager's configuration history rather than into the metric tables, which is what makes a MySQL server's settings comparable over time and against other servers under **Enterprise → Configuration**, and what the compliance rules in [chapter 9](compliance-rules.md#compliance-standards) evaluate. They carry no thresholds and raise no alerts, and a `(key)` column in one of them means the snapshot holds several rows — one per account, for example — rather than one row of settings.
 
@@ -59,13 +59,13 @@ Column names follow a few conventions consistently, so the name usually tells yo
 
 > **Note:** The replication metric group reports two different boolean vocabularies. `replica_io_running` returns `Yes` or `No`, while `replica_sql_running` returns `true` or `false`. The shipped thresholds match those forms exactly ([7.1](alerts-and-thresholds.md#71-default-thresholds)); a custom threshold, compliance rule or script that reads both columns must not assume a single format.
 
-Generated from the plug-in's target metadata for build 24.1.9.10.0.
+Generated from the plug-in's target metadata for build 24.1.10.0.0.
 Each metric group lists its columns, display labels, units, and the default
 warning/critical thresholds that ship (blank = no default threshold).
 Configuration snapshots are RAW metrics collected for configuration history;
 they do not carry thresholds. See the User Guide, chapter 6, for how to read this file.
 
-## MySQL Database (`ip_mysql_database_beta`)
+## MySQL Database (`ip_mysql_database`)
 
 ### Response (`Response`) — collected every 1 Min
 
@@ -2316,22 +2316,22 @@ Single-row summary of the interval's statement activity — total latency, total
 
 ### License (`License`) — collected every 15 Min
 
-Licence state of this plug-in installation, not of the MySQL server — the collection contacts neither the database nor the OMS. Status carries the reason (Active, Expired, Wrong Plug-in, Invalid Signature or License Required); the alert is set on the licensed column, which is 1 only when the licence is active.
+License state of this plug-in installation, not of the MySQL server — the collection contacts neither the database nor the OMS. Status carries the reason (Active, Expired, Wrong Plug-in, Invalid Signature or License Required); the alert is set on the licensed column, which is 1 only when the license is active.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `status` | Status (Active \| Expired \| Invalid Signature \| ...) | NA |  |  |
-| `licensed` | Licensed (0/1: 1 = licence is Active) | NA |  | < 1 |
+| `licensed` | Licensed (0/1: 1 = license is Active) | NA |  | < 1 |
 | `days_remaining` | Days Remaining (perpetual if Never Expires = 1) | DAYS | < 30 | < 7 |
 | `expiration` | Expiration | NA |  |  |
 | `license_type` | Type (Trial \| Enterprise \| None \| ...) | NA |  |  |
 | `instances` | Licensed Instances (entitlement) | NA |  |  |
 | `customer` | Customer | NA |  |  |
-| `never_expires` | Never Expires (0/1: 1 = perpetual licence) | NA |  |  |
+| `never_expires` | Never Expires (0/1: 1 = perpetual license) | NA |  |  |
 
 ### Monitoring Readiness Detail (`readiness_detail`) — collected on demand
 
-Monitoring Readiness checks, one row per requirement, keyed by feature section and check — what each feature needs, what is in effect now, and a status of ok, warn, fail or unknown (unknown means the check could not be made, never a pass). It is probed live under the target's monitoring credentials each time the Monitoring Readiness page loads, not collected on a schedule, so nothing is stored and a change to the server shows on the next page load. Database targets are checked for the monitoring grants, performance_schema, the sys schema, a backup tool history and the plug-in licence; ClusterSet targets for the connection and for MySQL Shell on the agent host. A failed connection is a row, not an error. The page is read-only: the statement that would fix a check is in its Detail, and the plug-in never runs it.
+Monitoring Readiness checks, one row per requirement, keyed by feature section and check — what each feature needs, what is in effect now, and a status of ok, warn, fail or unknown (unknown means the check could not be made, never a pass). It is probed live under the target's monitoring credentials each time the Monitoring Readiness page loads, not collected on a schedule, so nothing is stored and a change to the server shows on the next page load. Database targets are checked for the monitoring grants, performance_schema, the sys schema, a backup tool history and the plug-in license; ClusterSet targets for the connection and for MySQL Shell on the agent host. A failed connection is a row, not an error. The page is read-only: the statement that would fix a check is in its Detail, and the plug-in never runs it.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2396,7 +2396,7 @@ Index sizes for the Indexes page — one row per index with its table, columns, 
 
 ### Index Summary (`IndexSummary`) — collected every 60 Min
 
-Single-row figures behind the Indexes page tiles — tables read by full scan with no index, unused indexes and redundant indexes, from the sys schema views schema_tables_with_full_table_scans, schema_unused_indexes and schema_redundant_indexes — plus the number and total size of secondary indexes in user schemas (the primary key is not counted, matching the size) and the server's uptime in seconds, which is how long the since-start counts have been accumulating. The first two counts are since the server (or the performance_schema counters) last restarted, and are only reported while performance_schema table I/O instrumentation is on. A count is blank, with the reason in the matching Note column, whenever it could not be checked (the account cannot read the view, the sys schema is missing, performance_schema is off, or the statement timed out); it is never 0 for a check that did not run. Collected hourly. No alert is set on it.
+Single-row figures behind the Indexes page tiles — tables read by full scan with no index, unused indexes and redundant indexes, from the sys schema views schema_tables_with_full_table_scans, schema_unused_indexes and schema_redundant_indexes — plus the number and total size of secondary indexes (the primary key is not counted, matching the size) and the server's uptime in seconds, which is how long the since-start counts have been accumulating. Every count covers user schemas only: mysql, information_schema, performance_schema and sys are not counted. The first two counts are since the server (or the performance_schema counters) last restarted, and are only reported while performance_schema table I/O instrumentation is on. A count is blank, with the reason in the matching Note column, whenever it could not be checked (the account cannot read the view, the sys schema is missing, performance_schema is off, or the statement timed out); it is never 0 for a check that did not run. Collected hourly. No alert is set on it.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -2411,7 +2411,7 @@ Single-row figures behind the Indexes page tiles — tables read by full scan wi
 | `redundant_note` | Redundant Note | NA |  |  |
 | `totals_note` | Totals Note | NA |  |  |
 
-## MySQL InnoDB Cluster (`ip_mysql_cluster_beta`)
+## MySQL InnoDB Cluster (`ip_mysql_cluster`)
 
 ### Response (`Response`) — collected every 1 Min
 
@@ -2536,7 +2536,7 @@ Which cluster member the most recent successful backup was taken from, and wheth
 | `last_success_end_time` | Last Successful Backup End Time | NA |  |  |
 | `tool` | Backup Tool | NA |  |  |
 
-## MySQL InnoDB ClusterSet (`ip_mysql_clusterset_beta`)
+## MySQL InnoDB ClusterSet (`ip_mysql_clusterset`)
 
 ### Response (`Response`) — collected every 1 Min
 
@@ -2587,7 +2587,7 @@ Per-cluster ClusterSet detail, keyed by cluster name — role, status, replicati
 
 ### Monitoring Readiness Detail (`readiness_detail`) — collected on demand
 
-Monitoring Readiness checks, one row per requirement, keyed by feature section and check — what each feature needs, what is in effect now, and a status of ok, warn, fail or unknown (unknown means the check could not be made, never a pass). It is probed live under the target's monitoring credentials each time the Monitoring Readiness page loads, not collected on a schedule, so nothing is stored and a change to the server shows on the next page load. Database targets are checked for the monitoring grants, performance_schema, the sys schema, a backup tool history and the plug-in licence; ClusterSet targets for the connection and for MySQL Shell on the agent host. A failed connection is a row, not an error. The page is read-only: the statement that would fix a check is in its Detail, and the plug-in never runs it.
+Monitoring Readiness checks, one row per requirement, keyed by feature section and check — what each feature needs, what is in effect now, and a status of ok, warn, fail or unknown (unknown means the check could not be made, never a pass). It is probed live under the target's monitoring credentials each time the Monitoring Readiness page loads, not collected on a schedule, so nothing is stored and a change to the server shows on the next page load. Database targets are checked for the monitoring grants, performance_schema, the sys schema, a backup tool history and the plug-in license; ClusterSet targets for the connection and for MySQL Shell on the agent host. A failed connection is a row, not an error. The page is read-only: the statement that would fix a check is in its Detail, and the plug-in never runs it.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|

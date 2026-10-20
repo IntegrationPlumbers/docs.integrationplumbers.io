@@ -12,9 +12,9 @@ The plug-in runs inside Enterprise Manager and reaches MySQL from a management a
 
 You need:
 
-- **An Enterprise Manager 24ai (24.1) or 13.5 OMS** with the plug-in deployed on the OMS. Both the EM 24ai and EM 13.5 editions of the plug-in are certified in this beta — see chapters 1 and 10.
+- **An Enterprise Manager 24ai (24.1) or 13.5 OMS** with the plug-in deployed on the OMS. Both the EM 24ai and EM 13.5 editions of the plug-in are certified for this release; EM 13.5 is supported in GA and GA Update 1 and is not built for releases after that — see [1.3](index.md#13-supported-mysql-versions-and-platforms).
 - **At least one Enterprise Manager 24ai or 13.5 management agent** with the plug-in deployed on it. The agent runs every collection, so it needs a network path to each MySQL endpoint it monitors.
-- **MySQL Connector/J on every agent host** that will monitor a MySQL target, placed in the agent's `ip_plugin/xmyb/lib` directory before the plug-in is deployed to that agent. The driver is not distributed inside the plug-in; see [2.9](#29-mysql-connectorj-on-agent-hosts) for the version, the download check and the exact directory. MySQL ClusterSet targets have one further prerequisite; see [2.2](#22-mysql-shell-for-clusterset-targets).
+- **MySQL Connector/J on every agent host** that will monitor a MySQL target, placed in the agent's `ip_plugin/xmys/lib` directory before the plug-in is deployed to that agent. The driver is not distributed inside the plug-in; see [2.9](#29-mysql-connectorj-on-agent-hosts) for the version, the download check and the exact directory. MySQL InnoDB ClusterSet targets have one further prerequisite; see [2.2](#22-mysql-shell-for-clusterset-targets).
 
 Where the agent runs is your choice:
 
@@ -24,13 +24,13 @@ Where the agent runs is your choice:
 > **Note:** Deploying the plug-in on the OMS does not deploy it to agents. Deploy it to every agent that will monitor a MySQL target, as described in [3.3](install-and-upgrade.md#33-deploy-to-agents). Until you do, the MySQL target types are not offered for that agent on the Add Target page.
 
 ## 2.2 MySQL Shell for ClusterSet targets
-Besides Connector/J ([2.9](#29-mysql-connectorj-on-agent-hosts)), which every target type needs, the MySQL ClusterSet target type depends on one external tool being present on the agent host.
+Besides Connector/J ([2.9](#29-mysql-connectorj-on-agent-hosts)), which every target type needs, the MySQL InnoDB ClusterSet target type depends on one external tool being present on the agent host.
 
 The ClusterSet target runs MySQL Shell (mysqlsh) from the agent host to read AdminAPI status. Install MySQL Shell (mysqlsh) on every agent host that will monitor a ClusterSet target and make sure it is on the agent user's PATH. Without it the plug-in cannot run AdminAPI and degrades to a repository rollup that reports `fallback_reason MYSQLSH_NOT_FOUND`. A rollup cannot assess ClusterSet-wide promotion readiness, so it does not claim a verdict either way: `health_status` reads `UNKNOWN` and `dr_promotion_ready` reads -1 (not assessed). The DR Promotion Ready alert fires only on 0 — a readiness check that ran and failed — so it does not raise on a rollup.
 
 The rollup is a deliberate degradation, not an error: the target stays Up and its other columns keep collecting from the repository. A missing MySQL Shell is a prerequisite on the agent host, not a fault, so it raises no alert of its own; check `health_status` on the ClusterSet Health metric to see that readiness is not being assessed.
 
-**A member Shell cannot reach.** Once MySQL Shell connects through one listed endpoint, the AdminAPI opens its own session to every member Group Replication still considers online — not only the members the endpoint list ([2.3](#23-network-and-ports)) used to connect. A network path that reaches one listed member but not another therefore still degrades ClusterSet health, even though the endpoint list itself worked: `fallback_reason` reads `MEMBER_UNREACHABLE`, `health_status` reads `UNKNOWN` with `dr_promotion_ready` at -1, and the Fallback Reason alert raises WARNING after two consecutive collections until the path is open. The remedy is the same one 2.3 already asks for: a path from the agent host to every member of every cluster, on each member's MySQL port — not only the members you listed on the target. See [Troubleshooting](troubleshooting.md#clusterset).
+**A member Shell cannot reach.** Once MySQL Shell connects through one listed endpoint, the AdminAPI opens its own session to every member Group Replication still considers online — not only the members the endpoint list ([2.3](#23-network-and-ports)) used to connect. A network path that reaches one listed member but not another therefore still degrades ClusterSet health, even though the endpoint list itself worked: `fallback_reason` reads `MEMBER_UNREACHABLE`, `health_status` reads `UNKNOWN` with `dr_promotion_ready` at -1, and the Fallback Reason alert raises WARNING after two consecutive collections until the path is open. The remedy is the same one 2.3 already asks for: a path from the agent host to every member of every cluster, on each member's MySQL port — not only the members you listed on the target. The same applies when the agent host can reach no member of the primary cluster at all: MySQL Shell still answers through a replica-cluster member but reports the primary's state as unknown, and the plug-in reports `MEMBER_UNREACHABLE` and readiness not assessed rather than "not ready", because from the agent host a path that is cut and a primary cluster that is down look the same. See [Troubleshooting](troubleshooting.md#clusterset).
 
 Confirm the tool as the agent's operating-system user, not as `root`, because the agent's own PATH is what matters:
 
@@ -38,9 +38,11 @@ Confirm the tool as the agent's operating-system user, not as `root`, because th
 mysqlsh --version
 ```
 
-MySQL Database and MySQL Cluster targets do not use MySQL Shell. They connect over JDBC only, through the Connector/J driver you place on the agent host ([2.9](#29-mysql-connectorj-on-agent-hosts)), and need nothing else.
+**Which MySQL Shell.** The plug-in is tested with MySQL Shell 8.4 LTS, 9.7 and 26.7. MySQL renumbered its Shell releases after 9.6, so the current release from MySQL's repositories carries a 26.x version number; it works the same way. The agent picks up a newly installed or upgraded MySQL Shell on its next ClusterSet collection, with no restart.
 
-**Kerberos on a ClusterSet target.** When the target carries a Kerberos Configuration File ([4.1](targets-and-properties.md#41-target-properties)), the plug-in runs MySQL Shell with the `authentication_kerberos_client` plug-in and no password: the credential is the ticket in the agent operating-system user's default credential cache, and `KRB5_CONFIG` is set to the target's file. Three things must therefore be true on the agent host, none of which the plug-in can arrange for you: the Kerberos client libraries are installed; the agent's operating-system user holds a keytab for the monitoring principal with an unattended refresh (`k5start`, or a scheduled `kinit -kt`), because a scheduled collection cannot type a password; and `klist` run as that user shows a valid ticket. MySQL Shell's own package ships the client plug-in. Every ClusterSet member must accept the principal through the server's `authentication_kerberos` plug-in, and MySQL Shell opens its own session to every member, so the account must exist cluster-wide. Kerberos does not pass through MySQL Router: give a Kerberos ClusterSet target member endpoints (a node list, 4.1), not a Router port. The `fallback_reason` column names each of these when it is missing — `KERBEROS_TICKET` when the Kerberos exchange itself fails (a missing or expired ticket is the usual cause; an unreachable KDC, clock skew or a missing service principal look the same to MySQL Shell), `KERBEROS_NOT_SUPPORTED` for a Router endpoint, `KERBEROS_CLIENT_UNAVAILABLE` when MySQL Shell cannot load its Kerberos client plug-in, `KERBEROS_CONFIG_UNREADABLE` when the file itself cannot be read, and `AUTH_FAILED` for a member that does not accept the principal — each with its remedy in [Troubleshooting](troubleshooting.md#clusterset). The credential set's password is not used on this path: the ticket is the credential, and a target registered for Kerberos needs no password at all.
+MySQL Database and MySQL InnoDB Cluster targets do not use MySQL Shell. They connect over JDBC only, through the Connector/J driver you place on the agent host ([2.9](#29-mysql-connectorj-on-agent-hosts)), and need nothing else.
+
+**Kerberos on a ClusterSet target.** When the target carries a Kerberos Configuration File ([4.1](targets-and-properties.md#41-target-properties)), the plug-in runs MySQL Shell with the `authentication_kerberos_client` plug-in and no password: the credential is the ticket in the agent operating-system user's default credential cache, and `KRB5_CONFIG` is set to the target's file. Three things must therefore be true on the agent host, none of which the plug-in can arrange for you: the Kerberos client libraries are installed; the agent's operating-system user holds a keytab for the monitoring principal with an unattended refresh (`k5start`, or a scheduled `kinit -kt`), because a scheduled collection cannot type a password; and `klist` run as that user shows a valid ticket. MySQL Shell's own package ships the client plug-in. Every ClusterSet member must accept the principal through the server's `authentication_kerberos` plug-in, and MySQL Shell opens its own session to every member, so the account must exist cluster-wide. MySQL Shell cannot log in with Kerberos through MySQL Router, so give a Kerberos ClusterSet target member endpoints (a node list, 4.1), not a Router port; behind a Router its health falls back to the repository rollup. The plug-in's JDBC collections are not affected: they do authenticate with Kerberos through a Router. The `fallback_reason` column names each of these when it is missing — `KERBEROS_TICKET` when the Kerberos exchange itself fails (a missing or expired ticket is the usual cause; an unreachable KDC, clock skew or a missing service principal look the same to MySQL Shell), `KERBEROS_NOT_SUPPORTED` for a Router endpoint, `KERBEROS_CLIENT_UNAVAILABLE` when MySQL Shell cannot load its Kerberos client plug-in, `KERBEROS_CONFIG_UNREADABLE` when the file itself cannot be read, and `AUTH_FAILED` for a member that does not accept the principal — each with its remedy in [Troubleshooting](troubleshooting.md#clusterset). The credential set's password is not used on this path: the ticket is the credential, and a target registered for Kerberos needs no password at all.
 
 ## 2.3 Network and ports
 Open the paths the agent needs before you add a target. A blocked path shows up as a target that stays Down after it is added.
@@ -51,11 +53,11 @@ A MySQL Database target needs one outbound TCP path:
 |---|---|---|
 | Agent host → MySQL server | The server's listening port, `3306` by default | Every JDBC collection for the target |
 
-A MySQL Cluster target needs the same kind of path to whatever endpoint you configure on it — any member of the cluster, or a MySQL Router instance on the classic-protocol port you configured for it.
+A MySQL InnoDB Cluster target needs the same kind of path to whatever endpoint you configure on it — any member of the cluster, or a MySQL Router instance on the classic-protocol port you configured for it.
 
 Both container types accept a **comma-separated list** of endpoints in `(Router) Host` / `(Router) Port` ([4.1](targets-and-properties.md#41-target-properties)); every member you list needs this same path from the agent host.
 
-A MySQL ClusterSet target needs two things:
+A MySQL InnoDB ClusterSet target needs two things:
 
 - The agent's JDBC path to the host and port configured on the target, normally a MySQL Router endpoint.
 - A path from the agent host to **every member of every cluster in the ClusterSet**, on each member's MySQL port, because MySQL Shell opens those connections itself when it reads AdminAPI status.
@@ -86,9 +88,16 @@ What each privilege buys:
 
 > **Note:** Narrow the `'%'` host clause to your agent's subnet if your security policy requires it. The agent connects over TCP, so the account's host clause has to match the agent's address as MySQL sees it — not `localhost`. Socket-connected targets are the exception; see [2.6](#26-unix-socket-connections).
 
-After you add the target, its Monitoring Readiness page ([5.1](monitoring-pages.md#51-mysql-database-pages)) checks these three privileges and shows the statement to run for any that is missing.
+After you add the target, its Monitoring Readiness page ([5.1](monitoring-pages.md#51-mysql-database-pages)) checks PROCESS, REPLICATION CLIENT and SELECT on `performance_schema`, and separately checks that the `sys` schema is readable. For any that is missing it shows a GRANT statement for that one privilege, which can be narrower than the grant above. If you ran the grant above, you need none of them: it already covers every check.
 
 > **Note:** On Group Replication and InnoDB ClusterSet deployments `CREATE USER` and `GRANT` replicate like any other write. Run the two statements once on the (global) primary and the account exists on every member.
+
+**Statement text in the repository.** Two kinds of collection store SQL text in the Enterprise Manager repository, every 5 minutes by default:
+
+- The statement rankings behind Query Analyzer and the Overview's Top SQL (`SysStatementByLatency`, `SysStatementByExecCount` and `SysStatementByFirstSeen`) store the normalized statement text of the top digests. Normalized text has its literal values replaced by `?`.
+- The `SysProcesslist` group behind the Sessions page stores each active session's current statement as the session sent it, not normalized. It can include literal values, and so personal or other sensitive data.
+
+Access to both is governed by Enterprise Manager's target privileges. If your site has strict data-handling rules, disable the `SysProcesslist` collection in the target's **Metric and Collection Settings** ([7.2](alerts-and-thresholds.md#72-changing-thresholds)). The other metric groups are not affected; only the Sessions page stops filling. Query Analytics Trends keeps the digest and the figures, not the statement text ([5.1](monitoring-pages.md#51-mysql-database-pages)).
 
 ## 2.5 TLS
 Each target chooses its own transport security through the **TLS Mode** property; nothing is inherited from the server or from the agent.
@@ -105,11 +114,11 @@ The property recognizes four values, and leaving it empty is meaningful in its o
 
 Three behaviors matter operationally:
 
-- **An empty TLS Mode means plaintext.** Leaving the property blank is treated exactly as `disabled`, not as `required`. Set it explicitly on every target where the connection has to be encrypted.
+- **An empty TLS Mode means plaintext.** Leaving the property blank is treated exactly as `disabled`, not as `required`. Set it explicitly on every target where the connection has to be encrypted. One path differs: on a ClusterSet target, the MySQL Shell session that reads ClusterSet health passes no ssl-mode when TLS Mode is empty, so MySQL Shell uses its own default, which encrypts the session without verifying the server certificate.
 - **`required` fails closed.** If the server cannot give the agent an encrypted session, the connection fails with an explicit `SQLException` and the target goes Down. There is no silent fallback to plaintext, so a target that is Up under `required` connected over TLS.
 - **Any non-empty value the plug-in does not recognize fails closed to `required`.** A typo in the property is treated as `required` rather than as `disabled`, so it cannot quietly switch encryption off — but an *empty* property is not a typo, and follows the first rule above.
 
-> **Note:** verify_ca and verify_identity are not available in this release — the truststore properties they depend on are deferred — and only required and disabled are validated. Those two modes are absent from the target pages and from EM CLI, so use `required` where you need an encrypted session. A ClusterSet health check configured with `verify_ca` or `verify_identity` reports `TLS_TRUSTSTORE_REQUIRED` instead of connecting, so use `required` (or `disabled`) for ClusterSet targets as well.
+> **Note:** verify_ca and verify_identity are not available in this release — the truststore properties they depend on are deferred — and only required and disabled are validated. The TLS Mode property's label lists them and the property accepts free text, but they are not supported: the onboarding script refuses them ([4.7](targets-and-properties.md#47-bulk-onboarding-and-migration)), so use `required` where you need an encrypted session. A ClusterSet health check configured with `verify_ca` or `verify_identity` reports `TLS_TRUSTSTORE_REQUIRED` instead of connecting, so use `required` (or `disabled`) for ClusterSet targets as well.
 
 ## 2.6 Unix-socket connections
 A MySQL server that shares a host with its management agent can be monitored over a Unix socket instead of TCP.
@@ -159,7 +168,7 @@ Plan the agent hosts and the repository before you add more than a handful of ta
 
 **What one database target costs.**
 
-| Resource | Measured, per `ip_mysql_database_beta` target at default schedules |
+| Resource | Measured, per `ip_mysql_database` target at default schedules |
 |---|---|
 | Collection processes | about **14 JVM launches per minute** (Response, wait profile and its summary every minute; about 56 items every 5 minutes; configuration once a day) |
 | Agent-host CPU | about **0.3 of a vCPU, sustained** (18 targets drove the `oracle` user to ~525 % of an 8-vCPU host; each launch costs 2 to 3 CPU-seconds including the JDBC connect) |
@@ -178,7 +187,7 @@ Cluster and ClusterSet targets are lighter on the repository but each health col
 | Statement digest profile (Query Analytics Trends, 5.1) | ~2,400 | top 25 per 5-minute collection |
 | Wait profile (Waits, 5.1) | ~1,400 | active events only, every minute |
 
-**Agent hosts: the rule.** Give the plug-in **dedicated agent hosts** and plan **two database targets per vCPU** on them, which leaves headroom for cluster targets, collection bursts and the agent's own work. Never place these targets on an agent that shares a host with the Oracle Management Service or the repository database: on our 8-vCPU lab host that carries all three, 18 targets starved the repository's log writer of CPU — commits queued for seconds (`log file sync` averaging over 2 s while the disk sat idle), the metric loader's upload threads stuck on commit, and the OMS restarted itself repeatedly without finishing initialisation.
+**Agent hosts: the rule.** Give the plug-in **dedicated agent hosts** and plan **two database targets per vCPU** on them, which leaves headroom for cluster targets, collection bursts and the agent's own work. Never place these targets on an agent that shares a host with the Oracle Management Service or the repository database: on our 8-vCPU lab host that carries all three, 18 targets starved the repository's log writer of CPU — commits queued for seconds (`log file sync` averaging over 2 s while the disk sat idle), the metric loader's upload threads stuck on commit, and the OMS restarted itself repeatedly without finishing initialization.
 
 | Dedicated agent host | Database targets to plan for |
 |---|---|
@@ -188,27 +197,27 @@ Cluster and ClusterSet targets are lighter on the repository but each health col
 
 Spread a larger estate across several agents — the bulk-onboarding script ([4.7](targets-and-properties.md#47-bulk-onboarding-and-migration)) takes the agent per row — and keep the composite cluster and ClusterSet targets on the same agent as their members so a health collection does not add a network hop.
 
-**Repository: reduce what you do not read.** At 100 targets the default schedules load about 5 million rows an hour into the repository. Size the repository host per Oracle's Enterprise Manager sizing guidance for a large deployment, and reduce the collection frequency of the high-cardinality groups you do not use minute by minute. From the target's **Metric and Collection Settings**: move Memory by Event and File I/O to every 30 minutes and the three statement rankings to every 15 minutes, which removes roughly two thirds of the ingest with no loss to the Overview, Query Analytics Trends or Waits pages — those read the statement digest profile and the wait profile, which should stay at their defaults. Disabling Memory by Event entirely is reasonable in an estate that does not investigate memory instrument by instrument. Changing a schedule also changes the Week and Month rollup estimates described under Query Analytics Trends and Waits in [5.1](monitoring-pages.md#51-mysql-database-pages) for that group only.
+**Repository: reduce what you do not read.** At 100 targets the default schedules load about 5 million rows an hour into the repository. Size the repository host per Oracle's Enterprise Manager sizing guidance for a large deployment, and reduce the collection frequency of the high-cardinality groups you do not use minute by minute. From the target's **Metric and Collection Settings**: move Memory by Event and File I/O to every 30 minutes and the three statement rankings to every 15 minutes, which removes about half of the ingest with no loss to the Overview, Query Analytics Trends or Waits pages — those read the statement digest profile and the wait profile, which should stay at their defaults. Disabling Memory by Event entirely is reasonable in an estate that does not investigate memory instrument by instrument. Changing a schedule also changes the Week and Month rollup estimates described under Query Analytics Trends and Waits in [5.1](monitoring-pages.md#51-mysql-database-pages) for that group only.
 
-**Recognising overload.** The symptoms arrive in this order: the Week and Month windows on the trend pages stay empty and the 24 Hours window stops advancing; `emctl status oms -details` on the OMS reports the management server down with "PBS may not be up" while the console still serves; the WebLogic server log shows `[STUCK] ExecuteThread` entries whose stacks end in `MetricLoadShared.flushRows` waiting on a JDBC commit; the repository shows `log file sync` waits of seconds with `log file parallel write` in single-digit milliseconds; and the agent log reports the OMS upload URL answering "Context not fully initialized - rejecting request". A collection-error count of zero throughout is normal — the agent is collecting, the repository cannot absorb it.
+**Recognizing overload.** The symptoms arrive in this order: the Week and Month windows on the trend pages stay empty and the 24 Hours window stops advancing; `emctl status oms -details` on the OMS reports the management server down with "PBS may not be up" while the console still serves; the WebLogic server log shows `[STUCK] ExecuteThread` entries whose stacks end in `MetricLoadShared.flushRows` waiting on a JDBC commit; the repository shows `log file sync` waits of seconds with `log file parallel write` in single-digit milliseconds; and the agent log reports the OMS upload URL answering "Context not fully initialized - rejecting request". A collection-error count of zero throughout is normal — the agent is collecting, the repository cannot absorb it.
 
-**Relief, in order:** put the targets you can spare into a blackout with an explicit duration (`emcli create_blackout -name=<name> -add_targets="<target>:ip_mysql_database_beta;…" -reason="<reason>" -schedule="duration:168:00"` for seven days) so the launch rate drops immediately. Give the duration as hours and minutes: on Enterprise Manager 24ai `duration:-1` creates a one-hour blackout, not an indefinite one. `emcli stop_blackout -name=<name>` ends it early and leaves its record behind, so run `emcli delete_blackout -name=<name>` before creating another blackout with the same name. Once the launch rate has dropped, restart the OMS (`emctl stop oms -all` then `emctl start oms`), then move targets to additional agents or lower the schedules above before lifting the blackout. Restarting the OMS without reducing the load only repeats the stall.
+**Relief, in order:** put the targets you can spare into a blackout with an explicit duration (`emcli create_blackout -name=<name> -add_targets="<target>:ip_mysql_database;…" -reason="<reason>" -schedule="duration:168:00"` for seven days) so the launch rate drops immediately. Give the duration as hours and minutes: on Enterprise Manager 24ai `duration:-1` creates a one-hour blackout, not an indefinite one. `emcli stop_blackout -name=<name>` ends it early and leaves its record behind, so run `emcli delete_blackout -name=<name>` before creating another blackout with the same name. Once the launch rate has dropped, restart the OMS (`emctl stop oms -all` then `emctl start oms`), then move targets to additional agents or lower the schedules above before lifting the blackout. Restarting the OMS without reducing the load only repeats the stall.
 
 **Why the cost grows this way.** Each metric group collects in its own process on its own interval, so the process launch rate grows with the number of targets times the number of groups. The figures above apply to this release.
 
 ## 2.9 MySQL Connector/J on agent hosts
-The plug-in reaches MySQL through **MySQL Connector/J**, Oracle's JDBC driver. Connector/J is licensed under the GPL with Oracle's Universal FOSS Exception, or under a MySQL commercial licence, so it is not distributed inside the plug-in. You place one copy on every management agent host that monitors a MySQL target, and the plug-in loads it from there. This applies to MySQL Database, MySQL Cluster and MySQL ClusterSet targets alike, and to the Run EXPLAIN job ([8.1](jobs.md#81-run-explain)).
+The plug-in reaches MySQL through **MySQL Connector/J**, Oracle's JDBC driver. Connector/J is licensed under the GPL with Oracle's Universal FOSS Exception, or under a MySQL commercial license, so it is not distributed inside the plug-in. You place one copy on every management agent host that monitors a MySQL target, and the plug-in loads it from there. This applies to MySQL Database, MySQL InnoDB Cluster and MySQL InnoDB ClusterSet targets alike, and to the Run EXPLAIN job ([8.1](jobs.md#81-run-explain)).
 
-**Which version.** Connector/J **8.4.0** is the version this release is tested with, against MySQL 8.0, 8.4 and 9.x servers. Later 8.4.x and 9.x releases are expected to work; if a collection stops after you install a newer driver, go back to 8.4.0 and tell us ([1.4](index.md#14-beta-status)). The legacy `mysql-connector-java-*.jar` name (Connector/J 5.1 and 8.0) is not picked up: the plug-in looks for `mysql-connector-j-*.jar`.
+**Which version.** Connector/J **8.4.0** is the version this release is tested with, against MySQL 8.0, 8.4 and 9.x servers. Later 8.4.x and 9.x releases are expected to work; if a collection stops after you install a newer driver, go back to 8.4.0 and tell us ([1.4](index.md#14-release-status)). The legacy `mysql-connector-java-*.jar` name (Connector/J 5.1 and 8.0) is not picked up: the plug-in looks for `mysql-connector-j-*.jar`.
 
-**Where it goes.** The directory is `<agentStateDir>/ip_plugin/xmyb/lib/`, where `<agentStateDir>` is the agent's instance directory. `emctl status agent` prints it as **Agent Home** (the line above it, **Agent Binaries**, is a different directory):
+**Where it goes.** The directory is `<agentStateDir>/ip_plugin/xmys/lib/`, where `<agentStateDir>` is the agent's instance directory. `emctl status agent` prints it as **Agent Home** (the line above it, **Agent Binaries**, is a different directory):
 
 ```
 $ /u01/app/em/agent/agent_24.1.0.0.0/bin/emctl status agent | grep 'Agent Home'
 Agent Home             : /u01/app/em/agent/agent_inst
 ```
 
-With that value the driver directory is `/u01/app/em/agent/agent_inst/ip_plugin/xmyb/lib/`. On Enterprise Manager 13.5 the instance directory usually sits under the agent home, for example `/u01/app/em/agent/agent_13.5.0.0.0/agent_inst`. The directory survives plug-in upgrades and undeploys; the plug-in never writes files into it, though a collection creates the empty directory if it is missing. Keep **exactly one** `mysql-connector-j-*.jar` in it.
+With that value the driver directory is `/u01/app/em/agent/agent_inst/ip_plugin/xmys/lib/`. On Enterprise Manager 13.5 the instance directory usually sits under the agent home, for example `/u01/app/em/agent/agent_13.5.0.0.0/agent_inst`. The directory survives plug-in upgrades and undeploys; the plug-in never writes files into it, though a collection creates the empty directory if it is missing. Keep **exactly one** `mysql-connector-j-*.jar` in it.
 
 **Steps, on every agent host**, as the agent's operating-system user:
 
@@ -223,9 +232,9 @@ With that value the driver directory is `/u01/app/em/agent/agent_inst/ip_plugin/
 
    ```
    AGENT_HOME=$(emctl status agent | awk -F': *' '/Agent Home/ {print $2}')
-   install -d -m 0755 "$AGENT_HOME/ip_plugin/xmyb/lib"
-   install -m 0644 mysql-connector-j-8.4.0.jar "$AGENT_HOME/ip_plugin/xmyb/lib/"
-   shasum -a 256 "$AGENT_HOME/ip_plugin/xmyb/lib/mysql-connector-j-8.4.0.jar"
+   install -d -m 0755 "$AGENT_HOME/ip_plugin/xmys/lib"
+   install -m 0644 mysql-connector-j-8.4.0.jar "$AGENT_HOME/ip_plugin/xmys/lib/"
+   shasum -a 256 "$AGENT_HOME/ip_plugin/xmys/lib/mysql-connector-j-8.4.0.jar"
    ```
 
 3. Deploy the plug-in to the agent ([3.3](install-and-upgrade.md#33-deploy-to-agents)). If the plug-in is already deployed there, nothing needs restarting: the next collection uses the jar.
@@ -234,10 +243,10 @@ With that value the driver directory is `/u01/app/em/agent/agent_inst/ip_plugin/
 
 **Upgrading the driver.** Replace the jar with the new one, keeping exactly one in the directory. The next collection uses it; the plug-in does not need redeploying.
 
-**Licensing, for the record.** Integration Plumbers does not redistribute MySQL Connector/J and has not sought a redistribution licence from Oracle: you obtain the driver from Oracle under the licence that applies to you, the GPL version 2 with the Universal FOSS Exception or a MySQL commercial licence, and it never appears in the plug-in's own third-party notices. The components that do ship inside the plug-in, and their licences, are listed in `THIRD-PARTY-NOTICES.txt`, generated from the build's software bill of materials and deployed next to the plug-in's program in the agent's plug-in `scripts` directory; the SBOM itself is delivered beside the plug-in archive.
+**Licensing, for the record.** Integration Plumbers does not redistribute MySQL Connector/J and has not sought a redistribution license from Oracle: you obtain the driver from Oracle under the license that applies to you, the GPL version 2 with the Universal FOSS Exception or a MySQL commercial license, and it never appears in the plug-in's own third-party notices. The components that do ship inside the plug-in, and their licenses, are listed in `THIRD-PARTY-NOTICES.txt`, generated from the build's software bill of materials and deployed next to the plug-in's program in the agent's plug-in `scripts` directory; the SBOM itself is delivered beside the plug-in archive.
 
 **When it is missing or wrong.** Every collection of every MySQL target on that agent, and every Run EXPLAIN job, stops with one message that names the directory; the target does not report a MySQL problem. The messages and what to do about each are on the Troubleshooting page, under *Install and deploy*; the one you will see first is:
 
 ```
-MySQL Connector/J not found: no mysql-connector-j-*.jar in /u01/app/em/agent/agent_inst/ip_plugin/xmyb/lib; files present: none. Place exactly one Connector/J jar there.
+MySQL Connector/J not found: no mysql-connector-j-*.jar in /u01/app/em/agent/agent_inst/ip_plugin/xmys/lib; files present: none. Place exactly one Connector/J jar there.
 ```
