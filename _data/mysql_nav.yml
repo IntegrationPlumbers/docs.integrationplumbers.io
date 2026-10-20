@@ -27,4 +27,5 @@ groups:
       - { title: "Jobs", url: /mysql/jobs.html }
       - { title: "Compliance rules", url: /mysql/compliance-rules.html }
       - { title: "Backup monitoring", url: /mysql/backup-monitoring.html }
+      - { title: "EM MCP Server", url: /mysql/mcp-server.html }
       - { title: "Troubleshooting", url: /mysql/troubleshooting.html }

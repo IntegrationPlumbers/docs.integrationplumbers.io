@@ -7,7 +7,7 @@ nav_order: 13
 
 The things that go wrong most often, what each one looks like, and what to change.
 
-**In this page:** The license gate · Install and deploy · Connecting to MySQL · ClusterSet health · Jobs · Metrics that look wrong · Collections stop reaching the repository
+**In this page:** The license gate · Install and deploy · Connecting to MySQL · ClusterSet health · Jobs · Metrics that look wrong · Collections stop reaching the repository · Logs and the log level · Known issues in this release · Getting support
 
 Nearly everything that goes wrong in the first hour with this plug-in is one of a small number of things. This page is that list rather than a general guide to Enterprise Manager.
 
@@ -114,6 +114,8 @@ The agent's own OS credential is not resolved automatically for this job type, s
 
 **Run EXPLAIN fails with `MySQL Connector/J not found ...` or `cannot locate <agentStateDir>/ip_plugin/xmys/lib - EMSTATE is not set in the job step`.** The job runs under the target's Host Preferred Credential and reads the same driver directory as the collections. The first message means the driver is missing on that agent host or unreadable by the credential's operating-system user (the jar and the directory must be readable by it). The second means the credential switched user without keeping the agent's environment, usually a `sudo` rule with `env_reset` and no `env_keep`; allow the environment through, or use a credential that runs directly as the agent user.
 
+**The Host Preferred Credential uses `pbrun` or another privilege-delegation tool.** This release is tested with a credential that runs directly as the agent's operating-system user and with `sudo`. PowerBroker (`pbrun`) and similar tools are untested. If you must use one, confirm that the switched user keeps the agent's environment (see the `EMSTATE` entry above) and send us the result either way.
+
 **Run EXPLAIN fails with `the job step's javaHome=... does not name a JVM`.** The Java runtime Enterprise Manager resolved for the job is not there. This points at the agent installation rather than the plug-in; `emctl status agent` on that agent and the agent's own upgrade history are the place to look.
 
 **Run EXPLAIN returns a syntax error on a statement copied from Query Analyzer.** Query Analyzer shows normalized digests, with literals replaced by `?`. A digest will not explain as it stands. Substitute real values for the placeholders first. See [Jobs](jobs.md#81-run-explain).
@@ -136,10 +138,71 @@ The agent's own OS credential is not resolved automatically for this job type, s
 
 **The 24 Hours window stops advancing, Week and Month stay empty, and `emctl status oms -details` says "PBS may not be up" while the console works.** The repository cannot absorb the metric load, usually because the agent hosting the MySQL targets shares a host with the Management Service or the repository database, or carries more targets than its cores allow. Confirm with the WebLogic server log (`[STUCK] ExecuteThread` stacks ending in `MetricLoadShared.flushRows` on a JDBC commit) and the repository's wait profile (`log file sync` in seconds). Relief and the sizing rule are in the user guide, 2.8: blackout what you can spare, restart the OMS, then spread the targets or lower the high-cardinality schedules before lifting the blackout.
 
+## 8. Logs and the log level {#logs}
+
+**The plug-in log.** Every collection runs as its own short Java process on the agent host that monitors the target, and all of them write to one file there:
+
+```
+<agent binaries>/plugins/ip.em.xmys.agent.plugin_<version>/logging/mysql_oem.log
+```
+
+`emctl status agent` on the agent host prints **Agent Binaries** (the `plugins` directory is under it) and **Agent Home** (the agent's own logs are under it). Each launch logs one `INFO` line naming the target type and the metric group, for example `Running with args: target=Instance category=Response`; a fault follows as `WARN` or `ERROR` with the driver's or MySQL Shell's message. A line does not name the target, so match lines to a target by time and metric group.
+
+The file rolls over at 15 MB and the plug-in keeps ten rolled files beside it. Passwords and license keys are never written to it. A Run EXPLAIN job does not write to this file: its output, including any error, is in the job step's output on the Job Activity page.
+
+**The agent log.** `<agent home>/sysman/log/gcagent.log` is the agent's own view: a collection that timed out, a metric evaluation error, or an upload that could not reach the OMS. Read it beside the plug-in log when a metric group shows a collection error the plug-in log does not explain.
+
+**The OMS log.** Console pages and job dispatch run on the OMS, so an Unexpected Error dialog on a plug-in page, or a job that never reaches the agent, leaves its trace in `<OMS instance>/em/EMGC_OMS1/sysman/log/emoms.trc`. Deployment progress is in `emcli get_plugin_deployment_status -plugin=ip.em.xmys`.
+
+**Raising the log level.** The plug-in ships a standard log4j2 configuration beside the log, at `logging/log4j2.xml` in the same plug-in directory, and the agent points every launch at it. To see more, change the root level in that file from `info` to `debug`:
+
+```xml
+<Root level="debug">
+```
+
+Each collection is a new process, so the next collection on that agent uses the new level with no restart. Set it back to `info` when you are done: a database target makes about 14 launches a minute, and each of them now logs at `debug`. The file is replaced when the plug-in is upgraded on the agent, which restores `info`.
+
+## 9. Known issues in this release {#known-issues}
+
+These are the known issues of release 24.1.10.0.0 and 13.5.10.0.0. The release that carries each fix is named in parentheses. None of them stops a target from collecting.
+
+- **A MySQL role can be flagged as an over-privileged account.** The Security Accounts rules evaluate every row of `mysql.user`, and a role holding a flagged privilege is reported on the role row as well as on the account that inherits it. Read the violation on the account; the role row is the same finding. The fix marks roles and names the role on the account's violation (GA Update 1).
+- **A failed Run EXPLAIN ends with the job status Succeeded.** The step output carries the `em_error` line that names the fault, preceded by a Java stack trace. The console's Explain panel reads the `em_error` line correctly; the job pages do not. Read the step output, not the job status (GA Update 1).
+- **Non-ASCII characters in the monitoring password or an EXPLAIN statement.** The plug-in decodes what the agent sends it in the agent's default character set, which is ASCII under `LANG=C`. Use an ASCII password for the monitoring account, and ASCII in Run EXPLAIN statements, until the encoding is pinned (GA Update 1).
+- **Cluster targets carry no quorum or fault-tolerance verdict.** A member stopped cleanly reads as the remaining members online, a cluster that lost its majority abruptly can still read Up while a member answers, and a member leaving raises no incident of its own. Check the cluster with MySQL Shell's `cluster.status()` after any member event (GA Update 1).
+- **ClusterSet health that stops updating raises no incident.** The last verdict stays on the page with its Collected At time. Check that time before acting on a verdict (GA Update 1).
+- **An authentication failure reads as Down.** A wrong password, a locked account or a lapsed Kerberos ticket marks the target Down like a server outage; the connection row on Monitoring Readiness shows the driver's message (GA Update 1).
+- **TLS certificate verification is not available.** The `verify_ca` and `verify_identity` modes are not available in this release (2.5): ClusterSet health refuses them (`TLS_TRUSTSTORE_REQUIRED`), and the JDBC collections are not certified with them. Use `required`, which fails closed for encryption (GA Update 1).
+- **MariaDB is not a supported platform.** On MariaDB 11.8, five metric groups report a collection error at every collection (ReplicationByWorker, ReplicationConnStatus, ReplicationConnectionConfig, SecurityAccounts, SecurityConfigExt) because they read MySQL-only tables. The other groups collect. MariaDB support is planned separately.
+- **Managed services other than Amazon RDS are not certified.** Aurora MySQL, Google Cloud SQL and Azure Database for MySQL work as manually added targets (see 4.4 in the user guide) and are not yet certified. Amazon RDS for MySQL 8.4 is certified.
+- **Tested versions.** MySQL Connector/J 8.4.0 is the tested driver; later 8.4.x and 9.x releases are expected to work and are not certified. InnoDB ClusterSet is validated on MySQL 9.5; certification on 8.4 and 9.7 LTS is planned.
+- **Windows agents are not supported, and `pbrun` is untested.** The monitoring agent must run on Linux. Host Preferred Credentials are tested running directly as the agent user and through `sudo`; PowerBroker and similar tools are untested (see Jobs above).
+- **EM 13.5 column widths.** On Enterprise Manager 13.5 some console tables keep the widths that Enterprise Manager's own table component gives them, rather than sizing to their content as on 24ai (GA Update 1).
+
+## 10. Getting support {#support}
+
+Integration Plumbers supports the plug-in directly. Write to `helpdesk@integrationplumbers.io`: every message opens a ticket and you receive the ticket reference by reply. Open and follow tickets at <https://integrationplumbers.zohodesk.com/portal/en/home>. For a suspected security vulnerability, put `SECURITY` first in the subject line. Response targets by priority are set in the support terms that accompany your license.
+
+**What to send.** The support bundle is one archive from the agent host that monitors the target, plus two lines from the OMS. On the agent host, as the agent's operating-system user, with the two paths from `emctl status agent`:
+
+```bash
+emctl status agent > /tmp/agent-status.txt
+tar czf /tmp/mysql-plugin-support-$(hostname).tgz /tmp/agent-status.txt \
+    <agent binaries>/plugins/ip.em.xmys.agent.plugin_*/logging \
+    <agent home>/sysman/log/gcagent.log
+```
+
+On the OMS host:
+
+```bash
+emcli list_plugins_on_server
+emcli get_plugin_deployment_status -plugin=ip.em.xmys
+```
+
+Add the target's Monitoring Readiness page (every check with its status, current value and required value), the MySQL version and edition, the metric group or console page involved, and what you expected to see. The plug-in log carries no passwords or license keys; look through anything else you add and replace a secret with `<removed>` before sending. Do not send keytabs or Kerberos tickets.
+
 ---
 
 **In short:** the license gate explains most empty pages, a missing `mysqlsh` explains most unhappy ClusterSets, and a missing host credential explains Run EXPLAIN.
 
-If you find something that is not on this page, send it to your Integration Plumbers support contact; this page grows from what you report.
-
-If none of them fit, [Getting started](getting-started.md#wrong) lists what to include in a report.
+If you find something that is not on this page, send it to support (section 10); this page grows from what you report.

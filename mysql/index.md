@@ -87,6 +87,7 @@ Certification as of this build:
 | Aurora MySQL / Cloud SQL / Azure Database for MySQL | | Supported, added manually, see [4.4](targets-and-properties.md#44-autodiscovery); not yet certified |
 | EM 24ai (24.1) | | **Certified**, including the UI |
 | EM 13.5 | | **Certified**, the MySQL Database, MySQL InnoDB Cluster and MySQL InnoDB ClusterSet target types with the same features as on 24ai; console pages checked as in the note below. Supported in GA and GA Update 1; not built for releases after that |
+| Enterprise Manager MCP Server (24ai RU12 and later) | | **Validated** 2026-09-30 on EM 24ai 24.1.0.12 with a pre-release build: the three target types, their metric groups, units and incidents project to an AI client. See [chapter 11](mcp-server.md#the-plug-in-and-the-enterprise-manager-mcp-server) |
 
 **Enterprise Manager platform.** This release is certified on Enterprise Manager 24ai (24.1), including its console pages, and on Enterprise Manager 13.5 as the note below describes. Enterprise Manager 24ai is the reference platform.
 
@@ -99,6 +100,6 @@ This is the generally available (GA) release of the plug-in. It covers the three
 
 Earlier builds do not upgrade in place to this release: install it fresh and create the targets new ([3.4](install-and-upgrade.md#34-upgrading)). The onboarding script moves an existing estate across ([4.7](targets-and-properties.md#47-bulk-onboarding-and-migration)).
 
-**Give us feedback.** Send findings (bugs, confusing metrics, missing thresholds, unclear documentation) through your Integration Plumbers support contact. Include the plug-in version (`emcli list_plugins_on_server`), the MySQL version, and the metric group or console page involved. If you hit something that is not in the boundaries list in [10.4](whats-new.md#104-general-availability-2026-10-23), we especially want to hear about it.
+**Give us feedback.** Send findings (bugs, confusing metrics, missing thresholds, unclear documentation) to support; the troubleshooting page says where and what to include. Include the plug-in version (`emcli list_plugins_on_server`), the MySQL version, and the metric group or console page involved. If you hit something that is not in the boundaries list in [10.4](whats-new.md#104-general-availability-2026-10-23), we especially want to hear about it.
 
 > **Note:** [Chapter 6](metrics-reference.md#metrics-reference) points to the generated metrics reference, which is produced from the plug-in's own metadata for this exact build. Where this guide and the reference differ on a column, a unit or a threshold, the reference is authoritative.
