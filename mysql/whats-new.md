@@ -62,6 +62,7 @@ This release is a fresh install. No earlier build upgrades in place to it: insta
 - **Tables and Indexes show the last hourly collection** and carry no size-history chart. Index sizes are reported for InnoDB only ([5.1](monitoring-pages.md#51-mysql-database-pages)).
 - **Enterprise Manager 13.5 console pages.** All 28 pages of the three target types were walked on 13.5 with no error dialog. Some tables there keep the column widths Enterprise Manager gives them rather than being sized to their content; 24ai is the reference platform ([1.3](index.md#13-supported-mysql-versions-and-platforms)).
 - **MySQL versions outside the matrix are not blocked, only uncertified.** If an uncertified version misbehaves, the affected metric group degrades to a collection error rather than taking the target down ([1.3](index.md#13-supported-mysql-versions-and-platforms)).
+- **Enterprise Manager MCP Server.** The three target types, their metric groups, units and incidents are validated to project to an AI client through the Enterprise Manager 24ai Release Update 12 MCP server (validated 2026-09-30 on 24.1.0.12). [Chapter 11](mcp-server.md#the-plug-in-and-the-enterprise-manager-mcp-server) says what an assistant sees, how to connect one and where the boundary is.
 
 ## 10.3 Open Beta drop 10 (2026-09-16)
 

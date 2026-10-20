@@ -104,12 +104,6 @@ Every page is described in [Monitoring pages](monitoring-pages.md), and every me
 
 Start with [Troubleshooting](troubleshooting.md). It opens with the license-gate symptoms, which account for most of what people hit in the first hour. The target's Monitoring Readiness page checks the privileges, `performance_schema`, the `sys` schema, the backup tables, the license and MySQL Shell, and shows the statement to run for each gap.
 
-If the answer is not there, send it to your Integration Plumbers support contact, with:
-
-- the plug-in version (`emcli list_plugins_on_server`)
-- your EM version (24ai or 13.5)
-- the MySQL version and edition
-- the metric group or console page involved
-- any deploy log, agent log or collection-error text
+If the answer is not there, [Getting support](troubleshooting.md#support) on that page says where to write and gives the one-command support bundle to send with your report.
 
 Next: [Prerequisites](prerequisites.md) for the full requirements, or [Troubleshooting](troubleshooting.md) if something already needs fixing.
