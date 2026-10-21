@@ -7,7 +7,7 @@ nav_order: 25
 
 Ordered by how often each one actually happens.
 
-**In this page:** Target is Down · Target is Up but data is missing · A CRITICAL incident on the License metric · Certificate problems · Jobs fail · Import and deploy problems · What to send when you report something
+**In this page:** Target is Down · Target is Up but data is missing · A metric group is empty or its collection is failing · A CRITICAL incident on the License metric · Certificate problems · Jobs fail · Import and deploy problems · What to send when you report something
 
 ## Target is Down {#target-down}
 
@@ -16,6 +16,10 @@ Ordered by how often each one actually happens.
 **After a plug-in upgrade, on a target that verifies certificates.** A deploy cycle can reset truststore credentials to placeholder values. Re-apply them. Targets not verifying certificates are unaffected. See [TLS connections](tls.md#after-upgrade).
 
 **Intermittently.** Check the agent can still reach the instance on its port, and that the monitoring login has not expired or been locked out. A password policy that expires the monitoring login will take the target Down on the next collection with no other symptom.
+
+**With "refusing to build the JDBC URL" in the collection error.** The Host, Port or Named Instance property breaks the rules the plug-in checks before connecting: Host must be a hostname, an IPv4 address or a bracketed IPv6 address, optionally followed by `\INSTANCE`; Port a number from 1 to 65535; an instance name only the characters SQL Server allows in one. Correct the property in the target's monitoring configuration. The error names the property without repeating the value.
+
+**Briefly, after a failover cluster instance moved.** Expected: one or two one-minute samples while the instance comes online on the other node. Nothing to change if the target points at the virtual network name. If it stays Down, it points at a node. See [High availability](high-availability.md#fci).
 
 ## Target is Up but data is missing {#missing-data}
 
@@ -26,6 +30,27 @@ Ordered by how often each one actually happens.
 **A table shows fewer rows than you expect.** Some collections are deliberately filtered — index fragmentation only covers indexes above a size worth acting on, so small indexes are absent by design.
 
 **Two families report less on SQL Server 2016 and 2017.** TempDB contention collects, but its allocation-page and metadata-page waiter counts read zero and the advice cell is blank. Cluster nodes collects node names, but status, status description and current owner are blank. Both because the view that classifies a latched page by type arrived in 2019. Read a zero or a blank as "not classifiable on this version". Not a fault.
+
+**Non-ASCII text shows as question marks.** Every non-ASCII character in collected text, database, login and host names, SQL text, file paths, arrives as `?`, while numbers and ASCII text are fine. The agent is running without a UTF-8 locale. Restart it from a shell where one is set; see [Prerequisites](prerequisites.md#agent-locale).
+
+**A range page says no activity was collected, or that history starts later than your range.** The page can only sum what was stored. See [Pages that take a time range](monitoring-pages.md#timespan) for what the retention and rollup messages mean; on a newly deployed plug-in they are expected.
+
+**The Query Store views and the plan regression alert are empty.** Query Store is off in every user database, or the plug-in has not yet seen an interval close since it was deployed: the first collection records the server's time and only intervals that close after it are stored, and Query Store closes one every 60 minutes by default. Collector Status reads `NOT_CONFIGURED` for the Query Store groups with the reason when it is the former.
+
+## A metric group is empty or its collection is failing {#collector-status}
+
+An empty metric group looks the same on the All Metrics page, and to an AI client reading through the MCP Server, whether the feature is not set up, the group has not run yet, there was nothing to report, or the collection is failing. The **Collector Status** metric tells them apart: one row per metric group of the target, refreshed every 5 minutes even while the target is Down, with a status word from a closed set, the reason in plain text, the rows the last run returned and when it ran. Find it under the target's **All Metrics**.
+
+| Status | Means | What to do |
+|---|---|---|
+| `OK` | The last collection returned rows. A group that handles its own failure and still reports a value reads `OK` too, for example Response reporting the instance down after a failed login, so `OK` does not prove the credentials work: a broken credential shows as the target going Down. | Nothing. |
+| `NOT_CONFIGURED` | The feature the group measures is not set up on this instance: Always On not enabled or no availability group, not a failover cluster instance, no mirrored database, no user database with Query Store on. Reason says which. | Nothing, unless the feature should be there. |
+| `NOT_COLLECTED_YET` | The group has not completed a collection on this target, usually a target added less than one interval ago. Some groups collect once a day. | Read again after the interval. |
+| `NO_DATA` | It collected and there was nothing to report, for example no locks held right now, or this replica is not the primary of its availability group. | Nothing. |
+| `COLLECTION_ERROR` | The collection failed. Reason carries the error. Seen on two checks in a row, 5 minutes apart, it raises a CRITICAL incident, "Collection of the ... metric group is failing", which stays open until that group's next successful run. For a group that collects hourly or daily, one failed run raises it. | Fix the cause, usually a grant the monitoring login lacks, a permission on the instance, or reachability. [Credentials](credentials.md#grants) lists the grants. |
+| `DISABLED` | Skipped by design on this target, for example the Windows registry group on a Linux-hosted instance. | Nothing. |
+
+The last attempt time is a number, seconds since 1970 in UTC, blank for a group that has never run; the older text column beside it is always blank by design. A row named `_Vocabulary` lists the whole status set in its Reason column. Two limits: the status is what the agent observed, so it can lead the repository by one upload interval, and if the agent itself is down the statuses go stale with it, which the target's own availability says.
 
 ## A CRITICAL incident on the License metric {#license}
 
@@ -62,6 +87,12 @@ Quickest diagnostic: set the target's TLS Mode to `required`. If it comes Up, th
 
 **Permission denied.** Jobs need grants beyond the monitoring login's read-only set — see the table in [Jobs](jobs.md#grants). Delete backup needs `sysadmin` by SQL Server's own design and is meant to be run with override credentials.
 
+**Create index says "Cannot find the object", or created the index in master.** The table name was given as `schema.table` and resolved in the monitoring login's default database. Give the three-part name, `database.schema.table`, or use the dialog on the Indexes page, which builds it for you. See [Jobs](jobs.md#gotchas).
+
+**Show plan found no plan.** The job's message says why where it can: the plan has left the plan cache and Query Store is off in that database, the database is not online, or the monitoring login cannot open it. A plan older than Query Store's retention, 30 days by default, is gone.
+
+**A parameter was rejected with a message naming it.** The value would have added or repeated an argument the job passes to the agent. Remove the stray characters from that parameter; a comma inside a value is fine and is kept as part of the value.
+
 ## Import and deploy problems {#import-deploy}
 
 **Incompatible version on import.** The archive was built for a different Enterprise Manager release. Use the build matching yours — see [Install and upgrade](install-and-upgrade.md#which-build).
@@ -87,4 +118,5 @@ For a target that has been up less than a day, say so — it changes what an emp
 - [TLS connections](tls.md#failures) - certificate and PKIX failures in detail
 - [Jobs](jobs.md#gotchas) - the job failures that have no obvious cause
 - [Monitoring pages](monitoring-pages.md#blank) - a blank region that is not a fault
+- [AI clients and the MCP Server](mcp-server.md) - what an assistant sees, and how it should read Collector Status
 - [What's new](whats-new.md#ga) - the known limitations and boundaries of this release, so you can tell a known one from a new one

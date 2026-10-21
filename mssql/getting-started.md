@@ -59,7 +59,7 @@ The cards below those show the sessions consuming the most CPU, and every open i
 | [Alerts and thresholds](alerts-and-thresholds.md) | What will alert you, and at what values, before it does |
 | [AG Failover Readiness](monitoring-pages.md#ag-failover) | If the instance is in an availability group |
 
-Reading the thresholds page early is worth the five minutes. Fourteen thresholds are live from the moment the target exists, and it is better to know what they are than to meet them at 3am.
+Reading the thresholds page early is worth the five minutes. Twenty thresholds are live from the moment the target exists, and it is better to know what they are than to meet them at 3am.
 
 ## If something is wrong {#wrong}
 

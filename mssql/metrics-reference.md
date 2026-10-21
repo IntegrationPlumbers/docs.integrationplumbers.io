@@ -9,7 +9,7 @@ nav_order: 11
 
 This page is generated from the plug-in's own target metadata, for the exact build you deploy, rather than written by hand - so it cannot drift from what the plug-in actually collects. Where another page and this one disagree on a column name, a unit or a threshold, this page is authoritative.
 
-It covers all 74 metric groups and 620 columns on the `ip_mssql_database` target type, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship.
+It covers all 78 metric groups and 703 columns on the `ip_mssql_database` target type, each with its collection schedule, its columns, their display labels and units, and the default thresholds that ship.
 
 ## How to read a metric group
 
@@ -20,7 +20,7 @@ Every entry has the same shape. The heading gives the group's display name, its 
 | **Column** | The column's internal name, in the form EM CLI and threshold commands take. A `(key)` marker means the column is part of the group's key, so the group returns one row per distinct key value - per database, per index, per wait type - rather than a single row. A group with no key column returns exactly one row per collection. |
 | **Label** | The display name shown in the console. |
 | **Unit** | The unit Enterprise Manager labels the value with, for example `KB`, `SECOND`, `PERCENTAGE` or `BOOLEAN`. `NA` means the value carries no unit - a count, a state or a string. |
-| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 14 curated thresholds ship, listed on [Alerts and thresholds](alerts-and-thresholds.md). A blank cell is not an omission and it does not stop you setting your own. |
+| **Warning** / **Critical** | The default threshold that ships for the column, with its operator. **A blank cell means no default threshold**, which is the normal case: 20 curated thresholds ship, listed on [Alerts and thresholds](alerts-and-thresholds.md). A blank cell is not an omission and it does not stop you setting your own. |
 
 Groups marked **configuration snapshot** in their heading behave differently. They collect into Enterprise Manager's configuration history rather than into the metric tables, which is what makes an instance's settings comparable over time and against other instances under **Enterprise -> Configuration**, and what the [compliance rules](compliance-rules.md) evaluate. They carry no thresholds and raise no alerts.
 
@@ -34,7 +34,7 @@ Availability. EM derives the target's Up/Down state from the Status column; a St
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
-| `Status` | Status (up/down) | NA |  | < 1 |
+| `Status` | Status (1 = up, 0 = down) | NA |  | < 1 |
 
 ### Memory Usage (`MemoryUsage`) - collected every 15 Min
 
@@ -47,12 +47,12 @@ Host and SQL Server memory from sys.dm_os_sys_memory and sys.dm_os_process_memor
 | `server_memory_kb` | Host Used Memory (KB) | KB |  |  |
 | `total_page_file_kb` | Total Page File (KB) | KB |  |  |
 | `available_page_file_kb` | Available Page File (KB) | KB |  |  |
-| `system_memory_state_desc` | System Memory State | NA |  |  |
+| `system_memory_state_desc` | System Memory State (text: memory high | low | steady | ...) | NA |  |  |
 | `sql_process_memory_kb` | SQL Server Process Memory (KB) | KB |  |  |
 
 ### Processor (`Processor`) - collected every 15 Min
 
-CPU counts and utilization from sys.dm_os_sys_info and the scheduler ring buffer, split into the SQL Server process, other processes, and idle. On SQL Server 2017, 2019 and 2022 on Linux the OS idle counter is unreadable, so the three utilization columns are EMPTY rather than zero and cpu_counters_available is 0 - read that flag before treating a zero as a measurement, since an absent numeric is rendered as 0 by some clients. A genuinely saturated host reads the same way. See the known-limitations section of the Early-Access guide.
+CPU counts and utilization from sys.dm_os_sys_info and the scheduler ring buffer, split into the SQL Server process, other processes, and idle. On SQL Server 2017, 2019 and 2022 on Linux the OS idle counter is unreadable, so the three utilization columns are EMPTY rather than zero and cpu_counters_available is 0 - read that flag before treating a zero as a measurement, since an absent numeric is rendered as 0 by some clients. A genuinely saturated host reads the same way. See the boundaries list in the user guide's release notes (section 14.1).
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -62,11 +62,11 @@ CPU counts and utilization from sys.dm_os_sys_info and the scheduler ring buffer
 | `system_idle` | System Idle (%) | PERCENTAGE |  |  |
 | `other_process_utilization` | Other Process CPU (%) | PERCENTAGE |  |  |
 | `cpu_utilization_pct` | CPU Utilization (%) | PERCENTAGE | > 80 | > 90 |
-| `cpu_counters_available` | CPU Counters Available (1 = OS idle readable) | BOOLEAN |  |  |
+| `cpu_counters_available` | CPU Counters Available (0/1: 1 = OS idle readable) | BOOLEAN |  |  |
 
 ### Volume Space (`VolumeSpace`) - collected every 15 Min
 
-Total and available space per volume hosting database files, from sys.dm_os_volume_stats. One row per distinct mount point.
+Total and available space per volume hosting database files, from sys.dm_os_volume_stats, with a ships-enabled low-space threshold on the available percentage. One row per distinct mount point; on Linux every volume collapses into one row holding the smallest free space.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -74,7 +74,7 @@ Total and available space per volume hosting database files, from sys.dm_os_volu
 | `logical_volume_name` | Logical Volume Name | NA |  |  |
 | `total_bytes` | Total Bytes | BYTE |  |  |
 | `available_bytes` | Available Bytes | BYTE |  |  |
-| `available_pct` | Available (%) | PERCENTAGE |  |  |
+| `available_pct` | Available (%) | PERCENTAGE | < 10 | < 5 |
 
 ### SQL Server Configuration (`SQLServer`) - collected every 24 Hr
 
@@ -89,9 +89,9 @@ Instance identity and edition - server and machine name, edition, product versio
 | `product_version` | Product Version | NA |  |  |
 | `product_level` | Product Level | NA |  |  |
 | `collation` | Server Collation | NA |  |  |
-| `is_clustered` | Is Clustered (FCI) | BOOLEAN |  |  |
-| `is_hadr_enabled` | Is AlwaysOn AG Enabled | BOOLEAN |  |  |
-| `is_integrated_security_only` | Windows-Authentication-Only Mode | BOOLEAN |  |  |
+| `is_clustered` | Clustered FCI (0/1: 1 = clustered) | BOOLEAN |  |  |
+| `is_hadr_enabled` | AlwaysOn AG Enabled (0/1: 1 = enabled) | BOOLEAN |  |  |
+| `is_integrated_security_only` | Windows Auth Only (0/1: 1 = Windows authentication only) | BOOLEAN |  |  |
 
 ### Databases (`Database`) - collected every 24 Hr
 
@@ -101,14 +101,14 @@ Per-database inventory from sys.databases - state, recovery model, compatibility
 |---|---|---|---|---|
 | `database_name` (key) | Database Name | NA |  |  |
 | `database_id` | Database ID | NA |  |  |
-| `state_desc` | State | NA |  |  |
-| `recovery_model_desc` | Recovery Model | NA |  |  |
+| `state_desc` | Database State (ONLINE | RESTORING | RECOVERING | SUSPECT | ...) | NA |  |  |
+| `recovery_model_desc` | Recovery Model (SIMPLE | FULL | BULK_LOGGED) | NA |  |  |
 | `compatibility_level` | Compatibility Level | NA |  |  |
 | `collation_name` | Collation | NA |  |  |
 | `create_date` | Create Date | NA |  |  |
-| `is_read_only` | Is Read Only | BOOLEAN |  |  |
-| `containment_desc` | Containment | NA |  |  |
-| `log_reuse_wait_desc` | Log Reuse Wait | NA |  |  |
+| `is_read_only` | Read Only (0/1: 1 = read only) | BOOLEAN |  |  |
+| `containment_desc` | Containment (NONE | PARTIAL) | NA |  |  |
+| `log_reuse_wait_desc` | Log Reuse Wait (NOTHING | LOG_BACKUP | ACTIVE_TRANSACTION | ...) | NA |  |  |
 | `owner` | Owner | NA |  |  |
 
 ### Database Settings (`DatabaseSetting`) - collected every 24 Hr
@@ -118,15 +118,15 @@ Per-database options that matter for correctness and performance: auto-close, au
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `database_name` (key) | Database Name | NA |  |  |
-| `is_auto_close_on` | Auto Close | BOOLEAN |  |  |
-| `is_auto_shrink_on` | Auto Shrink | BOOLEAN |  |  |
-| `is_auto_create_stats_on` | Auto Create Statistics | BOOLEAN |  |  |
-| `is_auto_update_stats_on` | Auto Update Statistics | BOOLEAN |  |  |
-| `page_verify_option_desc` | Page Verify Option | NA |  |  |
-| `snapshot_isolation_state_desc` | Snapshot Isolation | NA |  |  |
-| `is_read_committed_snapshot_on` | Read Committed Snapshot | BOOLEAN |  |  |
-| `is_trustworthy_on` | Trustworthy | BOOLEAN |  |  |
-| `is_broker_enabled` | Service Broker Enabled | BOOLEAN |  |  |
+| `is_auto_close_on` | Auto Close (0/1: 1 = on) | BOOLEAN |  |  |
+| `is_auto_shrink_on` | Auto Shrink (0/1: 1 = on) | BOOLEAN |  |  |
+| `is_auto_create_stats_on` | Auto Create Statistics (0/1: 1 = on) | BOOLEAN |  |  |
+| `is_auto_update_stats_on` | Auto Update Statistics (0/1: 1 = on) | BOOLEAN |  |  |
+| `page_verify_option_desc` | Page Verify (NONE | TORN_PAGE_DETECTION | CHECKSUM) | NA |  |  |
+| `snapshot_isolation_state_desc` | Snapshot Isolation (OFF | ON | IN_TRANSITION_TO_ON | ...) | NA |  |  |
+| `is_read_committed_snapshot_on` | Read Committed Snapshot (0/1: 1 = on) | BOOLEAN |  |  |
+| `is_trustworthy_on` | Trustworthy (0/1: 1 = on) | BOOLEAN |  |  |
+| `is_broker_enabled` | Service Broker Enabled (0/1: 1 = enabled) | BOOLEAN |  |  |
 
 ### Database Status (`DatabaseStatus`) - collected every 24 Hr
 
@@ -136,11 +136,11 @@ Per-database availability state - online/offline/restoring, user access mode, st
 |---|---|---|---|---|
 | `database_name` (key) | Database Name | NA |  |  |
 | `database_id` | Database ID | NA |  |  |
-| `state_desc` | State | NA |  |  |
-| `user_access_desc` | User Access | NA |  |  |
-| `is_in_standby` | Is In Standby | BOOLEAN |  |  |
-| `is_read_only` | Is Read Only | BOOLEAN |  |  |
-| `is_encrypted` | Is Encrypted (TDE) | BOOLEAN |  |  |
+| `state_desc` | Database State (ONLINE | RESTORING | RECOVERING | SUSPECT | ...) | NA |  |  |
+| `user_access_desc` | User Access (MULTI_USER | SINGLE_USER | RESTRICTED_USER) | NA |  |  |
+| `is_in_standby` | In Standby (0/1: 1 = standby) | BOOLEAN |  |  |
+| `is_read_only` | Read Only (0/1: 1 = read only) | BOOLEAN |  |  |
+| `is_encrypted` | TDE Encrypted (0/1: 1 = encrypted) | BOOLEAN |  |  |
 
 ### Server Configuration Parameters (`DatabaseParameter`) - collected every 24 Hr
 
@@ -154,8 +154,8 @@ Server-level settings from sys.configurations: the configured value, the value i
 | `value_in_use` | Running Value | NA |  |  |
 | `minimum` | Minimum | NA |  |  |
 | `maximum` | Maximum | NA |  |  |
-| `is_dynamic` | Is Dynamic | BOOLEAN |  |  |
-| `is_advanced` | Is Advanced | BOOLEAN |  |  |
+| `is_dynamic` | Dynamic (0/1: 1 = takes effect without restart) | BOOLEAN |  |  |
+| `is_advanced` | Advanced Option (0/1: 1 = advanced) | BOOLEAN |  |  |
 
 ### Database Files (`DatabaseFile`) - collected every 24 Hr
 
@@ -166,13 +166,13 @@ Every data and log file from sys.master_files - type, physical path, state, curr
 | `database_name` (key) | Database Name | NA |  |  |
 | `logical_name` (key) | Logical Name | NA |  |  |
 | `file_id` | File ID | NA |  |  |
-| `type_desc` | File Type | NA |  |  |
+| `type_desc` | File Type (ROWS | LOG | FILESTREAM | FULLTEXT) | NA |  |  |
 | `physical_name` | Physical Path | NA |  |  |
-| `state_desc` | State | NA |  |  |
+| `state_desc` | File State (ONLINE | RESTORING | RECOVERING | OFFLINE | DEFUNCT) | NA |  |  |
 | `size_kb` | Size (KB) | KB |  |  |
 | `max_size_kb` | Max Size (KB, -1=unlimited) | KB |  |  |
-| `growth_raw` | Growth (pages or percent) | NA |  |  |
-| `is_percent_growth` | Growth Is Percent | BOOLEAN |  |  |
+| `growth_raw` | Growth (pages, or percent when Growth Is Percent = 1) | NA |  |  |
+| `is_percent_growth` | Growth Is Percent (0/1: 1 = percent, 0 = pages) | BOOLEAN |  |  |
 
 ### File Groups (`FileGroup`) - collected every 24 Hr
 
@@ -183,15 +183,15 @@ Filegroups per database - type, default and read-only flags, the number of files
 | `database_name` (key) | Database Name | NA |  |  |
 | `filegroup_name` (key) | File Group Name | NA |  |  |
 | `filegroup_id` | File Group ID | NA |  |  |
-| `type_desc` | Type | NA |  |  |
-| `is_default` | Is Default | BOOLEAN |  |  |
-| `is_read_only` | Is Read Only | BOOLEAN |  |  |
+| `type_desc` | File Group Type (ROWS_FILEGROUP | FILESTREAM_DATA_... | ...) | NA |  |  |
+| `is_default` | Default File Group (0/1: 1 = default) | BOOLEAN |  |  |
+| `is_read_only` | Read Only (0/1: 1 = read only) | BOOLEAN |  |  |
 | `file_count` | File Count | NA |  |  |
 | `total_size_kb` | Total Size (KB) | KB |  |  |
 
 ### Database Free Space (`DbFreespace`) - collected every 24 Hr
 
-Allocated, used and free space per database with the free percentage, which carries the ships-enabled low-free-space threshold.
+Allocated, used and free space per database, plus the size autogrowth can reach (up to each file's max size or the volume's free space) and the headroom left before it, which carries the ships-enabled low-space threshold.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -199,7 +199,10 @@ Allocated, used and free space per database with the free percentage, which carr
 | `allocated_kb` | Allocated (KB) | KB |  |  |
 | `used_kb` | Used (KB) | KB |  |  |
 | `free_kb` | Free (KB) | KB |  |  |
-| `free_pct` | Free (%) | PERCENTAGE | < 15 | < 5 |
+| `free_pct` | Free (% of allocated size) | PERCENTAGE |  |  |
+| `reachable_kb` | Reachable Size (KB, with autogrowth and volume free space) | KB |  |  |
+| `headroom_kb` | Headroom (KB, reachable size minus used) | KB |  |  |
+| `headroom_pct` | Headroom (% of reachable size) | PERCENTAGE | < 15 | < 5 |
 
 ### Host Info (`HostInfo`) - collected every 1 Hr
 
@@ -211,18 +214,19 @@ Operating system platform, distribution, release, service pack and SKU from sys.
 | `host_distribution` | Host Distribution | NA |  |  |
 | `host_release` | Host Release | NA |  |  |
 | `host_service_pack_level` | Host Service Pack Level | NA |  |  |
-| `host_sku` | Host SKU (Windows only) | NA |  |  |
-| `os_language_version` | OS Language Version | NA |  |  |
+| `host_sku` | Host SKU (Windows code; blank if Host Platform is Linux) | NA |  |  |
+| `os_language_version` | OS Language Version (Windows code; 0 on Linux) | NA |  |  |
 
 ### Registry Setting (`RegistrySetting`) - collected every 24 Hr
 
-Windows registry values for the instance. Windows-only enrichment; the group returns an empty result on Linux rather than erroring.
+Windows registry values for the instance. Windows-only enrichment; the group returns an empty result on Linux rather than erroring. is_numeric_value is 1 when Value Data is a number and 0 otherwise (text, binary or empty).
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `registry_key` (key) | Registry Key | NA |  |  |
 | `value_name` (key) | Value Name | NA |  |  |
 | `value_data` | Value Data | NA |  |  |
+| `is_numeric_value` | Numeric Value (0/1: 1 = Value Data is a number) | BOOLEAN |  |  |
 
 ### FCI / Cluster Identity (`FciIdentity`) - collected every 15 Min
 
@@ -230,12 +234,12 @@ Failover-cluster identity - whether the instance is clustered, the active node, 
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
-| `is_clustered` | Is Clustered (FCI) | BOOLEAN |  |  |
+| `is_clustered` | Clustered FCI (0/1: 1 = clustered) | BOOLEAN |  |  |
 | `machine_name` | Virtual Machine Name | NA |  |  |
 | `active_node` | Active Node | NA |  |  |
 | `host_platform` | Host Platform | NA |  |  |
-| `has_availability_group` | Hosts Availability Group | BOOLEAN |  |  |
-| `external_cluster_boundary` | External Cluster Boundary (Pacemaker) | BOOLEAN |  |  |
+| `has_availability_group` | Hosts Availability Group (0/1: 1 = yes) | BOOLEAN |  |  |
+| `external_cluster_boundary` | External Cluster Boundary (0/1: 1 = Pacemaker, not WSFC) | BOOLEAN |  |  |
 
 ### Cluster Nodes (`ClusterNodes`) - collected every 15 Min
 
@@ -244,9 +248,9 @@ WSFC cluster node list with each node's status and whether it currently owns the
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `node_name` (key) | Node Name | NA |  |  |
-| `status` | Status | NA |  |  |
-| `status_description` | Status Description | NA |  |  |
-| `is_current_owner` | Is Current Owner | BOOLEAN |  |  |
+| `status` | Node Status (0 = up, 1 = down, 2 = paused, 3 = joining) | NA |  |  |
+| `status_description` | Node Status Description (Up | Down | Paused | Joining) | NA |  |  |
+| `is_current_owner` | Current Owner (0/1: 1 = node owns the instance) | BOOLEAN |  |  |
 
 ### General Statistics (`GeneralStatistics`) - collected every 30 Min
 
@@ -255,8 +259,8 @@ SQL Server General Statistics performance counters - connections, processes and 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `counter_name` (key) | Counter | NA |  |  |
-| `cntr_type` | Counter Type | NA |  |  |
-| `cntr_value` | Value | NA |  |  |
+| `cntr_type` | Counter Type (272696576 = bulk count, 65792 = gauge, ...) | NA |  |  |
+| `cntr_value` | Value (per sec for Counter Type 272696576, else raw) | NA |  |  |
 
 ### SQL Statistics (`SQLStatistics`) - collected every 10 Min
 
@@ -265,8 +269,8 @@ SQL Server SQL Statistics performance counters - batch requests, compilations an
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `counter_name` (key) | Counter | NA |  |  |
-| `cntr_type` | Counter Type | NA |  |  |
-| `cntr_value` | Value | NA |  |  |
+| `cntr_type` | Counter Type (272696576 = bulk count, 65792 = gauge, ...) | NA |  |  |
+| `cntr_value` | Value (per sec for Counter Type 272696576, else raw) | NA |  |  |
 
 ### Access Methods (`AccessMethods`) - collected every 30 Min
 
@@ -275,8 +279,8 @@ SQL Server Access Methods performance counters - scans, page splits, and index a
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `counter_name` (key) | Counter | NA |  |  |
-| `cntr_type` | Counter Type | NA |  |  |
-| `cntr_value` | Value | NA |  |  |
+| `cntr_type` | Counter Type (272696576 = bulk count, 65792 = gauge, ...) | NA |  |  |
+| `cntr_value` | Value (per sec for Counter Type 272696576, else raw) | NA |  |  |
 
 ### Buffer Manager (`BufferManager`) - collected every 15 Min
 
@@ -285,8 +289,8 @@ SQL Server Buffer Manager performance counters - page life expectancy, buffer ca
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `counter_name` (key) | Counter | NA |  |  |
-| `cntr_type` | Counter Type | NA |  |  |
-| `cntr_value` | Value | NA |  |  |
+| `cntr_type` | Counter Type (272696576 = bulk count, 65792 = gauge, ...) | NA |  |  |
+| `cntr_value` | Value (per sec for Counter Type 272696576, else raw) | NA |  |  |
 
 ### Memory Manager (`MemoryManager`) - collected every 15 Min
 
@@ -295,8 +299,8 @@ SQL Server Memory Manager performance counters - target and total server memory,
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `counter_name` (key) | Counter | NA |  |  |
-| `cntr_type` | Counter Type | NA |  |  |
-| `cntr_value` | Value | NA |  |  |
+| `cntr_type` | Counter Type (272696576 = bulk count, 65792 = gauge, ...) | NA |  |  |
+| `cntr_value` | Value (per sec for Counter Type 272696576, else raw) | NA |  |  |
 
 ### Latches (`Latches`) - collected every 15 Min
 
@@ -305,8 +309,8 @@ SQL Server Latches performance counters - latch waits and average latch wait tim
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `counter_name` (key) | Counter | NA |  |  |
-| `cntr_type` | Counter Type | NA |  |  |
-| `cntr_value` | Value | NA |  |  |
+| `cntr_type` | Counter Type (272696576 = bulk count, 65792 = gauge, ...) | NA |  |  |
+| `cntr_value` | Value (per sec for Counter Type 272696576, else raw) | NA |  |  |
 
 ### Cache Manager (`CacheManager`) - collected every 15 Min
 
@@ -316,8 +320,8 @@ SQL Server Plan Cache performance counters per cache type - cache hit ratio, obj
 |---|---|---|---|---|
 | `counter_name` (key) | Counter | NA |  |  |
 | `instance_name` (key) | Cache Type | NA |  |  |
-| `cntr_type` | Counter Type | NA |  |  |
-| `cntr_value` | Value | NA |  |  |
+| `cntr_type` | Counter Type (272696576 = bulk count, 65792 = gauge, ...) | NA |  |  |
+| `cntr_value` | Value (per sec for Counter Type 272696576, else raw) | NA |  |  |
 
 ### Process Stats (`ProcessStats`) - collected every 15 Min
 
@@ -372,16 +376,17 @@ Average latch wait time in milliseconds, isolated as a single numeric row so it 
 
 ### Availability Groups (`AvailabilityGroups`) - collected every 15 Min
 
-One row per availability group - the current primary replica, the primary and secondary recovery health, and the group's overall synchronization health.
+One row per availability group - the current primary replica, the primary and secondary recovery health, and the group's overall synchronization health, as text and as the DMV's code (0 not healthy, 1 partially healthy, 2 healthy, -1 unknown).
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `group_id` (key) | Group ID | NA |  |  |
 | `group_name` | Group Name | NA |  |  |
 | `primary_replica` | Primary Replica | NA |  |  |
-| `primary_recovery_health_desc` | Primary Recovery Health | NA |  |  |
-| `secondary_recovery_health_desc` | Secondary Recovery Health | NA |  |  |
-| `synchronization_health_desc` | Synchronization Health | NA |  |  |
+| `primary_recovery_health_desc` | Primary Recovery Health (ONLINE_IN_PROGRESS | ONLINE) | NA |  |  |
+| `secondary_recovery_health_desc` | Secondary Recovery Health (ONLINE_IN_PROGRESS | ONLINE) | NA |  |  |
+| `synchronization_health_desc` | Sync Health (NOT_HEALTHY | PARTIALLY_HEALTHY | HEALTHY) | NA |  |  |
+| `synchronization_health` | Sync Health Code (0=unhealthy, 1=partial, 2=healthy, -1=unknown) | NA |  |  |
 
 ### Availability Replicas (`Replicas`) - collected every 15 Min
 
@@ -392,13 +397,13 @@ One row per replica in every availability group - server name, role, operational
 | `replica_id` (key) | Replica ID | NA |  |  |
 | `group_id` | Group ID | NA |  |  |
 | `replica_server_name` | Replica Server | NA |  |  |
-| `is_local` | Is Local | BOOLEAN |  |  |
-| `role_desc` | Role | NA |  |  |
-| `operational_state_desc` | Operational State | NA |  |  |
-| `connected_state_desc` | Connected State | NA |  |  |
-| `recovery_health_desc` | Recovery Health | NA |  |  |
-| `synchronization_health_desc` | Synchronization Health | NA |  |  |
-| `join_state_desc` | Join State | NA |  |  |
+| `is_local` | Local Replica (0/1: 1 = this instance) | BOOLEAN |  |  |
+| `role_desc` | Role (PRIMARY | SECONDARY | RESOLVING) | NA |  |  |
+| `operational_state_desc` | Operational State (ONLINE | OFFLINE | PENDING | FAILED | ...) | NA |  |  |
+| `connected_state_desc` | Connected State (DISCONNECTED | CONNECTED) | NA |  |  |
+| `recovery_health_desc` | Recovery Health (ONLINE_IN_PROGRESS | ONLINE) | NA |  |  |
+| `synchronization_health_desc` | Sync Health (NOT_HEALTHY | PARTIALLY_HEALTHY | HEALTHY) | NA |  |  |
+| `join_state_desc` | Join State (NOT_JOINED | JOINED_STANDALONE | JOINED_...) | NA |  |  |
 
 ### Availability Databases (`AvailabilityDatabases`) - collected every 15 Min
 
@@ -409,9 +414,9 @@ Per-database, per-replica failover state - whether the database is failover-read
 | `replica_id` (key) | Replica ID | NA |  |  |
 | `group_database_id` (key) | Group Database ID | NA |  |  |
 | `database_name` | Database Name | NA |  |  |
-| `is_failover_ready` | Is Failover Ready | BOOLEAN |  |  |
-| `is_pending_secondary_suspend` | Is Pending Secondary Suspend | BOOLEAN |  |  |
-| `is_database_joined` | Is Database Joined | BOOLEAN |  |  |
+| `is_failover_ready` | Failover Ready (0/1: 1 = ready) | BOOLEAN |  |  |
+| `is_pending_secondary_suspend` | Pending Secondary Suspend (0/1: 1 = pending) | BOOLEAN |  |  |
+| `is_database_joined` | Database Joined (0/1: 1 = joined) | BOOLEAN |  |  |
 | `recovery_lsn` | Recovery LSN | NA |  |  |
 | `truncation_lsn` | Truncation LSN | NA |  |  |
 
@@ -425,11 +430,11 @@ Per-database synchronization state on each replica - synchronization state and h
 | `replica_id` (key) | Replica ID | NA |  |  |
 | `database_id` (key) | Database ID | NA |  |  |
 | `database_name` | Database Name | NA |  |  |
-| `is_local` | Is Local | BOOLEAN |  |  |
-| `is_primary_replica` | Is Primary Replica | BOOLEAN |  |  |
-| `synchronization_state_desc` | Synchronization State | NA |  |  |
-| `synchronization_health_desc` | Synchronization Health | NA |  |  |
-| `is_suspended` | Is Suspended | BOOLEAN |  |  |
+| `is_local` | Local Replica (0/1: 1 = this instance) | BOOLEAN |  |  |
+| `is_primary_replica` | Primary Replica (0/1: 1 = primary) | BOOLEAN |  |  |
+| `synchronization_state_desc` | Sync State (SYNCHRONIZED | SYNCHRONIZING | NOT SYNC... | ...) | NA |  |  |
+| `synchronization_health_desc` | Sync Health (NOT_HEALTHY | PARTIALLY_HEALTHY | HEALTHY) | NA |  |  |
+| `is_suspended` | Suspended (0/1: 1 = data movement suspended) | BOOLEAN |  |  |
 
 ### AlwaysOn Cluster (WSFC Quorum) (`HadrCluster`) - collected every 15 Min
 
@@ -438,10 +443,10 @@ The WSFC quorum backing AlwaysOn - cluster name, quorum type and quorum state. E
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `cluster_name` (key) | Cluster Name | NA |  |  |
-| `quorum_type` | Quorum Type | NA |  |  |
-| `quorum_type_desc` | Quorum Type Description | NA |  |  |
-| `quorum_state` | Quorum State | NA |  |  |
-| `quorum_state_desc` | Quorum State Description | NA |  |  |
+| `quorum_type` | Quorum Type (0 = node, 1 = node+disk, 2 = node+share, 3 = disk) | NA |  |  |
+| `quorum_type_desc` | Quorum Type (NODE_MAJORITY | NODE_AND_DISK_MAJORITY | ...) | NA |  |  |
+| `quorum_state` | Quorum State (0 = unknown, 1 = normal, 2 = forced) | NA |  |  |
+| `quorum_state_desc` | Quorum State (NORMAL_QUORUM | FORCED_QUORUM | UNKNOWN_...) | NA |  |  |
 
 ### AlwaysOn Enabled (`HadrEnabled`) - collected every 15 Min
 
@@ -449,7 +454,7 @@ Whether the AlwaysOn Availability Groups feature is enabled on the instance. A s
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
-| `is_hadr_enabled` | Is AlwaysOn Enabled | BOOLEAN |  |  |
+| `is_hadr_enabled` | AlwaysOn Enabled (0/1: 1 = enabled) | BOOLEAN |  |  |
 
 ### AG Failover Readiness (`AgFailoverReadiness`) - collected every 15 Min
 
@@ -463,20 +468,22 @@ The flagship AlwaysOn surface: per-database recovery point and recovery time est
 | `ag_name` | Availability Group | NA |  |  |
 | `database_name` | Database | NA |  |  |
 | `replica_server_name` | Secondary Replica | NA |  |  |
-| `synchronization_state_desc` | Synchronization State | NA |  |  |
-| `synchronization_health_desc` | Synchronization Health | NA |  |  |
-| `is_suspended` | Suspended | BOOLEAN |  |  |
+| `synchronization_state_desc` | Sync State (SYNCHRONIZED | SYNCHRONIZING | NOT SYNC... | ...) | NA |  |  |
+| `synchronization_health_desc` | Sync Health (NOT_HEALTHY | PARTIALLY_HEALTHY | HEALTHY) | NA |  |  |
+| `is_suspended` | Suspended (0/1: 1 = data movement suspended) | BOOLEAN |  |  |
 | `log_send_queue_kb` | Log Send Queue (KB) | KB | > 1048576 | > 5242880 |
 | `redo_queue_kb` | Redo Queue (KB) | KB | > 1048576 | > 5242880 |
 | `redo_rate_kb_s` | Redo Rate (KB/s) | KBPS |  |  |
 | `rpo_seconds` | RPO - Est. Data Loss (s) | SECOND | > 300 | > 900 |
 | `rto_seconds` | RTO - Est. Recovery (s) | SECOND |  |  |
-| `readiness` | Failover Ready (1/0) | BOOLEAN |  |  |
-| `link_healthy` | Replica Link Healthy (1/0) | BOOLEAN |  | < 1 |
+| `readiness` | Failover Ready (0/1: 1 = ready) | BOOLEAN |  |  |
+| `link_healthy` | Replica Link Healthy (0/1: 1 = healthy) | BOOLEAN |  | < 1 |
 | `last_commit_primary` | Primary Last Commit | NA |  |  |
 | `last_commit_secondary` | Secondary Last Commit | NA |  |  |
-| `commit_position_known` | Commit Position Known (1 = RPO is measured) | BOOLEAN |  |  |
-| `queue_state_known` | Queue State Known (1 = queue sizes reported) | BOOLEAN |  |  |
+| `commit_position_known` | Commit Position Known (0/1: 1 = RPO is measured) | BOOLEAN |  |  |
+| `queue_state_known` | Queue State Known (0/1: 1 = queue sizes reported) | BOOLEAN |  |  |
+| `log_send_rate_kb_s` | Log Send Rate (KB/s) | KBPS |  |  |
+| `synchronization_state` | Sync State (0=not sync, 1=syncing, 2=synced, 3=revert, 4=init) | NA |  |  |
 
 ### Database Mirroring (`MirroringMonitoring`) - collected every 15 Min
 
@@ -486,13 +493,13 @@ Legacy database mirroring state per database - mirroring state, role, safety lev
 |---|---|---|---|---|
 | `database_id` (key) | Database ID | NA |  |  |
 | `database_name` | Database Name | NA |  |  |
-| `mirroring_state_desc` | Mirroring State | NA |  |  |
-| `mirroring_role_desc` | Mirroring Role | NA |  |  |
-| `mirroring_safety_level_desc` | Safety Level | NA |  |  |
+| `mirroring_state_desc` | Mirroring State (SYNCHRONIZED | SYNCHRONIZING | SUSPENDED | ...) | NA |  |  |
+| `mirroring_role_desc` | Mirroring Role (PRINCIPAL | MIRROR) | NA |  |  |
+| `mirroring_safety_level_desc` | Safety Level (FULL | OFF | UNKNOWN) | NA |  |  |
 | `mirroring_partner_name` | Partner Name | NA |  |  |
 | `mirroring_partner_instance` | Partner Instance | NA |  |  |
 | `mirroring_witness_name` | Witness Name | NA |  |  |
-| `mirroring_witness_state_desc` | Witness State | NA |  |  |
+| `mirroring_witness_state_desc` | Witness State (CONNECTED | DISCONNECTED | UNKNOWN) | NA |  |  |
 | `mirroring_redo_queue_kb` | Redo Queue (KB) | KB |  |  |
 
 ### Database Mirroring Statistics (`MirroringStatistics`) - collected every 15 Min
@@ -502,9 +509,9 @@ Database Mirroring performance counters per mirrored database - send and redo qu
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `counter_name` (key) | Counter Name | NA |  |  |
-| `cntr_type` | Counter Type | NA |  |  |
+| `cntr_type` | Counter Type (272696576 = bulk count, 65792 = gauge, ...) | NA |  |  |
 | `instance_name` (key) | Database | NA |  |  |
-| `cntr_value` | Counter Value | NA |  |  |
+| `cntr_value` | Value (raw; cumulative for Counter Type 272696576) | NA |  |  |
 
 ### SQL Server Instance Configuration (`SQLServerConfig`) - configuration snapshot, collected every 24 Hr
 
@@ -519,9 +526,9 @@ Configuration snapshot of SQL Server Instance Configuration, captured for config
 | `PRODUCT_VERSION` | Product Version | NA |  |  |
 | `PRODUCT_LEVEL` | Product Level | NA |  |  |
 | `COLLATION` | Server Collation | NA |  |  |
-| `IS_CLUSTERED` | Is Clustered (FCI) | NA |  |  |
-| `IS_HADR_ENABLED` | Is AlwaysOn AG Enabled | NA |  |  |
-| `IS_INTEGRATED_SECURITY_ONLY` | Windows-Authentication-Only Mode | NA |  |  |
+| `IS_CLUSTERED` | Clustered FCI (0/1: 1 = clustered) | BOOLEAN |  |  |
+| `IS_HADR_ENABLED` | AlwaysOn AG Enabled (0/1: 1 = enabled) | BOOLEAN |  |  |
+| `IS_INTEGRATED_SECURITY_ONLY` | Windows Auth Only (0/1: 1 = Windows authentication only) | BOOLEAN |  |  |
 
 ### Database Settings Configuration (`DatabaseSettingConfig`) - configuration snapshot, collected every 24 Hr
 
@@ -530,15 +537,15 @@ Configuration snapshot of Database Settings Configuration, captured for configur
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `DATABASE_NAME` (key) | Database Name | NA |  |  |
-| `IS_AUTO_CLOSE_ON` | Auto Close | NA |  |  |
-| `IS_AUTO_SHRINK_ON` | Auto Shrink | NA |  |  |
-| `IS_AUTO_CREATE_STATS_ON` | Auto Create Statistics | NA |  |  |
-| `IS_AUTO_UPDATE_STATS_ON` | Auto Update Statistics | NA |  |  |
+| `IS_AUTO_CLOSE_ON` | Auto Close (0/1: 1 = on) | BOOLEAN |  |  |
+| `IS_AUTO_SHRINK_ON` | Auto Shrink (0/1: 1 = on) | BOOLEAN |  |  |
+| `IS_AUTO_CREATE_STATS_ON` | Auto Create Statistics (0/1: 1 = on) | BOOLEAN |  |  |
+| `IS_AUTO_UPDATE_STATS_ON` | Auto Update Statistics (0/1: 1 = on) | BOOLEAN |  |  |
 | `PAGE_VERIFY_OPTION_DESC` | Page Verify Option | NA |  |  |
 | `SNAPSHOT_ISOLATION_STATE_DESC` | Snapshot Isolation | NA |  |  |
-| `IS_READ_COMMITTED_SNAPSHOT_ON` | Read Committed Snapshot | NA |  |  |
-| `IS_TRUSTWORTHY_ON` | Trustworthy | NA |  |  |
-| `IS_BROKER_ENABLED` | Service Broker Enabled | NA |  |  |
+| `IS_READ_COMMITTED_SNAPSHOT_ON` | Read Committed Snapshot (0/1: 1 = on) | BOOLEAN |  |  |
+| `IS_TRUSTWORTHY_ON` | Trustworthy (0/1: 1 = on) | BOOLEAN |  |  |
+| `IS_BROKER_ENABLED` | Service Broker Enabled (0/1: 1 = enabled) | BOOLEAN |  |  |
 
 ### AlwaysOn Databases Configuration (`HadrDatabasesConfig`) - configuration snapshot, collected every 24 Hr
 
@@ -550,11 +557,11 @@ Configuration snapshot of AlwaysOn Databases Configuration, captured for configu
 | `REPLICA_ID` (key) | Replica ID | NA |  |  |
 | `DATABASE_ID` (key) | Database ID | NA |  |  |
 | `DATABASE_NAME` | Database Name | NA |  |  |
-| `IS_LOCAL` | Is Local | NA |  |  |
-| `IS_PRIMARY_REPLICA` | Is Primary Replica | NA |  |  |
+| `IS_LOCAL` | Local Replica (0/1: 1 = this instance) | BOOLEAN |  |  |
+| `IS_PRIMARY_REPLICA` | Primary Replica (0/1: 1 = primary) | BOOLEAN |  |  |
 | `SYNCHRONIZATION_STATE_DESC` | Synchronization State | NA |  |  |
 | `SYNCHRONIZATION_HEALTH_DESC` | Synchronization Health | NA |  |  |
-| `IS_SUSPENDED` | Is Suspended | NA |  |  |
+| `IS_SUSPENDED` | Suspended (0/1: 1 = data movement suspended) | BOOLEAN |  |  |
 
 ### SQL Server Locks (`SQLServerLock`) - collected every 15 Min
 
@@ -564,48 +571,37 @@ Lock counts aggregated by resource type, request mode and status, from sys.dm_tr
 |---|---|---|---|---|
 | `resource_type` (key) | Resource Type | NA |  |  |
 | `request_mode` (key) | Request Mode | NA |  |  |
-| `request_status` (key) | Request Status | NA |  |  |
+| `request_status` (key) | Request Status (GRANT | WAIT | CONVERT | ...) | NA |  |  |
 | `lock_count` | Lock Count | NA |  |  |
 
-### Top Blocked Queries (`TopQueriesBlocked`) - collected every 15 Min
+### Blocked Sessions History (`BlockedSessionHistory`) - collected every 15 Min
 
-Requests currently blocked, with the blocking session, the wait type, how long the wait has run, the resource waited on, and the statement text.
-
-| Column | Label | Unit | Warning | Critical |
-|---|---|---|---|---|
-| `session_id` (key) | Session ID | NA |  |  |
-| `request_id` (key) | Request ID | NA |  |  |
-| `blocking_session_id` | Blocking Session ID | NA |  |  |
-| `wait_type` | Wait Type | NA |  |  |
-| `wait_time` | Wait Time (ms) | MILLISECONDS |  |  |
-| `wait_resource` | Wait Resource | NA |  |  |
-| `database_name` | Database | NA |  |  |
-| `status` | Status | NA |  |  |
-| `command` | Command | NA |  |  |
-| `sql_text` | SQL Text | NA |  |  |
-
-### Blocked Session History (`BlockedSessionHistory`) - collected every 15 Min
-
-Blocked requests with both sides identified - the blocked session's login, host and program, and the same three for the blocking session, which is what makes a blocking chain attributable to an application.
+Blocked requests with both sides of each block on one row - blocked and blocking session, the SQL text of both, how long the blocked request has waited in milliseconds, the wait type and the resource waited on (which says whether the block is on a table, an index, a page or a row), the database, login, host and program for both sides, and the session at the head of the blocking chain. The Blocking page shows it live and over a range you choose. Request Start Time separates one blocked request from the next when a session is blocked again. Empty when nothing is blocked, which is the normal state.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
-| `session_id` (key) | Session ID | NA |  |  |
+| `session_id` (key) | Blocked Session ID | NA |  |  |
 | `request_id` (key) | Request ID | NA |  |  |
+| `request_start_time` | Request Start Time | NA |  |  |
 | `blocking_session_id` | Blocking Session ID | NA |  |  |
+| `head_blocker_session_id` | Head Blocker Session ID | NA |  |  |
+| `blocker_is_head` | Blocker Is Head of Chain | NA |  |  |
 | `wait_type` | Wait Type | NA |  |  |
-| `wait_time` | Wait Time (ms) | MILLISECONDS |  |  |
+| `wait_time` | Blocked Time (ms) | MILLISECONDS |  |  |
 | `wait_resource` | Wait Resource | NA |  |  |
 | `database_name` | Database | NA |  |  |
-| `login_name` | Login | NA |  |  |
-| `host_name` | Host | NA |  |  |
-| `program_name` | Program | NA |  |  |
+| `login_name` | Blocked Login | NA |  |  |
+| `host_name` | Blocked Host | NA |  |  |
+| `program_name` | Blocked Program | NA |  |  |
 | `blocking_login_name` | Blocking Login | NA |  |  |
 | `blocking_host_name` | Blocking Host | NA |  |  |
+| `blocking_program_name` | Blocking Program | NA |  |  |
+| `sql_text` | Blocked SQL Text | NA |  |  |
+| `blocking_sql_text` | Blocking SQL Text | NA |  |  |
 
 ### Locks (`Locks`) - collected every 15 Min
 
-Individual lock requests from sys.dm_tran_locks - the session holding or waiting, the resource and its subtype, the requested mode, and the request status.
+Current lock requests from sys.dm_tran_locks - the session holding or waiting, the resource and its subtype, the requested mode, and the request status - one row per key. Locks that share a key are merged into one row: Resource Description reads N locks when their descriptions differ (for example many row locks of one session on one index) and the shared description followed by (N locks) when they are the same, and Database or Resource Subtype reads (several databases) or (several subtypes) when the merged locks differ. A row standing for one lock keeps that lock's own description. lock_count carries the number of locks in the row as a number.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -616,8 +612,9 @@ Individual lock requests from sys.dm_tran_locks - the session holding or waiting
 | `resource_subtype` | Resource Subtype | NA |  |  |
 | `request_mode` (key) | Request Mode | NA |  |  |
 | `request_type` | Request Type | NA |  |  |
-| `request_status` (key) | Request Status | NA |  |  |
+| `request_status` (key) | Request Status (GRANT | WAIT | CONVERT | ...) | NA |  |  |
 | `resource_description` | Resource Description | NA |  |  |
+| `lock_count` | Lock Count (locks merged into this row) | NA |  |  |
 
 ### Top Queries by CPU (`TopQueriesCpu`) - collected every 15 Min
 
@@ -636,7 +633,7 @@ Top cached statements by total CPU (worker) time, from sys.dm_exec_query_stats w
 | `total_logical_reads` | Logical Reads (Cumulative) | NA |  |  |
 | `total_physical_reads` | Physical Reads (Cumulative) | NA |  |  |
 | `total_logical_writes` | Logical Writes (Cumulative) | NA |  |  |
-| `last_execution_time` | Last Execution | NA |  |  |
+| `last_execution_time` | Last Execution (retired, always blank) | NA |  |  |
 | `sql_text` | SQL Text | NA |  |  |
 | `query_hash` | Query Hash | NA |  |  |
 | `query_plan_hash` | Query Plan Hash | NA |  |  |
@@ -652,6 +649,8 @@ Top cached statements by total CPU (worker) time, from sys.dm_exec_query_stats w
 | `max_used_grant_mb` | Max Used Memory | MB |  |  |
 | `interval_grant_mb` | Granted Memory (Interval) | MB |  |  |
 | `interval_seconds` | Interval Length | SECOND |  |  |
+| `query_plan_hash_id` | Plan Hash ID (low 48 bits of Query Plan Hash) | NA |  |  |
+| `last_execution_epoch` | Last Execution (seconds since 1970, server clock) | NA |  |  |
 
 ### Top Queries by Executions (`TopQueriesExec`) - collected every 15 Min
 
@@ -670,7 +669,7 @@ The same statement statistics as Top Queries by CPU, ranked by execution count i
 | `total_logical_reads` | Logical Reads (Cumulative) | NA |  |  |
 | `total_physical_reads` | Physical Reads (Cumulative) | NA |  |  |
 | `total_logical_writes` | Logical Writes (Cumulative) | NA |  |  |
-| `last_execution_time` | Last Execution | NA |  |  |
+| `last_execution_time` | Last Execution (retired, always blank) | NA |  |  |
 | `sql_text` | SQL Text | NA |  |  |
 | `query_hash` | Query Hash | NA |  |  |
 | `query_plan_hash` | Query Plan Hash | NA |  |  |
@@ -686,6 +685,7 @@ The same statement statistics as Top Queries by CPU, ranked by execution count i
 | `max_used_grant_mb` | Max Used Memory | MB |  |  |
 | `interval_grant_mb` | Granted Memory (Interval) | MB |  |  |
 | `interval_seconds` | Interval Length | SECOND |  |  |
+| `last_execution_epoch` | Last Execution (seconds since 1970, server clock) | NA |  |  |
 
 ### Top Queries by Memory Grant (`TopQueriesMemory`) - collected every 15 Min
 
@@ -704,7 +704,7 @@ The same statement statistics as Top Queries by CPU, ranked by total granted mem
 | `total_logical_reads` | Logical Reads (Cumulative) | NA |  |  |
 | `total_physical_reads` | Physical Reads (Cumulative) | NA |  |  |
 | `total_logical_writes` | Logical Writes (Cumulative) | NA |  |  |
-| `last_execution_time` | Last Execution | NA |  |  |
+| `last_execution_time` | Last Execution (retired, always blank) | NA |  |  |
 | `sql_text` | SQL Text | NA |  |  |
 | `query_hash` | Query Hash | NA |  |  |
 | `query_plan_hash` | Query Plan Hash | NA |  |  |
@@ -720,6 +720,7 @@ The same statement statistics as Top Queries by CPU, ranked by total granted mem
 | `max_used_grant_mb` | Max Used Memory | MB |  |  |
 | `interval_grant_mb` | Granted Memory (Interval) | MB |  |  |
 | `interval_seconds` | Interval Length | SECOND |  |  |
+| `last_execution_epoch` | Last Execution (seconds since 1970, server clock) | NA |  |  |
 
 ### Query Plan Statistics (`QueryPlanStatistics`) - collected every 15 Min
 
@@ -735,7 +736,7 @@ Cached execution plans aggregated per plan handle - how many statements the plan
 | `total_logical_reads` | Logical Reads (Cumulative) | NA |  |  |
 | `total_physical_reads` | Physical Reads (Cumulative) | NA |  |  |
 | `total_logical_writes` | Logical Writes (Cumulative) | NA |  |  |
-| `last_execution_time` | Last Execution | NA |  |  |
+| `last_execution_time` | Last Execution (retired, always blank) | NA |  |  |
 | `query_hash` | Query Hash | NA |  |  |
 | `query_plan_hash` | Query Plan Hash | NA |  |  |
 | `interval_execution_count` | Executions (Interval) | NA |  |  |
@@ -750,6 +751,7 @@ Cached execution plans aggregated per plan handle - how many statements the plan
 | `max_used_grant_mb` | Max Used Memory | MB |  |  |
 | `interval_grant_mb` | Granted Memory (Interval) | MB |  |  |
 | `interval_seconds` | Interval Length | SECOND |  |  |
+| `last_execution_epoch` | Last Execution (seconds since 1970, server clock) | NA |  |  |
 
 ### Top Sessions (`TopSessions`) - collected every 15 Min
 
@@ -761,7 +763,7 @@ The busiest sessions from sys.dm_exec_sessions - login, host, program, status, C
 | `login_name` | Login | NA |  |  |
 | `host_name` | Host | NA |  |  |
 | `program_name` | Program | NA |  |  |
-| `status` | Status | NA |  |  |
+| `status` | Session Status (running | sleeping | dormant | preconnect) | NA |  |  |
 | `cpu_time` | CPU Time (ms) | MILLISECONDS |  |  |
 | `memory_usage` | Memory (pages) | NA |  |  |
 | `total_scheduled_time` | Scheduled Time (ms) | MILLISECONDS |  |  |
@@ -774,7 +776,7 @@ The busiest sessions from sys.dm_exec_sessions - login, host, program, status, C
 
 ### Index Fragmentation (`IndexFragmentation`) - collected every 360 Min
 
-Average fragmentation percentage and page count per index partition and allocation unit, from sys.dm_db_index_physical_stats in LIMITED mode. Collected on a long schedule because the scan is not free.
+Average fragmentation percentage and page count per index partition and allocation unit, from sys.dm_db_index_physical_stats in LIMITED mode, for every index of 1,000 pages or more in total. Every partition and allocation unit of such an index is listed so its size is whole; fragmentation is blank on a unit under 1,000 pages, where it is not meaningful. Collected on a long schedule because the scan is not free.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -783,9 +785,9 @@ Average fragmentation percentage and page count per index partition and allocati
 | `table_name` (key) | Table | NA |  |  |
 | `index_name` (key) | Index | NA |  |  |
 | `partition_number` (key) | Partition | NA |  |  |
-| `alloc_unit_type_desc` (key) | Alloc Unit Type | NA |  |  |
+| `alloc_unit_type_desc` (key) | Alloc Unit Type (IN_ROW_DATA | LOB_DATA | ROW_OVERFLOW_DATA) | NA |  |  |
 | `index_id` | Index ID | NA |  |  |
-| `index_type_desc` | Index Type | NA |  |  |
+| `index_type_desc` | Index Type (CLUSTERED INDEX | NONCLUSTERED INDEX | HEAP | ...) | NA |  |  |
 | `avg_fragmentation_in_percent` | Fragmentation % | PERCENTAGE |  |  |
 | `page_count` | Page Count | NA |  |  |
 
@@ -852,7 +854,7 @@ Per-file I/O from sys.dm_io_virtual_file_stats. Read and write counts, bytes and
 | `file_id` (key) | File ID | NA |  |  |
 | `logical_name` | Logical Name | NA |  |  |
 | `physical_name` | Physical Name | NA |  |  |
-| `file_type` | File Type | NA |  |  |
+| `file_type` | File Type (ROWS | LOG | FILESTREAM | FULLTEXT) | NA |  |  |
 | `num_of_reads` | Reads (Interval) | NA |  |  |
 | `num_of_writes` | Writes (Interval) | NA |  |  |
 | `num_of_bytes_read` | Bytes Read (Interval) | BYTE |  |  |
@@ -862,6 +864,8 @@ Per-file I/O from sys.dm_io_virtual_file_stats. Read and write counts, bytes and
 | `io_stall` | Total Stall (Interval, ms) | MILLISECONDS |  |  |
 | `size_on_disk_mb` | Size on Disk (MB) | MB |  |  |
 | `interval_seconds` | Interval Length | SECOND |  |  |
+| `avg_read_latency_ms` | Avg Read Latency (Interval, ms) | MILLISECONDS | > 50 | > 100 |
+| `avg_write_latency_ms` | Avg Write Latency (Interval, ms) | MILLISECONDS | > 50 | > 100 |
 
 ### Database IOPS (`DatabaseIops`) - collected every 15 Min
 
@@ -890,34 +894,34 @@ Backup history from msdb - one row per backup set with type, start and finish ti
 | `backup_set_id` (key) | Backup Set ID | NA |  |  |
 | `media_set_id` | Media Set ID | NA |  |  |
 | `database_name` | Database | NA |  |  |
-| `backup_type` | Backup Type | NA |  |  |
+| `backup_type` | Backup Type (D = full, I = diff, L = log, F = file, ...) | NA |  |  |
 | `backup_start_date` | Start Date | NA |  |  |
 | `backup_finish_date` | Finish Date | NA |  |  |
 | `backup_size_bytes` | Backup Size (bytes) | BYTE |  |  |
 | `compressed_backup_size_bytes` | Compressed Size (bytes) | BYTE |  |  |
 | `user_name` | User Name | NA |  |  |
-| `recovery_model` | Recovery Model | NA |  |  |
-| `is_copy_only` | Copy Only | BOOLEAN |  |  |
+| `recovery_model` | Recovery Model (SIMPLE | FULL | BULK_LOGGED) | NA |  |  |
+| `is_copy_only` | Copy Only (0/1: 1 = copy-only backup) | BOOLEAN |  |  |
 | `server_name` | Server Name | NA |  |  |
 | `machine_name` | Machine Name | NA |  |  |
 | `backup_set_name` | Backup Set Name | NA |  |  |
 
 ### Last Database Backup (`LastDatabaseBackup`) - collected every 60 Min
 
-The most recent backup per database with its age in both days and hours, the last full and last log backup dates, and the recovery model. hours_since_last_backup carries the RPO threshold and is EMPTY for a database that has never been backed up - that state is reported by never_backed_up (1 or 0) and by hours_unbacked, which holds how long such a database has existed and carries the RPO threshold for the never case. days_since_last_backup reports -1 for it, which the console renders as Never.
+The most recent backup per database with its age in both days and hours, the last full and last log backup dates, and the recovery model. hours_since_last_backup carries the RPO threshold and is EMPTY for a database that has never been backed up - that state is reported by never_backed_up (1 or 0) and by hours_unbacked, which holds how long such a database has existed and carries the RPO threshold for the never case. hours_unbacked is blank for a database that has a backup (Never Backed Up = 0). For master and model the age runs from 2003-04-08, the create date SQL Server ships in their template, not from when the instance was installed. days_since_last_backup reports -1 for it, which the console renders as Never.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `database_name` (key) | Database | NA |  |  |
-| `days_since_last_backup` | Days Since Last Backup | DAYS |  |  |
+| `days_since_last_backup` | Days Since Last Backup (-1 = never backed up) | DAYS |  |  |
 | `last_backup_date` | Last Backup Date | NA |  |  |
-| `last_backup_type` | Last Backup Type | NA |  |  |
+| `last_backup_type` | Last Backup Type (D = full, I = diff, L = log, blank = none) | NA |  |  |
 | `last_full_backup_date` | Last Full Backup Date | NA |  |  |
 | `last_log_backup_date` | Last Log Backup Date | NA |  |  |
-| `recovery_model_desc` | Recovery Model | NA |  |  |
-| `hours_since_last_backup` | Hours Since Last Backup | HOURS | > 48 | > 168 |
-| `never_backed_up` | Never Backed Up (1 = no backup on record) | BOOLEAN |  |  |
-| `hours_unbacked` | Hours Unbacked (age of a never-backed-up database) | HOURS | > 48 | > 168 |
+| `recovery_model_desc` | Recovery Model (SIMPLE | FULL | BULK_LOGGED) | NA |  |  |
+| `hours_since_last_backup` | Hours Since Last Backup (blank if Never Backed Up = 1) | HOURS | > 48 | > 168 |
+| `never_backed_up` | Never Backed Up (0/1: 1 = no backup on record) | BOOLEAN |  |  |
+| `hours_unbacked` | Hours Unbacked (blank if Never Backed Up = 0; master/model 2003) | HOURS | > 48 | > 168 |
 
 ### Transaction Log Space (`TransactionLog`) - collected every 30 Min
 
@@ -938,7 +942,7 @@ Per-database I/O split by file type, so data-file and log-file activity can be t
 |---|---|---|---|---|
 | `database_id` (key) | Database ID | NA |  |  |
 | `database_name` | Database | NA |  |  |
-| `file_type` (key) | File Type | NA |  |  |
+| `file_type` (key) | File Type (ROWS | LOG | FILESTREAM | FULLTEXT) | NA |  |  |
 | `num_of_reads` | Reads (Interval) | NA |  |  |
 | `num_of_writes` | Writes (Interval) | NA |  |  |
 | `num_of_ios` | Total I/Os (Interval) | NA |  |  |
@@ -949,6 +953,8 @@ Per-database I/O split by file type, so data-file and log-file activity can be t
 | `io_stall` | Total Stall (Interval, ms) | MILLISECONDS |  |  |
 | `size_on_disk_mb` | Size on Disk (MB) | MB |  |  |
 | `interval_seconds` | Interval Length | SECOND |  |  |
+| `avg_read_latency_ms` | Avg Read Latency (Interval, ms) | MILLISECONDS |  |  |
+| `avg_write_latency_ms` | Avg Write Latency (Interval, ms) | MILLISECONDS |  |  |
 
 ### SQL Server Processes (`Processes`) - collected every 15 Min
 
@@ -963,11 +969,11 @@ Current sessions and requests - blocking session, CPU time, program and command,
 | `command` | Command | NA |  |  |
 | `login_time` | Login Time | NA |  |  |
 | `database_name` | Database | NA |  |  |
-| `execution_state` | Execution State | NA |  |  |
+| `execution_state` | Execution State (running | runnable | suspended | sleeping) | NA |  |  |
 | `host_name` | Host Name | NA |  |  |
 | `login_name` | Login Name | NA |  |  |
 | `memory_usage_pages` | Memory Usage (pages) | NA |  |  |
-| `process_state` | Process State | NA |  |  |
+| `process_state` | Session State (running | sleeping | dormant | preconnect) | NA |  |  |
 | `wait_type` | Wait Type | NA |  |  |
 | `wait_time_ms` | Wait Time (ms) | MILLISECONDS |  |  |
 
@@ -977,10 +983,10 @@ Server-level principals from sys.server_principals - type, whether disabled, cre
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
-| `name` (key) | Name | NA |  |  |
+| `name` (key) | Login Name | NA |  |  |
 | `type_code` | Type Code | NA |  |  |
-| `type_desc` | Type | NA |  |  |
-| `is_disabled` | Disabled | BOOLEAN |  |  |
+| `type_desc` | Login Type (SQL_LOGIN | WINDOWS_LOGIN | WINDOWS_GROUP | ...) | NA |  |  |
+| `is_disabled` | Login Disabled (0/1: 1 = disabled) | BOOLEAN |  |  |
 | `create_date` | Created | NA |  |  |
 | `modify_date` | Modified | NA |  |  |
 | `default_database_name` | Default Database | NA |  |  |
@@ -993,12 +999,12 @@ Database-level principals per database - type, whether it is a system user, crea
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `database_name` (key) | Database | NA |  |  |
-| `name` (key) | Name | NA |  |  |
-| `type_desc` | Type | NA |  |  |
-| `is_system` | System Object | BOOLEAN |  |  |
+| `name` (key) | User Name | NA |  |  |
+| `type_desc` | User Type (SQL_USER | WINDOWS_USER | WINDOWS_GROUP | ...) | NA |  |  |
+| `is_system` | System Object (0/1: 1 = system user) | BOOLEAN |  |  |
 | `create_date` | Created | NA |  |  |
 | `default_schema_name` | Default Schema | NA |  |  |
-| `authentication_type_desc` | Authentication Type | NA |  |  |
+| `authentication_type_desc` | Authentication Type (NONE | INSTANCE | DATABASE | WINDOWS) | NA |  |  |
 
 ### SQL Server Agent Status (`AgentStatus`) - collected every 5 Min
 
@@ -1010,7 +1016,7 @@ SQL Server Agent service state - the running status, start mode, last startup ti
 | `service_name` (key) | Service Name | NA |  |  |
 | `process_id` | Process ID | NA |  |  |
 | `service_path` | Service Path | NA |  |  |
-| `agent_status` | Agent Status | NA |  |  |
+| `agent_status` | Agent Status (Running | Stopped | Paused | ...) | NA |  |  |
 | `agent_start_mode` | Start Mode | NA |  |  |
 | `last_startup_time` | Last Startup Time | NA |  |  |
 | `service_account` | Service Account | NA |  |  |
@@ -1025,39 +1031,54 @@ Licence state of this plug-in installation, not of the SQL Server instance - the
 | `license_type` | License Type | NA |  |  |
 | `expiration` | Expiration | NA |  |  |
 | `instances` | Licensed Instances | NA |  |  |
-| `days_remaining` | Days Remaining | days | < 30 | < 7 |
-| `license_status` | License Status | NA |  |  |
+| `days_remaining` | Days Remaining (36500 = no countdown; see License Status) | days | < 30 | < 7 |
+| `license_status` | License Status (Active | Expired | License Required | ...) | NA |  |  |
+
+### Collector Status (`CollectorStatus`) - collected every 5 Min
+
+Why each metric group of this target is empty or failing, one row per group, so an empty group can be told apart from a feature that is not set up, a group that has not run yet and a collection that is failing. Status is one word from a closed set shared with the other Integration Plumbers plug-ins - OK, NOT_CONFIGURED, NOT_COLLECTED_YET, NO_DATA, COLLECTION_ERROR, DISABLED - with the reason in plain text, the rows the last run returned, and the last attempt as LastAttemptEpoch, UTC seconds since 1970, blank for a group that has never run. LastAttempt is retired and always blank: as a timestamp string it changed on every run and filled the repository's string history. The critical alert fires when a group still reads COLLECTION_ERROR after two consecutive 5-minute checks and clears on the group's next successful run. See the user guide, chapter 9.
+
+| Column | Label | Unit | Warning | Critical |
+|---|---|---|---|---|
+| `MetricGroup` (key) | Metric Group This Row Describes | NA |  |  |
+| `Status` | Status (OK | NOT_CONFIGURED | NOT_COLLECTED_YET | NO_DATA | ...) | NA | MATCH NotDefined | MATCH COLLECTION_ERROR |
+| `Reason` | Reason for the Status (plain text; error if COLLECTION_ERROR) | NA |  |  |
+| `LastAttempt` | Last Collection Attempt (retired, always blank) | NA |  |  |
+| `RowsReturned` | Rows Returned by the Last Collection Attempt (count) | NA |  |  |
+| `LastAttemptEpoch` | Last Collection Attempt (Unix epoch seconds; blank/0 = never) | NA |  |  |
 
 ### SQL Server Agent Jobs (`DatabaseJob`) - collected every 60 Min
 
-SQL Server Agent job definitions and outcomes from msdb - whether the job is enabled, its owner and category, the step count, and the last run's date, time and outcome.
+SQL Server Agent job definitions and outcomes from msdb - whether the job is enabled, its owner and category, the step count, and the last run's date, time and outcome. has_run is 1 once the job has run and 0 before; the date and time are blank until then.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `job_id` (key) | Job ID | NA |  |  |
-| `name` | Name | NA |  |  |
-| `enabled` | Enabled | BOOLEAN |  |  |
-| `description` | Description | NA |  |  |
+| `name` | Job Name | NA |  |  |
+| `enabled` | Job Enabled (0/1: 1 = enabled) | BOOLEAN |  |  |
+| `description` | Job Description | NA |  |  |
 | `owner` | Owner | NA |  |  |
 | `category` | Category | NA |  |  |
 | `date_created` | Created | NA |  |  |
 | `date_modified` | Modified | NA |  |  |
 | `version_number` | Version | NA |  |  |
-| `last_run_date` | Last Run Date | NA |  |  |
-| `last_run_time` | Last Run Time | NA |  |  |
-| `last_run_outcome` | Last Run Outcome | NA |  |  |
+| `last_run_date` | Last Run Date (yyyymmdd; blank if Has Run = 0) | NA |  |  |
+| `last_run_time` | Last Run Time (hhmmss; blank if Has Run = 0) | NA |  |  |
+| `last_run_outcome` | Run Outcome (0=fail, 1=ok, 3=cancel, 5=unknown/never, -1=none) | NA |  |  |
 | `number_of_steps` | Number of Steps | NA |  |  |
+| `has_run` | Has Run (0/1: 1 = ran at least once) | BOOLEAN |  |  |
 
 ### Error Log Entries (`ErrorLog`) - collected every 15 Min
 
-Recent SQL Server error log entries with their timestamp and process context. Keyed by timestamp and sequence so repeated messages in the same second stay distinct.
+Recent SQL Server error log entries with their timestamp and process context. Keyed by timestamp and sequence so repeated messages in the same second stay distinct. log_epoch carries the timestamp as seconds since 1970 on the server's clock.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `log_date` (key) | Log Date | NA |  |  |
 | `process_info` | Process Info | NA |  |  |
-| `error_text` | Message | NA |  |  |
+| `error_text` | Error Log Message | NA |  |  |
 | `seq` (key) | Sequence | NA |  |  |
+| `log_epoch` | Log Time (seconds since 1970, server clock) | NA |  |  |
 
 ### SQL Instance Statistics (`SqlInstanceStats`) - collected every 60 Min
 
@@ -1080,7 +1101,7 @@ Deadlock counts from the system_health extended-events session - the trailing ho
 | `deadlocks_last_hour` | Deadlocks (Last Hour) | NA | > 5 | > 20 |
 | `deadlocks_last_day` | Deadlocks (Last 24h) | NA |  |  |
 | `deadlocks_in_file` | Deadlocks (In Event File) | NA |  |  |
-| `minutes_since_last_deadlock` | Minutes Since Last Deadlock | MINUTES |  |  |
+| `minutes_since_last_deadlock` | Minutes Since Last Deadlock (blank if In Event File = 0) | MINUTES |  |  |
 
 ### Recent Deadlocks (`RecentDeadlocks`) - collected every 15 Min
 
@@ -1128,7 +1149,7 @@ TempDB PAGELATCH contention with the page type classified by the engine rather t
 
 ### Worst Query CPU (`WorstQueryCpu`) - collected every 15 Min
 
-Instance-wide worst-query costs as one numeric row per collection, which is what the Queries page history chart is drawn from. The three CPU columns are each the maximum of their own measure, so they may describe different statements; use the tables on that page to identify which.
+Instance-wide worst-query costs as one numeric row per collection, which is what the Current Queries page history chart is drawn from. The three CPU columns are each the maximum of their own measure, so they may describe different statements; use the tables on that page to identify which.
 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
@@ -1145,7 +1166,7 @@ The services this SQL Server instance reports - the running status, start mode, 
 | Column | Label | Unit | Warning | Critical |
 |---|---|---|---|---|
 | `service_name` (key) | Service | NA |  |  |
-| `service_status` | Status | NA |  |  |
+| `service_status` | Service Status (Running | Stopped | Paused | ...) | NA |  |  |
 | `start_mode` | Start Mode | NA |  |  |
 | `process_id` | Process ID | NA |  |  |
 | `service_account` | Service Account | NA |  |  |
@@ -1165,3 +1186,93 @@ What each database's space is actually holding, rather than how full it is: data
 | `unallocated_kb` | Unallocated (KB) | KB |  |  |
 | `log_used_kb` | Transaction Log Used (KB) | KB |  |  |
 | `log_allocated_kb` | Transaction Log Size (KB) | KB |  |  |
+
+### Security Update Status (`SecurityUpdateStatus`) - collected every 60 Min
+
+The instance's build against Microsoft's security updates for its version and servicing path (CU or GDR), from a reference table shipped with the plug-in and refreshed each release - reference_as_of says how current it is, and a Current verdict more than 45 days past it reads Reference Stale. required_build and required_update name the latest release to install; days_behind counts from the OLDEST security release the instance lacks, which oldest_missed_update and oldest_missed_release_date name, and carries the threshold (Warning 30, Critical 90). For a build older than every release in the table the count starts at the table's first release, so it is a minimum and oldest_missed_update says or earlier. days_behind and security_update_missing are blank for a version outside the table rather than reading as patched; version_judged is always 0 or 1, so a reader that turns a blank number into 0 (the EM MCP server does) can still tell an unjudged version from a patched one. SQL Server 2016 reports its final July 2026 updates and, once applied, Final Update Applied, Out of Support.
+
+| Column | Label | Unit | Warning | Critical |
+|---|---|---|---|---|
+| `product_version` | Product Version | NA |  |  |
+| `product_level` | Product Level | NA |  |  |
+| `product_update_level` | Installed Update | NA |  |  |
+| `product_update_reference` | Installed Update KB | NA |  |  |
+| `servicing_path` | Servicing Path | NA |  |  |
+| `security_status` | Security Update Status | NA |  |  |
+| `required_build` | Required Build | NA |  |  |
+| `required_update` | Latest Security Update | NA |  |  |
+| `required_release_date` | Latest Security Update Released | NA |  |  |
+| `security_update_missing` | Security Update Missing (0/1: 1 = behind latest) | BOOLEAN |  |  |
+| `days_behind` | Days Since Oldest Missed Security Update | days | >= 30 | >= 90 |
+| `reference_as_of` | Reference Data As Of | NA |  |  |
+| `oldest_missed_update` | Oldest Missed Security Update | NA |  |  |
+| `oldest_missed_release_date` | Oldest Missed Security Update Released | NA |  |  |
+| `version_judged` | Version Judged (0/1: 0 = not in the reference table) | BOOLEAN |  |  |
+
+### Query Store Status (`QueryStoreStatus`) - collected every 60 Min
+
+Which user databases Query Store covers, from sys.database_query_store_options - the actual and requested state, capture mode, statistics interval, retention, storage used against the maximum, and the number of queries and plans held. actual_state is 0 off, 1 read-only, 2 read-write. The Query Store groups read only databases where it is not 0; the plan-cache groups above cover every database regardless. Empty before SQL Server 2016.
+
+| Column | Label | Unit | Warning | Critical |
+|---|---|---|---|---|
+| `database_name` (key) | Database Name | NA |  |  |
+| `actual_state` | Query Store State (0 = off, 1 = read-only, 2 = read-write) | NA |  |  |
+| `actual_state_desc` | Query Store State (OFF | READ_ONLY | READ_WRITE | ERROR) | NA |  |  |
+| `desired_state_desc` | Requested State (OFF | READ_ONLY | READ_WRITE) | NA |  |  |
+| `readonly_reason` | Read-Only Reason (code, 0 = not read-only) | NA |  |  |
+| `capture_mode_desc` | Capture Mode (ALL | AUTO | NONE | CUSTOM) | NA |  |  |
+| `stats_interval_minutes` | Statistics Interval Length (minutes) | MINUTES |  |  |
+| `stale_days` | Retention (days, stale query threshold) | DAYS |  |  |
+| `max_size_mb` | Maximum Store Size (MB) | MB |  |  |
+| `used_size_mb` | Store Size Used (MB) | MB |  |  |
+| `flush_seconds` | Flush Interval (seconds) | SECOND |  |  |
+| `query_count` | Queries in Store (count, 0 when off) | NA |  |  |
+| `plan_count` | Plans in Store (count, 0 when off) | NA |  |  |
+
+### Query Store Plan Statistics per Interval (`QueryStorePlanStats`) - collected every 15 Min
+
+Per-interval runtime statistics per plan read from Query Store - executions, aborted executions, CPU, duration and reads per closed Query Store interval, so history survives plan-cache eviction and restarts. Each closed interval is stored exactly once (each run reads the intervals that closed since the previous run, on the server's clock), so sums over any range are exact; the first collection, and the first after the cache file is lost, stores nothing and starts the window, so no interval is stored twice. Top 300 (query, plan) pairs by CPU per interval; the plug-in's own collection statements are excluded. Most 15-minute collections are empty, because rows arrive only when an interval closes (60 minutes by default). Epochs are UTC seconds.
+
+| Column | Label | Unit | Warning | Critical |
+|---|---|---|---|---|
+| `database_name` (key) | Database Name | NA |  |  |
+| `query_id` (key) | Query Store Query ID | NA |  |  |
+| `plan_id` (key) | Query Store Plan ID | NA |  |  |
+| `interval_start_epoch` (key) | Interval Start (Interval key, UTC seconds since 1970) | NA |  |  |
+| `interval_minutes` | Interval Length | MINUTES |  |  |
+| `executions` | Executions in Interval (completed normally) | NA |  |  |
+| `aborted_executions` | Aborted or Failed Executions in Interval | NA |  |  |
+| `total_cpu_us` | CPU in Interval (us, all executions) | MICROSEC |  |  |
+| `total_duration_us` | Duration in Interval (us, all executions) | MICROSEC |  |  |
+| `total_logical_reads` | Logical Reads in Interval (pages) | NA |  |  |
+| `total_physical_reads` | Physical Reads in Interval (pages) | NA |  |  |
+| `avg_cpu_us` | Avg CPU per Execution in Interval (us) | MICROSEC |  |  |
+| `max_cpu_us` | Max CPU of One Execution in Interval (us) | MICROSEC |  |  |
+| `is_forced_plan` | Forced Plan (0/1: 1 = plan is forced) | BOOLEAN |  |  |
+| `query_hash` | Query Hash (same format as Top Queries) | NA |  |  |
+| `object_name` | Module (schema.name; empty for ad hoc SQL) | NA |  |  |
+| `first_execution_epoch` | First Execution in Interval (UTC seconds since 1970) | NA |  |  |
+| `last_execution_epoch` | Last Execution in Interval (UTC seconds since 1970) | NA |  |  |
+| `query_text` | Query Text (Query Store statement text) | NA |  |  |
+
+### Query Store Plan Regression (`QueryStoreRegression`) - collected every 15 Min
+
+Plan regression from Query Store - for each query that ran under more than one plan, its current plan (most recently executed, averaged over the last 24 hours) against its previous plan (the next most recently executed, averaged over Query Store's retention), with the ratio of their average CPU per execution and of their logical reads. cpu_ratio carries the ships-enabled alert (Warning 2, Critical 5); -1 means no ratio and never alerts: the current plan has under 10 executions in the last 24 hours or averages under 1 ms of CPU, or the previous plan has under 10. Every execution type counts, timed-out runs included. A query that stops running keeps its row at -1 for 7 days, so an open incident clears. A query that goes back to a better plan reads below 1 and clears; when Query Store forgets the previous plan the row disappears, and an incident still open on it must be cleared by hand.
+
+| Column | Label | Unit | Warning | Critical |
+|---|---|---|---|---|
+| `database_name` (key) | Database Name | NA |  |  |
+| `query_id` (key) | Query Store Query ID | NA |  |  |
+| `plan_count` | Plans with Executions in Query Store (count) | NA |  |  |
+| `current_plan_id` | Current Plan ID (most recently executed) | NA |  |  |
+| `previous_plan_id` | Previous Plan ID (executed before the current one) | NA |  |  |
+| `current_avg_cpu_us` | Current Plan Avg CPU per Execution (us, last 24 h) | MICROSEC |  |  |
+| `previous_avg_cpu_us` | Previous Plan Avg CPU per Execution (us) | MICROSEC |  |  |
+| `cpu_ratio` | CPU Ratio (current / previous avg; -1 = previous was 0) | NA | >= 2 | >= 5 |
+| `reads_ratio` | Logical Reads Ratio (current / previous; -1 = previous 0) | NA |  |  |
+| `current_executions` | Current Plan Executions (last 24 h) | NA |  |  |
+| `previous_executions` | Previous Plan Executions (Query Store retention) | NA |  |  |
+| `current_first_seen_epoch` | Current Plan First Seen (UTC seconds since 1970) | NA |  |  |
+| `is_forced_plan` | Current Plan Forced (0/1: 1 = plan is forced) | BOOLEAN |  |  |
+| `query_hash` | Query Hash (same format as Top Queries) | NA |  |  |
+| `query_text` | Query Text (first 500 characters) | NA |  |  |
