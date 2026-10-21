@@ -7,7 +7,7 @@ nav_order: 5
 
 Most of this is already in place if you monitor SQL Server today. There are three groups: what Enterprise Manager needs, what the SQL Server side needs, and one monitoring login with a short list of read-only grants.
 
-**In this page:** Supported versions and platforms · Enterprise Manager and agents · Network and connectivity · The monitoring login · TLS · What you do not need · Checklist
+**In this page:** Supported versions and platforms · Enterprise Manager and agents · The agent's locale · Network and connectivity · The monitoring login · TLS · What you do not need · Checklist
 
 ## Supported versions and platforms {#supported-versions}
 
@@ -26,7 +26,15 @@ You need a working Enterprise Manager environment — management server and repo
 
 The agent does **not** have to run on the SQL Server host. Remote monitoring from a Linux agent to a SQL Server on Windows is a supported and common arrangement, and it is how much of this plug-in was certified. Local agents work equally well.
 
-Enterprise Manager will only accept a plug-in built for its own release, so use the build that matches: the `24.1.x` artifact for 24ai, the `13.5.x` artifact for 13.5. See [Install and upgrade](install-and-upgrade.md).
+Enterprise Manager will only accept a plug-in built for its own release, so use the build that matches: the `24.1.1.0.0` artifact for 24ai, the `13.5.1.0.0` artifact for 13.5. See [Install and upgrade](install-and-upgrade.md).
+
+## The agent's locale {#agent-locale}
+
+The Management Agent that monitors SQL Server must run with a UTF-8 locale. The plug-in hands collected text to the agent in the agent's own character set, and an agent started under a locale such as `POSIX` or `C` turns every non-ASCII character in a database name, a login, a host name, SQL text or a file path into `?`. Numbers and ASCII text are unaffected, so the symptom is easy to miss until a name with an accent or a non-Latin script reaches a page or an alert.
+
+On Linux, set `LANG=C.UTF-8` (or any `*.UTF-8` locale installed on the host) in the environment the agent is started from, and restart the agent from that shell. Alternatively add `-Dfile.encoding=UTF-8` to `agentJavaDefines` in the agent's `emd.properties`. To check a running agent, read its process environment: `tr '\0' '\n' < /proc/<agent pid>/environ | grep LANG`. On a Windows agent the default code page is used; set the agent service's locale to one that covers the characters your estate uses, or leave it where it is for an ASCII-only estate.
+
+An agent that already monitors other targets under a non-UTF-8 locale is not broken by the change; only what the agent reports for text values changes.
 
 ## Network and connectivity {#network}
 
@@ -72,6 +80,7 @@ Choose per target when you add it. [TLS connections](tls.md) covers both, includ
 ## Checklist {#checklist}
 
 - [ ] Enterprise Manager 13.5 or 24ai, with a reachable Management Agent
+- [ ] The agent running under a UTF-8 locale
 - [ ] The plug-in build that matches your Enterprise Manager release
 - [ ] TCP access from the agent host to the instance, default port 1433
 - [ ] A monitoring login on each instance with the grants above

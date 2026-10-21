@@ -57,7 +57,7 @@ This is worth stating plainly because some monitoring tools require the very set
 
 ## Related
 
-- [Monitoring pages](monitoring-pages.md#analysis) - the Analysis page, which covers adjacent ground
+- [Monitoring pages](monitoring-pages.md#capacity) - the Capacity page, which covers adjacent ground
 - [Alerts and thresholds](alerts-and-thresholds.md) - metric thresholds, which are a separate mechanism
 - [Credentials](credentials.md#why-not-sysadmin) - the least-privilege position the rules assume
 - [Prerequisites](prerequisites.md#supported-versions) - the versions the end-of-support rule checks against

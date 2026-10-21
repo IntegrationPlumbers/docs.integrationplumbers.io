@@ -40,9 +40,19 @@ One deliberate design point: the critical threshold sits on the **replica link**
 
 ![The AG Failover Readiness page, one row per database and secondary, with readiness, availability group, database, secondary replica, synchronisation state, recovery point, recovery time, redo queue and send queue](images/ag-failover-readiness.png)
 
+The live table is primary-authoritative: rows appear when the target is the current primary of a group, and the table is empty on a secondary. Below it, two regions over a start and end you choose show the replication figures averaged and at their peak across the range, and the HADR wait types the instance accrued. The wait region is populated on a secondary too, because waits are instance-wide, and it is where to look when a secondary falls behind. [Monitoring pages](monitoring-pages.md#ag-failover) describes both.
+
+Two readiness columns say when a reading is unknown rather than zero. Commit Position Known is 0 when one replica did not report a last commit time, so the recovery point is empty rather than zero. Queue State Known is 0 when at least one of the two queues was not reported; the unknown one is empty and the other may hold a real measurement, which is the normal shape of a suspended replica. Anything reading these metrics through the API should check the flag before treating a zero as a measurement.
+
 ## Failover cluster instances {#fci}
 
-On a Windows Server Failover Cluster, the plug-in reports the node list and which node currently owns the instance. Point the target at the virtual network name and it follows the instance across a failover.
+On a Windows Server Failover Cluster, the plug-in reports the node list and which node currently owns the instance, in the Cluster Nodes and FCI Identity metrics. Define the target against the virtual network name and it follows the instance across a failover; a node name does not.
+
+- **Host:** the virtual network name or its fully qualified DNS name. The agent host must resolve it, so where the cluster registers its names in Active Directory DNS, the agent's resolver has to reach that zone.
+- **Port:** the FCI's own TCP port. A named FCI instance normally listens on its own port, not 1433. Port 1433 on the virtual IP can be answered by a node's default instance rather than by the FCI, which connects and collects but monitors the wrong instance; FCI Identity reporting "not clustered" on an FCI target is the sign.
+- **Instance name:** the FCI's instance name. When a port is also set the driver uses the port and ignores the instance name, so set either the port, or the instance name with no port and the SQL Server Browser service reachable on UDP 1434.
+
+The instance name of an FCI differs from the node's server name, and that is expected; the plug-in does not compare them. After a failover the target needs no change: collection continues against the new active node, and the cluster metrics report the new owner from the next collection. Expect a short Down on the availability metric, a sample or two, while the instance comes online on the other node.
 
 ## Linux and the Pacemaker boundary {#pacemaker}
 
