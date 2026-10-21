@@ -7,7 +7,7 @@ nav_order: 25
 
 Ordered by how often each one actually happens.
 
-**In this page:** Target is Down · Target is Up but data is missing · Certificate problems · Jobs fail · Import and deploy problems · What to send when you report something
+**In this page:** Target is Down · Target is Up but data is missing · A CRITICAL incident on the License metric · Certificate problems · Jobs fail · Import and deploy problems · What to send when you report something
 
 ## Target is Down {#target-down}
 
@@ -26,6 +26,25 @@ Ordered by how often each one actually happens.
 **A table shows fewer rows than you expect.** Some collections are deliberately filtered — index fragmentation only covers indexes above a size worth acting on, so small indexes are absent by design.
 
 **Two families report less on SQL Server 2016 and 2017.** TempDB contention collects, but its allocation-page and metadata-page waiter counts read zero and the advice cell is blank. Cluster nodes collects node names, but status, status description and current owner are blank. Both because the view that classifies a latched page by type arrived in 2019. Read a zero or a blank as "not classifiable on this version". Not a fault.
+
+## A CRITICAL incident on the License metric {#license}
+
+**Symptom.** The target is Up and every page fills, but there is an open CRITICAL incident on the `License` metric, and the Monitoring and License card on the Overview page shows a status other than `Active`.
+
+**Cause.** Every SQL Server Database target needs a licence key in its **License Key** property (`ip_mssql_database_license`). The plug-in checks the key on the agent host every 15 minutes, and again as soon as the property changes, and reports the result in the target's `License` metric. While the status is anything but `Active` it raises the incident; every other metric group keeps collecting. The incident, and the `days_remaining` threshold in [Alerts and thresholds](alerts-and-thresholds.md#thresholds), are the signal.
+
+**Fix.** Read the `Status` column of the `License` metric and act on it:
+
+| Status | Meaning | What to do |
+|---|---|---|
+| `Active` | The key is genuine, issued for this plug-in, and in date | Nothing |
+| `License Required` | No key has been entered | Enter your licence key in the License Key property |
+| `Invalid Signature` | The key text was altered | Paste the key exactly as issued, as one line, no wrapping, no trailing spaces |
+| `Wrong Product` | The key was issued for a different plug-in, for example an Open Beta key | Use the key issued for `ip.em.xmss`; beta keys stop working on 2026-10-31 |
+| `Expired` | The key's expiry date has passed | Request a new key |
+| `Exceeded Limit` | More licensed targets exist than the key's instance count | Request an increased instance count, or remove a target |
+
+For a key that carries an instance limit, checking the count means asking the OMS how many targets of this type exist; if that check cannot complete, for example during a transient OMS outage, the metric reports `Instance Count Unavailable` rather than passing or failing the target on a guess. A key with no instance limit never needs this check. Enter a valid key and the status clears at its next check; nothing needs a restart.
 
 ## Certificate problems {#certificates}
 
@@ -51,7 +70,7 @@ Quickest diagnostic: set the target's TLS Mode to `required`. If it comes Up, th
 
 ## What to send when you report something {#reporting}
 
-The more of this you include, the faster it resolves:
+Send it to **helpdesk@integrationplumbers.io**. Every email opens a ticket you can follow in the [customer portal](https://integrationplumbers.zohodesk.com/portal/en/home), or open the ticket there directly. The more of this you include, the faster it resolves:
 
 - Enterprise Manager release, and the plug-in version from the target's page
 - SQL Server version and edition, and the host operating system
@@ -68,4 +87,4 @@ For a target that has been up less than a day, say so — it changes what an emp
 - [TLS connections](tls.md#failures) - certificate and PKIX failures in detail
 - [Jobs](jobs.md#gotchas) - the job failures that have no obvious cause
 - [Monitoring pages](monitoring-pages.md#blank) - a blank region that is not a fault
-- [Open Beta notice](beta-pre-release.md#reporting) - reporting a defect in the beta
+- [What's new](whats-new.md#ga) - the known limitations and boundaries of this release, so you can tell a known one from a new one

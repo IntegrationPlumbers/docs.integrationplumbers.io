@@ -9,8 +9,8 @@ nav_order: 0
 
 ### Oracle Enterprise Manager Plug-in for Microsoft SQL Server User Guide
 
-*Open Beta · Enterprise Manager 24ai and 13.5*
-*August 2026*
+*General Availability · `24.1.1.0.0` for Enterprise Manager 24ai · `13.5.1.0.0` for Enterprise Manager 13.5*
+*October 2026*
 
 This release ships as two plug-in builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable — install the build that matches your Enterprise Manager. Everything in this guide applies to both.
 
@@ -37,7 +37,7 @@ One plug-in and one target type cover every supported version and both agent pla
 
 | If you want to | Go to |
 | :--- | :--- |
-| Read the Open Beta terms and what is and is not verified yet | [Open Beta notice](beta-pre-release.md) |
+| Know what this release covers, and where its boundaries are | [What's new](whats-new.md#ga) |
 | Install it and see a target, quickly | [Getting started](getting-started.md) |
 | See whether your estate is ready | [Prerequisites](prerequisites.md) |
 | Add your first instance | [Targets and properties](targets-and-properties.md) |
@@ -57,6 +57,10 @@ One plug-in and one target type cover every supported version and both agent pla
 
 SQL Server 2016 and 2017 collect every metric family, with two families returning less detail than on 2019 and later. [Prerequisites](prerequisites.md) has the specifics.
 
-## A note on the Open Beta
+## Release status
 
-This is pre-release software. It is not licensed for production use, and there is no production support commitment during the beta. The [Open Beta notice](beta-pre-release.md) covers the terms of use, what has been verified, what has not, and how to report what you find.
+This is the generally available release of the plug-in. It covers the target type, its 78 metric groups and 14 console pages, the 20 shipped thresholds, the 14 compliance rules, the 11 job types and the connection options, every one of them deployed and exercised against live SQL Server instances before shipping. Everything we know to be incomplete or unproven is in the boundaries list in [What's new](whats-new.md#ga) rather than left for you to discover.
+
+The Open Beta has ended. Its plug-in (`ip.em.xmsb`) is separate from this one, so moving to the general release is a fresh install, not an upgrade, and beta licence keys stop working on 2026-10-31. See [Moving from the Open Beta](install-and-upgrade.md#from-beta).
+
+Send findings - bugs, metrics that look wrong, thresholds that fire when they should not, unclear documentation - to **helpdesk@integrationplumbers.io**. Every email opens a ticket you can follow in the [customer portal](https://integrationplumbers.zohodesk.com/portal/en/home), or open the ticket there directly. [Troubleshooting](troubleshooting.md#reporting) says what to include.
