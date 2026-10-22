@@ -94,7 +94,7 @@ Seventeen console pages present a database, starting with an Overview that says 
 
 ## Release status {#release-status}
 
-This is a **general-availability** release, under the plug-in identity `ip.em.xdb2`: the first update after GA (24.1.1.0.0 / 13.5.2.0.0, released 2026-10-12), released 2026-10-23. It upgrades GA in place: read [Upgrade notes](upgrade-notes.md) first. Everything we know to be incomplete or unproven is in the limitations list on [What's new](whats-new.md#update-24-1-2) rather than left for you to discover.
+This is a **general-availability** release, under the plug-in identity `ip.em.xdb2`: the first update after GA (24.1.1.0.0 / 13.5.2.0.0, released 2026-10-12), released 2026-10-22. It upgrades GA in place: read [Upgrade notes](upgrade-notes.md) first. Everything we know to be incomplete or unproven is in the limitations list on [What's new](whats-new.md#update-24-1-2) rather than left for you to discover.
 
 If you ran the Open Beta (`ip.em.xdbb`), the released plug-in is a different plug-in and is installed fresh, side by side with the beta, rather than upgraded over it: see [Moving from the beta to GA](beta-pre-release.md).
 

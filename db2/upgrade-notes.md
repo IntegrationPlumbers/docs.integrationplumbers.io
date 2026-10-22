@@ -9,7 +9,7 @@ Release notes for changes that need operator action beyond a routine deploy: an 
 
 **In this page:** 24.1.2.0.0 / 13.5.3.0.0 (from GA) · GA 24.1.1.0.0 / 13.5.2.0.0
 
-## 24.1.2.0.0 / 13.5.3.0.0 (2026-10-23), from GA {#update-24-1-2}
+## 24.1.2.0.0 / 13.5.3.0.0 (2026-10-22), from GA {#update-24-1-2}
 
 The first in-place update of GA 24.1.1.0.0 / 13.5.2.0.0. The database target metadata moves from 3.9 to 4.9, and the new IBM Db2 Instance target type arrives at 1.3. Each note below says what changes, who it affects, and what to do.
 

@@ -7,7 +7,7 @@ nav_order: 13
 
 This page lists what changed in each release of the IBM Db2 plug-in, most recent first, in brief: [What's new](whats-new.md) has the detail. The plug-in is `ip.em.xdb2`, with target types `ip_db2_database` and, from 24.1.2.0.0 / 13.5.3.0.0, `ip_db2_instance`. Its Enterprise Manager 24ai and Enterprise Manager 13.5 builds are versioned independently. The Open Beta history follows the GA releases, under [Beta line](#beta-line).
 
-## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-23 {#update-24-1-2}
+## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-22 {#update-24-1-2}
 
 The first update of `ip.em.xdb2`, installed in place over 24.1.1.0.0 / 13.5.2.0.0. One release, two builds with the same content: 24.1.2.0.0 installs on Enterprise Manager 24ai, 13.5.3.0.0 on Enterprise Manager 13.5. The full detail is on [What's new](whats-new.md#update-24-1-2), and the operator actions are on [Upgrade notes](upgrade-notes.md#update-24-1-2).
 

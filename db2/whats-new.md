@@ -7,9 +7,9 @@ nav_order: 1
 
 The changes in each release of the IBM Db2 plug-in, newest first, for anyone deciding whether to upgrade or checking what a release changed. Each release ships as two builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Install the build that matches your Enterprise Manager.
 
-**In this page:** [24.1.2.0.0 / 13.5.3.0.0 (2026-10-23)](#update-24-1-2) · [General availability: 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12)](#ga) · [Feedback](#feedback)
+**In this page:** [24.1.2.0.0 / 13.5.3.0.0 (2026-10-22)](#update-24-1-2) · [General availability: 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12)](#ga) · [Feedback](#feedback)
 
-## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-23 {#update-24-1-2}
+## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-22 {#update-24-1-2}
 
 The first update after GA, installed over 24.1.1.0.0 / 13.5.2.0.0 in place ([Upgrade from GA](install-and-upgrade.md#upgrade)). The database target metadata moves from 3.9 to 4.9, and a second target type, IBM Db2 Instance, arrives at 1.3. [Upgrade notes](upgrade-notes.md#update-24-1-2) lists every change that needs operator action.
 

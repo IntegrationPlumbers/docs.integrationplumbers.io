@@ -10,7 +10,7 @@ nav_order: 5.7
 | | |
 |---|---|
 | Product | Integration Plumbers IBM Db2 Plug-in for Oracle Enterprise Manager |
-| Released plug-in | Plug-in `ip.em.xdb2`. GA was **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.2.0.0** for Enterprise Manager 13.5, released 2026-10-12. The current release is **24.1.2.0.0** / **13.5.3.0.0**, released 2026-10-23: install that one |
+| Released plug-in | Plug-in `ip.em.xdb2`. GA was **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.2.0.0** for Enterprise Manager 13.5, released 2026-10-12. The current release is **24.1.2.0.0** / **13.5.3.0.0**, released 2026-10-22: install that one |
 | Open Beta | Plug-in `ip.em.xdbb`, versions `24.1.9.N.0` / `13.5.9.N.0`; the last drop was `24.1.9.9.0` / `13.5.9.4.0`. **There is no further beta drop** |
 | How to move | A clean install of GA, side by side with the beta, then undeploy the beta (section 3) |
 | Reference | [IBM Db2 plug-in User Guide](index.md): the authoritative description of what the released plug-in does |
