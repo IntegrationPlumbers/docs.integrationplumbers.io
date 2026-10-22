@@ -3,15 +3,95 @@ title: What's new
 nav_order: 1
 ---
 
-# What's new in this release
+# Release notes
+
+The changes in each release of the IBM Db2 plug-in, newest first, for anyone deciding whether to upgrade or checking what a release changed. Each release ships as two builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Install the build that matches your Enterprise Manager.
+
+**In this page:** [24.1.2.0.0 / 13.5.3.0.0 (2026-10-22)](#update-24-1-2) · [General availability: 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12)](#ga) · [Feedback](#feedback)
+
+## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-22 {#update-24-1-2}
+
+The first update after GA, installed over 24.1.1.0.0 / 13.5.2.0.0 in place ([Upgrade from GA](install-and-upgrade.md#upgrade)). The database target metadata moves from 3.9 to 4.9, and a second target type, IBM Db2 Instance, arrives at 1.3. [Upgrade notes](upgrade-notes.md#update-24-1-2) lists every change that needs operator action.
+
+#### Functionality Added or Changed
+
+- **A redesigned console.** Every page opens with the question it answers, a toolbar, a row of KPI tiles and then its regions, with a left navigation grouped as Workload, Storage and Logs, and Protection ([Monitoring pages](monitoring-pages.md)). Several pages are renamed: Home is **Overview**, SQL Analytics is **SQL**, Analysis is **Locks**, Transaction Log & Recovery is **Transaction Log**, Backup History is **Backup**, and HADR is **High Availability**.
+- **Ten new database pages:** Sessions, Waits, Members, Tables, Indexes, Transaction Log, Memory & Sorts, Configuration, Monitoring Readiness and License Info ([IBM Db2 Database pages](monitoring-pages.md#51-ibm-db2-database-pages)). The Overview gains a **Database** card, a **Monitoring and License** card and seven Key Indicators tiles.
+- **Monitoring Readiness** checks the connection, licence, monitor authority, metric collection, monitor switches, deadlock capture, HADR and the diagnostic log, live on the agent, and prints the statement that fixes each, with a Copy button ([Monitoring Readiness](monitoring-pages.md#monitoring-readiness)). The Overview shows an hourly count of the same checks ([readiness_summary](metrics-reference.md#readiness-summary)). A [troubleshooting guide for AI assistants](https://docs.integrationplumbers.io/db2/ai/troubleshooting.md), published with this guide as a Markdown file, covers the same checks in a form you can load into your own assistant together with the page's results.
+- **Statement Detail** charts a statement's executions and CPU and activity time over the window, copies its text, and runs **Explain Plan**, which shows the access plan of the statement's cached section without running it ([Explain SQL Statement](jobs-and-metric-extensions.md#explain)). It opens from SQL, Sessions and Recent Deadlocks on Locks.
+- **Auto-refresh** on Locks and Sessions: Off, 30 seconds, 1 minute or 5 minutes. Each live read runs a collection on the agent, and the live reads pause while the browser tab is in the background ([Time windows, auto-refresh and live reads](monitoring-pages.md#53-time-windows-auto-refresh-and-live-reads)).
+- **Back Up Database** on the Backup page: an online backup now, once later or daily ([Backup](monitoring-pages.md#backup)). It submits the remote Online Backup job, now job type 1.6 with **Compress the Backup Image** and **Include Logs** options. A partitioned (DPF) database is refused, by the dialog and by the job itself ([Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs)).
+- **Sessions, Blocking Chains and Recent Deadlocks.** Sessions lists the 25 sessions using the most CPU in their current unit of work, with **Kill** on each row. Locks shows who waits on whom down to the root blocker, with **Kill** on the root blocker's row, and, once a DBA has set up deadlock capture, the past day's deadlocks with every participant ([Locks](monitoring-pages.md#locks)).
+- **IBM Db2 Instance target type** with its own six pages ([Instance targets](targets-and-properties.md#instance-targets)): availability, instance memory against its limit, memory sets, active databases, agents, FCM buffers, latch waits, the instance's db2diag.log and its own daily configuration snapshot. Start and Stop IBM Db2 Instance run from it. Instance targets need a licence key but do not count against its instance limit.
+- **Automatic discovery** of local databases on Linux and Windows agent hosts, with no setup and no password ([Target discovery](discovery.md)).
+- **Partitioned (DPF) databases are supported**: every query reads all active members and reports the database as a whole, and `Member_Status` alerts when a member is down ([Partitioned (DPF) databases](metrics-reference.md#dpf)). pureScale member and CF health is implemented, not lab-certified ([pureScale](metrics-reference.md#purescale)).
+- **New monitoring:** log archiving (`Log_Archive`), instance memory and memory sets, where request time waits (`Wait_Time`), latches, buffer-pool I/O time, FCM, WLM workloads and service classes (no WLM licence needed), index activity and unused indexes, blocking chains, opt-in deadlock capture, sessions and the oldest open transactions, and per-second log and cache rates ([Metrics reference](metrics-reference.md)). New default alerts ship on several of them ([Default thresholds](alerts-and-templates.md#default-thresholds)).
+- **Compliance:** twelve new rules on security settings, privileges granted to `PUBLIC`, DBADM and SECADM holders, trusted contexts and backup age, for 29 rules in three standards ([Compliance standards](compliance-standards.md)).
+- **Archive IBM Db2 Active Log**, a new local job, which an administrator can attach as a corrective action to the log-space alert; nothing ships attached ([Corrective action](jobs-and-metric-extensions.md#corrective-action)).
+- **Three monitoring templates (Starter, Standard and Production-critical), an incident rule set, and configuration comparison and drift definitions** ship beside the plug-in ([Monitoring templates](alerts-and-templates.md#monitoring-templates), [Incident rules](alerts-and-templates.md#incident-rules)). The templates replace the GA threshold starter kit.
+- **Kerberos authentication** ([Kerberos](prerequisites.md#kerberos)), an optional agent-load throttle ([Pausing collection](prerequisites.md#collection-throttle)), optional batch collection ([Batch collection](prerequisites.md#batch-collection)), and IPv6 hosts ([IPv6 hosts](targets-and-properties.md#ipv6)).
+- **The licence key is a credential**, hidden from target properties, with a 14-day grace period after expiry, and one **OMS API Communication** setting for the licence count ([Licensing](targets-and-properties.md#licensing)).
+- **Statements are keyed by digest**, so literal values no longer create new repository keys, and at most 200 new statement keys are added per target a day ([Statement metric keys](jobs-and-metric-extensions.md#statement-keys)).
+- **The plug-in no longer writes inside its agent plug-in home.** Target caches and the plug-in log go to `<agentStateDir>/ip_plugin/xdb2/`, so CollectorStatus history survives an agent plug-in upgrade ([Files the plug-in keeps on each agent](jobs-and-metric-extensions.md#agent-files)).
+- **Release downloads are signed**: each OPAR comes with a `SHA256SUMS` file and a detached cosign signature for each file ([Verify the download](install-and-upgrade.md#verify)).
+- **The target type is named IBM Db2 Database**, matching IBM Db2 Instance, and chart legends are shorter, with the unit on the chart's axis. The console theme (1.1.0) has higher-contrast colours that meet WCAG 2.2 AA, and Days to Full on Storage is coloured amber under 30 days and red under 7.
+- **Text for translation.** Job types, every console page and the target metadata's labels, descriptions and alert messages take their text from an English resource bundle. Nothing looks different in English; every alert message now has its own message id.
+
+#### Bugs Fixed
+
+- The oldest open transaction no longer reads *0 s*: units of work younger than 5 seconds and the plug-in's own connections are left out.
+- Numeric table columns (wait times and application handles on Locks) sort as numbers.
+- Wait_Time and Query_Analytics no longer report one inflated interval when a DPF partition stops or comes back: a change in the partitions read starts a new baseline ([Wait_Time](metrics-reference.md#wait-time)).
+- Top Statements retries the SQL text after a failed lookup (the [GA known issue](#known-issue)).
+- Performance shows one row per buffer pool and per database on every window, and cache lookup counts are per collection interval, so an idle cache no longer reads as a perfect one.
+- Diagnostic-log alerts carry the matched message, and CollectorStatus no longer fills the repository's string history.
+- The remote admin jobs and Explain run over TLS with the target's client truststore, and a target can be reached over IPv6.
+- Security: the Host, Port and Database Name properties, and remote admin job parameters, are checked before use, so a crafted value cannot add driver settings to the connection.
+- Tables fit their regions: headers wrap, and a table wider than its region scrolls inside its frame.
+- Table_Maintenance checks user schemas whose names begin with `SYS`, such as PeopleSoft's `SYSADM`.
+- The licence instance count is sturdier: it counts only this plug-in's target type, each target once; an OMS answer that is not a target list is an error, never a count of 0; and a count under 7 days old stands in during a short OMS outage.
+
+#### Upgrade notes
+
+Full detail, with what to do for each, is on [Upgrade notes](upgrade-notes.md#update-24-1-2).
+
+- Deploy to the OMS and to every agent, then restart the OMS once: appended columns stay empty, and the licence-status alert does not fire, until it restarts ([details](upgrade-notes.md#restart-oms)).
+- Seven lock and session metric groups are renamed and their stored history restarts; re-apply thresholds set on the old names ([details](upgrade-notes.md#renamed-groups)).
+- Compliance scores drop on the first configuration collection, because the new rules check Db2's own defaults ([details](upgrade-notes.md#compliance-scores)).
+- SQL statement history restarts under digest keys ([details](upgrade-notes.md#statement-keys)).
+- A licence key for 100 or more instances now needs the OMS settings ([details](upgrade-notes.md#licence-count)); move each key into its credential set when ready ([details](upgrade-notes.md#licence-credential)).
+- A TLS target that runs the remote admin jobs or Explain needs its client truststore credential set ([details](upgrade-notes.md#tls-truststore)).
+- Adding instance targets doubles the instance-level alerts until you clear them on the database targets ([details](upgrade-notes.md#duplicate-alerts)).
+
+#### Known limitations and boundaries
+
+- **Amazon RDS for Db2 is not certified.** Monitoring over JDBC has been verified on Db2 12.1.5 on RDS; the formal certified status waits for sign-off. The local jobs and diagnostic-log monitoring are unavailable, because the agent cannot run on the database host. Of the remote admin jobs, RUNSTATS works (over TLS too), and Force Application and Online Backup fail with `SQL1092N`, because no RDS user holds SYSADM, SYSCTRL or SYSMAINT ([Troubleshooting](troubleshooting.md#rds-for-db2)).
+- **Db2U and IBM Db2 SaaS are not certified** and have not been tested; the connection settings are written from IBM's documentation ([Db2U and IBM Db2 SaaS](targets-and-properties.md#db2u-saas)).
+- **pureScale is implemented, not lab-certified:** member, CF and group buffer pool health only; every other group stays off on pureScale.
+- **On DPF**, the HADR groups and diagnostic-log monitoring are not collected, `DB_History` lists the catalog partition's recovery history only, and Online Backup is refused ([Partitioned (DPF) databases](metrics-reference.md#dpf)).
+- **Deep HADR monitoring requires a standby pair**, and a standby without reads on standby reports availability only ([Monitoring a standby](hadr-monitoring.md#monitoring-a-standby)).
+- **Local-only features.** Diagnostic-log monitoring, the six local jobs and the Kill buttons need the agent on the Db2 host ([Network and ports](prerequisites.md#network)).
+- **Adding an IBM Db2 Instance target duplicates the instance-level alerts** on its database targets until you clear them there ([Duplicate alerts](targets-and-properties.md#duplicate-alerts)).
+- **The latch figures on Waits are for the whole instance**, every database on it, not this database alone.
+- **Tables and Indexes show what is collected:** table size covers only the tables that need statistics or a reorg (at most 100), index size only the indexes scanned in the last interval and the unused ones, "Invalid objects" counts packages and objects, not indexes, and missing indexes are not collected ([Tables](monitoring-pages.md#tables), [Indexes](monitoring-pages.md#indexes)).
+- **Last week and Last month read hourly averages**, so peaks look lower, and Statement Detail calls the window figures a relative size, not a total.
+- **Back Up Database scheduling:** Once and Daily are verified on Enterprise Manager 24ai, and Once on 13.5. A console that cannot build the schedule says so and submits nothing.
+- **Kerberos** is verified on a Linux agent with a principal and password; Windows agents, keytab and ticket-cache modes were not verified. **Batch collection** is not yet verified on Windows agents.
+- **Importing the monitoring templates on Enterprise Manager 13.5** has not been tested.
+- **Discovery on Windows** reads the Db2 command line's English output, so a host whose Db2 messages are in another language finds nothing ([Target discovery](discovery.md)).
+- **Federation and BLU (column-organized) databases** are monitored with the standard metric set, but nothing specific to them is collected.
+- **Not supported:** Db2 for z/OS, Db2 11.1 and below, and AIX, Solaris and HP-UX agents ([Supported versions](prerequisites.md#supported-versions)).
+- **Not covered in this release:** BLU and federation metrics, pureScale certification, AI Query Optimizer monitoring and Q Replication.
+
+## General availability: 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.2.0.0 (Enterprise Manager 13.5), 2026-10-12 {#ga}
+
+*24.1.2.0.0 / 13.5.3.0.0, above, upgrades this release in place. Page names in this section are the GA names (Home, Analysis, SQL Analytics, Backup History and HADR).*
 
 This is the first general-availability (GA) release of the IBM Db2 plug-in, `ip.em.xdb2`, released on 2026-10-12. It ships as two builds with the same features: **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.2.0.0** for Enterprise Manager 13.5. The two lines are versioned independently. Both builds have been verified on a live Enterprise Manager, including deployment and every console page.
 
-**Where to find it:** the plug-in appears under **Setup → Extensibility → Plug-ins → Databases → IBM DB2 Database**. Its pages appear in the `ip_db2_database` target's own navigation tree once a target is added.
 
-**In this page:** Read this first · Known issue · Breaking changes · Statement text and your data · What's new for monitoring · What's new in the console · What's new for administration · Changed defaults · Fixes · Feedback
 
-## Read this first {#read-this-first}
+### Read this first {#read-this-first}
 
 - **This is the first GA release**, so there is no earlier GA release to upgrade from. Install it fresh: see [Getting started](getting-started.md). The first GA update after it is the first release that upgrades in place.
 - **Moving from the Open Beta is a clean install, not an upgrade.** GA is a different plug-in from the Open Beta:
@@ -29,11 +109,11 @@ This is the first general-availability (GA) release of the IBM Db2 plug-in, `ip.
   - Alerts and collection intervals have new defaults. See [Changed defaults](#changed-defaults).
 - **Support levels.** Db2 12.1 is certified at the Comprehensive level, and Db2 11.5 at the Basic level. Every metric collects on both. The level is the certification label in Enterprise Manager's plug-in catalog. Amazon RDS for Db2 is not certified: see [Troubleshooting](troubleshooting.md#rds-for-db2).
 
-## Known issue {#known-issue}
+### Known issue {#known-issue}
 
 **After one failed text lookup, Top Statements keeps showing numbers without SQL text** on the SQL Analytics page, until you change the time window or the ranking. Refreshing the page does not retry the lookup. The ranking and the numbers stay correct. This is fixed in the first update after GA.
 
-## Breaking changes {#breaking-changes}
+### Breaking changes {#breaking-changes}
 
 **Every administrative job type is renamed.** Job type names are global across the OMS. The old names sat in the namespace of Oracle's own Db2 plug-in, which this plug-in is designed to run alongside.
 
@@ -49,7 +129,7 @@ Job history, saved jobs and library entries recorded under the old names do not 
 
 **DataFiles is retired and replaced by Table_Overflow** ("Table Overflow and Reorganization"). DataFiles keyed each row on a cumulative reorganization counter, so every reorg gave a table a new row identity. Table_Overflow keys on schema and table and carries the same counters. It keeps one row per table, summed over data partitions, leaves out temporary tables, and uploads the 100 tables with the most overflow accesses. A threshold or monitoring template set on `DataFiles.overflow_accesses` does not move to the new group: set it again on `Table_Overflow.overflow_accesses`.
 
-## Statement text and your data {#statement-text-privacy}
+### Statement text and your data {#statement-text-privacy}
 
 The SQL Analytics page now shows the SQL text of each statement. That text is **stored in the Enterprise Manager repository, and it can contain data**:
 
@@ -66,7 +146,7 @@ emcli modify_collection_schedule -targetType=ip_db2_database -targetNames=<targe
 
 Top Statements then shows its numbers without the text.
 
-## What's new for monitoring {#monitoring}
+### What's new for monitoring {#monitoring}
 
 - **SQL text for any window.** Top Statements follows the SQL Analytics page's time window, from the last hour to the last month, and shows each statement's SQL text. The new **SQL Statement Text** group stores each statement's text at most once a day. It reads what the analytics collection already fetched, so it adds no load on the database. Text is flattened to one line and cut at 2,000 characters.
 - **Storage-path headroom.** A new `Storage_Paths` group, collected every 30 minutes, reports each automatic-storage path's file system. A shipped alert warns at 85% used and goes critical at 95%.
@@ -84,7 +164,7 @@ Top Statements then shows its numbers without the text.
 - **TLS hardening.** A new optional **TLS Hostname Validation** property (`BASIC`, the default, or `OFF`). The security mechanism is now explicit. A TLS failure names its cause instead of reading as the database being down. See [Optional transport security](prerequisites.md#tls).
 - **Collection telemetry.** CollectorStatus adds how long each group's last collection took and how many attempts in a row have failed.
 
-## What's new in the console {#console}
+### What's new in the console {#console}
 
 - **Seven pages:** Home, Analysis, Performance, Storage, Backup History, SQL Analytics and HADR. See [Monitoring pages](monitoring-pages.md).
 - **Home health overview.** One row per area: availability, storage, transaction log, backup and recovery, HADR, locks, performance, SQL workload, licence, and diagnostics. Each row shows Enterprise Manager's own current verdict, the number of open alerts, the worst alert's message, and a link to the page behind it. The verdicts come from Enterprise Manager's alerts, so the overview cannot disagree with the Incidents list after you tune a threshold.
@@ -94,7 +174,7 @@ Top Statements then shows its numbers without the text.
 - **The console asks the agent for less.** Real-time charts on Home and Performance refresh once a minute. A real-time chart now starts empty and fills in as samples arrive; for history, pick **Past hour** or longer on Performance.
 - **Theme and accessibility.** Status colours come from the shared Integration Plumbers theme, and a status is always a word as well as a colour. Screen readers announce every section, chart and table. Long text cells stay inside their column, with the full text in the tooltip.
 
-## What's new for administration {#administration}
+### What's new for administration {#administration}
 
 - **Three remote admin jobs:** Force Application, RUNSTATS on a Table, and Online Backup. They work on any target, including a remotely monitored one. Each runs one Db2 command over `SYSPROC.ADMIN_CMD` on the target's JDBC connection. They run as a separate admin user, held in the new **IBM DB2 Database Admin Credentials** preferred credential set, and never as the monitoring user. Every parameter is validated before anything runs. See [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs).
 - **Kill Blocking Application.** The Analysis page's kill action now sits on the *Blocking* table, so it forces the lock holder rather than the waiter. It asks for an explicit Yes naming the application, then reports the result.
@@ -104,7 +184,7 @@ Top Statements then shows its numbers without the text.
 - **A diagnostics job.** *Collect IBM DB2 Plug-in Diagnostics* writes one archive of the plug-in's logs and environment for support, with every credential redacted.
 - **17 compliance rules.** Five rules join the three standards: the instance offers TLS; on Windows, Db2 extended security is not turned off; audit records are written asynchronously; SYSADM belongs to a named group; and the server runs the latest modification pack of its release. See [Compliance standards](compliance-standards.md).
 
-## Changed defaults {#changed-defaults}
+### Changed defaults {#changed-defaults}
 
 **New default alerts.** Several conditions that used to ship with no value now alert out of the box: table space fault states; HADR log gap, replay gap, replay lag and standby state; lock escalations; IBM licence feature use; database and instance status; and secondary logs in use. `sec_logs_allocated` now alerts on "more than 0"; before, it fired on the healthy value. The full list is on [Alerts and thresholds](alerts-and-templates.md#default-thresholds).
 
@@ -118,7 +198,7 @@ Top Statements then shows its numbers without the text.
 
 All of them read light monitor sources, and the lock groups upload rows only while waits exist. The backup-age alert now confirms 1.5 hours after the threshold is crossed, not 6. The HADR connection alert now fires within 15 minutes.
 
-## Fixes {#fixes}
+### Fixes {#fixes}
 
 - **"Target is down" now means down.** A wrong or empty password, a revoked grant, a TLS or truststore problem, a missing driver, or a database quiesced against the monitoring user now shows as a *metric collection error* that says what to fix. Unreachable hosts and stopped instances still read Down. A quiesced or roll-forward-pending database counts as Up.
 - **The ratio alerts can fire again.** The buffer-pool, catalog-cache and package-cache hit ratios, the sort-overflow ratio and the average lock wait are computed per collection interval, not from totals since the database was activated. After an upgrade they report from the second collection.
@@ -126,14 +206,14 @@ All of them read light monitor sources, and the lock groups upload rows only whi
 - **Arithmetic and unit corrections** to `sync_index_read_rate`, `creation_to_assigning_ratio`, the HADR log positions (now in bytes), `tablespace_max_size` (-1 for no maximum) and `HadrTimeout` (now in seconds). A new `ValuesLive` column says when the HADR gap and lag values are last-known rather than live.
 - **A `|` inside a collected value**, such as Db2's `||` operator in statement text, no longer corrupts the row.
 
-## Feedback
+## Feedback {#feedback}
 
-Send findings — bugs, confusing metrics, missing thresholds, unclear documentation — to **helpdesk@integrationplumbers.io** or through the [customer portal](https://integrationplumbers.zohodesk.com/portal/en/signin). Include the plug-in version (`emcli list_plugins_on_server`), the Enterprise Manager line (24ai or 13.5), the Db2 version (11.5 or 12.1), the metric group or console page involved, and any deploy log, agent log, or collection-error text.
+Send findings (bugs, confusing metrics, missing thresholds, unclear documentation) to **helpdesk@integrationplumbers.io** or through the [customer portal](https://integrationplumbers.zohodesk.com/portal/en/signin). Include the plug-in version (`emcli list_plugins_on_server`), the Enterprise Manager line (24ai or 13.5), the Db2 version (11.5 or 12.1) and topology, the metric group or console page involved, and any deploy log, agent log, or collection-error text. For a target that is not collecting, the Monitoring Readiness results are the fastest start: see [Troubleshooting](troubleshooting.md#support).
 
 ## Related
 
-- [Moving from the beta to GA](beta-pre-release.md) — for Open Beta users
-- [Getting started](getting-started.md) — install the plug-in and add your first target
-- [Install and upgrade](install-and-upgrade.md#download) — the release files and their SHA-256 checksums
-- [Troubleshooting](troubleshooting.md#licence-gate) — what an unlicensed target looks like, and how to fix it
-- [Changelog](changelog.md) — every release, with the beta history below
+- [Upgrade notes](upgrade-notes.md): every change that needs operator action
+- [Install and upgrade](install-and-upgrade.md#upgrade): the upgrade steps
+- [Moving from the beta to GA](beta-pre-release.md): for Open Beta users
+- [Getting started](getting-started.md): install the plug-in and add your first target
+- [Changelog](changelog.md): every release in brief, with the release files and checksums
