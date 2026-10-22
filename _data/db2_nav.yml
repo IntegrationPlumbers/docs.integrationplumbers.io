@@ -7,19 +7,23 @@ groups:
       - { title: "IBM Db2 Plug-in", url: /db2/ }
       - { title: "What's new", url: /db2/whats-new.html }
       - { title: "Getting started", url: /db2/getting-started.html }
-      - { title: "Open Beta notice", url: /db2/beta-pre-release.html }
       - { title: "Trial setup", url: /db2/trial.html }
   - name: Set up
     pages:
       - { title: "Prerequisites", url: /db2/prerequisites.html }
       - { title: "Install and upgrade", url: /db2/install-and-upgrade.html }
+      - { title: "Upgrade notes", url: /db2/upgrade-notes.html }
+      - { title: "Moving from the beta to GA", url: /db2/beta-pre-release.html }
       - { title: "Targets and properties", url: /db2/targets-and-properties.html }
+      - { title: "Target discovery", url: /db2/discovery.html }
   - name: Reference
     pages:
       - { title: "Monitoring pages", url: /db2/monitoring-pages.html }
-      - { title: "HADR monitoring", url: /db2/hadr-monitoring.html }
-      - { title: "Compliance standards", url: /db2/compliance-standards.html }
-      - { title: "Alerts and thresholds", url: /db2/alerts-and-templates.html }
+      - { title: "Metrics reference", url: /db2/metrics-reference.html }
+      - { title: "Alerts and templates", url: /db2/alerts-and-templates.html }
       - { title: "Jobs", url: /db2/jobs-and-metric-extensions.html }
+      - { title: "Compliance standards", url: /db2/compliance-standards.html }
+      - { title: "HADR monitoring", url: /db2/hadr-monitoring.html }
+      - { title: "EM MCP Server", url: /db2/mcp-server.html }
       - { title: "Troubleshooting", url: /db2/troubleshooting.html }
       - { title: "Changelog", url: /db2/changelog.html }

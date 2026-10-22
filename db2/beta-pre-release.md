@@ -1,19 +1,19 @@
 ---
 title: Moving from the beta to GA
-nav_order: 2.5
+nav_order: 5.7
 ---
 
 # Moving from the Open Beta to GA
 
-**For Open Beta users: the general-availability release is out. Please read before you plan the move.**
+**For Open Beta users.** The Open Beta has ended and the plug-in is generally available. This page says what moving to the released plug-in involves, and how to do it, so read it before you plan the move.
 
 | | |
 |---|---|
 | Product | Integration Plumbers IBM Db2 Plug-in for Oracle Enterprise Manager |
-| GA release | Plug-in `ip.em.xdb2`, **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.2.0.0** for Enterprise Manager 13.5, released 2026-10-12 |
+| Released plug-in | Plug-in `ip.em.xdb2`. GA was **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.2.0.0** for Enterprise Manager 13.5, released 2026-10-12. The current release is **24.1.2.0.0** / **13.5.3.0.0**, released 2026-10-23: install that one |
 | Open Beta | Plug-in `ip.em.xdbb`, versions `24.1.9.N.0` / `13.5.9.N.0`; the last drop was `24.1.9.9.0` / `13.5.9.4.0`. **There is no further beta drop** |
 | How to move | A clean install of GA, side by side with the beta, then undeploy the beta (section 3) |
-| Reference | [IBM Db2 plug-in User Guide](index.md) — the authoritative description of what the GA plug-in does |
+| Reference | [IBM Db2 plug-in User Guide](index.md): the authoritative description of what the released plug-in does |
 
 ## 1. What GA means for a beta install
 
@@ -22,8 +22,8 @@ GA is a **different plug-in** from the beta, by design. It has its own identity,
 | | Open Beta | GA |
 |---|---|---|
 | Plug-in ID | `ip.em.xdbb` | `ip.em.xdb2` |
-| Target type | `ip_db2_database_beta` — shown as *IBM DB2 Database (Beta)* | `ip_db2_database` — shown as *IBM DB2 Database* |
-| Versions | `24.1.9.N.0` / `13.5.9.N.0` | `24.1.1.0.0` / `13.5.2.0.0` |
+| Target type | `ip_db2_database_beta`, shown as *IBM DB2 Database (Beta)* | `ip_db2_database`, shown as *IBM Db2 Database* (and, from 24.1.2.0.0, `ip_db2_instance`, *IBM Db2 Instance*) |
+| Versions | `24.1.9.N.0` / `13.5.9.N.0` | `24.1.1.0.0` / `13.5.2.0.0` (GA), now `24.1.2.0.0` / `13.5.3.0.0` |
 | Licence keys | Issued for `ip.em.xdbb` | Issued for `ip.em.xdb2` |
 
 - **Beta to GA is a clean install, not an upgrade.** Deploying GA does not replace or upgrade the beta. Nothing the beta created in your Management Repository carries into GA: targets, metric history, incidents, thresholds you tuned and credentials all stay with the beta.
@@ -39,7 +39,7 @@ GA is a **different plug-in** from the beta, by design. It has its own identity,
 | **Credentials** | Enterprise Manager never exports credentials | Set them again: the monitoring password, and the truststore and OMS credentials where you use them |
 | **Licence keys** | A beta key is rejected by GA as `Invalid Signature` | Enter a GA key on each GA target |
 | **Thresholds** | Settings on beta targets stay on them | GA ships its own curated defaults ([Alerts and thresholds](alerts-and-templates.md#default-thresholds)). Re-apply only your own changes: read them with `emcli get_threshold -target_name=<beta target> -target_type=ip_db2_database_beta`, then set them on the GA target with `emcli modify_threshold` |
-| **Monitoring templates** | A template belongs to one target type | Re-create yours for `ip_db2_database` |
+| **Monitoring templates** | A template belongs to one target type | Re-create yours for `ip_db2_database`, or start from the shipped Starter, Standard or Production-critical template ([Monitoring templates](alerts-and-templates.md#monitoring-templates)). Do not apply the beta threshold starter kit to GA targets: its values already ship as defaults |
 | **Metric history** | Stays with the beta targets and cannot be moved | GA collects from the moment each target is added. Keep the beta targets for as long as you need their history |
 | **Incidents and events** | Stay with the beta targets | GA raises its own. Beta incidents close when their targets are removed |
 | **Groups, incident rules, notifications** | These refer to beta targets or the beta target type | Add the GA targets to your groups, and point rules at `ip_db2_database` |
@@ -51,21 +51,21 @@ GA is a **different plug-in** from the beta, by design. It has its own identity,
 
 ### 3.1 Install GA alongside the beta
 
-Import the GA release file that matches your Enterprise Manager, deploy it to the OMS, then to every agent that monitors a beta target. The beta keeps running. [Install and upgrade](install-and-upgrade.md) has the full procedure and the SHA-256 checksums; in brief:
+Import the GA release file that matches your Enterprise Manager, deploy it to the OMS, then to every agent that monitors a beta target. The beta keeps running. [Install and upgrade](install-and-upgrade.md) has the full procedure, and how to verify the download; in brief:
 
 ```
 emcli login -username=<em administrator>
-emcli import_update -file="/tmp/24.1.1.0.0_ip.em.xdb2_2000_0.opar" -omslocal
-emcli deploy_plugin_on_server -plugin="ip.em.xdb2:24.1.1.0.0" -dbUser=SYS -dbPassword=<repository SYS password>
+emcli import_update -file="/tmp/24.1.2.0.0_ip.em.xdb2_2000_0.opar" -omslocal
+emcli deploy_plugin_on_server -plugin="ip.em.xdb2:24.1.2.0.0" -dbUser=SYS -dbPassword=<repository SYS password>
 emcli get_plugin_deployment_status -plugin=ip.em.xdb2       # wait for Success
-emcli deploy_plugin_on_agent -plugin="ip.em.xdb2:24.1.1.0.0" -agent_names="<agent host>:<port>"
+emcli deploy_plugin_on_agent -plugin="ip.em.xdb2:24.1.2.0.0" -agent_names="<agent host>:<port>"
 ```
 
-On Enterprise Manager 13.5, use `13.5.2.0.0_ip.em.xdb2_2000_0.opar` and `13.5.2.0.0` in place of `24.1.1.0.0`, and pass `-sys_password=<repository SYS password>` in place of `-dbUser`/`-dbPassword`. **Always pin the `:version`** on both deploy commands.
+On Enterprise Manager 13.5, use `13.5.3.0.0_ip.em.xdb2_2000_0.opar` and `13.5.3.0.0` in place of `24.1.2.0.0` (13.5 also accepts `-sys_password=<repository SYS password>` in place of `-dbUser`/`-dbPassword`). **Always pin the `:version`** on both deploy commands.
 
 ### 3.2 Add each database as a GA target
 
-For each beta target, add an **IBM DB2 Database** target with the same connection properties, a GA licence key, and the monitoring credentials — see [Targets and properties](targets-and-properties.md). A GA target may keep its beta target's name, because Enterprise Manager keys targets by name *and* type, but distinct names make the two easier to tell apart while both run.
+For each beta target, add an **IBM Db2 Database** target with the same connection properties, a GA licence key in its licence credential set, and the monitoring credentials: see [Targets and properties](targets-and-properties.md). On an agent that runs on the Db2 host, the databases may already be proposed under **Auto Discovery Results** ([Target discovery](discovery.md)). A GA target may keep its beta target's name, because Enterprise Manager keys targets by name *and* type, but distinct names make the two easier to tell apart while both run.
 
 ### 3.3 Check each GA target
 
@@ -77,7 +77,7 @@ Once you no longer need the beta's history, remove every **IBM DB2 Database (Bet
 
 ## 4. What changed since the beta
 
-Everything new in GA is on [What's new](whats-new.md). The changes most likely to surprise a beta user:
+Everything new since the beta is on [What's new](whats-new.md): the GA release and 24.1.2.0.0 / 13.5.3.0.0. The changes most likely to surprise a beta user:
 
 - **The administrative job types are renamed.** The beta's `sidbb_*` job types become `ip_db2_start_instance`, `ip_db2_stop_instance`, `ip_db2_quiesce_database`, `ip_db2_unquiesce_database` and `ip_db2_kill_application`. Saved jobs and job library entries do not carry over. See [Breaking changes](whats-new.md#breaking-changes).
 - **Three remote admin jobs**, Force Application, RUNSTATS on a Table and Online Backup, work on a remotely monitored target. They run as a separate admin user in the new **IBM DB2 Database Admin Credentials** set. See [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs).
@@ -86,22 +86,22 @@ Everything new in GA is on [What's new](whats-new.md). The changes most likely t
   - A database on an unsupported Db2 version or topology still reports availability. Every other group reads `DISABLED` in CollectorStatus, with the reason.
   - A wrong password, a missing privilege, a TLS problem, or a database quiesced against the monitoring user is now a *metric collection error*, not "target is down".
 - **New alert and collection defaults.** More conditions alert out of the box, and the lock, HADR status and backup groups collect more often. See [Changed defaults](whats-new.md#changed-defaults).
-- **Licensing.** `Exceeded Limit` no longer stops collection: the target keeps collecting while the status alert stays open. A licence gate now also leaves **CollectorStatus** running, alongside License, Response and Version. See [Licensing](targets-and-properties.md#licensing).
+- **Licensing.** The key is a credential (the *IBM DB2 Plug-in Licence Monitoring Credentials* set), not a target property. `Exceeded Limit` no longer stops collection, an expired key has a 14-day grace period, and a licence gate leaves **CollectorStatus** and **readiness_summary** running, alongside License, Response and Version. See [Licensing](targets-and-properties.md#licensing).
 - **DataFiles is retired**, replaced by Table_Overflow, keyed per table.
-- **The Kill action moved.** On the Analysis page it is now **Kill Blocking Application**, on the *Blocking* table, and it asks for confirmation.
+- **The console is redesigned.** The beta's Home, Analysis and Performance pages become seventeen pages, from Overview to Monitoring Readiness. **Kill** is on the root blocker's row on **Locks** and on each row of **Sessions**, and asks for confirmation. See [Monitoring pages](monitoring-pages.md).
 - **SQL text is collected.** Top Statements shows each statement's SQL text, which is stored in the repository and can contain literal values. Read [Statement text and your data](whats-new.md#statement-text-privacy) before you roll GA out.
 
-### Known issue in GA
+- **Several lock and session metric groups are renamed** (for example `Lock_Waits` is `Longest_Lock_Waits`). Re-create thresholds against the names the released plug-in uses. See [Upgrade notes](upgrade-notes.md#renamed-groups).
 
-After one failed text lookup, Top Statements keeps showing numbers without SQL text until you change the time window or the ranking. The ranking and numbers stay correct. This is fixed in the first update after GA. See [Known issue](whats-new.md#known-issue).
+The GA known issue (Top Statements losing its SQL text after one failed lookup) is fixed in 24.1.2.0.0 / 13.5.3.0.0.
 
 ## 5. Where to report {#reporting}
 
-Send questions about the move, and anything you find on GA, to **helpdesk@integrationplumbers.io** — every email opens a ticket you can follow in the [customer portal](https://integrationplumbers.zohodesk.com/portal/en/home) — or open the ticket there directly. Include the plug-in version (`emcli list_plugins_on_server`), your Enterprise Manager version (24ai or 13.5), the Db2 version (11.5 or 12.1), the metric group or page involved, and any deploy log, agent log or collection-error text.
+Send questions about the move, and anything you find on GA, to **helpdesk@integrationplumbers.io** (every email opens a ticket you can follow in the [customer portal](https://integrationplumbers.zohodesk.com/portal/en/home)), or open the ticket there directly. Include the plug-in version (`emcli list_plugins_on_server`), your Enterprise Manager version (24ai or 13.5), the Db2 version (11.5 or 12.1), the metric group or page involved, and any deploy log, agent log or collection-error text.
 
 ## Related
 
-- [What's new](whats-new.md) — everything in the GA release
-- [Install and upgrade](install-and-upgrade.md) — install GA, with the release files' checksums
-- [Targets and properties](targets-and-properties.md) — add GA targets and enter GA licence keys
-- [Changelog](changelog.md) — the GA release, and the beta history
+- [What's new](whats-new.md): everything since the beta
+- [Install and upgrade](install-and-upgrade.md): install the released plug-in and verify the download
+- [Targets and properties](targets-and-properties.md): add targets and enter licence keys
+- [Changelog](changelog.md): every release, and the beta history

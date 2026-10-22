@@ -5,11 +5,47 @@ nav_order: 13
 
 # Changelog
 
-This page lists what changed in each release of the IBM Db2 plug-in, most recent first. The general-availability (GA) plug-in is `ip.em.xdb2`, target type `ip_db2_database`. Its Enterprise Manager 24ai and Enterprise Manager 13.5 builds are versioned independently. The Open Beta history follows the GA releases, under [Beta line](#beta-line).
+This page lists what changed in each release of the IBM Db2 plug-in, most recent first, in brief: [What's new](whats-new.md) has the detail. The plug-in is `ip.em.xdb2`, with target types `ip_db2_database` and, from 24.1.2.0.0 / 13.5.3.0.0, `ip_db2_instance`. Its Enterprise Manager 24ai and Enterprise Manager 13.5 builds are versioned independently. The Open Beta history follows the GA releases, under [Beta line](#beta-line).
 
-## 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.2.0.0 (Enterprise Manager 13.5) — GA, 2026-10-12
+## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-23 {#update-24-1-2}
 
-The first general-availability release of `ip.em.xdb2`. One release, two builds with the same content: 24.1.1.0.0 installs on Enterprise Manager 24ai, 13.5.2.0.0 on Enterprise Manager 13.5. There is no earlier GA release to upgrade from. Moving from the Open Beta is a clean install — see [Moving from the beta to GA](beta-pre-release.md). The full detail is on [What's new](whats-new.md).
+The first update of `ip.em.xdb2`, installed in place over 24.1.1.0.0 / 13.5.2.0.0. One release, two builds with the same content: 24.1.2.0.0 installs on Enterprise Manager 24ai, 13.5.3.0.0 on Enterprise Manager 13.5. The full detail is on [What's new](whats-new.md#update-24-1-2), and the operator actions are on [Upgrade notes](upgrade-notes.md#update-24-1-2).
+
+- Redesigned the console: every page opens with the question it answers and a row of KPI tiles, under a left navigation grouped as Workload, Storage and Logs, and Protection. Renamed Home to Overview, SQL Analytics to SQL, Analysis to Locks, Transaction Log & Recovery to Transaction Log, Backup History to Backup, and HADR to High Availability.
+- Added ten database pages (Sessions, Waits, Members, Tables, Indexes, Transaction Log, Memory & Sorts, Configuration, Monitoring Readiness, License Info), auto-refresh on Locks and Sessions (paused while the browser tab is in the background), statement history and Explain Plan in Statement Detail (also opened from Recent Deadlocks), and a Back Up Database dialog. The backup job (type 1.6) refuses a partitioned (DPF) database however it is submitted.
+- Added the IBM Db2 Instance target type, automatic discovery of local databases, partitioned (DPF) database support, and pureScale member and CF health (implemented, not lab-certified).
+- Added monitoring for log archiving, instance memory, waits, latches, WLM, indexes, blocking chains, deadlocks (opt-in) and sessions, twelve compliance rules, the Archive IBM Db2 Active Log job, Kerberos authentication, and three monitoring templates.
+- Moved the licence key into a credential set, with a 14-day grace period after expiry, and counted keys of 100 instances or more.
+- Renamed seven lock and session metric groups, whose stored history restarts on the upgrade. Thresholds set on the old names must be set again on the new ones:
+
+  | Retired group | Replaced by |
+  | :--- | :--- |
+  | `AgentStatistics` | `Application_Statistics` |
+  | `Sessions` | `Top_Sessions` |
+  | `Open_Transactions` | `Oldest_Transactions` |
+  | `Lock_Waits` | `Longest_Lock_Waits` |
+  | `Lock_Waits_By_Blkd_App` | `Lock_Waits_By_Blocked_App` |
+  | `Lock_Waits_By_Blkng_App` | `Lock_Waits_By_Blocking_App` |
+  | `Blocking_Chains` | `Blocking_Tree` |
+
+- Keyed SQL statements by digest, so literal values no longer create repository keys.
+- Moved the plug-in's caches and log out of the agent plug-in home, into the agent state directory.
+- Signed the release downloads: each OPAR comes with a `SHA256SUMS` file and a detached cosign signature for each file.
+- Moved the console to theme 1.1.0: higher-contrast colours, and Days to Full coloured amber under 30 days and red under 7.
+- Fixed the GA known issue (Top Statements losing its SQL text), numeric sorting in the console tables, the oldest open transaction reading *0 s*, one inflated Wait_Time and Query_Analytics interval when a DPF partition stops or comes back, and the remote admin jobs on TLS targets with a custom truststore.
+
+**Release files**
+
+| Enterprise Manager | File |
+| :--- | :--- |
+| 24ai | `24.1.2.0.0_ip.em.xdb2_2000_0.opar` |
+| 13.5 | `13.5.3.0.0_ip.em.xdb2_2000_0.opar` |
+
+Their SHA-256 checksums are in the signed `SHA256SUMS` file delivered with the download: see [Verify the download](install-and-upgrade.md#verify).
+
+## 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.2.0.0 (Enterprise Manager 13.5), GA, 2026-10-12 {#ga}
+
+The first general-availability release of `ip.em.xdb2`. One release, two builds with the same content: 24.1.1.0.0 installs on Enterprise Manager 24ai, 13.5.2.0.0 on Enterprise Manager 13.5. There is no earlier GA release to upgrade from. Moving from the Open Beta is a clean install: see [Moving from the beta to GA](beta-pre-release.md). The full detail is on [What's new](whats-new.md).
 
 - Released the first general-availability version of the IBM Db2 plug-in for Oracle Enterprise Manager, for Db2 12.1 and 11.5. Moving from the Open Beta is a clean install, and the two can run side by side while you move over.
 - Added monitoring for storage-path headroom, table maintenance, open and idle units of work, lock-list use, running utilities, and the SQL text behind each statement.
@@ -18,7 +54,7 @@ The first general-availability release of `ip.em.xdb2`. One release, two builds 
 - Added compliance standards with seventeen rules, and HADR monitoring that follows the primary through a takeover and reports a standby as up.
 - Renamed every administrative job type, and changed the default alert thresholds and collection intervals.
 
-**Known issue:** after one failed text lookup, Top Statements keeps showing numbers without SQL text until the time window or the ranking changes — see [What's new](whats-new.md#known-issue).
+**Known issue:** after one failed text lookup, Top Statements keeps showing numbers without SQL text until the time window or the ranking changes (fixed in 24.1.2.0.0 / 13.5.3.0.0): see [What's new](whats-new.md#known-issue).
 
 **Release files and SHA-256 checksums**
 
@@ -76,7 +112,8 @@ These predate the beta guide and are recorded here for history only.
 
 ## Related
 
-- [What's new](whats-new.md) — the GA release in detail
-- [Moving from the beta to GA](beta-pre-release.md) — for Open Beta users
-- [Install and upgrade](install-and-upgrade.md#download) — download, verify and install the release files
-- [IBM Db2 Plug-in](index.md) — the documentation hub for every page in this guide
+- [What's new](whats-new.md): each release in detail
+- [Upgrade notes](upgrade-notes.md): the operator actions each upgrade needs
+- [Moving from the beta to GA](beta-pre-release.md): for Open Beta users
+- [Install and upgrade](install-and-upgrade.md#download): download, verify and install the release files
+- [IBM Db2 Plug-in](index.md): the documentation hub for every page in this guide
