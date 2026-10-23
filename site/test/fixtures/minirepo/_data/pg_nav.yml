@@ -1,0 +1,6 @@
+# Navigation for the fixture product guide.
+groups:
+  - name: Start here
+    pages:
+      - { title: "PostgreSQL Plug-in", url: /pg/ }
+      - { title: "Getting started", url: /pg/getting-started.html }

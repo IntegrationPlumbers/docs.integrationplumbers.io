@@ -1,0 +1,27 @@
+{
+  "name": "ip-docs-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "convert": "node scripts/convert.mjs ..",
+    "build": "npm run convert && astro build && node scripts/postbuild-pages.mjs dist",
+    "dev": "npm run convert && astro dev",
+    "preview": "astro preview",
+    "check": "node scripts/check-links.mjs dist && node scripts/check-parity.mjs .. dist",
+    "test": "node --test \"test/**/*.test.mjs\""
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.4",
+    "@astrojs/starlight": "^0.42.6",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "astro": "^7.4.2",
+    "sharp": "^0.35.5",
+    "unist-util-visit": "^5.1.0",
+    "yaml": "^2.9.1"
+  }
+}

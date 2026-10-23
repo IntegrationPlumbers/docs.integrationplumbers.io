@@ -6,7 +6,7 @@
 
 ## Risk / review tier
 <!-- two-class model from .github/risk-classes.yml: Self-merge (a product's own
-     pages / images / nav) or Reviewed (default — _layouts/, _config.yml, assets/,
+     pages / images / nav) or Reviewed (default — site/, CNAME,
      scripts/, .github/, anything shared across sections). -->
 **<Reviewed | Self-merge>** — basis: <!-- the self_merge glob that matched, or "default (not on self_merge allowlist)" --> (a human may raise it, never lower it)
 
@@ -15,13 +15,13 @@
 
 ## AI pre-review triage
 <!-- page content: consistency + secrets pass, and the static-checks run (lint-docs + check-anchors) is green.
-     layout / config / scripts / workflow diffs: /code-review + /security-review. -->
+     site / scripts / workflow diffs: /code-review + /security-review. -->
 | Finding | Source | Resolution |
 |---|---|---|
 | <finding> | code-review / security-review / lint | fixed (<commit>) / dismissed: <reason> |
 
 ## Verification evidence
-<!-- for page content: the rendered page checked locally (bundle exec jekyll serve) or the static-checks run link;
+<!-- for page content: the rendered page checked locally (cd site && npm run build && npm run preview) or the static-checks run link;
      otherwise "not applicable (docs site — no lab gate)" -->
 
 ## Rollback

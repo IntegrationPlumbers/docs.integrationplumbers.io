@@ -1,0 +1,101 @@
+---
+import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+import products from '../products.json';
+import ProductMark from './ProductMark.astro';
+
+const { sidebar, id } = Astro.locals.starlightRoute;
+const keys = Object.keys(products);
+const current = keys.find((k) => id === k || id.startsWith(k + '/'));
+const index = current ? keys.indexOf(current) : -1;
+const group = index >= 0 ? sidebar[index] : undefined;
+const entries = group && group.type === 'group' ? group.entries : sidebar;
+const href = (k: string) => `/${k}/`;
+---
+
+<div class="switcher-wrap">
+  <details class="switcher">
+    <summary>
+      {current ? (
+        <>
+          <ProductMark product={current} />
+          <span class="label">
+            <span class="kicker">Plug-in</span>
+            <span class="name">{products[current].fullName ?? products[current].name}</span>
+          </span>
+        </>
+      ) : (
+        <span class="label"><span class="kicker">Docs</span><span class="name">Choose a plug-in</span></span>
+      )}
+      <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    </summary>
+    <ul>
+      {keys.map((k) => (
+        <li>
+          <a href={href(k)} aria-current={k === current ? 'true' : undefined}>
+            <ProductMark product={k} size="sm" />
+            <span>{products[k].fullName ?? products[k].name}</span>
+            <span class="builds">{products[k].builds.map((b) => b.build).join(' · ')}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </details>
+</div>
+
+<SidebarPersister>
+  <SidebarSublist sublist={entries} />
+</SidebarPersister>
+
+<div class="md:sl-hidden">
+  <MobileMenuFooter />
+</div>
+
+<style>
+  .switcher-wrap { margin-bottom: 1.25rem; }
+  .switcher { position: relative; }
+  .switcher > summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--ip-hairline);
+    border-radius: 10px;
+    background: var(--ip-card);
+    cursor: pointer;
+  }
+  .switcher > summary::-webkit-details-marker { display: none; }
+  .switcher > summary:hover { border-color: var(--sl-color-gray-4); }
+  .switcher > summary:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
+  .label { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+  .kicker { font-size: 0.6875rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sl-color-gray-3); }
+  .name { font-weight: 600; color: var(--sl-color-white); font-size: var(--sl-text-sm); }
+  .chev { width: 1rem; height: 1rem; margin-inline-start: auto; color: var(--sl-color-gray-3); transition: transform 0.15s; }
+  .switcher[open] .chev { transform: rotate(180deg); }
+  .switcher ul {
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 0.3rem;
+    border: 1px solid var(--ip-hairline);
+    border-radius: 10px;
+    background: var(--ip-card);
+  }
+  .switcher li a {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 0.6rem;
+    align-items: center;
+    padding: 0.45rem 0.5rem;
+    border-radius: 7px;
+    text-decoration: none;
+    color: var(--sl-color-gray-1);
+    font-size: var(--sl-text-sm);
+  }
+  .switcher li a > :first-child { grid-row: span 2; }
+  .switcher li a:hover { background: var(--sl-color-gray-6); color: var(--sl-color-white); }
+  .switcher li a[aria-current] { background: var(--sl-color-accent-low); color: var(--sl-color-accent-high); }
+  .builds { font-family: var(--sl-font-mono); font-size: 0.6875rem; color: var(--sl-color-gray-3); }
+</style>

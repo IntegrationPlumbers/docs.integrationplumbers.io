@@ -1,3 +1,10 @@
 .DS_Store
-Gemfile.lock
 .obsidian
+site/node_modules/
+site/dist/
+site/.astro/
+site/src/content/docs/
+site/src/sidebar.json
+site/src/products.json
+site/public/*/
+site/public/llms.txt

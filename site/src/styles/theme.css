@@ -1,0 +1,167 @@
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
+@import '@fontsource/ibm-plex-sans/latin-400-italic.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+
+/* Layout: three-pane docs shell; brand palette taken from the Integration Plumbers mark
+   (charcoal pipe, two blues). Dark is Starlight's base theme; light overrides below. */
+:root {
+  --ip-charcoal: #1b1b1a;
+  --ip-blue: #0080bc;
+  --ip-sky: #4dc0e8;
+
+  --sl-font: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sl-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --sl-color-accent-low: #0b2e3d;
+  --sl-color-accent: #2aa6d6;
+  --sl-color-accent-high: #b9e6f7;
+  --sl-color-white: #f1f2f0;
+  --sl-color-gray-1: #dcdedb;
+  --sl-color-gray-2: #b9bcb8;
+  --sl-color-gray-3: #8b8f8b;
+  --sl-color-gray-4: #5a5e5b;
+  --sl-color-gray-5: #383b39;
+  --sl-color-gray-6: #232524;
+  --sl-color-black: #161817;
+
+  --ip-surface: #1c1e1d;
+  --ip-card: #1e2120;
+  --ip-hairline: #2c302e;
+  --ip-ok-bg: #12301f;
+  --ip-ok-fg: #7fd6a0;
+  --ip-callout-bg: #10242d;
+  --ip-callout-border: #1c4152;
+
+  --sl-content-width: 46rem;
+  --sl-sidebar-width: 17.5rem;
+  --sl-text-h1: 2.125rem;
+  --sl-text-h2: 1.5rem;
+  --sl-text-h3: 1.1875rem;
+  --sl-line-height: 1.7;
+  --sl-line-height-headings: 1.25;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #e3f3fa;
+  --sl-color-accent: #0074ab;
+  --sl-color-accent-high: #00415f;
+  --sl-color-white: #1b1b1a;
+  --sl-color-gray-1: #2b2c2a;
+  --sl-color-gray-2: #3f413e;
+  --sl-color-gray-3: #62655f;
+  --sl-color-gray-4: #8e918b;
+  --sl-color-gray-5: #c9cbc6;
+  --sl-color-gray-6: #eceeea;
+  --sl-color-gray-7: #f6f7f5;
+  --sl-color-black: #ffffff;
+
+  --ip-surface: #f7f8f6;
+  --ip-card: #ffffff;
+  --ip-hairline: #e3e5e1;
+  --ip-ok-bg: #e4f5ea;
+  --ip-ok-fg: #1d6b3c;
+  --ip-callout-bg: #f0f8fc;
+  --ip-callout-border: #c6e3f1;
+}
+
+/* ---------- Shell ---------- */
+body { background: var(--sl-color-black); }
+
+header.header {
+  background: color-mix(in srgb, var(--sl-color-black) 88%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--ip-hairline);
+}
+.site-title img { height: 1.9rem; }
+
+#starlight__sidebar,
+.sidebar-pane { background: var(--ip-surface); }
+.sidebar-pane { border-inline-end: 1px solid var(--ip-hairline); }
+
+/* Sidebar links: quieter current-page state than Starlight's solid block. */
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+  background: var(--sl-color-accent-low);
+  color: var(--sl-color-accent-high);
+  font-weight: 600;
+}
+.sidebar-content a { border-radius: 6px; }
+
+/* ---------- Content ---------- */
+/* Starlight wraps headings in a flex row; the section rule goes on the wrapper so it spans the column. */
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
+  margin-top: 2.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--ip-hairline);
+}
+.sl-markdown-content .sl-heading-wrapper.level-h2:first-child { border-top: 0; padding-top: 0; margin-top: 0.5rem; }
+.sl-markdown-content h2:not(:where(.not-content *)) { letter-spacing: -0.01em; text-wrap: balance; }
+.sl-markdown-content h3:not(:where(.not-content *)) { text-wrap: balance; }
+.sl-markdown-content :is(h2, h3, h4) { font-weight: 600; }
+
+.sl-markdown-content :not(pre) > code {
+  background: var(--sl-color-gray-6);
+  border: 1px solid var(--ip-hairline);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+  font-size: 0.875em;
+}
+
+/* Tables: compact reference style, scroll inside their own box. */
+.sl-markdown-content table {
+  font-size: var(--sl-text-sm);
+  border: 1px solid var(--ip-hairline);
+  border-radius: 8px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.sl-markdown-content th {
+  background: var(--ip-surface);
+  font-weight: 600;
+  text-align: start;
+  border-bottom: 1px solid var(--ip-hairline);
+}
+.sl-markdown-content :is(th, td) { padding: 0.5rem 0.75rem; border: 0; vertical-align: top; }
+.sl-markdown-content tr + tr td { border-top: 1px solid var(--ip-hairline); }
+
+/* The Jekyll pages use blockquotes as callouts ("Prerequisites for this page", notes). */
+.sl-markdown-content blockquote {
+  background: var(--ip-callout-bg);
+  border: 1px solid var(--ip-callout-border);
+  border-radius: 8px;
+  padding: 0.85rem 1.1rem;
+  color: var(--sl-color-gray-1);
+  font-style: normal;
+}
+.sl-markdown-content blockquote > :first-child { margin-top: 0; }
+.sl-markdown-content blockquote strong:first-child { color: var(--sl-color-white); }
+
+/* Screenshots and walkthrough recordings. */
+.sl-markdown-content :is(img, video) {
+  border: 1px solid var(--ip-hairline);
+  border-radius: 8px;
+  max-width: 100%;
+  height: auto;
+}
+.sl-markdown-content video.walkthrough { width: 100%; background: var(--ip-surface); }
+
+.sl-markdown-content details {
+  border: 1px solid var(--ip-hairline);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  background: var(--ip-surface);
+}
+.sl-markdown-content details > summary { cursor: pointer; font-weight: 600; }
+.sl-markdown-content details[open] > summary { margin-bottom: 0.5rem; }
+
+/* Right-hand table of contents. */
+starlight-toc nav h2 { font-size: var(--sl-text-xs); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sl-color-gray-3); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; }
+}

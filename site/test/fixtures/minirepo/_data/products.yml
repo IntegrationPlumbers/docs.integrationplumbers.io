@@ -1,0 +1,6 @@
+pg:
+  name: PostgreSQL
+  mark: Pg
+  status: General Availability
+  summary: Example summary for the fixture product.
+  supports: [PostgreSQL 14 to 18, Example clusters]

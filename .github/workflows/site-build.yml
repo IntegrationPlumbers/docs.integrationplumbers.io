@@ -1,0 +1,39 @@
+name: site-build
+
+# Builds the Starlight site in site/ on every PR and runs its unit tests, the
+# internal link/anchor check and the URL parity check against the old site.
+# site/dist is kept as a 7-day artifact so a reviewer can inspect the build.
+#
+# This lives in its own file so it runs independently of static-checks.yml.
+# deploy-pages.yml publishes from main.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  site-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npm run check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: site/dist
+          retention-days: 7

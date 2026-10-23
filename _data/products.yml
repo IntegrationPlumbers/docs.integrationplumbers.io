@@ -1,0 +1,26 @@
+# Product card metadata for the docs site. Order here is the order on the home page and in the sidebar switcher.
+postgresql:
+  name: PostgreSQL
+  mark: Pg
+  status: General Availability
+  summary: Close to 200 metrics per instance, plus five advisors for plans, plan drift, workload history, indexes, and vacuum.
+  supports: [PostgreSQL 14 to 18, Patroni clusters]
+mysql:
+  name: MySQL
+  mark: My
+  status: General Availability
+  summary: MySQL servers, InnoDB Clusters, and ClusterSets as first-class targets, with replication, backup, and compliance coverage.
+  supports: [MySQL 8.4 LTS, MySQL 9.7 LTS, InnoDB Cluster]
+mssql:
+  name: SQL Server
+  fullName: Microsoft SQL Server
+  mark: Ms
+  status: General Availability
+  summary: Availability, performance, queries, deadlocks, indexes, space, and AlwaysOn availability groups from one target type.
+  supports: [SQL Server 2016 to 2025, Windows and Linux]
+db2:
+  name: IBM Db2
+  mark: Db2
+  status: General Availability
+  summary: Db2 for Linux, UNIX, and Windows through the MON_GET table functions, with HADR, storage, locking, and compliance.
+  supports: [Db2 LUW 12.1, Db2 LUW 11.5, HADR]
