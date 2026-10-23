@@ -12,6 +12,8 @@ const index = current ? keys.indexOf(current) : -1;
 const group = index >= 0 ? sidebar[index] : undefined;
 const entries = group && group.type === 'group' ? group.entries : sidebar;
 const href = (k: string) => `/${k}/`;
+// Plug-in builds end in a fifth ".0" that never changes; the switcher has no room for it.
+const short = (v: string) => v.replace(/\.0$/, '');
 ---
 
 <div class="switcher-wrap">
@@ -35,8 +37,10 @@ const href = (k: string) => `/${k}/`;
         <li>
           <a href={href(k)} aria-current={k === current ? 'true' : undefined}>
             <ProductMark product={k} size="sm" />
-            <span>{products[k].fullName ?? products[k].name}</span>
-            <span class="builds">{products[k].builds.map((b) => b.build).join(' · ')}</span>
+            <span class="text">
+              <span class="pname">{products[k].name}</span>
+              <span class="builds">{products[k].builds.map((b) => short(b.build)).join(' · ')}</span>
+            </span>
           </a>
         </li>
       ))}
@@ -83,19 +87,18 @@ const href = (k: string) => `/${k}/`;
     background: var(--ip-card);
   }
   .switcher li a {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-rows: auto auto;
-    column-gap: 0.6rem;
+    display: flex;
     align-items: center;
+    gap: 0.6rem;
     padding: 0.45rem 0.5rem;
     border-radius: 7px;
     text-decoration: none;
     color: var(--sl-color-gray-1);
     font-size: var(--sl-text-sm);
   }
-  .switcher li a > :first-child { grid-row: span 2; }
+  .text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+  .pname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .switcher li a:hover { background: var(--sl-color-gray-6); color: var(--sl-color-white); }
   .switcher li a[aria-current] { background: var(--sl-color-accent-low); color: var(--sl-color-accent-high); }
-  .builds { font-family: var(--sl-font-mono); font-size: 0.6875rem; color: var(--sl-color-gray-3); }
+  .builds { font-family: var(--sl-font-mono); font-size: 0.6875rem; color: var(--sl-color-gray-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
