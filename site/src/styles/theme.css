@@ -111,8 +111,14 @@ header.header {
   font-size: 0.875em;
 }
 
-/* Tables: compact reference style, scroll inside their own box. */
+/* Tables: compact reference style, scroll inside their own box.
+   Starlight renders tables as display:block so wide ones scroll; that block is
+   full width while the rows inside shrink to fit, so the border and header
+   band would outrun the cells. Size the block to its content and cap it at
+   the column width: narrow tables hug their rows, wide ones still scroll. */
 .sl-markdown-content table {
+  width: max-content;
+  max-width: 100%;
   font-size: var(--sl-text-sm);
   border: 1px solid var(--ip-hairline);
   border-radius: 8px;
