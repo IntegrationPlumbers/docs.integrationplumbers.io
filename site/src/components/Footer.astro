@@ -1,0 +1,42 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+const { id } = Astro.locals.starlightRoute;
+const isHome = id === '' || id === 'index';
+---
+
+{!isHome && <Default />}
+
+<div class="site-footer">
+  <div class="support">
+    <p class="h">Need help?</p>
+    <p>
+      Email <span class="addr">helpdesk@integrationplumbers.io</span> or open a ticket in the
+      <a href="https://integrationplumbers.zohodesk.com/portal/en/signin">self-service portal</a>.
+    </p>
+  </div>
+  <nav class="links" aria-label="Footer">
+    <a href="/legal.html">Legal notices</a>
+    <a href="https://github.com/IntegrationPlumbers/docs.integrationplumbers.io">GitHub</a>
+    <a href="https://integrationplumbers.io">integrationplumbers.io</a>
+  </nav>
+  <p class="copy">© 2026 Integration Plumbers. Oracle and Enterprise Manager are trademarks of Oracle Corporation and/or its affiliates.</p>
+</div>
+
+<style>
+  .site-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--ip-hairline);
+    display: grid;
+    gap: 1rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+  .h { color: var(--sl-color-white); font-weight: 600; margin: 0 0 0.25rem; }
+  .support p { margin: 0; }
+  .addr { font-family: var(--sl-font-mono); font-size: 0.85em; color: var(--sl-color-gray-1); user-select: all; }
+  .links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; }
+  .links a, .support a { color: var(--sl-color-gray-2); }
+  .links a:hover, .support a:hover { color: var(--sl-color-accent); }
+  .copy { margin: 0; font-size: var(--sl-text-xs); }
+</style>
