@@ -146,6 +146,18 @@ export async function convert(srcRoot, siteRoot) {
       const p = path.join(dir, extra);
       if (fs.existsSync(p)) fs.cpSync(p, path.join(PUBLIC, product, extra), { recursive: true });
     }
+    // The old site rendered ai/<name>.md as /<product>/ai/<name>.html; keep that URL alive with a redirect stub.
+    if (fs.existsSync(path.join(dir, 'ai'))) {
+      for (const f of fs.readdirSync(path.join(dir, 'ai'))) {
+        if (!f.endsWith('.md')) continue;
+        const target = f;
+        const html = `<!doctype html><meta charset="utf-8"><title>Redirecting</title>
+<link rel="canonical" href="/${product}/ai/${target}"><meta http-equiv="refresh" content="0; url=${target}">
+<script>location.replace('${target}' + location.hash)</script>
+<a href="${target}">Continue to the guide</a>`;
+        fs.writeFileSync(path.join(PUBLIC, product, 'ai', f.replace(/\.md$/, '.html')), html);
+      }
+    }
 
     const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'));
     for (const file of files) {

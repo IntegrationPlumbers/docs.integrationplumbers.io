@@ -39,7 +39,11 @@ export function expectedPaths(srcRoot) {
     for (const sub of ASSET_DIRS) {
       const sdir = path.join(pdir, sub);
       if (!fs.existsSync(sdir)) continue;
-      for (const f of walkFiles(sdir)) out.push(`/${p}/${sub}/${f}`);
+      for (const f of walkFiles(sdir)) {
+        out.push(`/${p}/${sub}/${f}`);
+        // Redirect stub that keeps the old Jekyll-rendered URL alive.
+        if (sub === 'ai' && f.endsWith('.md')) out.push(`/${p}/ai/${f.slice(0, -3)}.html`);
+      }
     }
   }
   out.push(...GLOBAL);

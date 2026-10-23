@@ -45,7 +45,7 @@ test('expectedPaths lists pages, markdown copies, assets and globals from the so
   ]) {
     assert.ok(got.includes(p), `missing expectation ${p}`);
   }
-  assert.ok(!got.includes('/pg/ai/troubleshooting.html'));
+  assert.ok(got.includes('/pg/ai/troubleshooting.html'));
 });
 
 test('missingPaths returns only the absent path', () => {

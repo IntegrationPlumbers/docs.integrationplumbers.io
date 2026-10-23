@@ -76,6 +76,15 @@ test('raw images are published at their old paths', async () => {
   assert.ok(result.pages.includes('/pg/images/a.png'));
 });
 
+test('ai pages get a redirect stub at their old .html URL', async () => {
+  const { src, site } = setup();
+  const result = await convert(src, site);
+  const stub = path.join(site, 'public/pg/ai/troubleshooting.html');
+  assert.ok(fs.existsSync(stub));
+  assert.ok(fs.readFileSync(stub, 'utf8').includes('url=troubleshooting.md'));
+  assert.ok(result.pages.includes('/pg/ai/troubleshooting.html'));
+});
+
 test('a page absent from the nav still converts and is not in sidebar.json', async () => {
   const { src, site } = setup();
   fs.writeFileSync(path.join(src, 'pg/orphan.md'), '---\ntitle: Orphan\nnav_order: 9\n---\n\n# Orphan\n\nThis page is not listed in the navigation file.\n');
