@@ -14,7 +14,7 @@ This page lists every threshold the plug-in ships, how often each metric group c
 
 **Where to find it:** metric values under **Target menu → Monitoring → All Metrics**; thresholds and schedules under **Target menu → Monitoring → Metric and Collection Settings**; templates under **Enterprise → Monitoring → Monitoring Templates**; rule sets under **Setup → Incidents → Incident Rules**.
 
-**In this page:** How findings become alerts · Default thresholds · Collection intervals · Tuning thresholds · Licence alerts · Monitoring templates · Duplicate alerts on instance targets · Incident rules, configuration comparison and drift · Runbooks for common alerts · After upgrading from GA
+**In this page:** How findings become alerts · Default thresholds · Collection intervals · Tuning thresholds · Licence alerts · Monitoring templates · Duplicate alerts on instance targets · Incident rules, configuration comparison and drift · Runbooks for common alerts · After upgrading from 24.1.1.0.0
 
 ## How findings become alerts {#how-alerts-work}
 
@@ -175,7 +175,7 @@ Where a value should hold across many targets, put it in a monitoring template a
 - **`license_severity`**: Warning at 1, during the 14-day grace period after the key expires (status `Grace Period`, collection continues), and Critical at 2, for any other status that is not `Active` (collection stops). This is the alert on this page you should not disable, because it is also the signal that a target has stopped collecting almost everything else.
 - **`days_remaining`**: Warning at 30 days and Critical at 7 days before the key expires. A key with expiration `Never` has no expiry alert.
 
-After an upgrade from GA, `license_severity` stays empty, and the licence-status alert does not fire, until the OMS is restarted once (`emctl stop oms`, then `emctl start oms`). See [Upgrade notes](upgrade-notes.md#restart-oms). Licence statuses are explained under [Licensing](targets-and-properties.md#licence-statuses); what an unlicensed target looks like is under [Troubleshooting](troubleshooting.md#licence-gate).
+After an upgrade from 24.1.1.0.0, `license_severity` stays empty, and the licence-status alert does not fire, until the OMS is restarted once (`emctl stop oms`, then `emctl start oms`). See [Upgrade notes](upgrade-notes.md#restart-oms). Licence statuses are explained under [Licensing](targets-and-properties.md#licence-statuses); what an unlicensed target looks like is under [Troubleshooting](troubleshooting.md#licence-gate).
 
 ## Monitoring templates {#monitoring-templates}
 
@@ -187,7 +187,7 @@ Three monitoring templates for the IBM Db2 Database target type (`ip_db2_databas
 | `IP_DB2_Standard_v1` | `ip_db2_monitoring_standard_v1.xml` | The 55 shipped values of the database target (the 54 thresholds above and the availability condition). Applying it puts a target back on the defaults. |
 | `IP_DB2_Production_Critical_v1` | `ip_db2_monitoring_production_critical_v1.xml` | The 55, with 20 of them tighter, plus 3 more alerts. It also reads log space every 15 minutes instead of 30. |
 
-The templates name metric groups this release adds, such as `Log_Archive` and `Wait_Time`, so deploy this release to the OMS and the agents before you import them. They replace the GA threshold starter kit, which reverted the shipped `tablespace_state` values when applied. If you applied that kit, apply Starter or Standard to put them back.
+The templates name metric groups this release adds, such as `Log_Archive` and `Wait_Time`, so deploy this release to the OMS and the agents before you import them. They replace the 24.1.1.0.0 threshold starter kit, which reverted the shipped `tablespace_state` values when applied. If you applied that kit, apply Starter or Standard to put them back.
 
 ### Import and apply
 
@@ -316,7 +316,7 @@ On **Enterprise Manager 24ai**, the plug-in installs six Enterprise Manager runb
 
 To have Enterprise Manager archive the transaction log automatically when `Log_Storage : space_utilization` goes Critical, attach the archive job as a corrective action. Nothing ships attached; see [Corrective action](jobs-and-metric-extensions.md#corrective-action).
 
-## After upgrading from GA {#after-upgrade}
+## After upgrading from 24.1.1.0.0 {#after-upgrade}
 
 **Seven lock and session groups are renamed, and thresholds set on the old names do not move.** Each old group was keyed by a connection id; the new groups use bounded keys. On the upgrade Enterprise Manager deletes the retired groups' stored data. Re-apply any threshold, template or incident rule of your own on the new name. See [Upgrade notes](upgrade-notes.md#renamed-groups).
 
@@ -342,4 +342,4 @@ The shipped defaults (`Oldest_Transactions : uow_age_sec` at 1800 / 7200 seconds
 - [Compliance standards](compliance-standards.md): findings that report through compliance scores rather than a metric threshold
 - [Instance targets](targets-and-properties.md#instance-targets): adding IBM Db2 Instance targets
 - [Corrective action](jobs-and-metric-extensions.md#corrective-action): archiving the log when it fills
-- [Upgrade notes](upgrade-notes.md#update-24-1-2): what to do when you upgrade from GA
+- [Upgrade notes](upgrade-notes.md#update-24-1-2): what to do when you upgrade from 24.1.1.0.0

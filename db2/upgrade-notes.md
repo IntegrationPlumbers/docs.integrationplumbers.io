@@ -7,17 +7,17 @@ nav_order: 5.5
 
 Release notes for changes that need operator action beyond a routine deploy: an OMS restart, renamed metric groups whose history restarts, compliance rules that change scores, and licence settings. This page is for the Enterprise Manager administrator planning an upgrade. One section per release, **newest first**. The full list of what each release adds is on [What's new](whats-new.md).
 
-**In this page:** 24.1.2.0.0 / 13.5.3.0.0 (from GA) · GA 24.1.1.0.0 / 13.5.2.0.0
+**In this page:** GA 24.1.2.0.0 / 13.5.3.0.0 (from 24.1.1.0.0) · Initial release 24.1.1.0.0 / 13.5.2.0.0
 
-## 24.1.2.0.0 / 13.5.3.0.0 (2026-10-22), from GA {#update-24-1-2}
+## GA 24.1.2.0.0 / 13.5.3.0.0 (2026-10-23), from 24.1.1.0.0 {#update-24-1-2}
 
-The first in-place update of GA 24.1.1.0.0 / 13.5.2.0.0. The database target metadata moves from 3.9 to 4.9, and the new IBM Db2 Instance target type arrives at 1.3. Each note below says what changes, who it affects, and what to do.
+The general-availability release, installed in place over the initial release, 24.1.1.0.0 / 13.5.2.0.0. The database target metadata moves from 3.9 to 4.9, and the new IBM Db2 Instance target type arrives at 1.3. Each note below says what changes, who it affects, and what to do.
 
 ### Deploy to the OMS and every agent, then restart the OMS once {#restart-oms}
 
 Several metric groups gain columns in this release: `Diag_Log_File_Monitoring.message_text`, `CollectorStatus.LastAttemptEpoch`, `License.license_severity`, and the per-second rate columns of `LogIO` and `Cache`. An OMS keeps each target type's column list in memory, so on an upgraded OMS these columns stay empty, and the licence-status alert does not fire, until `emctl stop oms; emctl start oms`. Until then the Transaction Log I/O chart on Performance and the cache rate chart on Memory & Sorts stay empty. A new OMS install needs no restart.
 
-Deploy to the agents in the same window. An agent left on the previous version refuses the new backup job type (1.6) and runs nothing (`STDIN names DB_BACKUP_COMPRESS`). For the same reason, going back to the previous plug-in version is not a rollback for that job type: the OMS keeps job type 1.6. See [Upgrade from GA](install-and-upgrade.md#upgrade).
+Deploy to the agents in the same window. An agent left on the previous version refuses the new backup job type (1.6) and runs nothing (`STDIN names DB_BACKUP_COMPRESS`). For the same reason, going back to the previous plug-in version is not a rollback for that job type: the OMS keeps job type 1.6. See [Upgrade from 24.1.1.0.0](install-and-upgrade.md#upgrade).
 
 ### Compliance scores drop on the first configuration collection {#compliance-scores}
 
@@ -47,9 +47,9 @@ Statements are now keyed by digest (literal values replaced by `?`), and at most
 
 ### Licence keys for 100 or more instances are now counted {#licence-count}
 
-GA did not count keys of 100 instances or more. A target with such a key now needs the OMS Host, OMS Port and OMS credential that smaller keys already needed. Without them the **License** group reports a collection error naming the missing setting; the other groups keep collecting. An `Unlimited` key never contacts the OMS. See [The OMS settings](targets-and-properties.md#oms-settings).
+24.1.1.0.0 did not count keys of 100 instances or more. A target with such a key now needs the OMS Host, OMS Port and OMS credential that smaller keys already needed. Without them the **License** group reports a collection error naming the missing setting; the other groups keep collecting. An `Unlimited` key never contacts the OMS. See [The OMS settings](targets-and-properties.md#oms-settings).
 
-The two GA properties *OMS: skip certificate validation* and *OMS: allow cleartext HTTP fallback* are replaced by one **OMS API Communication** property (`STRICT` by default). A target that used either old property needs `SECURE` or `INSECURE`.
+The two 24.1.1.0.0 properties *OMS: skip certificate validation* and *OMS: allow cleartext HTTP fallback* are replaced by one **OMS API Communication** property (`STRICT` by default). A target that used either old property needs `SECURE` or `INSECURE`.
 
 ### Move the licence key into its credential set {#licence-credential}
 
@@ -67,7 +67,7 @@ The new IBM Db2 Instance target collects the instance-scope groups (`Instance_Me
 
 ### The console's page names changed {#page-names}
 
-| GA name | Now |
+| 24.1.1.0.0 name | Now |
 | :--- | :--- |
 | Home | **Overview** |
 | SQL Analytics | **SQL** |
@@ -75,19 +75,19 @@ The new IBM Db2 Instance target collects the instance-scope groups (`Instance_Me
 | Backup History | **Backup** |
 | HADR | **High Availability** |
 
-The transaction log, a section of Storage at GA, now has its own **Transaction Log** page, one of ten new database pages ([What's new](whats-new.md#update-24-1-2)). The target menu shows the new names after a full deploy or an OMS restart. The database target type is now spelled **IBM Db2 Database**, matching **IBM Db2 Instance**: existing targets keep their names, and the Add Target picker, the target menu and Preferred Credentials show the new spelling. The plug-in is still listed as IBM DB2 Database under Plug-ins. Chart and column labels are shorter (the unit moved to the chart's axis), so anything that matches a metric by its display label, rather than its internal name, needs the new text.
+The transaction log, a section of Storage in 24.1.1.0.0, now has its own **Transaction Log** page, one of ten new database pages ([What's new](whats-new.md#update-24-1-2)). The target menu shows the new names after a full deploy or an OMS restart. The database target type is now spelled **IBM Db2 Database**, matching **IBM Db2 Instance**: existing targets keep their names, and the Add Target picker, the target menu and Preferred Credentials show the new spelling. The plug-in is still listed as IBM DB2 Database under Plug-ins. Chart and column labels are shorter (the unit moved to the chart's axis), so anything that matches a metric by its display label, rather than its internal name, needs the new text.
 
 ### Also check
 
-- **The three monitoring templates replace the GA threshold starter kit**, which reverted two shipped defaults on `tablespace_state` when applied. See [Monitoring templates](alerts-and-templates.md#monitoring-templates).
-- **The plug-in no longer writes inside its agent plug-in home.** Target caches and the plug-in log move to `<agentStateDir>/ip_plugin/xdb2/`. Run [the cache purge job](jobs-and-metric-extensions.md#purge-stale-cache) (**Purge Orphaned IBM DB2 Plug-in Cache Files**) once per agent to remove the GA copies.
+- **The three monitoring templates replace the 24.1.1.0.0 threshold starter kit**, which reverted two shipped defaults on `tablespace_state` when applied. See [Monitoring templates](alerts-and-templates.md#monitoring-templates).
+- **The plug-in no longer writes inside its agent plug-in home.** Target caches and the plug-in log move to `<agentStateDir>/ip_plugin/xdb2/`. Run [the cache purge job](jobs-and-metric-extensions.md#purge-stale-cache) (**Purge Orphaned IBM DB2 Plug-in Cache Files**) once per agent to remove the 24.1.1.0.0 copies.
 - **The DRDA encryption property is relabelled** *DRDA Credential Encryption AES-256*: it encrypts the user ID and password, not the data. The setting and its values are unchanged.
 - **AIX, Solaris and HP-UX agents are declared unsupported.** The plug-in was already certified for Linux x86-64 and Windows x86-64 agents only.
 - **Monitoring templates saved from the console before this release** keep their old alert message ids, which still resolve to the English text.
 
-## GA 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12) {#ga}
+## Initial release 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12) {#ga}
 
-The first general-availability release. It was a fresh install: there was no earlier GA release to upgrade from, and moving from the Open Beta is a clean install side by side ([Moving from the beta to GA](beta-pre-release.md)). What changed for beta users (renamed job types, the retired `DataFiles` group, new default alerts and intervals) is on [What's new](whats-new.md#ga).
+The initial release of `ip.em.xdb2`. It was a fresh install: there was no earlier release to upgrade from, and moving from the Open Beta is a clean install side by side ([Moving from the beta to GA](beta-pre-release.md)). What changed for beta users (renamed job types, the retired `DataFiles` group, new default alerts and intervals) is on [What's new](whats-new.md#ga).
 
 ## Related
 

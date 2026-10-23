@@ -10,7 +10,7 @@ nav_order: 5.7
 | | |
 |---|---|
 | Product | Integration Plumbers IBM Db2 Plug-in for Oracle Enterprise Manager |
-| Released plug-in | Plug-in `ip.em.xdb2`. GA was **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.2.0.0** for Enterprise Manager 13.5, released 2026-10-12. The current release is **24.1.2.0.0** / **13.5.3.0.0**, released 2026-10-22: install that one |
+| Released plug-in | Plug-in `ip.em.xdb2`. GA is **24.1.2.0.0** for Enterprise Manager 24ai and **13.5.3.0.0** for Enterprise Manager 13.5, released 2026-10-23: install that one. It follows the initial release, 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12) |
 | Open Beta | Plug-in `ip.em.xdbb`, versions `24.1.9.N.0` / `13.5.9.N.0`; the last drop was `24.1.9.9.0` / `13.5.9.4.0`. **There is no further beta drop** |
 | How to move | A clean install of GA, side by side with the beta, then undeploy the beta (section 3) |
 | Reference | [IBM Db2 plug-in User Guide](index.md): the authoritative description of what the released plug-in does |
@@ -23,7 +23,7 @@ GA is a **different plug-in** from the beta, by design. It has its own identity,
 |---|---|---|
 | Plug-in ID | `ip.em.xdbb` | `ip.em.xdb2` |
 | Target type | `ip_db2_database_beta`, shown as *IBM DB2 Database (Beta)* | `ip_db2_database`, shown as *IBM Db2 Database* (and, from 24.1.2.0.0, `ip_db2_instance`, *IBM Db2 Instance*) |
-| Versions | `24.1.9.N.0` / `13.5.9.N.0` | `24.1.1.0.0` / `13.5.2.0.0` (GA), now `24.1.2.0.0` / `13.5.3.0.0` |
+| Versions | `24.1.9.N.0` / `13.5.9.N.0` | `24.1.2.0.0` / `13.5.3.0.0` (GA), after the initial `24.1.1.0.0` / `13.5.2.0.0` |
 | Licence keys | Issued for `ip.em.xdbb` | Issued for `ip.em.xdb2` |
 
 - **Beta to GA is a clean install, not an upgrade.** Deploying GA does not replace or upgrade the beta. Nothing the beta created in your Management Repository carries into GA: targets, metric history, incidents, thresholds you tuned and credentials all stay with the beta.
@@ -77,7 +77,7 @@ Once you no longer need the beta's history, remove every **IBM DB2 Database (Bet
 
 ## 4. What changed since the beta
 
-Everything new since the beta is on [What's new](whats-new.md): the GA release and 24.1.2.0.0 / 13.5.3.0.0. The changes most likely to surprise a beta user:
+Everything new since the beta is on [What's new](whats-new.md): the initial release, 24.1.1.0.0 / 13.5.2.0.0, and the GA release, 24.1.2.0.0 / 13.5.3.0.0. The changes most likely to surprise a beta user:
 
 - **The administrative job types are renamed.** The beta's `sidbb_*` job types become `ip_db2_start_instance`, `ip_db2_stop_instance`, `ip_db2_quiesce_database`, `ip_db2_unquiesce_database` and `ip_db2_kill_application`. Saved jobs and job library entries do not carry over. See [Breaking changes](whats-new.md#breaking-changes).
 - **Three remote admin jobs**, Force Application, RUNSTATS on a Table and Online Backup, work on a remotely monitored target. They run as a separate admin user in the new **IBM DB2 Database Admin Credentials** set. See [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs).
@@ -93,7 +93,7 @@ Everything new since the beta is on [What's new](whats-new.md): the GA release a
 
 - **Several lock and session metric groups are renamed** (for example `Lock_Waits` is `Longest_Lock_Waits`). Re-create thresholds against the names the released plug-in uses. See [Upgrade notes](upgrade-notes.md#renamed-groups).
 
-The GA known issue (Top Statements losing its SQL text after one failed lookup) is fixed in 24.1.2.0.0 / 13.5.3.0.0.
+The 24.1.1.0.0 known issue (Top Statements losing its SQL text after one failed lookup) is fixed in GA, 24.1.2.0.0 / 13.5.3.0.0.
 
 ## 5. Where to report {#reporting}
 

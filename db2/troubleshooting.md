@@ -7,7 +7,7 @@ nav_order: 12
 
 The things people actually hit, what each one looks like, and what to change. This page is for the DBA or Enterprise Manager administrator looking at a target that is empty, wrong or failing a job. Nearly everything that goes wrong in the first hour with this plug-in is one of a small number of things, so this page is that list rather than a general guide to Enterprise Manager.
 
-**In this page:** The licence gate · An empty metric group · Install and deploy · After the upgrade from GA · Connecting to Db2 · Instance targets · Jobs · Compliance shows nothing · Amazon RDS for Db2 · OMS licence-count connection · Logs · Known issues in this release · Getting support
+**In this page:** The licence gate · An empty metric group · Install and deploy · After the upgrade from 24.1.1.0.0 · Connecting to Db2 · Instance targets · Jobs · Compliance shows nothing · Amazon RDS for Db2 · OMS licence-count connection · Logs · Known issues in this release · Getting support
 
 **If a target is Up but almost every page is empty, it is the licence key.** That single cause accounts for more first-hour reports than everything else here combined, so it is the first section.
 
@@ -21,7 +21,7 @@ For a target whose pages are empty or partly filled, open its **Monitoring Readi
 Collection stopped by license status
 ```
 
-**Cause.** Every `ip_db2_database` target needs a licence key for `ip.em.xdb2` in its **Plug-in Licence Key** credential (the *IBM DB2 Plug-in Licence Monitoring Credentials* set; a target upgraded from GA may still carry it in the older **Plugin Licence Key** property, which is read while the credential is empty). While the status is `License Required`, `Invalid Signature` or `Expired`, the plug-in stops ordinary collection on that target, with five deliberate exceptions so you can always tell why: **License** itself (so you can see the status), **Response** (so availability keeps working), **Version**, **CollectorStatus** (which reports each stopped group as `DISABLED`), and **readiness_summary** (so the Overview still counts the licence check). Availability keeps reporting, which is why the target stays *Up* rather than going *Down*: the incident and the collection errors are the signal, not the target status.
+**Cause.** Every `ip_db2_database` target needs a licence key for `ip.em.xdb2` in its **Plug-in Licence Key** credential (the *IBM DB2 Plug-in Licence Monitoring Credentials* set; a target upgraded from 24.1.1.0.0 may still carry it in the older **Plugin Licence Key** property, which is read while the credential is empty). While the status is `License Required`, `Invalid Signature` or `Expired`, the plug-in stops ordinary collection on that target, with five deliberate exceptions so you can always tell why: **License** itself (so you can see the status), **Response** (so availability keeps working), **Version**, **CollectorStatus** (which reports each stopped group as `DISABLED`), and **readiness_summary** (so the Overview still counts the licence check). Availability keeps reporting, which is why the target stays *Up* rather than going *Down*: the incident and the collection errors are the signal, not the target status.
 
 **Fix.** Read the licence status on the `License` metric and act on it:
 
@@ -75,7 +75,7 @@ The key is checked on the agent host every 15 minutes, and at every collection. 
 
 **Related:** [Install and upgrade](install-and-upgrade.md)
 
-## After the upgrade from GA {#upgrade}
+## After the upgrade from 24.1.1.0.0 {#upgrade}
 
 **New charts or columns stay empty after the upgrade, and the licence-status alert does not fire.** The OMS has not been restarted since the deploy. It keeps each target type's column list in memory, so columns this release adds (the Transaction Log I/O chart on Performance, the cache rate chart on Memory & Sorts, `license_severity`) stay empty until `emctl stop oms; emctl start oms`. See [Upgrade notes](upgrade-notes.md#restart-oms).
 
@@ -228,7 +228,7 @@ The default, `STRICT` (also when blank), verifies the OMS certificate and host n
 
 ## Known issues in this release {#known-issues}
 
-24.1.2.0.0 / 13.5.3.0.0 has no known issue of its own. The GA known issue, Top Statements losing its SQL text after one failed lookup, is fixed. What the release deliberately does not cover is listed under [Known limitations and boundaries](whats-new.md#update-24-1-2).
+24.1.2.0.0 / 13.5.3.0.0 has no known issue of its own. The 24.1.1.0.0 known issue, Top Statements losing its SQL text after one failed lookup, is fixed. What the release deliberately does not cover is listed under [Known limitations and boundaries](whats-new.md#update-24-1-2).
 
 ## Getting support {#support}
 
@@ -253,5 +253,5 @@ If support asks for diagnostics, run the **Collect IBM DB2 Plug-in Diagnostics**
 - [Getting started](getting-started.md): the install path this page's symptoms usually trace back to
 - [Monitoring pages](monitoring-pages.md#monitoring-readiness): the Monitoring Readiness page
 - [Metrics reference](metrics-reference.md#collectorstatus): CollectorStatus, column by column
-- [Upgrade notes](upgrade-notes.md): what changes when you upgrade from GA
+- [Upgrade notes](upgrade-notes.md): what changes when you upgrade from 24.1.1.0.0
 - [AI troubleshooting guide](https://docs.integrationplumbers.io/db2/ai/troubleshooting.md): the same checks, for your own AI assistant

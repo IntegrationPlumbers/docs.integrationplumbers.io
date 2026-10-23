@@ -237,9 +237,9 @@ To do this for many targets, add the same corrective action to the Log Space Uti
 The job is listed as **Purge Orphaned IBM DB2 Plug-in Cache Files** (job type `ip_db2_purge_stale_cache`).
 
 
-**Run it once after upgrading from GA (24.1.1.0.0 / 13.5.2.0.0), or schedule it.** It is housekeeping, not a fix: skipping it wastes a small amount of disk and nothing else.
+**Run it once after upgrading from 24.1.1.0.0 / 13.5.2.0.0, or schedule it.** It is housekeeping, not a fix: skipping it wastes a small amount of disk and nothing else.
 
-**Why it is needed.** Several metrics are deltas: they report the change since the previous collection. To compute them, the agent keeps a small cache file per target, which also holds the CollectorStatus history. GA kept that file inside the **versioned plug-in home**, and an upgrade creates a new home, so each earlier version's cache files are stranded: a few KB per target, per version.
+**Why it is needed.** Several metrics are deltas: they report the change since the previous collection. To compute them, the agent keeps a small cache file per target, which also holds the CollectorStatus history. 24.1.1.0.0 kept that file inside the **versioned plug-in home**, and an upgrade creates a new home, so each earlier version's cache files are stranded: a few KB per target, per version.
 
 **From 24.1.2.0.0 / 13.5.3.0.0** the cache lives in the agent state directory instead (`<agentStateDir>/ip_plugin/xdb2/cache/`, see [Files the plug-in keeps on each agent](#agent-files)), which an upgrade does not touch. The first collection after the upgrade copies the CollectorStatus history from the previous version's home, and this job then removes the old file. Once every older home has been swept, the job finds nothing to do.
 
