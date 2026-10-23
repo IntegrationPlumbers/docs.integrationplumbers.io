@@ -10,8 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-23-starlight-migration-design.md`
 
-A local clone of Nathan's repo with a successful test build is at
-`/private/tmp/claude-501/-Users-andrebeaumont-Projects-docs-integrationplumbers-io/48ae3641-cf61-4f49-96fc-f8b3e619c707/scratchpad/starlight-src`. If it is gone, `gh repo clone IntegrationPlumbers/ip-docs-starlight`.
+Reference: a local clone of Nathan's repo (`gh repo clone IntegrationPlumbers/ip-docs-starlight`, commit `cb83dfc`).
 
 ## Global Constraints
 
@@ -287,8 +286,8 @@ Expected: `links ok (N checked)`. If it reports findings, they are real regressi
 
 ```bash
 cd site && npm test && npm run build && node scripts/check-parity.mjs .. dist
-curl -s https://docs.integrationplumbers.io/sitemap.xml | grep -oE '<loc>[^<]+' | sed 's#<loc>https://docs.integrationplumbers.io##; s#/$#/index.html#' > /tmp/live-urls.txt
-node scripts/check-parity.mjs .. dist --urls /tmp/live-urls.txt
+curl -s https://docs.integrationplumbers.io/sitemap.xml | grep -oE '<loc>[^<]+' | sed 's#<loc>https://docs.integrationplumbers.io##; s#/$#/index.html#' > live-urls.txt
+node scripts/check-parity.mjs .. dist --urls live-urls.txt
 ```
 Expected: both runs print `parity ok (N paths)`. (The live list has 77 entries; `/README.md` and any Jekyll-only paths it lists are expected misses and go in the PR description.)
 
@@ -348,7 +347,7 @@ Expected: all pass; status shows only intended deletions/edits, no generated fil
 
 - [ ] **Step 1: Serve and compare**
 
-Run: `cd site && npm run preview` (serves `dist/` on http://localhost:4321). With the `browse` skill binary at `~/.claude/skills/gstack/browse/dist/browse`, screenshot at 1400×900 and 390×844, in light and dark (`localStorage.setItem('starlight-theme','light'|'dark')` then reload), the home page and `/postgresql/getting-started.html`, `/mysql/getting-started.html`, `/mssql/getting-started.html`, `/db2/getting-started.html`, `/legal.html`. Compare against the same pages on http://ip-docs-web-ikeukj-c26849-172-233-213-159.sslip.io/. Also fetch `http://localhost:4321/mysql/ai/troubleshooting.md` and confirm it is raw Markdown, and `http://localhost:4321/mysql/` and confirm the redirect.
+Run: `cd site && npm run preview` (serves `dist/` on http://localhost:4321). With the `browse` skill binary at `~/.claude/skills/gstack/browse/dist/browse`, screenshot at 1400×900 and 390×844, in light and dark (`localStorage.setItem('starlight-theme','light'|'dark')` then reload), the home page and `/postgresql/getting-started.html`, `/mysql/getting-started.html`, `/mssql/getting-started.html`, `/db2/getting-started.html`, `/legal.html`. Compare against the same pages on Nathan's preview deployment (internal URL, shared in the team channel). Also fetch `http://localhost:4321/mysql/ai/troubleshooting.md` and confirm it is raw Markdown, and `http://localhost:4321/mysql/` and confirm the redirect.
 Expected: no visual difference beyond content newer than Nathan's build; search opens with Ctrl+K and finds "license key".
 
 - [ ] **Step 2: Push and open the PR**

@@ -11,7 +11,7 @@ remote theme, built by GitHub Pages' legacy builder from `main`. It looks dated
 and has no sidebar, no page outline and no search. Nathan built a replacement
 on Astro + Starlight (https://github.com/IntegrationPlumbers/ip-docs-starlight,
 one commit, 2026-10-23, preview at
-http://ip-docs-web-ikeukj-c26849-172-233-213-159.sslip.io/). His site is a
+Nathan's preview deployment (internal URL, shared in the team channel)). His site is a
 build step over this repo's existing Markdown: a converter reads
 `<product>/*.md` and `_data/<product>_nav.yml` and produces Starlight content.
 The page text is unchanged.
@@ -215,5 +215,5 @@ user, so these are settled here as the author's calls.
 - Nathan reviews the PR. The PR description credits his repo and commit
   `cb83dfc` as the source and lists what was left out (Dokploy files).
 - Whether to archive `ip-docs-starlight` after merge, and whether anyone uses
-  the sslip.io preview URL, are Nathan's and the user's calls, not the
+  the preview deployment URL, are Nathan's and the user's calls, not the
   builder's.
