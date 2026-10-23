@@ -72,16 +72,15 @@ The new IBM Db2 Instance target collects the instance-scope groups (`Instance_Me
 | Home | **Overview** |
 | SQL Analytics | **SQL** |
 | Analysis | **Locks** |
-| Transaction Log & Recovery | **Transaction Log** |
 | Backup History | **Backup** |
 | HADR | **High Availability** |
 
-The target menu shows the new names after a full deploy or an OMS restart. The database target type is now spelled **IBM Db2 Database**, matching **IBM Db2 Instance**: existing targets keep their names, and the Add Target picker, the target menu and Preferred Credentials show the new spelling. The plug-in is still listed as IBM DB2 Database under Plug-ins. Chart and column labels are shorter (the unit moved to the chart's axis), so anything that matches a metric by its display label, rather than its internal name, needs the new text.
+The transaction log, a section of Storage at GA, now has its own **Transaction Log** page, one of ten new database pages ([What's new](whats-new.md#update-24-1-2)). The target menu shows the new names after a full deploy or an OMS restart. The database target type is now spelled **IBM Db2 Database**, matching **IBM Db2 Instance**: existing targets keep their names, and the Add Target picker, the target menu and Preferred Credentials show the new spelling. The plug-in is still listed as IBM DB2 Database under Plug-ins. Chart and column labels are shorter (the unit moved to the chart's axis), so anything that matches a metric by its display label, rather than its internal name, needs the new text.
 
 ### Also check
 
 - **The three monitoring templates replace the GA threshold starter kit**, which reverted two shipped defaults on `tablespace_state` when applied. See [Monitoring templates](alerts-and-templates.md#monitoring-templates).
-- **The plug-in no longer writes inside its agent plug-in home.** Target caches and the plug-in log move to `<agentStateDir>/ip_plugin/xdb2/`. Run [Purge Stale Plugin Cache](jobs-and-metric-extensions.md#purge-stale-cache) once per agent to remove the GA copies.
+- **The plug-in no longer writes inside its agent plug-in home.** Target caches and the plug-in log move to `<agentStateDir>/ip_plugin/xdb2/`. Run [the cache purge job](jobs-and-metric-extensions.md#purge-stale-cache) (**Purge Orphaned IBM DB2 Plug-in Cache Files**) once per agent to remove the GA copies.
 - **The DRDA encryption property is relabelled** *DRDA Credential Encryption AES-256*: it encrypts the user ID and password, not the data. The setting and its values are unchanged.
 - **AIX, Solaris and HP-UX agents are declared unsupported.** The plug-in was already certified for Linux x86-64 and Windows x86-64 agents only.
 - **Monitoring templates saved from the console before this release** keep their old alert message ids, which still resolve to the English text.

@@ -18,7 +18,7 @@ An IBM Db2 Database target has seventeen pages. **Overview** is the default page
 | Group | Pages |
 |---|---|
 | (none) | Overview |
-| Workload | Performance, Memory & Sorts, SQL, Sessions, Locks, Waits, Members (partitioned and pureScale databases only) |
+| Workload | Performance, Memory & Sorts, SQL, Sessions, Locks, Waits, Members (in the left navigation of partitioned and pureScale databases only; the target menu always lists it) |
 | Storage and Logs | Storage, Tables, Indexes, Transaction Log |
 | Protection | Backup, High Availability |
 | (none) | Configuration, Monitoring Readiness, License Info |
@@ -130,7 +130,6 @@ The history charts read stored collections only, never a live collection (nothin
 
 #### Sessions
 ![Sessions page: the Connections tiles and the Top Sessions by CPU table](images/pages/sessions.jpg)
-<!-- Screenshot from build 24.1.49: it predates the Auto-refresh control, and the table is empty. Screenshot pending with sessions listed. -->
 
 *Who is connected, and what are they doing?* The 25 sessions using the most CPU in their **current unit of work**, read live at the **Auto-refresh** rate ([Time windows, auto-refresh and live reads](#53-time-windows-auto-refresh-and-live-reads)), and paused, as on Locks, while the browser tab is in the background. Idle sessions are included; the plug-in's own monitoring connection is not.
 
@@ -194,7 +193,6 @@ All stored: the page never runs a collection; the tables are re-read from the re
 
 #### Members
 ![Members page on a partitioned (DPF) database: Member Summary, Member Status and Data Size by Member](images/pages/members.jpg)
-<!-- Host names redacted. No pureScale capture: the Cluster Caching Facilities and Group Buffer Pool regions have no screenshot. -->
 
 *Is every member up, and is the data spread evenly?* For a partitioned (DPF) or pureScale database (metadata 4.6). The left navigation lists **Members** only on a target whose `dbTopology` property is DPF or PURESCALE. The target menu always has it; on a single-member database the page says *Members applies to partitioned (DPF) and pureScale databases; this database has a single member.*
 
@@ -370,7 +368,6 @@ Source: the daily configuration snapshot (`Db2DatabaseConfiguration`). The page 
 
 #### Monitoring Readiness
 ![Monitoring Readiness page: the summary line, the jump list and the Connection and Collection, Monitor Switches and Deadlock Capture panels](images/pages/monitoring-readiness.jpg)
-<!-- Screenshot from build 24.1.49; one detail line that still used the page's old name is blanked. -->
 
 *Is monitoring set up to collect everything?* What each feature needs, what is set now, and the statement that fixes it. Open it first when a page is empty or partly filled.
 
@@ -387,7 +384,7 @@ Each item has a status word (**OK**, **Attention**, **Not functional** or **Unkn
 
 **Live and stored.** Each time the page opens, and each time you press **Check again**, the agent runs the checks live (`readiness_detail`, metadata 4.6; a few short reads under the monitoring credentials; nothing is stored), and the note says *Checked live on the agent at* the time. While it runs, and when it does not answer, the panels show the latest stored collections (`License`, `CollectorStatus`, `Monitor_Metrics`, `HADR_Readiness`) and the note says why: a target below metadata 4.6 has no live check, and a check that does not answer within 30 seconds is abandoned. **Check again** is disabled while a check runs. The Overview's **Readiness** row counts the same checks once an hour ([readiness_summary](metrics-reference.md#readiness-summary)).
 
-The AI troubleshooting guide covers every check, its causes and its fix in a form you can load into your own AI assistant with the page's results: `https://docs.integrationplumbers.io/db2/ai/troubleshooting.md`.
+The page's **Troubleshooting with an AI assistant?** note links to the [Db2 troubleshooting guide](https://docs.integrationplumbers.io/db2/ai/troubleshooting.md), a Markdown file that covers every check, its causes and its fix. Load it into your own AI assistant together with the page's results.
 
 #### License Info
 ![License Info page: the Licenses table](images/pages/license-info.jpg)

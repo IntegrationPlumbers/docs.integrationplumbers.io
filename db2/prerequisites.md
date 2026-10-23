@@ -214,7 +214,7 @@ Monitoring needs only the monitoring user. The administrative jobs each run as a
 | Preferred credential set | Holds | Used by |
 | :--- | :--- | :--- |
 | **IBM DB2 Database Host Credentials** (`DB2HostCreds`) | The Db2 instance owner's OS account on the Db2 host | The six local administrative jobs, including **Kill** on the Locks and Sessions pages |
-| **IBM DB2 Plug-in Agent Owner Credentials** (`DB2AgentOwnerCreds`) | The account that owns the agent installation (commonly `oracle`) | Purge Stale Plugin Cache, Collect IBM DB2 Plug-in Diagnostics, the three remote administrative jobs (including **Back Up Database**) and Explain |
+| **IBM DB2 Plug-in Agent Owner Credentials** (`DB2AgentOwnerCreds`) | The account that owns the agent installation (commonly `oracle`) | Purge Orphaned IBM DB2 Plug-in Cache Files, Collect IBM DB2 Plug-in Diagnostics, the three remote administrative jobs (including **Back Up Database**) and Explain |
 | **IBM DB2 Database Admin Credentials** (`DB2AdminCreds`) | A Db2 admin user (a database credential) | The three remote administrative jobs only |
 
 On Linux, the Db2 instance owner must also be able to read the agent's plug-in files, so add it to the agent install owner's group on the Db2 host: see [Jobs](jobs-and-metric-extensions.md#local-jobs). The authority the admin user needs is on [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs). An IBM Db2 Instance target has its own host and agent-owner sets: see [Credentials](jobs-and-metric-extensions.md#credentials).
