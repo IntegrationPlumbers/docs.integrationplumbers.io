@@ -1,6 +1,7 @@
 name: static-checks
 
-# Two jobs, both advisory (main is unprotected; nothing here blocks a merge).
+# Three jobs. checks and docs-lint are advisory (main is unprotected; nothing
+# here blocks a merge). site-build is the build gate for the Starlight site.
 #
 # checks: thin caller — delegates to the central reusable workflow in
 # ip-dev-plugin with no inputs, so it runs the secrets scan (gitleaks) only.
@@ -13,6 +14,10 @@ name: static-checks
 # links were only caught by a manual review pass. scripts/lint-changed.sh scopes
 # both to the product guides the PR touches — a PostgreSQL publish is never
 # held up by a draft page in another product's section.
+#
+# site-build: builds the Starlight site in site/ and runs its tests, link/anchor
+# check and URL parity check, so a PR that breaks the site build is visible
+# before it reaches main, where deploy-pages.yml publishes it.
 
 on:
   pull_request:
