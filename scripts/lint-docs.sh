@@ -55,8 +55,8 @@ rc=0
 for f in "${FILES[@]}"; do
   [[ -f "$f" ]] || { echo "$f: not found"; rc=1; continue; }
   # <product>/ai/*.md are raw-Markdown downloads an AI assistant loads (the IP UI standard's
-  # troubleshooting guide). They carry NO front matter on purpose: without it GitHub Pages
-  # copies the file as-is and serves it as text/markdown, as it already does /README.md.
+  # troubleshooting guide). They carry NO front matter on purpose: the site converter copies
+  # them to the published site as-is, so they are served as raw Markdown.
   # Every other check below still applies to them.
   if [[ "$f" != */ai/*.md && "$(head -1 "$f")" != "---" ]]; then echo "$f: missing front matter"; rc=1; fi
   FORBID="$(forbid_for "$f")"

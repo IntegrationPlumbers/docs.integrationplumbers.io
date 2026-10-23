@@ -1,4 +1,0 @@
-## Oracle Plugins
-
-- [PostgreSQL](/postgresql/)
-

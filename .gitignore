@@ -1,5 +1,4 @@
 .DS_Store
-Gemfile.lock
 .obsidian
 site/node_modules/
 site/dist/
