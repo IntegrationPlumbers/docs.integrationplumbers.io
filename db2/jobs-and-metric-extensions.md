@@ -15,26 +15,26 @@ The jobs fall into four groups: six **local** jobs that run the Db2 command line
 
 **Where to find it:** **Enterprise → Job → Activity → Create Job**. Three console buttons also submit jobs: **Kill** on the [Locks](monitoring-pages.md#locks) and [Sessions](monitoring-pages.md#sessions) pages, **Back Up Database** on the [Backup](monitoring-pages.md#backup) page, and **Explain Plan** in [Statement Detail](monitoring-pages.md#statement-detail).
 
-**In this page:** Jobs shipped with the plug-in · Credentials · The six local jobs · Remote admin jobs · TLS targets · Explain SQL Statement · Corrective action: archive the log when it fills · Purge Stale Plugin Cache · Collect diagnostics for support · Files the plug-in keeps on each agent · Statement metric keys · Running a job
+**In this page:** Jobs shipped with the plug-in · Credentials · The six local jobs · Remote admin jobs · TLS targets · Explain SQL Statement · Corrective action: archive the log when it fills · Purge orphaned cache files · Collect diagnostics for support · Files the plug-in keeps on each agent · Statement metric keys · Running a job
 
 ## Jobs shipped with the plug-in {#jobs-shipped}
 
 | Job (display name) | Job type | What it does | Runs |
 | :--- | :--- | :--- | :--- |
-| Start IBM Db2 Instance | `ip_db2_start_instance` | Starts the Db2 **instance** (`db2start`): every database in it. | Local |
-| Stop IBM Db2 Instance | `ip_db2_stop_instance` | Stops the Db2 **instance** (`db2stop force`): every database in it, with every connection forced off. | Local |
+| Start IBM Db2 Instance (all databases) | `ip_db2_start_instance` | Starts the Db2 **instance** (`db2start`): every database in it. | Local |
+| Stop IBM Db2 Instance (all databases, db2stop force) | `ip_db2_stop_instance` | Stops the Db2 **instance** (`db2stop force`): every database in it, with every connection forced off. | Local |
 | Quiesce IBM Db2 Database | `ip_db2_quiesce_database` | Quiesces the target's database, blocking new connections. | Local |
 | Unquiesce IBM Db2 Database | `ip_db2_unquiesce_database` | Removes the quiesced state. | Local |
 | Archive IBM Db2 Active Log | `ip_db2_archive_log` | Closes and archives the database's active log (`db2 archive log for database`), online, without disturbing connected applications. Can run as a [corrective action](#corrective-action). | Local |
-| Kill IBM Db2 Application | `ip_db2_kill_application` | Forces a specified application off the database (`db2 force application`). Requires an **Application handle** parameter (digits only). Also submitted by **Kill** on Locks and Sessions. | Local |
+| Kill IBM Db2 Application (force application) | `ip_db2_kill_application` | Forces a specified application off the database (`db2 force application`). Requires an **Application handle** parameter (digits only). Also submitted by **Kill** on Locks and Sessions. | Local |
 | IBM Db2 - Force Application (remote) | `ip_db2_admin_force_application` | `FORCE APPLICATION (<handle>)` over `ADMIN_CMD`. | Remote, any target |
 | IBM Db2 - RUNSTATS on a Table (remote) | `ip_db2_admin_runstats` | Table, distribution and sampled detailed index statistics for one table. | Remote, any target |
 | IBM Db2 - Online Backup (remote) | `ip_db2_admin_backup` | An online backup to a directory on the database server, compressed and with logs unless you say no. Also submitted by **Back Up Database** on Backup, now or on a schedule. | Remote, any target |
 | IBM Db2 - Explain SQL Statement | `ip_db2_explain_statement` | Shows the access plan of a statement's cached section. Runs nothing. Also submitted by **Explain Plan** in Statement Detail. | Remote, any target |
-| Purge Stale Plugin Cache | `ip_db2_purge_stale_cache` | Deletes the metric-cache files earlier upgrades left in older plug-in homes. Opens no database connection. | Agent-side |
+| Purge Orphaned IBM DB2 Plug-in Cache Files | `ip_db2_purge_stale_cache` | Deletes the metric-cache files earlier upgrades left in older plug-in homes. Opens no database connection. | Agent-side |
 | Collect IBM DB2 Plug-in Diagnostics | `ip_db2_collect_diagnostics` | Writes one archive of the plug-in's logs and environment for support. Opens no database connection. | Agent-side |
 
-**Four of them also run from an IBM Db2 Instance target** ([Instance targets](targets-and-properties.md#instance-targets)): Start and Stop IBM Db2 Instance, whose natural home is the instance and which offer the instance target type first, plus Purge Stale Plugin Cache and Collect IBM DB2 Plug-in Diagnostics. They behave the same from either target type, and jobs saved against a database target keep working. The other jobs act on one database and run only from a database target.
+**Four of them also run from an IBM Db2 Instance target** ([Instance targets](targets-and-properties.md#instance-targets)): Start and Stop IBM Db2 Instance, whose natural home is the instance and which offer the instance target type first, plus Purge Orphaned IBM DB2 Plug-in Cache Files and Collect IBM DB2 Plug-in Diagnostics. They behave the same from either target type, and jobs saved against a database target keep working. The other jobs act on one database and run only from a database target.
 
 The job types were renamed for GA; the earlier `sidb_*` and beta `sidbb_*` names are gone: see [Breaking changes](whats-new.md#breaking-changes).
 
@@ -50,7 +50,7 @@ emcli set_preferred_credential -set_name=<set name> -target_type=ip_db2_database
 | Preferred credential set | Set name | Holds | Used by |
 | :--- | :--- | :--- | :--- |
 | IBM DB2 Database Host Credentials | `DB2HostCreds` | The Db2 instance owner's OS account on the Db2 host | The six local jobs, including Kill and the archive-log corrective action |
-| IBM DB2 Plug-in Agent Owner Credentials | `DB2AgentOwnerCreds` | The account that owns the agent installation (commonly `oracle`) | Purge Stale Plugin Cache, Collect IBM DB2 Plug-in Diagnostics, the three remote jobs and Explain SQL Statement |
+| IBM DB2 Plug-in Agent Owner Credentials | `DB2AgentOwnerCreds` | The account that owns the agent installation (commonly `oracle`) | Purge Orphaned IBM DB2 Plug-in Cache Files, Collect IBM DB2 Plug-in Diagnostics, the three remote jobs and Explain SQL Statement |
 | IBM DB2 Database Admin Credentials | `DB2AdminCreds` | A Db2 admin user (a database credential) | The three remote jobs |
 | IBM DB2 Database Monitoring Credentials | `DB2DatabaseMonitoringCreds` | The monitoring user | Explain SQL Statement only |
 
@@ -232,7 +232,10 @@ To do this for many targets, add the same corrective action to the Log Space Uti
 
 **Remove it** from the same per-object **Edit Advanced Settings** page: on the **Critical** row of **Corrective Actions**, click **Remove**, then **Continue** twice and **OK**. If a monitoring template attached it, remove it from the template too, or the next apply attaches it again. To retire the library entry, remove every attachment first (the **References** column shows how many remain), then select it under **Enterprise → Monitoring → Corrective Actions** and click **Delete**.
 
-## Purge Stale Plugin Cache {#purge-stale-cache}
+## Purge orphaned cache files {#purge-stale-cache}
+
+The job is listed as **Purge Orphaned IBM DB2 Plug-in Cache Files** (job type `ip_db2_purge_stale_cache`).
+
 
 **Run it once after upgrading from GA (24.1.1.0.0 / 13.5.2.0.0), or schedule it.** It is housekeeping, not a fix: skipping it wastes a small amount of disk and nothing else.
 
@@ -242,7 +245,7 @@ To do this for many targets, add the same corrective action to the Log Space Uti
 
 **Why it is not automatic.** Enterprise Manager provides no post-deployment or upgrade hook for a plug-in. A scheduled job is the supported equivalent.
 
-**Run it once, from the console:** **Enterprise → Job → Activity → Create Job**, choose **Purge Stale Plugin Cache**, and select any one Db2 target on the agent you want cleaned. The sweep covers that whole agent, so one target per agent is enough.
+**Run it once, from the console:** **Enterprise → Job → Activity → Create Job**, choose **Purge Orphaned IBM DB2 Plug-in Cache Files**, and select any one Db2 target on the agent you want cleaned. The sweep covers that whole agent, so one target per agent is enough.
 
 **Or schedule it.** The sweep is idempotent: it deletes only files that are already dead and does nothing when there is nothing stale, so a weekly job costs nothing between upgrades:
 
@@ -291,7 +294,7 @@ When support asks for diagnostics, run **Collect IBM DB2 Plug-in Diagnostics** a
 
 The archive holds the plug-in's own log files (the newest five, up to 50 MB), the target's metric cache, an environment report (plug-in version, the JVM the collector uses, the classpath, and the IBM JDBC driver version), and the target's properties from the agent's `targets.xml`.
 
-**Nothing secret is included.** The monitoring credential, the truststore password, the OMS credential, and any property marked encrypted or named like a password, key, secret or token are written as `<redacted>`. The licence key shows only as its length. The archive is readable by the agent owner only, and the newest five archives are kept. The job uses the same agent owner credentials as Purge Stale Plugin Cache. From the command line:
+**Nothing secret is included.** The monitoring credential, the truststore password, the OMS credential, and any property marked encrypted or named like a password, key, secret or token are written as `<redacted>`. The licence key shows only as its length. The archive is readable by the agent owner only, and the newest five archives are kept. The job uses the same agent owner credentials as the cache purge job ([Purge orphaned cache files](#purge-stale-cache)). From the command line:
 
 ```bash
 cat > diag_job.props <<'PROPS'

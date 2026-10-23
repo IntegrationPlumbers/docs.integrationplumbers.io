@@ -26,10 +26,10 @@ You enter the key per target, in its **IBM DB2 Plug-in Licence Monitoring Creden
 
 The plug-in ships as one OPAR per Enterprise Manager release, with the same features in each. Your Integration Plumbers contact provides the download. Use the one that matches your OMS: Enterprise Manager refuses to import an OPAR built for the other release (`Incompatible version`), because each is built with that Enterprise Manager line's own development kit.
 
-| Enterprise Manager | OPAR | Plug-in version |
-| :--- | :--- | :--- |
-| 24ai | `24.1.2.0.0_ip.em.xdb2_2000_0.opar` | `24.1.2.0.0` |
-| 13.5 | `13.5.3.0.0_ip.em.xdb2_2000_0.opar` | `13.5.3.0.0` |
+| Enterprise Manager | OPAR | Plug-in version | SHA-256 |
+| :--- | :--- | :--- | :--- |
+| 24ai | `24.1.2.0.0_ip.em.xdb2_2000_0.opar` | `24.1.2.0.0` | `ff70441d9bd6be2fb1f8b928062cd11d540488b315b46d272f32cfb34d8bf4d7` |
+| 13.5 | `13.5.3.0.0_ip.em.xdb2_2000_0.opar` | `13.5.3.0.0` | `c1540e8d3f12f24b22613e46e01ed4615aec2e953cc5f2a8b0aab75fdbc115b1` |
 
 The two lines are versioned independently, so the numbers after `24.1` and `13.5` do not have to match. Each OPAR comes with a `SHA256SUMS` file, its `build-info.txt`, and a detached signature (`.sig`) for each file.
 
@@ -45,7 +45,7 @@ cosign verify-blob --key cosign.pub --signature SHA256SUMS.sig --insecure-ignore
 sha256sum -c SHA256SUMS --ignore-missing
 ```
 
-The OPAR comes first because `--ignore-missing` skips a file that is not there under its listed name, so it does not catch a renamed OPAR. The check runs offline. cosign 3.x also prints a `--signature` deprecation notice and a "Skipping tlog verification" warning; both are expected, because the signatures are detached and deliberately not in a public transparency log.
+The digest `sha256sum` reports must also match the table under [Download](#download). The OPAR comes first because `--ignore-missing` skips a file that is not there under its listed name, so it does not catch a renamed OPAR. The check runs offline. cosign 3.x also prints a `--signature` deprecation notice and a "Skipping tlog verification" warning; both are expected, because the signatures are detached and deliberately not in a public transparency log.
 
 The release signing public key (`cosign.pub`, ECDSA P-256, sha256 `1c419e1a95947e4783d1754306539933f331666bb7804b7ad0cf007be2144a19`) is:
 
@@ -132,7 +132,7 @@ Once the plug-in is on the OMS and at least one agent, you can add Db2 targets: 
 - **Check the target menu and pages.** Pages are renamed in this release (Home is Overview, Analysis is Locks, and so on; see [Upgrade notes](upgrade-notes.md#page-names)). The target menu shows the new names after the deploy and the OMS restart.
 - **Re-apply thresholds set on the renamed lock and session groups.** Thresholds, templates and incident rules set on the GA names do not move. See [Upgrade notes](upgrade-notes.md#renamed-groups).
 - **Move each licence key into its credential set**, when you are ready. Nothing breaks if you wait: see [Moving a key](targets-and-properties.md#moving-a-key).
-- **Run Purge Stale Plugin Cache once per agent**, or schedule it. GA kept a small cache file per target inside the versioned plug-in home; this release moves it to the agent state directory, and the job removes the GA copies. Skipping it wastes a few KB and nothing else. See [Purge Stale Plugin Cache](jobs-and-metric-extensions.md#purge-stale-cache).
+- **Run Purge Orphaned IBM DB2 Plug-in Cache Files once per agent**, or schedule it. GA kept a small cache file per target inside the versioned plug-in home; this release moves it to the agent state directory, and the job removes the GA copies. Skipping it wastes a few KB and nothing else. See [Purge orphaned cache files](jobs-and-metric-extensions.md#purge-stale-cache).
 - **Open Monitoring Readiness** on a target or two. It checks the connection, licence, monitor authority, collection, monitor switches, deadlock capture, HADR and the diagnostic log live, and prints the statement that fixes each gap. See [Monitoring pages](monitoring-pages.md#monitoring-readiness).
 
 If a limited-instance licence key's instance count fails to validate, see [Troubleshooting](troubleshooting.md#oms-licence-count): it is usually the OMS settings or the OMS certificate, not a licence problem.

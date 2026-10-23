@@ -7,7 +7,7 @@ nav_order: 12
 
 The things people actually hit, what each one looks like, and what to change. This page is for the DBA or Enterprise Manager administrator looking at a target that is empty, wrong or failing a job. Nearly everything that goes wrong in the first hour with this plug-in is one of a small number of things, so this page is that list rather than a general guide to Enterprise Manager.
 
-**In this page:** The licence gate · An empty metric group · Install and deploy · After the upgrade from GA · Connecting to Db2 · Jobs · Compliance shows nothing · Amazon RDS for Db2 · OMS licence-count connection · Logs · Known issues in this release · Getting support
+**In this page:** The licence gate · An empty metric group · Install and deploy · After the upgrade from GA · Connecting to Db2 · Instance targets · Jobs · Compliance shows nothing · Amazon RDS for Db2 · OMS licence-count connection · Logs · Known issues in this release · Getting support
 
 **If a target is Up but almost every page is empty, it is the licence key.** That single cause accounts for more first-hour reports than everything else here combined, so it is the first section.
 
@@ -31,7 +31,7 @@ Collection stopped by license status
 | `License Required` | No key has been entered. | Enter your key in the Plug-in Licence Key credential: see [Licensing](targets-and-properties.md#licensing). |
 | `Invalid Signature` | The key text was altered or truncated, or it was issued for a different plug-in identity, for example an Open Beta key (`ip.em.xdbb`) on a GA target. | Paste the key exactly as issued, as one line, or request a key issued for `ip.em.xdb2`. |
 | `Grace Period` | The key expired less than 14 days ago. Collection continues, and the status alert is a Warning. | Request a renewed key and set it before the 14 days end. |
-| `Expired` | The key expired more than 14 days ago. | Request a new key. |
+| `Expired` | The key expired 14 or more days ago. | Request a new key. |
 | `Exceeded Limit` | More `ip_db2_database` targets exist than the key's instance count. Only this plug-in's own targets count, never beta targets or targets under a different Db2 plug-in. Collection keeps running; the status alert stays open. | Request an increased instance count, or remove a target. |
 
 The key is checked on the agent host every 15 minutes, and at every collection. Collections resume at their next interval once the key is accepted; you do not need to restart anything. The `License` metric also warns 30 days, and goes critical 7 days, before a key expires.
@@ -123,9 +123,23 @@ See [Optional transport security](prerequisites.md#tls).
 
 **Related:** [Prerequisites](prerequisites.md#network) · [The monitoring role](prerequisites.md#monitoring-role)
 
+## Instance targets {#instance-targets}
+
+**An IBM Db2 Instance target reads Up, but every other group is `DISABLED`.** The instance target reads everything through its **Connection Database**, and that database is refusing connections: it is an HADR standby without reads on standby, or it is deactivated, quiesced or dropped. The instance still reads Up, because only a running instance can give that answer, and CollectorStatus gives the reason. Point **Connection Database** at a database on the instance that is always active and never a standby. On an instance that holds only standby databases, no choice helps until a takeover.
+
+**The instance target reports a collection error naming two instance names.** **Instance Name** is set, and the Host and Port lead to a different instance. Correct the port (the instance's `SVCENAME`, or `SSL_SVCENAME` with TLS) or the name.
+
+**A named credential of the database target cannot be chosen for the instance target.** The instance target has its own credential types. Create a named credential of type `DB2InstanceCreds` with the same monitoring user and password.
+
+**A database is not linked to its instance target.** The link is made by host and port at the next configuration collection (daily). A database registered by IP address and an instance registered by host name, or the reverse, do not match: register both the same way. When the instance's `SVCENAME` is a service name rather than a number, set the instance target's Port to the number it stands for.
+
+**One instance-level breach opened several incidents.** The instance-scope groups alert on the instance target and on each of its database targets: clear those thresholds on the database targets. See [Duplicate alerts](targets-and-properties.md#duplicate-alerts).
+
+**Related:** [Instance targets](targets-and-properties.md#instance-targets) · [Instance pages](monitoring-pages.md#52-ibm-db2-instance-pages)
+
 ## Jobs {#jobs}
 
-**A job fails with `Unable to get credentials for defaultHostCred`.** The preferred credential set the job uses is not set for the target. The local jobs use **IBM DB2 Database Host Credentials**; Purge Stale Plugin Cache and Collect IBM DB2 Plug-in Diagnostics use **IBM DB2 Plug-in Agent Owner Credentials**. See [Credentials](jobs-and-metric-extensions.md#credentials).
+**A job fails with `Unable to get credentials for defaultHostCred`.** The preferred credential set the job uses is not set for the target. The local jobs use **IBM DB2 Database Host Credentials**; Purge Orphaned IBM DB2 Plug-in Cache Files and Collect IBM DB2 Plug-in Diagnostics use **IBM DB2 Plug-in Agent Owner Credentials**. See [Credentials](jobs-and-metric-extensions.md#credentials).
 
 **Kill on the Locks or Sessions page reports *The kill job could not run. Check that preferred host credentials are set for this target.*** Set the target's **IBM DB2 Database Host Credentials**: the button submits the job without asking for any.
 
@@ -145,7 +159,7 @@ See [Optional transport security](prerequisites.md#tls).
 
 **The online backup job fails with `SQL2413N`.** The database uses circular logging, so an online backup is not allowed. Online backups need archive logging (`LOGARCHMETH1` not `OFF`); the Configuration Best Practices compliance standard flags circular logging too.
 
-**`Purge Stale Plugin Cache` fails even though a credential is set.** Check *which* OS account the credential runs as. Purge Stale Plugin Cache needs the account that **owns the agent installation** (commonly `oracle`), not the Db2 instance owner the local jobs use. A credential for the wrong user authenticates successfully and then cannot read the job's script, or cannot delete the files (`Deleted 0 of N orphaned cache file(s)`). On Windows the same message can mean a file is in use: run the job again later. See [Jobs](jobs-and-metric-extensions.md#purge-stale-cache).
+**Purge Orphaned IBM DB2 Plug-in Cache Files fails even though a credential is set.** Check *which* OS account the credential runs as. The purge job needs the account that **owns the agent installation** (commonly `oracle`), not the Db2 instance owner the local jobs use. A credential for the wrong user authenticates successfully and then cannot read the job's script, or cannot delete the files (`Deleted 0 of N orphaned cache file(s)`). On Windows the same message can mean a file is in use: run the job again later. See [Jobs](jobs-and-metric-extensions.md#purge-stale-cache).
 
 **Diagnostic-log monitoring reports nothing, or a local job type is refused, on a database you know is reachable.** Confirm the agent is actually on the Db2 host, not just network-reachable: these need a local agent by design. CollectorStatus reports `Diag_Log_File_Monitoring` as `DISABLED` when it is not. See [Network and ports](prerequisites.md#network).
 

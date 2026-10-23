@@ -14,7 +14,7 @@ Before the plug-in can monitor anything, you add each Db2 database as an IBM Db2
 
 **Where to find it:** **Setup → Add Target → Add Targets Manually**. To change a target you already added, open it and go to **Target Setup → Monitoring Configuration**. Databases on an agent host can also be [discovered automatically](discovery.md).
 
-**In this page:** Database target properties · IPv6 hosts · Add a target from the console · Add a target with EM CLI · Modifying a target · Licensing · Instance targets · Associations · Db2U and IBM Db2 SaaS
+**In this page:** Database target properties · Database credential sets · IPv6 hosts · Add a target from the console · Add a target with EM CLI · Modifying a target · Licensing · Instance targets · Associations · Db2U and IBM Db2 SaaS
 
 ## Database target properties {#target-properties}
 
@@ -43,6 +43,22 @@ Before the plug-in can monitor anything, you add each Db2 database as an IBM Db2
 | OMS API Communication | No | `STRICT` | How the licence instance count connects to the OMS. See [The OMS settings](#oms-settings). |
 
 Credentials (the user and password, the truststore fields and the licence key) are stored obfuscated in the agent's `targets.xml`, passed to the collector on its standard input, and never logged. The Host, Port and Database Name properties are checked before use: a value outside the rules fails collection with an error that names the property, not the value.
+
+## Database credential sets {#credential-sets}
+
+An IBM Db2 Database target has seven credential sets. Four are **monitoring** credentials, set on the target itself (**Target Setup → Monitoring Configuration**, or `emcli set_monitoring_credential`); three are **preferred** credentials, set under **Setup → Security → Preferred Credentials → IBM Db2 Database** (or `emcli set_preferred_credential`) and used only by jobs. The console names keep the plug-in's catalog spelling, *IBM DB2*.
+
+| Credential set (console name) | Set name | Credential type | Kind | What for |
+| :--- | :--- | :--- | :--- | :--- |
+| IBM DB2 Database Monitoring Credentials | `DB2DatabaseMonitoringCreds` | `DB2DatabaseCreds` (user, password) | Monitoring | The monitoring user every collection connects as. Required. Explain SQL Statement also runs as this user |
+| IBM DB2 Plug-in Licence Monitoring Credentials | `DB2LicenseMonitoringCreds` | `DB2LicenseCreds` (**Plug-in Licence Key**) | Monitoring | The licence key. Required to collect: see [Licensing](#licensing) |
+| IBM DB2 Client Truststore Monitoring Credentials | `DB2TruststoreMonitoringCreds` | `DB2TruststoreCreds` (location, type, password) | Monitoring | The truststore for TLS with a private or self-signed certificate. A TLS target that runs the remote jobs or Explain needs it: see [TLS targets](jobs-and-metric-extensions.md#tls-targets) |
+| IBM DB2 OMS Monitoring Credentials (licence instance count) | `DB2OmsMonitoringCreds` | `DB2OmsCreds` (user, password) | Monitoring | An Enterprise Manager user for the licence instance count. Keys with an instance limit only: see [The OMS settings](#oms-settings) |
+| IBM DB2 Database Admin Credentials | `DB2AdminCreds` | `DB2DatabaseCreds` (user, password) | Preferred | A Db2 admin user for the three remote admin jobs and Back Up Database: see [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs) |
+| IBM DB2 Database Host Credentials | `DB2HostCreds` | `DB2HostCreds` (host OS account) | Preferred | The instance owner's OS account, for the six local jobs and **Kill**: see [The six local jobs](jobs-and-metric-extensions.md#local-jobs) |
+| IBM DB2 Plug-in Agent Owner Credentials (plug-in jobs) | `DB2AgentOwnerCreds` | `DB2HostCreds` (host OS account) | Preferred | The agent install owner, for the remote jobs, Explain, the cache purge and the diagnostics job: see [Credentials](jobs-and-metric-extensions.md#credentials) |
+
+An IBM Db2 Instance target has its own five sets: see [Instance target credentials](#instance-credentials).
 
 ## IPv6 hosts {#ipv6}
 
@@ -265,15 +281,15 @@ There are no HADR alternate server properties (an instance does not fail over as
 
 **Choosing the connection database.** The instance target reads everything through one database. Instance data is the same whichever database you choose, so pick one that is **always active** and **never an HADR standby**. A standby without reads on standby refuses every connection, so the instance still reads up but every other group is `DISABLED` until a takeover. A database that is deactivated, quiesced or dropped has the same effect; if you drop or rename it, change the property.
 
-### Credentials
+### Credentials {#instance-credentials}
 
 | Credential set (console name) | Credential type | What for |
 | :--- | :--- | :--- |
 | `DB2InstanceMonitoringCreds` (IBM Db2 Instance Monitoring Credentials) | `DB2InstanceCreds` (user, password) | Monitoring. The same monitoring user as the databases works: `CONNECT` on the connection database plus `SQLADM`. No extra grant is needed |
-| `DB2InstanceTruststoreMonitoringCreds` | `DB2InstanceTruststoreCreds` (location, type, password) | TLS with a private CA, as on a database target |
+| `DB2InstanceTruststoreMonitoringCreds` (IBM Db2 Instance Client Truststore Monitoring Credentials) | `DB2InstanceTruststoreCreds` (location, type, password) | TLS with a private CA, as on a database target |
 | `DB2InstanceLicenseMonitoringCreds` (IBM Db2 Instance Plug-in Licence Monitoring Credentials) | `DB2InstanceLicenseCreds` | The licence key |
 | `DB2HostCreds` (IBM Db2 Instance Host Credentials) | `DB2HostCreds` | Preferred credentials for the start and stop jobs: the instance owner OS account |
-| `DB2AgentOwnerCreds` | `DB2HostCreds` | Preferred credentials for the diagnostics and cache-purge jobs: the agent install owner |
+| `DB2AgentOwnerCreds` (IBM Db2 Plug-in Agent Owner Credentials (plug-in jobs)) | `DB2HostCreds` | Preferred credentials for the diagnostics and cache-purge jobs: the agent install owner |
 
 The credential types are the instance target's own: a database target's named credentials of type `DB2DatabaseCreds` cannot be used for an instance target. Create a named credential of type `DB2InstanceCreds` with the same user and password.
 

@@ -11,7 +11,7 @@ This page lists what changed in each release of the IBM Db2 plug-in, most recent
 
 The first update of `ip.em.xdb2`, installed in place over 24.1.1.0.0 / 13.5.2.0.0. One release, two builds with the same content: 24.1.2.0.0 installs on Enterprise Manager 24ai, 13.5.3.0.0 on Enterprise Manager 13.5. The full detail is on [What's new](whats-new.md#update-24-1-2), and the operator actions are on [Upgrade notes](upgrade-notes.md#update-24-1-2).
 
-- Redesigned the console: every page opens with the question it answers and a row of KPI tiles, under a left navigation grouped as Workload, Storage and Logs, and Protection. Renamed Home to Overview, SQL Analytics to SQL, Analysis to Locks, Transaction Log & Recovery to Transaction Log, Backup History to Backup, and HADR to High Availability.
+- Redesigned the console: every page opens with the question it answers and a row of KPI tiles, under a left navigation grouped as Workload, Storage and Logs, and Protection. Renamed Home to Overview, SQL Analytics to SQL, Analysis to Locks, Backup History to Backup, and HADR to High Availability, and moved the transaction log from a section of Storage to its own Transaction Log page.
 - Added ten database pages (Sessions, Waits, Members, Tables, Indexes, Transaction Log, Memory & Sorts, Configuration, Monitoring Readiness, License Info), auto-refresh on Locks and Sessions (paused while the browser tab is in the background), statement history and Explain Plan in Statement Detail (also opened from Recent Deadlocks), and a Back Up Database dialog. The backup job (type 1.6) refuses a partitioned (DPF) database however it is submitted.
 - Added the IBM Db2 Instance target type, automatic discovery of local databases, partitioned (DPF) database support, and pureScale member and CF health (implemented, not lab-certified).
 - Added monitoring for log archiving, instance memory, waits, latches, WLM, indexes, blocking chains, deadlocks (opt-in) and sessions, twelve compliance rules, the Archive IBM Db2 Active Log job, Kerberos authentication, and three monitoring templates.
@@ -34,14 +34,14 @@ The first update of `ip.em.xdb2`, installed in place over 24.1.1.0.0 / 13.5.2.0.
 - Moved the console to theme 1.1.0: higher-contrast colours, and Days to Full coloured amber under 30 days and red under 7.
 - Fixed the GA known issue (Top Statements losing its SQL text), numeric sorting in the console tables, the oldest open transaction reading *0 s*, one inflated Wait_Time and Query_Analytics interval when a DPF partition stops or comes back, and the remote admin jobs on TLS targets with a custom truststore.
 
-**Release files**
+**Release files and SHA-256 checksums**
 
-| Enterprise Manager | File |
-| :--- | :--- |
-| 24ai | `24.1.2.0.0_ip.em.xdb2_2000_0.opar` |
-| 13.5 | `13.5.3.0.0_ip.em.xdb2_2000_0.opar` |
+| Enterprise Manager | File | SHA-256 |
+| :--- | :--- | :--- |
+| 24ai | `24.1.2.0.0_ip.em.xdb2_2000_0.opar` | `ff70441d9bd6be2fb1f8b928062cd11d540488b315b46d272f32cfb34d8bf4d7` |
+| 13.5 | `13.5.3.0.0_ip.em.xdb2_2000_0.opar` | `c1540e8d3f12f24b22613e46e01ed4615aec2e953cc5f2a8b0aab75fdbc115b1` |
 
-Their SHA-256 checksums are in the signed `SHA256SUMS` file delivered with the download: see [Verify the download](install-and-upgrade.md#verify).
+The same checksums are in the signed `SHA256SUMS` file delivered with the download: verify the signature before you trust either, see [Verify the download](install-and-upgrade.md#verify).
 
 ## 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.2.0.0 (Enterprise Manager 13.5), GA, 2026-10-12 {#ga}
 
@@ -83,7 +83,7 @@ The last Open Beta drop, and the first to make the Enterprise Manager 13.5 build
 - A documented, certified least-privilege monitoring grant — `CONNECT` + `SQLADM`, nothing more. See [The monitoring role](prerequisites.md#monitoring-role).
 - Compliance and advisor pack: configuration best-practices, version end-of-life advisory, and audit-posture standards. See [Compliance standards](compliance-standards.md).
 - Three native console pages — Home, Analysis, Performance — with no dependency on a legacy report platform.
-- Six administrative job types, including Purge Stale Plugin Cache. See [Jobs](jobs-and-metric-extensions.md).
+- Six administrative job types, including Purge Orphaned IBM DB2 Plug-in Cache Files. See [Jobs](jobs-and-metric-extensions.md).
 - Amazon RDS for Db2 compatibility, documented. See [Troubleshooting](troubleshooting.md#rds-for-db2).
 - **Licensing enforcement.** Every target now carries a **Plugin Licence Key** property and a `License` metric (status, days remaining, expiration, instances, customer), checked every 15 minutes and again whenever the key changes. While the status is anything but `Active`, every metric group except License, Response, and Version reports `Collection stopped by license status: <status>` until a valid key is entered; availability keeps reporting, so the target stays Up. See [Troubleshooting](troubleshooting.md#licence-gate).
 - Query Analytics windows now say what they actually are: any window wider than roughly seven days is served from Enterprise Manager's hourly rollup rather than raw samples, and is now labelled `(aggregated)` so the count on screen is not read as a raw statement count.
@@ -95,7 +95,7 @@ The last Open Beta drop, and the first to make the Enterprise Manager 13.5 build
 **Upgrade notes**
 
 - An OMS presenting a self-signed certificate that previously validated a limited-instance licence key's count will now fail that check — this is the certificate-validation fix above taking effect, not a regression. See [Troubleshooting](troubleshooting.md#oms-licence-count) for the fix.
-- Run, or schedule, [Purge Stale Plugin Cache](jobs-and-metric-extensions.md#purge-stale-cache) after this and every future upgrade.
+- Run, or schedule, [the cache purge job](jobs-and-metric-extensions.md#purge-stale-cache) (**Purge Orphaned IBM DB2 Plug-in Cache Files**) after this and every future upgrade.
 
 **Also in this drop**
 

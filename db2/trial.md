@@ -36,9 +36,9 @@ The key is issued for `ip.em.xdb2` specifically. A key issued for the Open Beta 
 ### Enter the key
 
 1. Open the target and go to **Target Setup → Monitoring Configuration**.
-2. Enter the key in the **Plug-in Licence Key** field, exactly as issued, as one line.
+2. Enter the key in the **Plug-in Licence Key** field of the licence credential set (*IBM DB2 Plug-in Licence Monitoring Credentials*), exactly as issued, as one line. Leave the **Plugin Licence Key (legacy - set the credential instead)** property empty: it is read only while the credential is empty, and only for targets upgraded from GA.
 3. Save.
-4. Repeat for every target. Keys are entered per target, so a second database added later needs the same key entered again. IBM Db2 Instance targets take the same key but do not count against its instance limit.
+4. Repeat for every target. Keys are entered per target, so a second database added later needs the same key entered again. IBM Db2 Instance targets take the same key, in their own licence credential set, and do not count against its instance limit.
 
 With EM CLI, set the key through the `DB2LicenseMonitoringCreds` credential set: see [Licensing](targets-and-properties.md#licensing).
 
@@ -87,6 +87,8 @@ These need a little more time.
 | If the database is in an HADR pair, open **High Availability**. | Takeover readiness and standby lag per standby, with log gap and replay lag over the window. | [HADR monitoring](hadr-monitoring.md) |
 | Set the target's preferred credentials and run a remote **RUNSTATS on a Table** job against a test table. | The job completes and its output carries Db2's own message. | [Jobs](jobs-and-metric-extensions.md#remote-admin-jobs) |
 | Open **Monitoring Readiness** and press **Check again**. | One panel per monitoring feature, with a status per item and, where something is missing, the statement that fixes it. Optional items such as deadlock capture read Attention until a DBA sets them up. | [Monitoring pages](monitoring-pages.md#monitoring-readiness) |
+| Add an **IBM Db2 Instance** target for the instance that runs the database, with the same key. | Six instance pages: memory against its limit, agents, the instance's `db2diag.log` and its configuration. Once Enterprise Manager links the two (at the next configuration collection), the database's Overview names its instance. | [Instance targets](targets-and-properties.md#instance-targets) |
+| On a test database with archive logging, open **Backup** and press **Back Up Database**, Now. | Db2's time stamp for the image and where it is; the backup appears in the Recovery History after the next collections. Needs the admin and agent-owner preferred credentials. | [Monitoring pages](monitoring-pages.md#backup) |
 | Associate the three compliance standards with your target. | Association Count moves from 0 to 1 on each of the three standards. | [Compliance standards](compliance-standards.md#associate) |
 
 ### Week 1
@@ -95,7 +97,7 @@ These need a little more time.
 | :--- | :--- | :--- |
 | Let a configuration collection run (every 24 hours), then open **Compliance → Results**. | Scored results for all three standards: configuration best-practices, audit posture, and version lifecycle. A fresh, unhardened install typically shows some findings on the first two, because several rules check Db2's own defaults: that is real signal, not a broken check. | [Compliance standards](compliance-standards.md) |
 | Review the curated default thresholds on **Metric and Collection Settings**. | Warning and Critical values already set on the metrics in [Alerts and thresholds](alerts-and-templates.md#default-thresholds), sized for a general estate rather than tuned to yours. | [Alerts and thresholds](alerts-and-templates.md) |
-| Watch **Days to Full** in the Table Spaces table on Storage over several days. | `DaysToFull` moves from `9999` (no forecast) to a real projection once there is enough history to fit a trend. | [Monitoring pages](monitoring-pages.md#storage) |
+| Watch **Days to Full** in the Table Spaces table on Storage over several days. | Days to Full moves from **No forecast** (`DaysToFull` = `9999` under All Metrics) to a real projection once there is enough history to fit a trend. | [Monitoring pages](monitoring-pages.md#storage) |
 
 ## Send us your findings {#send-us-your-findings}
 

@@ -17,7 +17,7 @@ If you have not deployed the IBM Db2 plug-in before, this page is the shortest p
 
 **Coming from the Open Beta?** GA is a different plug-in, installed fresh alongside the beta: read [Moving from the beta to GA](beta-pre-release.md) first.
 
-**In this page:** The one thing worth knowing · Step 1: Create the monitoring user · Step 2: Install the plug-in · Step 3: Add your first target · Step 4: Enter the licence key · Step 5: Check the first collection · What to look at first · If something is wrong
+**In this page:** The one thing worth knowing · Step 1: Create the monitoring user · Step 2: Install the plug-in · Step 3: Add your first target · Step 4: Enter the licence key · Step 5: Check the first collection · Optional: the instance target · What to look at first · If something is wrong
 
 ## The one thing worth knowing before you start {#licence-key}
 
@@ -84,6 +84,14 @@ Within a few minutes the target should show **Up**, its Overview page should fil
 - **A populated Overview page** means collections are running and uploading. Groups collect on intervals from 5 minutes to 24 hours, so some sections fill in later than others.
 
 A target that is Up with an empty Overview page is almost always the licence key; its **Monitoring Readiness** page says which check fails. For any other empty metric group, read the target's **CollectorStatus** metric: it says, per group, whether it is collecting, not configured, not collected yet, gated off, or failing: see [Troubleshooting](troubleshooting.md#empty-group).
+
+## Optional: add the instance target {#instance-target}
+
+An **IBM Db2 Instance** target watches the instance that runs your databases: its memory against the instance limit, agents, FCM, latches, the instance's `db2diag.log` and its configuration, with six pages of its own. It is optional, takes the same licence key in its own credential set, and does not count against the key's instance limit. Add it the same way, with target type **IBM Db2 Instance**, the instance's host and port, and any always-active database on the instance as its **Connection Database**. Choose the agent on the Db2 server if you can, so the start and stop jobs and the diagnostic log work there.
+
+Adding it doubles the alerts of the instance-level metrics until you clear them on the database targets: see [Duplicate alerts](targets-and-properties.md#duplicate-alerts).
+
+Detail: [Instance targets](targets-and-properties.md#instance-targets) · [Instance pages](monitoring-pages.md#52-ibm-db2-instance-pages).
 
 ## What to look at first
 

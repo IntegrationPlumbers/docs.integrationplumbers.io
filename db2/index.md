@@ -64,7 +64,7 @@ What you get once a target is up:
 - partitioned (DPF) databases read across every member, and pureScale member and CF health;
 - a daily configuration snapshot that feeds Enterprise Manager's configuration history and comparison, and 29 compliance rules on configuration, security, privileges, backup age, audit posture and version lifecycle.
 
-Seventeen console pages present a database, starting with an Overview that says whether the database is healthy and whether monitoring works, and ending with a Monitoring Readiness page that checks the set-up and prints the statement that fixes each gap. Curated Warning and Critical thresholds ship enabled on the metrics that matter most, so a freshly added target raises real incidents without any tuning. Twelve job types, including three remote administrative jobs and a Back Up Database dialog, and six Enterprise Manager runbooks (24ai) help you act on what you see.
+Seventeen console pages present a database, and six an instance, starting with an Overview that says whether the database is healthy and whether monitoring works, and ending with a Monitoring Readiness page that checks the set-up and prints the statement that fixes each gap. Curated Warning and Critical thresholds ship enabled on the metrics that matter most, so a freshly added target raises real incidents without any tuning. Twelve job types, including three remote administrative jobs and a Back Up Database dialog, and six Enterprise Manager runbooks (24ai) help you act on what you see.
 
 ## Target types {#target-types}
 
@@ -83,7 +83,8 @@ Seventeen console pages present a database, starting with an Overview that says 
 | IBM Db2 LUW | **12.1**, certified at the Comprehensive level, and **11.5**, certified at the Basic level. Every metric collects on both; the level is the certification label Enterprise Manager shows in its plug-in catalog |
 | Db2 LUW 11.1 and below | Not supported |
 | Db2 topology | Single-partition and **partitioned (DPF)** databases. pureScale: member and CF health only, implemented, not lab-certified. Db2 for z/OS is not supported |
-| Agent platforms | Linux x86-64 (64-bit), Microsoft Windows x86-64 (64-bit) |
+| Agent platforms | Linux x86-64 (64-bit), Microsoft Windows x86-64 (64-bit). AIX, Solaris, HP-UX and other agent platforms are not supported: the plug-in does not deploy to them |
+| Federation and BLU (column-organized) databases | Monitored with the standard metric set; nothing specific to federation or column-organized tables is collected |
 | Amazon RDS for Db2 | Not certified: see [Troubleshooting](troubleshooting.md#rds-for-db2) |
 | Db2U (OpenShift, Kubernetes), IBM Db2 SaaS | Not certified: see [Db2U and IBM Db2 SaaS](targets-and-properties.md#db2u-saas) |
 | Enterprise Manager MCP Server (24ai Release Update 12 and later) | IBM Db2 Database targets, their metric groups, units and incidents reach an AI client: see [EM MCP Server](mcp-server.md) |
@@ -120,7 +121,7 @@ If you ran the Open Beta (`ip.em.xdbb`), the released plug-in is a different plu
 
 ### Reference
 
-- [Monitoring pages](monitoring-pages.md): a tour of every console page, from the Overview to Monitoring Readiness, on the database and instance targets.
+- [Monitoring pages](monitoring-pages.md): a tour of every console page, from the Overview to Monitoring Readiness: seventeen on the database target and six on the instance target.
 - [Metrics reference](metrics-reference.md): every metric group, column by column, with the alerts that ship enabled.
 - [Alerts and templates](alerts-and-templates.md): every default threshold, how to tune one, the monitoring templates, the incident rule set, and the runbooks.
 - [Jobs](jobs-and-metric-extensions.md): the local and remote administrative jobs, Explain, the corrective action, and the housekeeping and files the plug-in keeps on each agent.
