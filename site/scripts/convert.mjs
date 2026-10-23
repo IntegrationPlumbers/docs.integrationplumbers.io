@@ -195,6 +195,7 @@ export async function convert(srcRoot, siteRoot) {
             return '';
           });
         }
+        if (!legal[product]) throw new Error(`convert: ${product}/index.md: no Legal Notice block found`);
         const rel = releaseLines.join(' · ');
         const builds = [...rel.matchAll(/(\d+\.\d+\.\d+\.\d+\.\d+)\s+for Enterprise Manager\s+([\w.]+)/g)].map((m) => ({ build: m[1], em: m[2] }));
         if (!builds.length) throw new Error(`convert: ${product}/index.md: no builds found`);

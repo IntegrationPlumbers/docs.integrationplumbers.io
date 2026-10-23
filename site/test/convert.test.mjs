@@ -69,6 +69,13 @@ test('an index.md with no parseable release line fails the build', async () => {
   await assert.rejects(convert(src, site), /convert: pg\/index\.md: no builds found/);
 });
 
+test('an index.md with no Legal Notice block fails the build', async () => {
+  const { src, site } = setup();
+  const f = path.join(src, 'pg/index.md');
+  fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace(/<details>[\s\S]*?<\/details>\s*\n/, '').replace(/^\*\*Legal Notice\*\*\s*\n/m, ''));
+  await assert.rejects(convert(src, site), /convert: pg\/index\.md: no Legal Notice block found/);
+});
+
 test('raw images are published at their old paths', async () => {
   const { src, site } = setup();
   const result = await convert(src, site);
