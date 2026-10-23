@@ -76,6 +76,18 @@ test('an index.md with no Legal Notice block fails the build', async () => {
   await assert.rejects(convert(src, site), /convert: pg\/index\.md: no Legal Notice block found/);
 });
 
+test('root-relative cross-links to another product are rewritten for any product key', async () => {
+  const { src, site } = setup();
+  fs.cpSync(path.join(src, 'pg'), path.join(src, 'qq'), { recursive: true });
+  fs.writeFileSync(path.join(src, '_data/qq_nav.yml'), fs.readFileSync(path.join(src, '_data/pg_nav.yml'), 'utf8').replaceAll('/pg/', '/qq/'));
+  fs.appendFileSync(path.join(src, '_data/products.yml'), 'qq:\n  name: Queue\n  mark: Qq\n  status: General Availability\n  summary: Example summary for the second fixture product.\n  supports: [Queue 1]\n');
+  fs.appendFileSync(path.join(src, 'pg/getting-started.md'), '\nAlso [see](/qq/getting-started.md) for the queue.\n');
+  await convert(src, site);
+  const out = fs.readFileSync(path.join(site, 'src/content/docs/pg/getting-started.md'), 'utf8');
+  assert.match(out, /\/qq\/getting-started\.html/);
+  assert.doesNotMatch(out, /\/qq\/getting-started\.md/);
+});
+
 test('raw images are published at their old paths', async () => {
   const { src, site } = setup();
   const result = await convert(src, site);

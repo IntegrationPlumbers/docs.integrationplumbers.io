@@ -1,5 +1,5 @@
-// Converts the Jekyll docs repo into Starlight content.
-// Usage: node scripts/convert.mjs <path-to-jekyll-repo>
+// Converts this repo's root Markdown (<srcRoot>) into Starlight content.
+// Usage: node scripts/convert.mjs <srcRoot>
 // Also importable: convert(srcRoot, siteRoot).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -49,7 +49,8 @@ function firstSentence(body) {
   return '';
 }
 
-function rewriteLinks(body, product) {
+function rewriteLinks(body, product, productKeys) {
+  const keyAlt = productKeys.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
   // Absolute links to the live site become site-local.
   body = body.replace(/\]\(https?:\/\/docs\.integrationplumbers\.io(\/[^)\s]*)\)/g, '](\$1)');
   // Relative .md links become absolute .html URLs (keeps the old URL shape).
@@ -61,7 +62,7 @@ function rewriteLinks(body, product) {
   // Other relative non-image links (downloads) become absolute.
   body = body.replace(/(?<!!)\]\((?!https?:|\/|#|mailto:|images\/)([^)\s]+)\)/g, `](/${product}/$1)`);
   // Root-relative .md links to other products.
-  body = body.replace(/\]\(\/(postgresql|mysql|mssql|db2)\/([^)\s#]+)\.md(#[^)\s]*)?\)/g, (_m, p, f, h = '') =>
+  body = body.replace(new RegExp(`\\]\\(/(${keyAlt})/([^)\\s#]+)\\.md(#[^)\\s]*)?\\)`, 'g'), (_m, p, f, h = '') =>
     f.startsWith('ai/') ? `](/${p}/${f}.md${h})` : `](/${p}/${f}.html${h})`);
   return body;
 }
@@ -205,7 +206,7 @@ export async function convert(srcRoot, siteRoot) {
       }
 
       body = body.replace(/^\s*\n+/, '');
-      body = rewriteLinks(body, product);
+      body = rewriteLinks(body, product, Object.keys(PRODUCTS));
       copyHtmlMedia(body, product, SRC, PUBLIC);
 
       const description = firstSentence(body) || info.summary;
