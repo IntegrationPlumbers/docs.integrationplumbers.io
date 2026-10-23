@@ -1,11 +1,12 @@
 ---
+import products from '../products.json';
 // A small monogram tile per plug-in. Avoids vendor logos (trademarks) while staying recognizable.
 interface Props { product: string; size?: 'sm' | 'md' | 'lg' }
 const { product, size = 'md' } = Astro.props;
-const labels: Record<string, string> = { postgresql: 'Pg', mysql: 'My', mssql: 'Ms', db2: 'Db2' };
+const mark = (products as Record<string, { mark?: string }>)[product]?.mark ?? product.slice(0, 2);
 ---
 
-<span class:list={['mark', size]} aria-hidden="true">{labels[product] ?? product.slice(0, 2)}</span>
+<span class:list={['mark', size]} aria-hidden="true">{mark}</span>
 
 <style>
   .mark {

@@ -9,6 +9,8 @@ const product = data.product as
   | { key: string; name: string; status: string; builds: { build: string; em: string }[]; date?: string; supports: string[] }
   | undefined;
 const keys = Object.keys(products);
+const productNames = Object.values(products).map((p: any) => p.fullName ?? p.name);
+const names = productNames.length <= 2 ? productNames.join(' and ') : `${productNames.slice(0, -1).join(', ')}, and ${productNames[productNames.length - 1]}`;
 const currentKey = keys.find((k) => id === k || id.startsWith(k + '/'));
 const isHome = id === '' || id === 'index';
 const markdownHref = currentKey && !isHome ? `/${id}.md` : undefined;
@@ -27,8 +29,7 @@ const quick = product
     <p class="eyebrow">Oracle Enterprise Manager plug-ins</p>
     <h1 id={PAGE_TITLE_ID}>Integration Plumbers documentation</h1>
     <p class="lead">
-      Install, configure, and run the plug-ins that monitor PostgreSQL, MySQL, Microsoft SQL Server, and IBM Db2
-      from Oracle Enterprise Manager 13.5 and 24ai.
+      Install, configure, and run the plug-ins that monitor {names} from Oracle Enterprise Manager 13.5 and 24ai.
     </p>
   </div>
 ) : product ? (
