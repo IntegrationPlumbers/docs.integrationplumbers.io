@@ -2,7 +2,7 @@ name: deploy-pages
 
 # Builds the Starlight site in site/, runs the link/anchor and URL parity
 # checks, and publishes site/dist to GitHub Pages on every push to main.
-# Tests are not re-run here: static-checks.yml gates them on the PR.
+# Tests are not re-run here: site-build.yml gates them on the PR.
 
 on:
   push:

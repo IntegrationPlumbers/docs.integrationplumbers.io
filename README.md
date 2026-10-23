@@ -45,7 +45,7 @@ The converter stops with a `convert:` error when the source tree is inconsistent
 
 ## Deploy
 
-A push to `main` runs the `deploy-pages` workflow, which builds `site/` and publishes `site/dist` to GitHub Pages. Pull requests run the `site-build` job in `static-checks`, which runs `npm test`, builds the site, and runs `npm run check`, next to the secrets scan and the page lint. Before the first merge to `main`, a repository admin must set Settings → Pages → Source to "GitHub Actions"; until then GitHub's legacy branch build would render the repo without a theme. The `deploy` job runs only on `main`, so a manual run from another branch fails fast. If a `deploy-pages` run fails, the previous deployment stays live. To undo a bad deploy, revert the merge commit on `main`.
+A push to `main` runs the `deploy-pages` workflow, which builds `site/` and publishes `site/dist` to GitHub Pages. Pull requests run the `site-build` workflow (`.github/workflows/site-build.yml`), which runs `npm test`, builds the site, and runs `npm run check`. Before the first merge to `main`, a repository admin must set Settings → Pages → Source to "GitHub Actions"; until then GitHub's legacy branch build would render the repo without a theme. The `deploy` job runs only on `main`, so a manual run from another branch fails fast. If a `deploy-pages` run fails, the previous deployment stays live. To undo a bad deploy, revert the merge commit on `main`.
 
 ## Credits
 

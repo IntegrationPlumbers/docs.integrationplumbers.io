@@ -1,7 +1,6 @@
 name: static-checks
 
-# Three jobs. checks and docs-lint are advisory (main is unprotected; nothing
-# here blocks a merge). site-build is the build gate for the Starlight site.
+# Two jobs, both advisory (main is unprotected; nothing here blocks a merge).
 #
 # checks: thin caller — delegates to the central reusable workflow in
 # ip-dev-plugin with no inputs, so it runs the secrets scan (gitleaks) only.
@@ -14,10 +13,6 @@ name: static-checks
 # links were only caught by a manual review pass. scripts/lint-changed.sh scopes
 # both to the product guides the PR touches — a PostgreSQL publish is never
 # held up by a draft page in another product's section.
-#
-# site-build: builds the Starlight site in site/ and runs its tests, link/anchor
-# check and URL parity check, so a PR that breaks the site build is visible
-# before it reaches main, where deploy-pages.yml publishes it.
 
 on:
   pull_request:
@@ -44,30 +39,3 @@ jobs:
           # The PR base commit, passed as data (not interpolated into the script).
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: scripts/lint-changed.sh "$BASE_SHA"
-
-  # site-build: gates the Starlight build in site/ on every PR: unit tests, the
-  # build, the internal link/anchor check and the URL parity check against the
-  # old site. The built site is kept as an artifact for 7 days so a reviewer can
-  # inspect it.
-  site-build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: site
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: site/.nvmrc
-          cache: npm
-          cache-dependency-path: site/package-lock.json
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - run: npm run check
-      - uses: actions/upload-artifact@v4
-        with:
-          name: site-dist
-          path: site/dist
-          retention-days: 7
