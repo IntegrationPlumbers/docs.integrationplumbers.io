@@ -175,7 +175,7 @@ The **License** metric group, collected every 15 minutes, reports the customer, 
 | `Expired` | The key expired 14 or more days ago | **Stopped** |
 | `Exceeded Limit` | More IBM Db2 Database targets than the key allows (see [Instance counting](#instance-counting)) | Runs, and the status alert stays open |
 
-Two alerts ship enabled on this group: on **Licence Severity** (`license_severity`), a **Warning** during the grace period and **Critical** for any other status that is not `Active`; and **Warning at 30 days / Critical at 7 days** before the key expires. A key with expiration `Never` has no expiry alert. On an OMS upgraded from GA, `license_severity` fills only after the OMS restart the upgrade needs ([Upgrade notes](upgrade-notes.md#restart-oms)).
+Two alerts ship enabled on this group: on **Licence Severity** (`license_severity`), a **Warning** during the grace period and **Critical** for any other status that is not `Active`; and **Warning at 30 days / Critical at 7 days** before the key expires. A key with expiration `Never` has no expiry alert. On an OMS upgraded from 24.1.1.0.0, `license_severity` fills only after the OMS restart the upgrade needs ([Upgrade notes](upgrade-notes.md#restart-oms)).
 
 When the status is `License Required`, `Invalid Signature` or `Expired`, every metric group **except** `Response` (availability), `License`, `Version`, `CollectorStatus` and `readiness_summary` stops collecting. Each stopped group shows a metric collection error beginning `Collection stopped by license status`, and CollectorStatus reports it as `DISABLED`. Availability keeps working, so a missing key never makes a database look down. Collection resumes on the next cycle after a valid key is set, with no restart.
 
@@ -186,7 +186,7 @@ When the status is `License Required`, `Invalid Signature` or `Expired`, every m
 A key carries a licensed instance count, or `Unlimited`. Only this plug-in's own IBM Db2 Database targets count toward it, each once; IBM Db2 Instance targets, beta targets and other vendors' Db2 targets do not.
 
 - **`Unlimited`:** the plug-in does not count targets and never contacts the OMS.
-- **Any instance count:** the License group counts the IBM Db2 Database targets through the OMS REST API and reports `Exceeded Limit` when there are more than the key allows. The count is cached on the agent for 24 hours, so adding or removing targets shows up within a day. GA did not count keys of 100 instances or more; they are counted now, so a target with such a key needs the OMS settings below.
+- **Any instance count:** the License group counts the IBM Db2 Database targets through the OMS REST API and reports `Exceeded Limit` when there are more than the key allows. The count is cached on the agent for 24 hours, so adding or removing targets shows up within a day. 24.1.1.0.0 did not count keys of 100 instances or more; they are counted now, so a target with such a key needs the OMS settings below.
 
 If the OMS cannot be reached when the count is due, a count taken in the last 7 days is used instead, and the plug-in log says so, so a short OMS outage or restart does not turn the License group into a collection error. Configuration problems are never covered this way, and are reported at the next collection: a missing OMS setting, a credential the OMS rejects, an OMS certificate the agent does not trust, or an OMS host name that does not resolve. An expired key reads `Expired` and does not contact the OMS.
 
@@ -217,7 +217,7 @@ The connection is HTTPS with certificate and host-name validation on. If your OM
 | `SECURE` | HTTPS with no certificate check. Despite the name, weaker than `STRICT`: use it only where the OMS certificate cannot be imported |
 | `INSECURE` | No certificate check, and an HTTP fallback that sends the OMS password Base64-encoded. Lab use only |
 
-It replaces the two GA properties *OMS: skip certificate validation* and *OMS: allow cleartext HTTP fallback*: after the upgrade, set it on any target that used them.
+It replaces the two 24.1.1.0.0 properties *OMS: skip certificate validation* and *OMS: allow cleartext HTTP fallback*: after the upgrade, set it on any target that used them.
 
 **Which truststore.** The collector runs on the JVM that `JAVA_HOME` names in the agent's `emd.properties` (`<agent instance>/sysman/config/emd.properties`). That is not always the agent home's own JDK: for the central agent on the OMS host, it is the OMS home's JDK. As the agent owner:
 

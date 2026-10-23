@@ -5,7 +5,7 @@ nav_order: 2
 
 # Getting started
 
-If you have not deployed the IBM Db2 plug-in before, this page is the shortest path from a downloaded archive to a Db2 target you can look at: five steps, each with what to do and how you know it worked, then links to the page that carries the detail. Upgrading an existing GA install instead? See [Upgrade from GA](install-and-upgrade.md#upgrade).
+If you have not deployed the IBM Db2 plug-in before, this page is the shortest path from a downloaded archive to a Db2 target you can look at: five steps, each with what to do and how you know it worked, then links to the page that carries the detail. Upgrading an existing 24.1.1.0.0 install instead? See [Upgrade from 24.1.1.0.0](install-and-upgrade.md#upgrade).
 
 > **Prerequisites for this page**
 > - OMS access that can import an OPAR and deploy plug-ins, for example `sysman`: see [Enterprise Manager and agents](prerequisites.md#enterprise-manager).

@@ -5,7 +5,7 @@ nav_order: 9
 
 # Compliance standards
 
-The plug-in ships three compliance standards with 29 rules for IBM Db2 databases. They cover configuration best practices, audit posture with authorities and privileges, and the Db2 version lifecycle. This page explains what ships, how to switch it on, what to expect when you upgrade from GA, and what every rule checks. It is for the administrator who associates the standards and the DBA who acts on their findings.
+The plug-in ships three compliance standards with 29 rules for IBM Db2 databases. They cover configuration best practices, audit posture with authorities and privileges, and the Db2 version lifecycle. This page explains what ships, how to switch it on, what to expect when you upgrade from 24.1.1.0.0, and what every rule checks. It is for the administrator who associates the standards and the DBA who acts on their findings.
 
 > **Prerequisites for this page**
 > - The plug-in deployed to the OMS. Deploying it installs the compliance content, with no separate registration step.
@@ -14,7 +14,7 @@ The plug-in ships three compliance standards with 29 rules for IBM Db2 databases
 
 **Where to find it:** **Enterprise → Compliance → Library** (the standards, rules and framework), and **Enterprise → Compliance → Results**.
 
-**In this page:** What ships · Scores drop after upgrading from GA · Associate a standard with targets · Let a configuration collection run · Read results · A hardened database · Rule parameters · Rules by standard
+**In this page:** What ships · Scores drop after upgrading from 24.1.1.0.0 · Associate a standard with targets · Let a configuration collection run · Read results · A hardened database · Rule parameters · Rules by standard
 
 ## What ships {#what-ships}
 
@@ -32,9 +32,9 @@ The rules are evaluated in the Enterprise Manager repository on the daily config
 - **Importance** (High, Normal or Low) is how heavily a rule weighs in its standard's compliance score.
 - **All three are authored by `SYSMAN`.** No standard is evaluated until you associate it with targets.
 
-This release adds twelve rules to the 17 of the GA release: client authentication, TLS offered but not enforced, `CATALOG_NOAUTH`, `LOCKTIMEOUT` -1, automatic RUNSTATS off, backup retention, backup recency, and five authorities and privileges rules.
+This release adds twelve rules to the 17 of 24.1.1.0.0: client authentication, TLS offered but not enforced, `CATALOG_NOAUTH`, `LOCKTIMEOUT` -1, automatic RUNSTATS off, backup retention, backup recency, and five authorities and privileges rules.
 
-## Scores drop after upgrading from GA {#score-drop}
+## Scores drop after upgrading from 24.1.1.0.0 {#score-drop}
 
 **Expect compliance scores to drop on each database's first configuration collection after the upgrade.** Three of the new rules check settings that most databases have:
 
@@ -69,7 +69,7 @@ emcli associate_cs_targets -name="ip_db2_audit_posture" -version=1 -author=SYSMA
       -target_list="<target1>,<target2>"
 ```
 
-Add `-force` to evaluate again at once, for example after a configuration change. The standards keep their GA names and versions (2, 1 and 1) in this release.
+Add `-force` to evaluate again at once, for example after a configuration change. The standards keep their 24.1.1.0.0 names and versions (2, 1 and 1) in this release.
 
 ## Let a configuration collection run {#let-a-configuration-collection-run}
 
@@ -448,7 +448,7 @@ Each rule below gives its name as the console shows it, its internal name, its s
 
 - [Prerequisites](prerequisites.md#monitoring-role): the monitoring user and its grants
 - [Alerts and templates](alerts-and-templates.md#incident-rules): the incident a score drop opens, and configuration drift, which also reports as a compliance violation
-- [Upgrade notes](upgrade-notes.md#compliance-scores): the score drop, with the other steps after you upgrade from GA
+- [Upgrade notes](upgrade-notes.md#compliance-scores): the score drop, with the other steps after you upgrade from 24.1.1.0.0
 - [Troubleshooting](troubleshooting.md#compliance): a standard that shows nothing
 - [Trial setup](trial.md): associating the standards during an evaluation
 - [What's new](whats-new.md#update-24-1-2): everything else in this release

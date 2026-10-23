@@ -7,15 +7,15 @@ nav_order: 1
 
 The changes in each release of the IBM Db2 plug-in, newest first, for anyone deciding whether to upgrade or checking what a release changed. Each release ships as two builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Install the build that matches your Enterprise Manager.
 
-**In this page:** [24.1.2.0.0 / 13.5.3.0.0 (2026-10-22)](#update-24-1-2) · [General availability: 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12)](#ga) · [Feedback](#feedback)
+**In this page:** [General availability: 24.1.2.0.0 / 13.5.3.0.0 (2026-10-23)](#update-24-1-2) · [Initial release: 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12)](#ga) · [Feedback](#feedback)
 
-## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-22 {#update-24-1-2}
+## General availability: 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-23 {#update-24-1-2}
 
-The first update after GA, installed over 24.1.1.0.0 / 13.5.2.0.0 in place ([Upgrade from GA](install-and-upgrade.md#upgrade)). The database target metadata moves from 3.9 to 4.9, and a second target type, IBM Db2 Instance, arrives at 1.3. [Upgrade notes](upgrade-notes.md#update-24-1-2) lists every change that needs operator action. The release files and their SHA-256 checksums are under [Download](install-and-upgrade.md#download).
+The general-availability (GA) release of the IBM Db2 plug-in, `ip.em.xdb2`, released on 2026-10-23. It installs fresh, or over the initial release, 24.1.1.0.0 / 13.5.2.0.0, in place ([Upgrade from 24.1.1.0.0](install-and-upgrade.md#upgrade)). The database target metadata moves from 3.9 to 4.9, and a second target type, IBM Db2 Instance, arrives at 1.3. [Upgrade notes](upgrade-notes.md#update-24-1-2) lists every change that needs operator action. The release files and their SHA-256 checksums are under [Download](install-and-upgrade.md#download).
 
 #### Functionality Added or Changed
 
-- **A redesigned console.** Every page opens with the question it answers, a toolbar, a row of KPI tiles and then its regions, with a left navigation grouped as Workload, Storage and Logs, and Protection ([Monitoring pages](monitoring-pages.md)). Five GA pages are renamed: Home is **Overview**, SQL Analytics is **SQL**, Analysis is **Locks**, Backup History is **Backup**, and HADR is **High Availability**. The transaction log, a section of Storage at GA, has its own **Transaction Log** page.
+- **A redesigned console.** Every page opens with the question it answers, a toolbar, a row of KPI tiles and then its regions, with a left navigation grouped as Workload, Storage and Logs, and Protection ([Monitoring pages](monitoring-pages.md)). Five 24.1.1.0.0 pages are renamed: Home is **Overview**, SQL Analytics is **SQL**, Analysis is **Locks**, Backup History is **Backup**, and HADR is **High Availability**. The transaction log, a section of Storage in 24.1.1.0.0, has its own **Transaction Log** page.
 - **Ten new database pages:** Sessions, Waits, Members, Tables, Indexes, Transaction Log, Memory & Sorts, Configuration, Monitoring Readiness and License Info ([IBM Db2 Database pages](monitoring-pages.md#51-ibm-db2-database-pages)). The Overview gains a **Database** card, a **Monitoring and License** card and seven Key Indicators tiles.
 - **Monitoring Readiness** checks the connection, licence, monitor authority, metric collection, monitor switches, deadlock capture, HADR and the diagnostic log, live on the agent, and prints the statement that fixes each, with a Copy button ([Monitoring Readiness](monitoring-pages.md#monitoring-readiness)). The Overview shows an hourly count of the same checks ([readiness_summary](metrics-reference.md#readiness-summary)). A [troubleshooting guide for AI assistants](https://docs.integrationplumbers.io/db2/ai/troubleshooting.md), published with this guide as a Markdown file, covers the same checks in a form you can load into your own assistant together with the page's results.
 - **Statement Detail** charts a statement's executions and CPU and activity time over the window, copies its text, and runs **Explain Plan**, which shows the access plan of the statement's cached section without running it ([Explain SQL Statement](jobs-and-metric-extensions.md#explain)). It opens from SQL, Sessions and Recent Deadlocks on Locks.
@@ -28,7 +28,7 @@ The first update after GA, installed over 24.1.1.0.0 / 13.5.2.0.0 in place ([Upg
 - **New monitoring:** log archiving (`Log_Archive`), instance memory and memory sets, where request time waits (`Wait_Time`), latches, buffer-pool I/O time, FCM, WLM workloads and service classes (no WLM licence needed), index activity and unused indexes, blocking chains, opt-in deadlock capture, sessions and the oldest open transactions, and per-second log and cache rates ([Metrics reference](metrics-reference.md)). New default alerts ship on several of them ([Default thresholds](alerts-and-templates.md#default-thresholds)).
 - **Compliance:** twelve new rules on security settings, privileges granted to `PUBLIC`, DBADM and SECADM holders, trusted contexts and backup age, for 29 rules in three standards ([Compliance standards](compliance-standards.md)).
 - **Archive IBM Db2 Active Log**, a new local job, which an administrator can attach as a corrective action to the log-space alert; nothing ships attached ([Corrective action](jobs-and-metric-extensions.md#corrective-action)).
-- **Three monitoring templates (Starter, Standard and Production-critical), an incident rule set, and configuration comparison and drift definitions** ship beside the plug-in ([Monitoring templates](alerts-and-templates.md#monitoring-templates), [Incident rules](alerts-and-templates.md#incident-rules)). The templates replace the GA threshold starter kit.
+- **Three monitoring templates (Starter, Standard and Production-critical), an incident rule set, and configuration comparison and drift definitions** ship beside the plug-in ([Monitoring templates](alerts-and-templates.md#monitoring-templates), [Incident rules](alerts-and-templates.md#incident-rules)). The templates replace the 24.1.1.0.0 threshold starter kit.
 - **Kerberos authentication** ([Kerberos](prerequisites.md#kerberos)), an optional agent-load throttle ([Pausing collection](prerequisites.md#collection-throttle)), optional batch collection ([Batch collection](prerequisites.md#batch-collection)), and IPv6 hosts ([IPv6 hosts](targets-and-properties.md#ipv6)).
 - **The licence key is a credential**, hidden from target properties, with a 14-day grace period after expiry, and one **OMS API Communication** setting for the licence count ([Licensing](targets-and-properties.md#licensing)).
 - **Statements are keyed by digest**, so literal values no longer create new repository keys, and at most 200 new statement keys are added per target a day ([Statement metric keys](jobs-and-metric-extensions.md#statement-keys)).
@@ -42,7 +42,7 @@ The first update after GA, installed over 24.1.1.0.0 / 13.5.2.0.0 in place ([Upg
 - The oldest open transaction no longer reads *0 s*: units of work younger than 5 seconds and the plug-in's own connections are left out.
 - Numeric table columns (wait times and application handles on Locks) sort as numbers.
 - Wait_Time and Query_Analytics no longer report one inflated interval when a DPF partition stops or comes back: a change in the partitions read starts a new baseline ([Wait_Time](metrics-reference.md#wait-time)).
-- Top Statements retries the SQL text after a failed lookup (the [GA known issue](#known-issue)).
+- Top Statements retries the SQL text after a failed lookup (the [24.1.1.0.0 known issue](#known-issue)).
 - Performance shows one row per buffer pool and per database on every window, and cache lookup counts are per collection interval, so an idle cache no longer reads as a perfect one.
 - Diagnostic-log alerts carry the matched message, and CollectorStatus no longer fills the repository's string history.
 - The remote admin jobs and Explain run over TLS with the target's client truststore, and a target can be reached over IPv6.
@@ -83,17 +83,17 @@ Full detail, with what to do for each, is on [Upgrade notes](upgrade-notes.md#up
 - **Not supported:** Db2 for z/OS, Db2 11.1 and below, and AIX, Solaris and HP-UX agents ([Supported versions](prerequisites.md#supported-versions)).
 - **Not covered in this release:** BLU and federation metrics, pureScale certification, AI Query Optimizer monitoring and Q Replication.
 
-## General availability: 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.2.0.0 (Enterprise Manager 13.5), 2026-10-12 {#ga}
+## Initial release: 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.2.0.0 (Enterprise Manager 13.5), 2026-10-12 {#ga}
 
-*24.1.2.0.0 / 13.5.3.0.0, above, upgrades this release in place. Page names in this section are the GA names (Home, Analysis, SQL Analytics, Backup History and HADR).*
+*24.1.2.0.0 / 13.5.3.0.0, the GA release above, upgrades this release in place. Page names in this section are the 24.1.1.0.0 names (Home, Analysis, SQL Analytics, Backup History and HADR).*
 
-This is the first general-availability (GA) release of the IBM Db2 plug-in, `ip.em.xdb2`, released on 2026-10-12. It ships as two builds with the same features: **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.2.0.0** for Enterprise Manager 13.5. The two lines are versioned independently. Both builds have been verified on a live Enterprise Manager, including deployment and every console page.
+This is the initial release of the IBM Db2 plug-in, `ip.em.xdb2`, released on 2026-10-12. It ships as two builds with the same features: **24.1.1.0.0** for Enterprise Manager 24ai and **13.5.2.0.0** for Enterprise Manager 13.5. The two lines are versioned independently. Both builds have been verified on a live Enterprise Manager, including deployment and every console page.
 
 
 
 ### Read this first {#read-this-first}
 
-- **This is the first GA release**, so there is no earlier GA release to upgrade from. Install it fresh: see [Getting started](getting-started.md). The first GA update after it is the first release that upgrades in place.
+- **This is the first release of `ip.em.xdb2`**, so there is no earlier release to upgrade from. Install it fresh: see [Getting started](getting-started.md). 24.1.2.0.0 / 13.5.3.0.0, the GA release, is the first release that upgrades in place.
 - **Moving from the Open Beta is a clean install, not an upgrade.** GA is a different plug-in from the Open Beta:
 
   | | Open Beta | GA |
@@ -111,7 +111,7 @@ This is the first general-availability (GA) release of the IBM Db2 plug-in, `ip.
 
 ### Known issue {#known-issue}
 
-**After one failed text lookup, Top Statements keeps showing numbers without SQL text** on the SQL Analytics page, until you change the time window or the ranking. Refreshing the page does not retry the lookup. The ranking and the numbers stay correct. This is fixed in the first update after GA.
+**After one failed text lookup, Top Statements keeps showing numbers without SQL text** on the SQL Analytics page, until you change the time window or the ranking. Refreshing the page does not retry the lookup. The ranking and the numbers stay correct. This is fixed in 24.1.2.0.0 / 13.5.3.0.0, the GA release.
 
 ### Breaking changes {#breaking-changes}
 
