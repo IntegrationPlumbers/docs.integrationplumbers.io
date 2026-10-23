@@ -100,6 +100,18 @@ export async function convert(srcRoot, siteRoot) {
   }
   const names = joinNames(Object.values(PRODUCTS).map((p) => p.fullName ?? p.name));
 
+  // Every nav entry must point at a page that exists.
+  for (const product of Object.keys(PRODUCTS)) {
+    const navFile = `${product}_nav.yml`;
+    const nav = yaml.load(fs.readFileSync(path.join(SRC, '_data', navFile), 'utf8'));
+    for (const g of nav?.groups || []) {
+      for (const pg of g.pages || []) {
+        const rel = pg.url.replace(/^\//, '').replace(/\/$/, '/index').replace(/\.html$/, '') + '.md';
+        if (!fs.existsSync(path.join(SRC, rel))) throw new Error(`convert: nav page ${pg.url} (${navFile}) does not exist`);
+      }
+    }
+  }
+
   rm(DOCS); mkdirp(DOCS);
   for (const p of Object.keys(PRODUCTS)) rm(path.join(PUBLIC, p));
 
@@ -124,6 +136,10 @@ export async function convert(srcRoot, siteRoot) {
         recursive: true,
         filter: (f) => !/\.(mp4|webm)$/i.test(f),
       });
+    }
+    // Raw images stay reachable at their old /<product>/images/ URLs.
+    if (fs.existsSync(path.join(dir, 'images'))) {
+      fs.cpSync(path.join(dir, 'images'), path.join(PUBLIC, product, 'images'), { recursive: true });
     }
     // Static extras published as plain files: AI guides and downloads.
     for (const extra of ['ai', 'downloads']) {
@@ -169,6 +185,7 @@ export async function convert(srcRoot, siteRoot) {
         }
         const rel = releaseLines.join(' · ');
         const builds = [...rel.matchAll(/(\d+\.\d+\.\d+\.\d+\.\d+)\s+for Enterprise Manager\s+([\w.]+)/g)].map((m) => ({ build: m[1], em: m[2] }));
+        if (!builds.length) throw new Error(`convert: ${product}/index.md: no builds found`);
         const date = (rel.match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}/) || [])[0];
         extra.product = { key: product, name: info.fullName || info.name, status: info.status, builds, date, supports: info.supports };
         landing[product] = { key: product, ...info, builds, date, title };

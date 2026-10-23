@@ -55,3 +55,31 @@ test('a product folder with no products.yml entry fails the build', async () => 
   fs.writeFileSync(path.join(src, '_data/my_nav.yml'), 'groups: []\n');
   await assert.rejects(convert(src, site), /convert: .*my.*products\.yml/);
 });
+
+test('a nav entry whose page does not exist fails the build', async () => {
+  const { src, site } = setup();
+  fs.appendFileSync(path.join(src, '_data/pg_nav.yml'), '      - { title: "Ghost", url: /pg/ghost.html }\n');
+  await assert.rejects(convert(src, site), /convert: nav page .*\/pg\/ghost\.html.* does not exist/);
+});
+
+test('an index.md with no parseable release line fails the build', async () => {
+  const { src, site } = setup();
+  const f = path.join(src, 'pg/index.md');
+  fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace(/^\*General Availability.*\*$/m, '*Some release*'));
+  await assert.rejects(convert(src, site), /convert: pg\/index\.md: no builds found/);
+});
+
+test('raw images are published at their old paths', async () => {
+  const { src, site } = setup();
+  const result = await convert(src, site);
+  assert.ok(fs.existsSync(path.join(site, 'public/pg/images/a.png')));
+  assert.ok(result.pages.includes('/pg/images/a.png'));
+});
+
+test('a page absent from the nav still converts and is not in sidebar.json', async () => {
+  const { src, site } = setup();
+  fs.writeFileSync(path.join(src, 'pg/orphan.md'), '---\ntitle: Orphan\nnav_order: 9\n---\n\n# Orphan\n\nThis page is not listed in the navigation file.\n');
+  await convert(src, site);
+  assert.ok(fs.existsSync(path.join(site, 'src/content/docs/pg/orphan.md')));
+  assert.ok(!fs.readFileSync(path.join(site, 'src/sidebar.json'), 'utf8').includes('pg/orphan'));
+});
