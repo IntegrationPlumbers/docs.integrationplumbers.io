@@ -80,11 +80,14 @@ Certification as of this build:
 | MySQL 8.4 LTS | Comprehensive | **Certified** (primary reference platform) |
 | MySQL 9.7 LTS | Comprehensive | **Certified** (2026-07-28) |
 | MySQL 8.0 | Basic | Supported and continuously exercised in our lab. Note 8.0 reached end of life in April 2026; plan your upgrade |
-| MySQL 9.5 / 9.6 / 26.x innovation releases | | Expected to work; not yet certified |
+| MySQL 9.5 commercial (standalone) | Comprehensive | **Certified** (2026-10-24, MySQL 9.5.0-commercial: every metric group collecting with zero collection errors over seven days) |
+| MySQL 26.10 innovation | Comprehensive | **Certified** (2026-10-24, MySQL 26.10.0 Community: the same 51 metric groups as the 9.7 LTS reference target on the same OMS, zero collection errors) |
+| MySQL 9.6 / 26.7 innovation releases | | Expected to work; not yet certified |
 | InnoDB Cluster (Group Replication, 8.4) | | **Certified** (cluster target with member stats) |
 | InnoDB ClusterSet | | Validated on MySQL 9.5 commercial; 8.4 ClusterSet not yet certified |
 | Amazon RDS for MySQL 8.4 | Comprehensive | **Certified** (2026-09-09, RDS MySQL 8.4.11), added manually, see [4.4](targets-and-properties.md#44-autodiscovery); managed-service notes there |
-| Aurora MySQL / Cloud SQL / Azure Database for MySQL | | Supported, added manually, see [4.4](targets-and-properties.md#44-autodiscovery); not yet certified |
+| Amazon Aurora MySQL 8.4 | Comprehensive | **Certified** (2026-10-24, Aurora MySQL 8.4.8 Serverless v2: the same metric groups as the RDS MySQL 8.4 reference with zero collection errors), added manually, see [4.4](targets-and-properties.md#44-autodiscovery); managed-service notes there |
+| Google Cloud SQL / Azure Database for MySQL | | Supported, added manually, see [4.4](targets-and-properties.md#44-autodiscovery); not yet certified |
 | EM 24ai (24.1) | | **Certified**, including the UI |
 | EM 13.5 | | **Certified**, the MySQL Database, MySQL InnoDB Cluster and MySQL InnoDB ClusterSet target types with the same features as on 24ai; console pages checked as in the note below. Supported in GA and GA Update 1; not built for releases after that |
 | Enterprise Manager MCP Server (24ai RU12 and later) | | **Validated** 2026-09-30 on EM 24ai 24.1.0.12 with a pre-release build: the three target types, their metric groups, units and incidents project to an AI client. See [chapter 11](mcp-server.md#the-plug-in-and-the-enterprise-manager-mcp-server) |

@@ -215,6 +215,15 @@ Certified 2026-09-09 on RDS MySQL 8.4.11. The standard monitoring user ([2.4](pr
 - Replica-side, Enterprise-only and lock-wait groups are empty on a stand-alone RDS instance, as on any server without a replica, the audit-log or firewall components, or lock contention: no rows, no errors. Table statistics appear once user tables see I/O.
 - RDS MySQL 8.4 accepts plain and TLS connections by default, and TLS Mode `required` ([4.1](#41-target-properties)) works against the RDS endpoint. Verifying the RDS certificate chain (TLS Mode `verify_ca` or `verify_identity`) needs the truststore credential set and is not yet certified.
 
+#### Amazon Aurora MySQL
+
+Certified 2026-10-24 on Aurora MySQL 8.4.8 (Serverless v2, one writer instance). Add the cluster's writer endpoint as Host; the standard monitoring user ([2.4](prerequisites.md#24-the-monitoring-user)) collects the same metric groups as RDS MySQL 8.4 with zero collection errors. Everything in the RDS list above applies to Aurora as well, with these differences:
+
+- The Aurora MySQL 8.4 parameter-group family sets `require_secure_transport` on, so TLS Mode `required` ([4.1](#41-target-properties)) is the setting to use; a target left on plain TCP fails to connect.
+- Aurora turns `performance_schema` on by default only when Performance Insights is enabled. The certified instance set `performance_schema=1` in its instance parameter group before it started (a static parameter: set it before the first start, or reboot after). Without it the statement, wait and file groups report nothing and Monitoring Readiness says so.
+- Aurora snapshots and continuous backup are not MySQL Enterprise Backup or XtraBackup runs, so the backup groups are empty as on RDS; watch Aurora backups in AWS.
+- `InstanceInfo` reports Aurora's own paths (`/rdsdbbin/oscar-8.4.mysql_aurora.<build>/` as the base directory, `/rdsdbdata/db/` as the data directory); the version reads as the MySQL-compatible version, `8.4.8`.
+
 MySQL InnoDB Cluster and MySQL InnoDB ClusterSet targets are not autodiscovered either. They are added against an endpoint you choose, so create them manually.
 
 ## 4.5 Modify or remove a target
