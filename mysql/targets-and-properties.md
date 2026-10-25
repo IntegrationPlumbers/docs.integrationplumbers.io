@@ -237,6 +237,10 @@ Certified 2026-10-25 on HeatWave MySQL 8.4.13 (`8.4.13-cloud`, MySQL Enterprise 
 - Replica-side groups are empty on a standalone DB System: the `group_replication` plug-in is loaded but `OFFLINE`, and there are no replication channels, so the replica groups have no rows and no errors. The source-side groups (`ReplicationSource`, `ReplicationSourceActivity`) do report, since binary logging and GTIDs are on, with a replica count of zero.
 - `InstanceInfo` reports the DB System's own paths (`/usr/` as the base directory, `/db/data/` as the data directory, `/db/tmp` as the temp directory); the version reads `8.4.13-cloud`.
 
+#### MariaDB
+
+A MariaDB target can be added the same way and collects most of the database groups, but nine groups stay empty or report collection errors: the four InnoDB status groups, two security groups and three replication-channel groups. MariaDB does not ship the MySQL schemas those groups read (the MySQL InnoDB monitor layout, `performance_schema.global_variables`, `mandatory_roles`, `replication_connection_status`, `mysql.slave_master_info`), so the gaps are properties of MariaDB, not defects the plug-in can work around. The plug-in is for MySQL Server and the managed services built on it; Integration Plumbers does not support or certify it on MariaDB.
+
 MySQL InnoDB Cluster and MySQL InnoDB ClusterSet targets are not autodiscovered either. They are added against an endpoint you choose, so create them manually.
 
 ## 4.5 Modify or remove a target
