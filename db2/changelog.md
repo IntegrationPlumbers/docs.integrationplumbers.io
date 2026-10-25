@@ -5,11 +5,11 @@ nav_order: 13
 
 # Changelog
 
-This page lists what changed in each release of the IBM Db2 plug-in, most recent first, in brief: [What's new](whats-new.md) has the detail. The plug-in is `ip.em.xdb2`, with target types `ip_db2_database` and, from 24.1.2.0.0 / 13.5.3.0.0, `ip_db2_instance`. Its Enterprise Manager 24ai and Enterprise Manager 13.5 builds are versioned independently. The Open Beta history follows the GA releases, under [Beta line](#beta-line).
+This page lists what changed in each release of the IBM Db2 plug-in, most recent first, in brief: [What's new](whats-new.md) has the detail. The plug-in is `ip.em.xdb2`, with target types `ip_db2_database` and, from 24.1.2.0.0 / 13.5.3.0.0, `ip_db2_instance`. Its Enterprise Manager 24ai and Enterprise Manager 13.5 builds are versioned independently. The Open Beta history follows the released versions, under [Beta line](#beta-line).
 
-## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-22 {#update-24-1-2}
+## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), GA, 2026-10-23 {#update-24-1-2}
 
-The first update of `ip.em.xdb2`, installed in place over 24.1.1.0.0 / 13.5.2.0.0. One release, two builds with the same content: 24.1.2.0.0 installs on Enterprise Manager 24ai, 13.5.3.0.0 on Enterprise Manager 13.5. The full detail is on [What's new](whats-new.md#update-24-1-2), and the operator actions are on [Upgrade notes](upgrade-notes.md#update-24-1-2).
+The general-availability release of `ip.em.xdb2`. It installs fresh, or in place over the initial release, 24.1.1.0.0 / 13.5.2.0.0. Moving from the Open Beta is a clean install: see [Moving from the beta to GA](beta-pre-release.md). One release, two builds with the same content: 24.1.2.0.0 installs on Enterprise Manager 24ai, 13.5.3.0.0 on Enterprise Manager 13.5. The full detail is on [What's new](whats-new.md#update-24-1-2), and the operator actions are on [Upgrade notes](upgrade-notes.md#update-24-1-2).
 
 - Redesigned the console: every page opens with the question it answers and a row of KPI tiles, under a left navigation grouped as Workload, Storage and Logs, and Protection. Renamed Home to Overview, SQL Analytics to SQL, Analysis to Locks, Backup History to Backup, and HADR to High Availability, and moved the transaction log from a section of Storage to its own Transaction Log page.
 - Added ten database pages (Sessions, Waits, Members, Tables, Indexes, Transaction Log, Memory & Sorts, Configuration, Monitoring Readiness, License Info), auto-refresh on Locks and Sessions (paused while the browser tab is in the background), statement history and Explain Plan in Statement Detail (also opened from Recent Deadlocks), and a Back Up Database dialog. The backup job (type 1.6) refuses a partitioned (DPF) database however it is submitted.
@@ -32,7 +32,7 @@ The first update of `ip.em.xdb2`, installed in place over 24.1.1.0.0 / 13.5.2.0.
 - Moved the plug-in's caches and log out of the agent plug-in home, into the agent state directory.
 - Signed the release downloads: each OPAR comes with a `SHA256SUMS` file and a detached cosign signature for each file.
 - Moved the console to theme 1.1.0: higher-contrast colours, and Days to Full coloured amber under 30 days and red under 7.
-- Fixed the GA known issue (Top Statements losing its SQL text), numeric sorting in the console tables, the oldest open transaction reading *0 s*, one inflated Wait_Time and Query_Analytics interval when a DPF partition stops or comes back, and the remote admin jobs on TLS targets with a custom truststore.
+- Fixed the 24.1.1.0.0 known issue (Top Statements losing its SQL text), numeric sorting in the console tables, the oldest open transaction reading *0 s*, one inflated Wait_Time and Query_Analytics interval when a DPF partition stops or comes back, and the remote admin jobs on TLS targets with a custom truststore.
 
 **Release files and SHA-256 checksums**
 
@@ -43,11 +43,11 @@ The first update of `ip.em.xdb2`, installed in place over 24.1.1.0.0 / 13.5.2.0.
 
 The same checksums are in the signed `SHA256SUMS` file delivered with the download: verify the signature before you trust either, see [Verify the download](install-and-upgrade.md#verify).
 
-## 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.2.0.0 (Enterprise Manager 13.5), GA, 2026-10-12 {#ga}
+## 24.1.1.0.0 (Enterprise Manager 24ai) / 13.5.2.0.0 (Enterprise Manager 13.5), initial release, 2026-10-12 {#ga}
 
-The first general-availability release of `ip.em.xdb2`. One release, two builds with the same content: 24.1.1.0.0 installs on Enterprise Manager 24ai, 13.5.2.0.0 on Enterprise Manager 13.5. There is no earlier GA release to upgrade from. Moving from the Open Beta is a clean install: see [Moving from the beta to GA](beta-pre-release.md). The full detail is on [What's new](whats-new.md).
+The initial release of `ip.em.xdb2`. One release, two builds with the same content: 24.1.1.0.0 installs on Enterprise Manager 24ai, 13.5.2.0.0 on Enterprise Manager 13.5. There is no earlier release of `ip.em.xdb2` to upgrade from. Moving from the Open Beta is a clean install: see [Moving from the beta to GA](beta-pre-release.md). The full detail is on [What's new](whats-new.md).
 
-- Released the first general-availability version of the IBM Db2 plug-in for Oracle Enterprise Manager, for Db2 12.1 and 11.5. Moving from the Open Beta is a clean install, and the two can run side by side while you move over.
+- Released the first version of the IBM Db2 plug-in for Oracle Enterprise Manager after the Open Beta, for Db2 12.1 and 11.5. Moving from the Open Beta is a clean install, and the two can run side by side while you move over.
 - Added monitoring for storage-path headroom, table maintenance, open and idle units of work, lock-list use, running utilities, and the SQL text behind each statement.
 - Added a health overview on the Home page, links between the plug-in's pages, a shared time window, and runbooks for the most common Db2 alerts.
 - Added three administrative jobs (force an application, refresh table statistics, and take an online backup) that work on remotely monitored databases and run as a separate administrator account.
