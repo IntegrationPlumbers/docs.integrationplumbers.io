@@ -84,7 +84,7 @@ Certification as of this build:
 | MySQL 26.10 innovation | Comprehensive | **Certified** (2026-10-24, MySQL 26.10.0 Community: the same 51 metric groups as the 9.7 LTS reference target on the same OMS, zero collection errors) |
 | MySQL 9.6 / 26.7 innovation releases | | Expected to work; not yet certified |
 | InnoDB Cluster (Group Replication, 8.4) | | **Certified** (cluster target with member stats) |
-| InnoDB ClusterSet | | Validated on MySQL 9.5 commercial; 8.4 ClusterSet not yet certified |
+| InnoDB ClusterSet | Comprehensive | **Certified** on MySQL 8.4 (2026-10-25, MySQL 8.4.13: a primary cluster of three members and one replica cluster, DR Promotion Ready assessed by the MySQL Shell AdminAPI from the first collection, zero collection errors over the soak); validated on MySQL 9.5 commercial since 2026-07-29 |
 | Amazon RDS for MySQL 8.4 | Comprehensive | **Certified** (2026-09-09, RDS MySQL 8.4.11), added manually, see [4.4](targets-and-properties.md#44-autodiscovery); managed-service notes there |
 | Amazon Aurora MySQL 8.4 | Comprehensive | **Certified** (2026-10-24, Aurora MySQL 8.4.8 Serverless v2: the same metric groups as the RDS MySQL 8.4 reference with zero collection errors), added manually, see [4.4](targets-and-properties.md#44-autodiscovery); managed-service notes there |
 | OCI MySQL HeatWave 8.4 | Comprehensive | **Certified** (2026-10-25, HeatWave MySQL 8.4.13, one standalone DB System reached through a Network Load Balancer: every metric group the Aurora MySQL 8.4 reference holds, plus the audit-log group, with zero collection errors), added manually, see [4.4](targets-and-properties.md#44-autodiscovery); managed-service notes there |

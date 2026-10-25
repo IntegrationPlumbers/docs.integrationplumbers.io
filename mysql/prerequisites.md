@@ -44,6 +44,8 @@ mysqlsh --version
 
 **Which MySQL Shell.** The plug-in is tested with MySQL Shell 8.4 LTS, 9.7, 26.7 and 26.10. MySQL renumbered its Shell releases after 9.6, so the current release from MySQL's repositories carries a 26.x version number; it works the same way. The agent picks up a newly installed or upgraded MySQL Shell on its next ClusterSet collection, with no restart.
 
+A MySQL Shell newer than the ClusterSet it reads is fine. The 8.4 certification ([1.3](index.md#13-supported-mysql-versions-and-platforms)) read an 8.4.13 ClusterSet, whose metadata schema is version 2.3.0, with MySQL Shell 26.10, which recommends upgrading the metadata to 2.4.0 on every call. The recommendation goes to the Shell's error stream, the status document is complete, and the plug-in reports the ClusterSet normally. Upgrading the metadata is the cluster administrator's decision, not a monitoring prerequisite.
+
 MySQL Database and MySQL InnoDB Cluster targets do not use MySQL Shell. They connect over JDBC only, through the Connector/J driver you place on the agent host ([2.9](#29-mysql-connectorj-on-agent-hosts)), and need nothing else.
 
 **Kerberos on a ClusterSet target.** When the target carries a Kerberos Configuration File ([4.1](targets-and-properties.md#41-target-properties)), the plug-in runs MySQL Shell with the `authentication_kerberos_client` plug-in and no password. The credential is the ticket in the agent operating-system user's default credential cache, and `KRB5_CONFIG` is set to the target's file. The credential set's password is not used on this path, so a target registered for Kerberos needs no password at all.
