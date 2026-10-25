@@ -42,7 +42,7 @@ Confirm the tool as the agent's operating-system user, not as `root`, because th
 mysqlsh --version
 ```
 
-**Which MySQL Shell.** The plug-in is tested with MySQL Shell 8.4 LTS, 9.7 and 26.7. MySQL renumbered its Shell releases after 9.6, so the current release from MySQL's repositories carries a 26.x version number; it works the same way. The agent picks up a newly installed or upgraded MySQL Shell on its next ClusterSet collection, with no restart.
+**Which MySQL Shell.** The plug-in is tested with MySQL Shell 8.4 LTS, 9.7, 26.7 and 26.10. MySQL renumbered its Shell releases after 9.6, so the current release from MySQL's repositories carries a 26.x version number; it works the same way. The agent picks up a newly installed or upgraded MySQL Shell on its next ClusterSet collection, with no restart.
 
 MySQL Database and MySQL InnoDB Cluster targets do not use MySQL Shell. They connect over JDBC only, through the Connector/J driver you place on the agent host ([2.9](#29-mysql-connectorj-on-agent-hosts)), and need nothing else.
 
@@ -236,7 +236,7 @@ Disabling Memory by Event entirely is reasonable in an estate that does not inve
 ## 2.9 MySQL Connector/J on agent hosts
 The plug-in reaches MySQL through **MySQL Connector/J**, Oracle's JDBC driver. Connector/J is licensed under the GPL with Oracle's Universal FOSS Exception, or under a MySQL commercial license, so it is not distributed inside the plug-in. You place one copy on every management agent host that monitors a MySQL target, and the plug-in loads it from there. This applies to MySQL Database, MySQL InnoDB Cluster and MySQL InnoDB ClusterSet targets alike, and to the Run EXPLAIN job ([8.1](jobs.md#81-run-explain)).
 
-**Which version.** Connector/J **8.4.0** is the version this release is tested with, against MySQL 8.0, 8.4 and 9.x servers. Later 8.4.x and 9.x releases are expected to work; if a collection stops after you install a newer driver, go back to 8.4.0 and tell us ([1.4](index.md#14-release-status)). The legacy `mysql-connector-java-*.jar` name (Connector/J 5.1 and 8.0) is not picked up: the plug-in looks for `mysql-connector-j-*.jar`.
+**Which version.** Connector/J **8.4.0** is the version this release ships its checksum for and the one to stage unless you have a reason not to; it is tested against MySQL 8.0, 8.4, 9.5, 9.7 and 26.10 servers. Connector/J **9.7.0** and **26.10.0** are also certified (2026-10-24, every metric group on every target type, the Kerberos, TLS, RDS and Unix-socket paths included), so a site that standardizes on a newer driver can use either. Other 8.4.x, 9.x and 26.x releases are expected to work; if a collection stops after you install one of those, go back to 8.4.0 and tell us ([1.4](index.md#14-release-status)). The legacy `mysql-connector-java-*.jar` name (Connector/J 5.1 and 8.0) is not picked up: the plug-in looks for `mysql-connector-j-*.jar`.
 
 **Where it goes.** The directory is `<agentStateDir>/ip_plugin/xmys/lib/`, where `<agentStateDir>` is the agent's instance directory. `emctl status agent` prints it as **Agent Home** (the line above it, **Agent Binaries**, is a different directory):
 
