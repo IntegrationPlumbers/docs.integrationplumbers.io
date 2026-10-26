@@ -2,10 +2,11 @@ name: static-checks
 
 # Two jobs, both advisory (main is unprotected; nothing here blocks a merge).
 #
-# checks: thin caller — delegates to the central reusable workflow in
-# ip-dev-plugin with no inputs, so it runs the secrets scan (gitleaks) only.
-# This is a PUBLIC repo serving docs.integrationplumbers.io; a leaked token or
-# lab address in a page is the one thing that must never reach main.
+# secrets-scan: the gitleaks step from ip-dev-plugin's reusable static-checks
+# workflow, copied here because this repo is PUBLIC and cannot call a reusable
+# workflow in the private ip-dev-plugin (see slack-notify.yml). Its XML and
+# make-target steps do not apply to a Jekyll site and are left out. A leaked
+# token or lab address in a page is the one thing that must never reach main.
 #
 # docs-lint: the repo's own gate. scripts/lint-docs.sh (front matter, forbidden
 # terms, relative links, images) and scripts/check-anchors.sh (page.md#anchor
@@ -21,8 +22,18 @@ permissions:
   contents: read
 
 jobs:
-  checks:
-    uses: IntegrationPlumbers/ip-dev-plugin/.github/workflows/static-checks.yml@main
+  secrets-scan:
+    runs-on: ubuntu-latest
+    # Cap a hung step (GitHub's default is 6h). Download plus scan of a few
+    # hundred files is well under a minute.
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secrets scan (gitleaks)
+        run: |
+          VER=8.30.1
+          curl -sSL --max-time 120 "https://github.com/gitleaks/gitleaks/releases/download/v${VER}/gitleaks_${VER}_linux_x64.tar.gz" | tar -xz gitleaks
+          ./gitleaks dir . --no-banner --redact --exit-code 1
 
   docs-lint:
     runs-on: ubuntu-latest
