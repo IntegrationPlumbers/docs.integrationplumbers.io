@@ -8,7 +8,7 @@ nav_order: 12.5
 Enterprise Manager 24ai Release Update 12 (24.1.0.12) and later ship a Model Context Protocol (MCP) server. It gives an AI client, meaning an assistant, agent or chat tool that speaks MCP, read access to targets, metrics and incidents. This page says what such a client sees for the Db2 targets this plug-in monitors, how to connect one, what to ask, how to tell an empty metric group from a broken one, and where the boundary is. It is for administrators who connect an assistant to Enterprise Manager. Oracle's documentation covers enabling the server; this page does not repeat it.
 
 > **Prerequisites for this page**
-> - An Enterprise Manager 24ai OMS at Release Update 12 (24.1.0.12) or later. Enterprise Manager 13.5 has no MCP server, so this page does not apply to the 13.5.3.0.0 edition of the plug-in.
+> - An Enterprise Manager 24ai OMS at Release Update 12 (24.1.0.12) or later. Enterprise Manager 13.5 has no MCP server, so this page does not apply to the 13.5 edition of the plug-in.
 > - Db2 targets that have collected at least once. A client reads only what has reached the repository.
 
 **Where to find it:** the MCP endpoint of your OMS, `https://<oms-host>:<console-https-port>/em/api/mcp`
@@ -108,7 +108,7 @@ Thresholds are the strongest signal a client gets. A group with a shipped alert 
 
 | Metric | Shipped condition |
 | :--- | :--- |
-| Tablespace utilization (`Tablespace_Storage`) | Warning above 80 %, Critical above 90 % |
+| Tablespace used of maximum (`Tablespace_Forecast : PctUsed`) | Warning above 80 %, Critical above 90 % |
 | Catalog and package cache hit ratios (`Cache`) | Warning below 80 %, Critical below 70 % |
 | Availability (`Response`) | Critical when the target is down |
 | `CollectorStatus` | Critical on `COLLECTION_ERROR` |

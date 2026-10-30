@@ -9,10 +9,10 @@ nav_order: 0
 
 ### Oracle Enterprise Manager Plug-in for IBM Db2 User Guide
 
-*General Availability · `24.1.2.0.0` for Enterprise Manager 24ai · `13.5.3.0.0` for Enterprise Manager 13.5*  
+*General Availability · `24.1.3.0.0` for Enterprise Manager 24ai · `13.5.4.0.0` for Enterprise Manager 13.5*  
 *October 2026*
 
-This guide covers release **24.1.2.0.0** for Enterprise Manager 24ai and **13.5.3.0.0** for Enterprise Manager 13.5, the general-availability (GA) release. The two builds have the same features. The lines are versioned independently, so the numbers after `24.1` and `13.5` do not have to match. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable: install the build that matches your Enterprise Manager. Everything in this guide applies to both, except where a page says otherwise.
+This guide covers release **24.1.3.0.0** for Enterprise Manager 24ai and **13.5.4.0.0** for Enterprise Manager 13.5, the first update of the general-availability (GA) release. The two builds have the same features. The lines are versioned independently, so the numbers after `24.1` and `13.5` do not have to match. Enterprise Manager decides whether it will accept a plug-in from the toolkit it was built with, not from its version number, so the two are not interchangeable: install the build that matches your Enterprise Manager. Everything in this guide applies to both, except where a page says otherwise.
 
 <details>
 <summary>Legal Notice</summary>
@@ -32,7 +32,7 @@ IBM and Db2 are trademarks of IBM Corporation, registered in many jurisdictions 
 | If you want to | Go to |
 | :--- | :--- |
 | See what is in this release, and what to read first | [What's new](whats-new.md) |
-| Upgrade from the initial release (24.1.1.0.0 / 13.5.2.0.0) | [Upgrade notes](upgrade-notes.md) |
+| Upgrade from GA (24.1.2.0.0 / 13.5.3.0.0) or the initial release (24.1.1.0.0 / 13.5.2.0.0) | [Upgrade notes](upgrade-notes.md) |
 | Install it and see a target, quickly | [Getting started](getting-started.md) |
 | Get a licence key and work a guided evaluation | [Trial setup](trial.md) |
 | Check your estate is ready | [Prerequisites](prerequisites.md) |
@@ -73,7 +73,7 @@ Seventeen console pages present a database, and six an instance, starting with a
 | **IBM Db2 Database** (`ip_db2_database`) | One Db2 database: single-partition, partitioned (DPF), or pureScale (member and CF health only) | One per database you want to monitor. Each needs a licence key and counts toward its instance limit |
 | **IBM Db2 Instance** (`ip_db2_instance`), new in 24.1.2.0.0 / 13.5.3.0.0 | One Db2 instance (database manager): its memory, agents, configuration, diagnostic log, and start and stop | Optional, one per instance. It needs a licence key but does not count toward its instance limit. See [Instance targets](targets-and-properties.md#instance-targets) |
 
-**This is a brand-new product, not an upgrade of any prior Db2 plug-in.** Targets are added fresh: there is no migration of targets from another Db2 plug-in, Oracle's included. Because it registers under its own target-type names, it can run side by side with Oracle's bundled Db2 plug-in while you cut over database by database.
+**This is a brand-new product, not an upgrade of any prior Db2 plug-in.** Targets are added fresh: no history moves over from another Db2 plug-in, Oracle's included. Because it registers under its own target-type names, it can run side by side with Oracle's bundled Db2 plug-in while you cut over database by database, and from 24.1.3.0.0 a script creates the new targets beside Oracle's for you (see [What's new](whats-new.md#update-24-1-3)).
 
 ## Supported versions and platforms {#supported-versions}
 
@@ -95,7 +95,7 @@ Seventeen console pages present a database, and six an instance, starting with a
 
 ## Release status {#release-status}
 
-This is the **general-availability** release, under the plug-in identity `ip.em.xdb2`, released 2026-10-23. It upgrades the initial release (24.1.1.0.0 / 13.5.2.0.0, released 2026-10-12) in place: if you run that release, read [Upgrade notes](upgrade-notes.md) first. Everything we know to be incomplete or unproven is in the limitations list on [What's new](whats-new.md#update-24-1-2) rather than left for you to discover.
+This is **24.1.3.0.0 / 13.5.4.0.0**, released 2026-10-30, the first update of the **general-availability** release of the plug-in `ip.em.xdb2` (GA: 24.1.2.0.0 / 13.5.3.0.0, released 2026-10-23). It upgrades GA, and the initial release (24.1.1.0.0 / 13.5.2.0.0, released 2026-10-12), in place: if you run either, read [Upgrade notes](upgrade-notes.md) first. Everything we know to be incomplete or unproven is in the limitations lists on [What's new](whats-new.md#update-24-1-3) rather than left for you to discover.
 
 If you ran the Open Beta (`ip.em.xdbb`), the released plug-in is a different plug-in and is installed fresh, side by side with the beta, rather than upgraded over it: see [Moving from the beta to GA](beta-pre-release.md).
 
@@ -106,14 +106,14 @@ If you ran the Open Beta (`ip.em.xdbb`), the released plug-in is a different plu
 ### Start here
 
 - **IBM Db2 Plug-in** (this page): what the plug-in does, and where every topic in this guide lives.
-- [What's new](whats-new.md): what is in this release, the upgrade notes in brief, and the known limitations, with the initial release below.
+- [What's new](whats-new.md): what is in this release, the upgrade notes in brief, and the known limitations, with GA and the initial release below.
 - [Getting started](getting-started.md): the shortest path from a downloaded archive to a Db2 target you can look at.
 - [Trial setup](trial.md): request a licence key, enter it on each target, then work the guided evaluation checklist.
 
 ### Set up
 
 - [Prerequisites](prerequisites.md): supported versions, the JDBC driver, network paths, the least-privilege monitoring user, TLS, Kerberos, sizing, and the optional collection throttle and batch collection.
-- [Install and upgrade](install-and-upgrade.md): download and verify the OPAR, import it, deploy it to the OMS and to each agent, upgrade from the initial release, and uninstall.
+- [Install and upgrade](install-and-upgrade.md): download and verify the OPAR, import it, deploy it to the OMS and to each agent, upgrade from an earlier release, and uninstall.
 - [Upgrade notes](upgrade-notes.md): every change in an upgrade that needs operator action.
 - [Moving from the beta to GA](beta-pre-release.md): for Open Beta users.
 - [Targets and properties](targets-and-properties.md): add a database or instance target, every property, the EM CLI equivalent, licensing, associations, and Db2U and IBM Db2 SaaS.

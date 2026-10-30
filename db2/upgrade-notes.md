@@ -7,7 +7,51 @@ nav_order: 5.5
 
 Release notes for changes that need operator action beyond a routine deploy: an OMS restart, renamed metric groups whose history restarts, compliance rules that change scores, and licence settings. This page is for the Enterprise Manager administrator planning an upgrade. One section per release, **newest first**. The full list of what each release adds is on [What's new](whats-new.md).
 
-**In this page:** GA 24.1.2.0.0 / 13.5.3.0.0 (from 24.1.1.0.0) · Initial release 24.1.1.0.0 / 13.5.2.0.0
+**In this page:** [24.1.3.0.0 / 13.5.4.0.0 (from GA)](#update-24-1-3) · [GA 24.1.2.0.0 / 13.5.3.0.0 (from 24.1.1.0.0)](#update-24-1-2) · [Initial release 24.1.1.0.0 / 13.5.2.0.0](#ga)
+
+## 24.1.3.0.0 / 13.5.4.0.0 (2026-10-30), from GA 24.1.2.0.0 {#update-24-1-3}
+
+The first update of the GA release, installed in place over GA, 24.1.2.0.0 / 13.5.3.0.0. The database target metadata moves from 4.9 to 5.0, and the instance target from 1.3 to 1.4. Each note below says what changes, who it affects, and what to do. **Upgrading straight from the initial release, 24.1.1.0.0 / 13.5.2.0.0?** That works in place too: do everything in this section and in the [GA section](#update-24-1-2) below.
+
+### Deploy to the OMS and every agent, then restart the OMS once {#restart-oms-24-1-3}
+
+Metadata 5.0 appends one column, `never_backed_up`, to `DB_Backup`, a metric group the OMS has already registered. An OMS keeps each target type's column list in memory, so on an upgraded OMS the column stays empty, and a database that has never been backed up still raises no alert, until `emctl stop oms; emctl start oms`. Until then the Backup page's *Never* stays amber instead of red. A new OMS install needs no restart.
+
+Deploy to the agents in the same window. The labels, credential set names and job names change once the OMS has the new version; the alert texts, the readable backup times, the Windows job fix, the purge job's output and the HADR standby log fix come from the agent, so they change as each agent gets it. An incident that is already open keeps the text it was raised with; the next one uses the new text. See [Upgrade](install-and-upgrade.md#upgrade).
+
+### Associate the compliance standards with your targets again {#reassociate-standards}
+
+The compliance framework, its three standards and the 29 rules are now authored `INTEGRATION_PLUMBERS`; before, they showed Author `SYSMAN`. Enterprise Manager identifies a standard by its name, author and version, so the upgrade removes the `SYSMAN` framework and standards and installs the new ones, and **their target associations are not carried over**. Until you associate them again, nothing is evaluated and the Db2 compliance results stay empty.
+
+**What to do:** after the upgrade, associate the three standards with your IBM Db2 Database targets again, in **Enterprise → Compliance → Library** or with `emcli associate_cs_targets ... -author=INTEGRATION_PLUMBERS`, then check that the Library shows each standard with your targets. If you changed a rule parameter for a target, check it on the new association. Results come back after the evaluation the association starts. Leave HADR standbys without reads on standby out: they collect no configuration, so every standard scores 100 there without evaluating anything. See [Associate a standard with targets](compliance-standards.md#associate). A new install has nothing to re-associate.
+
+### The two Top SQL groups are retired, and their stored rows deleted {#top-sql-retired}
+
+`Top_Queries_Cpu_Time` and `Top_Queries_Execution_Count` stop collecting, and the upgrade **deletes the rows they stored**. A threshold, template entry or incident rule set on them does not carry over. Their two Conditions move to `Query_Analytics` as `CpuTime` and `Executions` (CPU time and executions of one statement per 15-minute interval), shipped Not Defined: set a value there if you alerted on the old groups. The SQL page is unchanged, because it already read `Query_Analytics` and `Statement_Text`. A statement that last ran before `Statement_Text` existed loses the text the old groups stored. See [Top SQL](metrics-reference.md#top-sql).
+
+### Clear a table space threshold you set yourself {#tablespace-threshold}
+
+The shipped Warning 80 / Critical 90 % table space alert moves from `Tablespace_Storage : tablespace_utilization` (used of allocated, now labelled *Tablespace Used of Allocated (%)*) to `Tablespace_Forecast : PctUsed` (used of maximum). The upgrade replaces the shipped 80 / 90 on `tablespace_utilization` with its new shipped default, none, so a target that still had the shipped values stops raising the old alert on its own.
+
+A value you set yourself is kept, as every customised threshold is, so such a target can go on raising the old alert beside the new one. **What to do:** on those targets, open **Monitoring → Metric and Collection Settings**, find **Tablespace Storage**, and clear both values of *Tablespace Used of Allocated (%)*. Applying an updated monitoring template sets the new alert but does not clear the old one. See [Tablespace_Forecast](metrics-reference.md#tablespace-forecast).
+
+### Check thresholds you set on three ratios {#ratio-thresholds}
+
+`creation_to_assigning_ratio` (Agent Connection, both target types), `hashjoin_overflow_ratio` (Sort Heap) and `host_cpu_usage_per_sec` were labelled as percentages, though each is a plain ratio (0.25, not 25). They are unitless now. The values, and any threshold set on them, are unchanged. **If you set a threshold on one of them as a percentage**, 50 meant 50 % to the eye but is compared with the ratio, so it never fires: set 0.5 instead. None ships with a value.
+
+### Re-import the incident rule set and the templates if you use them {#collateral-24-1-3}
+
+The files that ship beside the plug-in changed with this release. Importing a new plug-in does not update them in your OMS:
+
+- **Incident rule set.** `db2_incident_rules.sh import` now turns on the Warning rule by default, and both threshold rules cover the three thresholds the Production-critical template adds. Re-import with `./db2_incident_rules.sh import --overwrite --yes` to pick that up. **If you turned the Warning rule off, pass `--no-warnings` as well**: `import --overwrite --yes` and `enable` now turn it on without it. See [Incident rules](alerts-and-templates.md#incident-rules).
+- **Monitoring templates.** All three carry the never-backed-up Critical and the new table space alert, and Production-critical raises its log-space alert on the first collection over 60 % instead of the third. Re-import with `emcli import_template -files=<file> -overwrite`, then apply it again. Applying sets every column the template names back to the template's value, so note any per-target change you made to those columns first. See [Monitoring templates](alerts-and-templates.md#monitoring-templates).
+
+### Also check
+
+- **A never-backed-up database now raises a Critical.** Expect it on new and development databases you do not back up, and clear `DB_Backup : never_backed_up` for those targets. See [DB_Backup](metrics-reference.md#db-backup).
+- **Anything that matches the console names by text.** Credential sets, credential types, the two plug-in job types, the runbooks and several labels now say "IBM Db2" and "Db2" where they said "IBM DB2" and "DB2"; internal names (`DB2HostCreds`, `ip_db2_purge_stale_cache`, metric and column names) are unchanged. The plug-in is still listed as IBM DB2 Database under Plug-ins.
+- **Run [the cache purge job](jobs-and-metric-extensions.md#purge-stale-cache) once per agent**, as after every upgrade. Its output now lists what it purged.
+- **Known issue:** a successful online backup on a Windows agent was not lab-verified for this release. See [What's new](whats-new.md#known-issue-24-1-3).
 
 ## GA 24.1.2.0.0 / 13.5.3.0.0 (2026-10-23), from 24.1.1.0.0 {#update-24-1-2}
 
@@ -53,7 +97,7 @@ The two 24.1.1.0.0 properties *OMS: skip certificate validation* and *OMS: allow
 
 ### Move the licence key into its credential set {#licence-credential}
 
-Nothing breaks on the upgrade: the old *Plugin Licence Key* property is still read while the new credential is empty. While the key stays in the property, anyone who can view the target's properties can read it. To hide it, set the key in **IBM DB2 Plug-in Licence Monitoring Credentials** and then clear the property, target by target. See [Moving a key](targets-and-properties.md#moving-a-key).
+Nothing breaks on the upgrade: the old *Plugin Licence Key* property is still read while the new credential is empty. While the key stays in the property, anyone who can view the target's properties can read it. To hide it, set the key in **IBM Db2 Plug-in Licence Monitoring Credentials** and then clear the property, target by target. See [Moving a key](targets-and-properties.md#moving-a-key).
 
 An expired key now has a **14-day grace period**: the status reads `Grace Period`, collection continues and the alert is a Warning; then `Expired`, and collection stops. The status alert moves to the new `license_severity` column.
 
@@ -80,7 +124,7 @@ The transaction log, a section of Storage in 24.1.1.0.0, now has its own **Trans
 ### Also check
 
 - **The three monitoring templates replace the 24.1.1.0.0 threshold starter kit**, which reverted two shipped defaults on `tablespace_state` when applied. See [Monitoring templates](alerts-and-templates.md#monitoring-templates).
-- **The plug-in no longer writes inside its agent plug-in home.** Target caches and the plug-in log move to `<agentStateDir>/ip_plugin/xdb2/`. Run [the cache purge job](jobs-and-metric-extensions.md#purge-stale-cache) (**Purge Orphaned IBM DB2 Plug-in Cache Files**) once per agent to remove the 24.1.1.0.0 copies.
+- **The plug-in no longer writes inside its agent plug-in home.** Target caches and the plug-in log move to `<agentStateDir>/ip_plugin/xdb2/`. Run [the cache purge job](jobs-and-metric-extensions.md#purge-stale-cache) (**Purge Orphaned IBM Db2 Plug-in Cache Files**) once per agent to remove the 24.1.1.0.0 copies.
 - **The DRDA encryption property is relabelled** *DRDA Credential Encryption AES-256*: it encrypts the user ID and password, not the data. The setting and its values are unchanged.
 - **AIX, Solaris and HP-UX agents are declared unsupported.** The plug-in was already certified for Linux x86-64 and Windows x86-64 agents only.
 - **Monitoring templates saved from the console before this release** keep their old alert message ids, which still resolve to the English text.
@@ -92,5 +136,5 @@ The initial release of `ip.em.xdb2`. It was a fresh install: there was no earlie
 ## Related
 
 - [Install and upgrade](install-and-upgrade.md#upgrade): the upgrade steps
-- [What's new](whats-new.md#update-24-1-2): everything in this release
+- [What's new](whats-new.md#update-24-1-3): everything in this release
 - [Changelog](changelog.md): each release in brief

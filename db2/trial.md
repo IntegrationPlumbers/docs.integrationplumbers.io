@@ -22,7 +22,7 @@ Request the key before you install anything: a valid licence key is required to 
 
 | What we ask for | Why it matters |
 | :--- | :--- |
-| Your Enterprise Manager line, 13.5 or 24ai | It decides which build you receive, `13.5.3.0.0` or `24.1.2.0.0`. Both carry the same features. |
+| Your Enterprise Manager line, 13.5 or 24ai | It decides which build you receive, `13.5.4.0.0` or `24.1.3.0.0`. Both carry the same features. |
 | Your Db2 versions, 11.5 or 12.1 | Versions 11.1 and below are not supported: see [Supported versions and platforms](prerequisites.md#supported-versions). |
 | How many databases you want to monitor | A key carries a licensed instance count, or `Unlimited`. A key with an instance count also needs the OMS settings described in [Licensing](targets-and-properties.md#oms-settings). |
 | Whether the agent will be local or remote to each database | Metric collection, and the three remote administrative jobs, work either way. Local-only capabilities (the six local administrative jobs, Kill and diagnostic-log monitoring) need the agent on the same host as the database. See [Network and ports](prerequisites.md#network). |
@@ -36,7 +36,7 @@ The key is issued for `ip.em.xdb2` specifically. A key issued for the Open Beta 
 ### Enter the key
 
 1. Open the target and go to **Target Setup → Monitoring Configuration**.
-2. Enter the key in the **Plug-in Licence Key** field of the licence credential set (*IBM DB2 Plug-in Licence Monitoring Credentials*), exactly as issued, as one line. Leave the **Plugin Licence Key (legacy - set the credential instead)** property empty: it is read only while the credential is empty, and only for targets upgraded from 24.1.1.0.0.
+2. Enter the key in the **Plug-in Licence Key** field of the licence credential set (*IBM Db2 Plug-in Licence Monitoring Credentials*), exactly as issued, as one line. Leave the **Plugin Licence Key (legacy - set the credential instead)** property empty: it is read only while the credential is empty, and only for targets upgraded from 24.1.1.0.0.
 3. Save.
 4. Repeat for every target. Keys are entered per target, so a second database added later needs the same key entered again. IBM Db2 Instance targets take the same key, in their own licence credential set, and do not count against its instance limit.
 

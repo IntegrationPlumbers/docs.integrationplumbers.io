@@ -7,7 +7,7 @@ nav_order: 12
 
 The things people actually hit, what each one looks like, and what to change. This page is for the DBA or Enterprise Manager administrator looking at a target that is empty, wrong or failing a job. Nearly everything that goes wrong in the first hour with this plug-in is one of a small number of things, so this page is that list rather than a general guide to Enterprise Manager.
 
-**In this page:** The licence gate · An empty metric group · Install and deploy · After the upgrade from 24.1.1.0.0 · Connecting to Db2 · Instance targets · Jobs · Compliance shows nothing · Amazon RDS for Db2 · OMS licence-count connection · Logs · Known issues in this release · Getting support
+**In this page:** The licence gate · An empty metric group · Install and deploy · After the upgrade from GA · After the upgrade from 24.1.1.0.0 · Connecting to Db2 · Instance targets · Jobs · Compliance shows nothing · Amazon RDS for Db2 · OMS licence-count connection · Logs · Known issues in this release · Getting support
 
 **If a target is Up but almost every page is empty, it is the licence key.** That single cause accounts for more first-hour reports than everything else here combined, so it is the first section.
 
@@ -21,7 +21,7 @@ For a target whose pages are empty or partly filled, open its **Monitoring Readi
 Collection stopped by license status
 ```
 
-**Cause.** Every `ip_db2_database` target needs a licence key for `ip.em.xdb2` in its **Plug-in Licence Key** credential (the *IBM DB2 Plug-in Licence Monitoring Credentials* set; a target upgraded from 24.1.1.0.0 may still carry it in the older **Plugin Licence Key** property, which is read while the credential is empty). While the status is `License Required`, `Invalid Signature` or `Expired`, the plug-in stops ordinary collection on that target, with five deliberate exceptions so you can always tell why: **License** itself (so you can see the status), **Response** (so availability keeps working), **Version**, **CollectorStatus** (which reports each stopped group as `DISABLED`), and **readiness_summary** (so the Overview still counts the licence check). Availability keeps reporting, which is why the target stays *Up* rather than going *Down*: the incident and the collection errors are the signal, not the target status.
+**Cause.** Every `ip_db2_database` target needs a licence key for `ip.em.xdb2` in its **Plug-in Licence Key** credential (the *IBM Db2 Plug-in Licence Monitoring Credentials* set; a target upgraded from 24.1.1.0.0 may still carry it in the older **Plugin Licence Key** property, which is read while the credential is empty). While the status is `License Required`, `Invalid Signature` or `Expired`, the plug-in stops ordinary collection on that target, with five deliberate exceptions so you can always tell why: **License** itself (so you can see the status), **Response** (so availability keeps working), **Version**, **CollectorStatus** (which reports each stopped group as `DISABLED`), and **readiness_summary** (so the Overview still counts the licence check). Availability keeps reporting, which is why the target stays *Up* rather than going *Down*: the incident and the collection errors are the signal, not the target status.
 
 **Fix.** Read the licence status on the `License` metric and act on it:
 
@@ -61,7 +61,7 @@ The key is checked on the agent host every 15 minutes, and at every collection. 
 
 ## Install and deploy {#deploy}
 
-**`Incompatible version` at import.** The plug-in ships one artifact per Enterprise Manager line, each built with that line's development kit, and Enterprise Manager refuses the other one. Use `24.1.2.0.0_ip.em.xdb2_2000_0.opar` on Enterprise Manager 24ai and `13.5.3.0.0_ip.em.xdb2_2000_0.opar` on Enterprise Manager 13.5, and verify it first: see [Verify the download](install-and-upgrade.md#verify).
+**`Incompatible version` at import.** The plug-in ships one artifact per Enterprise Manager line, each built with that line's development kit, and Enterprise Manager refuses the other one. Use `24.1.3.0.0_ip.em.xdb2_2000_0.opar` on Enterprise Manager 24ai and `13.5.4.0.0_ip.em.xdb2_2000_0.opar` on Enterprise Manager 13.5, and verify it first: see [Verify the download](install-and-upgrade.md#verify).
 
 **`deploy_plugin_on_server` rejects `-sys_password` on 24ai.** Enterprise Manager 24ai takes `-dbUser=SYS -dbPassword=<repository SYS password>` instead.
 
@@ -74,6 +74,20 @@ The key is checked on the agent host every 15 minutes, and at every collection. 
 **Moving from the Open Beta.** GA does not install over the beta, and beta targets do not become GA targets. Install GA side by side and re-create the targets: see [Moving from the beta to GA](beta-pre-release.md).
 
 **Related:** [Install and upgrade](install-and-upgrade.md)
+
+## After the upgrade from GA (24.1.2.0.0) {#upgrade-24-1-3}
+
+**The compliance standards show no results, or Association Count reads 0.** The upgrade replaced the `SYSMAN`-authored standards with `INTEGRATION_PLUMBERS` ones, and their associations were not carried over. Associate the three standards with your targets again. See [Upgrade notes](upgrade-notes.md#reassociate-standards).
+
+**A database that was never backed up raises no alert, and the Backup page's *Never* is amber.** The OMS has not been restarted since the deploy, so the new `never_backed_up` column stays empty. Run `emctl stop oms; emctl start oms`. See [Upgrade notes](upgrade-notes.md#restart-oms-24-1-3).
+
+**A table space alert on *Tablespace Used of Allocated (%)* keeps firing.** It is a value you set yourself on `Tablespace_Storage : tablespace_utilization`, which the upgrade keeps. The shipped alert is now on `Tablespace_Forecast : PctUsed`: clear the old one. See [Upgrade notes](upgrade-notes.md#tablespace-threshold).
+
+**A threshold you set on Top SQL is gone.** `Top_Queries_Cpu_Time` and `Top_Queries_Execution_Count` are retired; set it on `Query_Analytics` instead. See [Upgrade notes](upgrade-notes.md#top-sql-retired).
+
+**Warnings now open incidents.** The incident rule set, re-imported from this release, turns the Warning rule on by default. Run `./db2_incident_rules.sh disable-warnings`, or import with `--no-warnings`. See [Incident rules](alerts-and-templates.md#incident-rules).
+
+**An admin job on a Windows agent now fails where it used to succeed.** Before this release, the remote admin jobs on a Windows agent showed *Succeeded* with empty output whatever happened. They now report the real result: read the job output for Db2's message.
 
 ## After the upgrade from 24.1.1.0.0 {#upgrade}
 
@@ -139,11 +153,11 @@ See [Optional transport security](prerequisites.md#tls).
 
 ## Jobs {#jobs}
 
-**A job fails with `Unable to get credentials for defaultHostCred`.** The preferred credential set the job uses is not set for the target. The local jobs use **IBM DB2 Database Host Credentials**; Purge Orphaned IBM DB2 Plug-in Cache Files and Collect IBM DB2 Plug-in Diagnostics use **IBM DB2 Plug-in Agent Owner Credentials**. See [Credentials](jobs-and-metric-extensions.md#credentials).
+**A job fails with `Unable to get credentials for defaultHostCred`.** The preferred credential set the job uses is not set for the target. The local jobs use **IBM Db2 Database Host Credentials**; Purge Orphaned IBM Db2 Plug-in Cache Files and Collect IBM Db2 Plug-in Diagnostics use **IBM Db2 Plug-in Agent Owner Credentials**. See [Credentials](jobs-and-metric-extensions.md#credentials).
 
-**Kill on the Locks or Sessions page reports *The kill job could not run. Check that preferred host credentials are set for this target.*** Set the target's **IBM DB2 Database Host Credentials**: the button submits the job without asking for any.
+**Kill on the Locks or Sessions page reports *The kill job could not run. Check that preferred host credentials are set for this target.*** Set the target's **IBM Db2 Database Host Credentials**: the button submits the job without asking for any.
 
-**Back Up Database reports that the backup did not run because a preferred credential is not set.** The dialog submits the remote **Online Backup** job, which needs the target's **IBM DB2 Database Admin Credentials** and **IBM DB2 Plug-in Agent Owner Credentials**, and Full privilege on the target for you. Deploy the plug-in to the agent as well as the OMS: an agent on an earlier version refuses the backup job and runs nothing.
+**Back Up Database reports that the backup did not run because a preferred credential is not set.** The dialog submits the remote **Online Backup** job, which needs the target's **IBM Db2 Database Admin Credentials** and **IBM Db2 Plug-in Agent Owner Credentials**, and Full privilege on the target for you. Deploy the plug-in to the agent as well as the OMS: an agent on an earlier version refuses the backup job and runs nothing.
 
 **Back Up Database, or the Online Backup job, refuses a partitioned (DPF) database.** Expected: without `ON ALL DBPARTITIONNUMS` the job would back up only the partition its connection runs on, and that image cannot restore the database. The dialog shows a red note, and the job itself refuses a DPF database however it was submitted (Job Library, `emcli`, a saved or scheduled job), running nothing. Back up every partition on the server with `db2 backup database <db> on all dbpartitionnums ...`. If the refusal says the partition count could not be read, the admin user needs EXECUTE on `SYSPROC.DB_MEMBERS`, which PUBLIC holds only on a database not created `RESTRICTIVE`: run `GRANT EXECUTE ON FUNCTION SYSPROC.DB_MEMBERS TO USER <admin user>`, or give it SQLADM. See [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs).
 
@@ -151,7 +165,7 @@ See [Optional transport security](prerequisites.md#tls).
 
 **A local job fails with `Can't open perl script ".../killagent.pl": Permission denied`.** On Linux, the Db2 instance owner cannot read the agent's plug-in files. Add the instance owner to the agent install owner's group on the Db2 host, then submit the job again: see [The six local jobs](jobs-and-metric-extensions.md#local-jobs).
 
-**A remote admin job fails at once with `Default preferred credentials are not set`.** A remote job needs **both** **IBM DB2 Database Admin Credentials** and **IBM DB2 Plug-in Agent Owner Credentials** set on the target. It never falls back to the monitoring user.
+**A remote admin job fails at once with `Default preferred credentials are not set`.** A remote job needs **both** **IBM Db2 Database Admin Credentials** and **IBM Db2 Plug-in Agent Owner Credentials** set on the target. It never falls back to the monitoring user.
 
 **A remote admin job or Explain on a TLS target fails at once with "Unable to resolve credential reference".** A target with **Use SSL/TLS?** = `yes` needs its client truststore credential set for jobs, even when the agent JVM's default `cacerts` trusts the server. Point the set at that `cacerts`: see [TLS targets](jobs-and-metric-extensions.md#tls-targets).
 
@@ -159,7 +173,7 @@ See [Optional transport security](prerequisites.md#tls).
 
 **The online backup job fails with `SQL2413N`.** The database uses circular logging, so an online backup is not allowed. Online backups need archive logging (`LOGARCHMETH1` not `OFF`); the Configuration Best Practices compliance standard flags circular logging too.
 
-**Purge Orphaned IBM DB2 Plug-in Cache Files fails even though a credential is set.** Check *which* OS account the credential runs as. The purge job needs the account that **owns the agent installation** (commonly `oracle`), not the Db2 instance owner the local jobs use. A credential for the wrong user authenticates successfully and then cannot read the job's script, or cannot delete the files (`Deleted 0 of N orphaned cache file(s)`). On Windows the same message can mean a file is in use: run the job again later. See [Jobs](jobs-and-metric-extensions.md#purge-stale-cache).
+**Purge Orphaned IBM Db2 Plug-in Cache Files fails even though a credential is set.** Check *which* OS account the credential runs as. The purge job needs the account that **owns the agent installation** (commonly `oracle`), not the Db2 instance owner the local jobs use. A credential for the wrong user authenticates successfully and then cannot read the job's script, or cannot delete the files (`Deleted 0 of N orphaned cache file(s)`). On Windows the same message can mean a file is in use: run the job again later. See [Jobs](jobs-and-metric-extensions.md#purge-stale-cache).
 
 **Diagnostic-log monitoring reports nothing, or a local job type is refused, on a database you know is reachable.** Confirm the agent is actually on the Db2 host, not just network-reachable: these need a local agent by design. CollectorStatus reports `Diag_Log_File_Monitoring` as `DISABLED` when it is not. See [Network and ports](prerequisites.md#network).
 
@@ -167,7 +181,9 @@ See [Optional transport security](prerequisites.md#tls).
 
 ## Compliance shows nothing {#compliance}
 
-**A standard is installed but the compliance dashboard shows no Db2 bar, or Association Count reads 0.** Nothing evaluates until you associate the standard with your targets. This is the most common cause of an "installed but silent" compliance standard. See [Associate a standard with targets](compliance-standards.md#associate).
+**A standard is installed but the compliance dashboard shows no Db2 bar, or Association Count reads 0.** Nothing evaluates until you associate the standard with your targets. This is the most common cause of an "installed but silent" compliance standard, and it is expected after an upgrade from 24.1.2.0.0 or earlier, which replaces the standards. See [Associate a standard with targets](compliance-standards.md#associate).
+
+**A standard scores 100 on an HADR standby.** A standby without reads on standby has no configuration snapshot, so nothing is evaluated. Associate the standards with the primary. See [Compliance standards](compliance-standards.md#standby-association).
 
 **Association Count is non-zero, but a standard still shows no results.** Its rules read a daily configuration snapshot; a newly associated target legitimately shows nothing until that snapshot has run once. See [Let a configuration collection run](compliance-standards.md#let-a-configuration-collection-run).
 
@@ -192,7 +208,7 @@ If you are evaluating against RDS, tell us what you find: see [Getting support](
 **A limited-instance licence key's License group shows a metric collection error about the OMS.** For a key limited to a number of instances, the plug-in counts the `ip_db2_database` targets through the OMS. On Monitoring Readiness this shows as **License collection** reading Not functional. The error names the cause:
 
 - **A missing setting.** A missing **OMS Host**, **OMS Port** or OMS credential is named as such. Set them on the target: see [The OMS settings](targets-and-properties.md#oms-settings).
-- **Credentials rejected.** The **IBM DB2 OMS Monitoring Credentials** user must be able to view the `ip_db2_database` targets.
+- **Credentials rejected.** The **IBM Db2 OMS Monitoring Credentials** user must be able to view the `ip_db2_database` targets.
 - **The certificate is not trusted.** The connection validates the OMS certificate and hostname by default, so an OMS presenting its default self-signed certificate fails.
 
 The other metric groups keep collecting in every case, because the collection gate never depends on the count. An `Unlimited` key never contacts the OMS. IBM Db2 Instance targets never count and never contact it.
@@ -228,7 +244,9 @@ The default, `STRICT` (also when blank), verifies the OMS certificate and host n
 
 ## Known issues in this release {#known-issues}
 
-24.1.2.0.0 / 13.5.3.0.0 has no known issue of its own. The 24.1.1.0.0 known issue, Top Statements losing its SQL text after one failed lookup, is fixed. What the release deliberately does not cover is listed under [Known limitations and boundaries](whats-new.md#update-24-1-2).
+**A successful online backup on a Windows agent was not lab-verified for 24.1.3.0.0 / 13.5.4.0.0.** This release fixes admin jobs on a Windows agent reporting *Succeeded* with empty output; the fix was verified with a failing backup and with RUNSTATS, but not with a backup that succeeds. If an *Online Backup* on a Windows agent reports a result you do not expect, check the database's recovery history on the Backup page and tell [support](#support). See [What's new](whats-new.md#known-issue-24-1-3).
+
+GA (24.1.2.0.0 / 13.5.3.0.0) had no known issue of its own, and the 24.1.1.0.0 known issue, Top Statements losing its SQL text after one failed lookup, is fixed. What the plug-in deliberately does not cover is listed under [Known limitations and boundaries](whats-new.md#update-24-1-2).
 
 ## Getting support {#support}
 
@@ -246,7 +264,7 @@ Include the following in your ticket, so we can reproduce what you are seeing:
 - The Monitoring Readiness results: the note under **Check again**, and every item that is not OK.
 - A screenshot of what you are seeing.
 
-If support asks for diagnostics, run the **Collect IBM DB2 Plug-in Diagnostics** job and attach the archive it writes: see [Collect diagnostics for support](jobs-and-metric-extensions.md#collect-diagnostics).
+If support asks for diagnostics, run the **Collect IBM Db2 Plug-in Diagnostics** job and attach the archive it writes: see [Collect diagnostics for support](jobs-and-metric-extensions.md#collect-diagnostics).
 
 ## Related
 

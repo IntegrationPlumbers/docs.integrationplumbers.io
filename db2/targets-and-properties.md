@@ -37,7 +37,7 @@ Before the plug-in can monitor anything, you add each Db2 database as an IBM Db2
 | Client Reroute Retries | No | `2` | How many times to retry the list, 1 second apart. |
 | Affinity Failback Interval (seconds) | No | driver default | With client affinities, how often to try going back to the first server. |
 | TLS Hostname Validation | No | `BASIC` | With TLS on, `OFF` skips the check that the server certificate names this host, keeping the truststore check. See [Optional transport security](prerequisites.md#tls). |
-| Plug-in Licence Key | Yes, to collect (credential) | | Your Integration Plumbers licence key, in the *IBM DB2 Plug-in Licence Monitoring Credentials* set (hidden). See [Licensing](#licensing). |
+| Plug-in Licence Key | Yes, to collect (credential) | | Your Integration Plumbers licence key, in the *IBM Db2 Plug-in Licence Monitoring Credentials* set (hidden). See [Licensing](#licensing). |
 | Plugin Licence Key (legacy - set the credential instead) | No | | Where the key lived before this release. Still read while the credential is empty; move the key and clear this. See [Moving a key you entered before this release](#moving-a-key). |
 | OMS Host / OMS Port (licence instance count) | Limited-instance keys only | | Where the licence instance count reaches the OMS. See [The OMS settings](#oms-settings). |
 | OMS API Communication | No | `STRICT` | How the licence instance count connects to the OMS. See [The OMS settings](#oms-settings). |
@@ -46,17 +46,17 @@ Credentials (the user and password, the truststore fields and the licence key) a
 
 ## Database credential sets {#credential-sets}
 
-An IBM Db2 Database target has seven credential sets. Four are **monitoring** credentials, set on the target itself (**Target Setup → Monitoring Configuration**, or `emcli set_monitoring_credential`); three are **preferred** credentials, set under **Setup → Security → Preferred Credentials → IBM Db2 Database** (or `emcli set_preferred_credential`) and used only by jobs. The console names keep the plug-in's catalog spelling, *IBM DB2*.
+An IBM Db2 Database target has seven credential sets. Four are **monitoring** credentials, set on the target itself (**Target Setup → Monitoring Configuration**, or `emcli set_monitoring_credential`); three are **preferred** credentials, set under **Setup → Security → Preferred Credentials → IBM Db2 Database** (or `emcli set_preferred_credential`) and used only by jobs. From 24.1.3.0.0 / 13.5.4.0.0 the console names say *IBM Db2*; earlier releases said *IBM DB2*. The set names in the second column are unchanged.
 
 | Credential set (console name) | Set name | Credential type | Kind | What for |
 | :--- | :--- | :--- | :--- | :--- |
-| IBM DB2 Database Monitoring Credentials | `DB2DatabaseMonitoringCreds` | `DB2DatabaseCreds` (user, password) | Monitoring | The monitoring user every collection connects as. Required. Explain SQL Statement also runs as this user |
-| IBM DB2 Plug-in Licence Monitoring Credentials | `DB2LicenseMonitoringCreds` | `DB2LicenseCreds` (**Plug-in Licence Key**) | Monitoring | The licence key. Required to collect: see [Licensing](#licensing) |
-| IBM DB2 Client Truststore Monitoring Credentials | `DB2TruststoreMonitoringCreds` | `DB2TruststoreCreds` (location, type, password) | Monitoring | The truststore for TLS with a private or self-signed certificate. A TLS target that runs the remote jobs or Explain needs it: see [TLS targets](jobs-and-metric-extensions.md#tls-targets) |
-| IBM DB2 OMS Monitoring Credentials (licence instance count) | `DB2OmsMonitoringCreds` | `DB2OmsCreds` (user, password) | Monitoring | An Enterprise Manager user for the licence instance count. Keys with an instance limit only: see [The OMS settings](#oms-settings) |
-| IBM DB2 Database Admin Credentials | `DB2AdminCreds` | `DB2DatabaseCreds` (user, password) | Preferred | A Db2 admin user for the three remote admin jobs and Back Up Database: see [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs) |
-| IBM DB2 Database Host Credentials | `DB2HostCreds` | `DB2HostCreds` (host OS account) | Preferred | The instance owner's OS account, for the six local jobs and **Kill**: see [The six local jobs](jobs-and-metric-extensions.md#local-jobs) |
-| IBM DB2 Plug-in Agent Owner Credentials (plug-in jobs) | `DB2AgentOwnerCreds` | `DB2HostCreds` (host OS account) | Preferred | The agent install owner, for the remote jobs, Explain, the cache purge and the diagnostics job: see [Credentials](jobs-and-metric-extensions.md#credentials) |
+| IBM Db2 Database Monitoring Credentials | `DB2DatabaseMonitoringCreds` | `DB2DatabaseCreds` (user, password) | Monitoring | The monitoring user every collection connects as. Required. Explain SQL Statement also runs as this user |
+| IBM Db2 Plug-in Licence Monitoring Credentials | `DB2LicenseMonitoringCreds` | `DB2LicenseCreds` (**Plug-in Licence Key**) | Monitoring | The licence key. Required to collect: see [Licensing](#licensing) |
+| IBM Db2 Client Truststore Monitoring Credentials | `DB2TruststoreMonitoringCreds` | `DB2TruststoreCreds` (location, type, password) | Monitoring | The truststore for TLS with a private or self-signed certificate. A TLS target that runs the remote jobs or Explain needs it: see [TLS targets](jobs-and-metric-extensions.md#tls-targets) |
+| IBM Db2 OMS Monitoring Credentials (licence instance count) | `DB2OmsMonitoringCreds` | `DB2OmsCreds` (user, password) | Monitoring | An Enterprise Manager user for the licence instance count. Keys with an instance limit only: see [The OMS settings](#oms-settings) |
+| IBM Db2 Database Admin Credentials | `DB2AdminCreds` | `DB2DatabaseCreds` (user, password) | Preferred | A Db2 admin user for the three remote admin jobs and Back Up Database: see [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs) |
+| IBM Db2 Database Host Credentials | `DB2HostCreds` | `DB2HostCreds` (host OS account) | Preferred | The instance owner's OS account, for the six local jobs and **Kill**: see [The six local jobs](jobs-and-metric-extensions.md#local-jobs) |
+| IBM Db2 Plug-in Agent Owner Credentials (plug-in jobs) | `DB2AgentOwnerCreds` | `DB2HostCreds` (host OS account) | Preferred | The agent install owner, for the remote jobs, Explain, the cache purge and the diagnostics job: see [Credentials](jobs-and-metric-extensions.md#credentials) |
 
 An IBM Db2 Instance target has its own five sets: see [Instance target credentials](#instance-credentials).
 
@@ -136,7 +136,7 @@ The plug-in is licensed per target. Every IBM Db2 Database target needs a licenc
 
 ### Entering the key {#entering-the-key}
 
-The key is a credential: it goes into the target's **IBM DB2 Plug-in Licence Monitoring Credentials** set (`DB2LicenseMonitoringCreds`, credential type `DB2LicenseCreds`, one field, **Plug-in Licence Key**). Enterprise Manager keeps it in its credential store and hands it to the collector on its standard input. It is not a target property, so users with view access to the target, and the MCP server's `ListTargetProperties`, cannot read it.
+The key is a credential: it goes into the target's **IBM Db2 Plug-in Licence Monitoring Credentials** set (`DB2LicenseMonitoringCreds`, credential type `DB2LicenseCreds`, one field, **Plug-in Licence Key**). Enterprise Manager keeps it in its credential store and hands it to the collector on its standard input. It is not a target property, so users with view access to the target, and the MCP server's `ListTargetProperties`, cannot read it.
 
 - **Console:** **Target → Target Setup → Monitoring Configuration**, field **Plug-in Licence Key**.
 - **EM CLI:** put the key alone in a file, then run the `DB2LicenseMonitoringCreds` command under [Add a target with EM CLI](#add-target-emcli). **Renewing** a key is the same command with the new key.
@@ -198,7 +198,7 @@ The count needs to reach the OMS. Set these on each target that carries a key wi
 | :--- | :--- | :--- |
 | **OMS Host (licence instance count)** | Property `ip_db2_database_oms_host` | The OMS host name |
 | **OMS Port (licence instance count)** | Property `ip_db2_database_oms_port` | The OMS console HTTPS port |
-| **IBM DB2 OMS Monitoring Credentials** | Monitoring credential set `DB2OmsMonitoringCreds` (credential type `DB2OmsCreds`) | An Enterprise Manager user that can **view** the IBM Db2 Database targets. Nothing more is needed |
+| **IBM Db2 OMS Monitoring Credentials** | Monitoring credential set `DB2OmsMonitoringCreds` (credential type `DB2OmsCreds`) | An Enterprise Manager user that can **view** the IBM Db2 Database targets. Nothing more is needed |
 
 Set the credential through the credential set, never inline:
 

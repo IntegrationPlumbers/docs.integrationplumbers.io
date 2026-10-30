@@ -5,7 +5,7 @@ nav_order: 5
 
 # Install and upgrade
 
-This page takes an Enterprise Manager administrator through installing the IBM Db2 plug-in, upgrading it in place from the initial release, and removing it. It follows Enterprise Manager's standard plug-in lifecycle: verify the download, import the archive (OPAR) onto the OMS, deploy it to the OMS and to each monitoring agent, then add and licence your targets. **24.1.2.0.0 / 13.5.3.0.0, the GA release, upgrades the initial release (24.1.1.0.0 / 13.5.2.0.0) in place**, with the same steps; read [Upgrade notes](upgrade-notes.md) before you upgrade a production OMS.
+This page takes an Enterprise Manager administrator through installing the IBM Db2 plug-in, upgrading it in place from an earlier release, and removing it. It follows Enterprise Manager's standard plug-in lifecycle: verify the download, import the archive (OPAR) onto the OMS, deploy it to the OMS and to each monitoring agent, then add and licence your targets. **24.1.3.0.0 / 13.5.4.0.0 upgrades GA (24.1.2.0.0 / 13.5.3.0.0) and the initial release (24.1.1.0.0 / 13.5.2.0.0) in place**, with the same steps; read [Upgrade notes](upgrade-notes.md) before you upgrade a production OMS.
 
 > **Prerequisites for this page**
 > - Your Enterprise Manager and Db2 versions are supported: see [Supported versions and platforms](prerequisites.md#supported-versions).
@@ -14,13 +14,13 @@ This page takes an Enterprise Manager administrator through installing the IBM D
 
 **Where to find it:** **Setup → Extensibility → Plug-ins → Databases → IBM DB2 Database → Actions → Deploy On**, or the equivalent `emcli` plug-in commands shown below.
 
-**In this page:** Licence key · Download · Verify the download · Import the OPAR · Deploy to the OMS · Deploy to agents · Upgrade from 24.1.1.0.0 · After an upgrade · Uninstall
+**In this page:** Licence key · Download · Verify the download · Import the OPAR · Deploy to the OMS · Deploy to agents · Upgrade · After an upgrade · Uninstall
 
 ## Licence key {#licence-key}
 
 A valid licence key for `ip.em.xdb2` is required to monitor a target. Request one through your Integration Plumbers contact: see [Trial setup](trial.md). A key issued for the Open Beta plug-in (`ip.em.xdbb`) does not work.
 
-You enter the key per target, in its **IBM DB2 Plug-in Licence Monitoring Credentials** set. To confirm a target's key is recognised, check its **License Info** page or its **License** metric under All Metrics. See [Licensing](targets-and-properties.md#licensing).
+You enter the key per target, in its **IBM Db2 Plug-in Licence Monitoring Credentials** set. To confirm a target's key is recognised, check its **License Info** page or its **License** metric under All Metrics. See [Licensing](targets-and-properties.md#licensing).
 
 ## Download {#download}
 
@@ -28,12 +28,12 @@ The plug-in ships as one OPAR per Enterprise Manager release, with the same feat
 
 | Enterprise Manager | OPAR | Plug-in version | SHA-256 |
 | :--- | :--- | :--- | :--- |
-| 24ai | `24.1.2.0.0_ip.em.xdb2_2000_0.opar` | `24.1.2.0.0` | `ff70441d9bd6be2fb1f8b928062cd11d540488b315b46d272f32cfb34d8bf4d7` |
-| 13.5 | `13.5.3.0.0_ip.em.xdb2_2000_0.opar` | `13.5.3.0.0` | `c1540e8d3f12f24b22613e46e01ed4615aec2e953cc5f2a8b0aab75fdbc115b1` |
+| 24ai | `24.1.3.0.0_ip.em.xdb2_2000_0.opar` | `24.1.3.0.0` | `b2b8d6a2c37269775602522408f731469d3dedbdd9708a4c86e97a196b221e8c` |
+| 13.5 | `13.5.4.0.0_ip.em.xdb2_2000_0.opar` | `13.5.4.0.0` | `aecd7ccedc44080c658922461e7c024f87cd489d111b0b110fd36235475ef9b4` |
 
-The two lines are versioned independently, so the numbers after `24.1` and `13.5` do not have to match. Each OPAR comes with a `SHA256SUMS` file, its `build-info.txt`, and a detached signature (`.sig`) for each file.
+The two lines are versioned independently, so the numbers after `24.1` and `13.5` do not have to match. Each OPAR comes with a `SHA256SUMS` file, its `build-info.txt`, its CycloneDX software bill of materials (`<opar>.bom.cyclonedx.json`), the release signing public key `cosign.pub`, and a detached signature (`.sig`) for each file. From this release the SBOM is signed too.
 
-The commands below use the 24ai version. On Enterprise Manager 13.5, substitute `13.5.3.0.0` everywhere.
+The commands below use the 24ai version. On Enterprise Manager 13.5, substitute `13.5.4.0.0` everywhere.
 
 ## Verify the download {#verify}
 
@@ -45,7 +45,7 @@ cosign verify-blob --key cosign.pub --signature SHA256SUMS.sig --insecure-ignore
 sha256sum -c SHA256SUMS --ignore-missing
 ```
 
-The digest `sha256sum` reports must also match the table under [Download](#download). The OPAR comes first because `--ignore-missing` skips a file that is not there under its listed name, so it does not catch a renamed OPAR. The check runs offline. cosign 3.x also prints a `--signature` deprecation notice and a "Skipping tlog verification" warning; both are expected, because the signatures are detached and deliberately not in a public transparency log.
+The digest `sha256sum` reports must also match the table under [Download](#download). The OPAR comes first because `--ignore-missing` skips a file that is not there under its listed name, so it does not catch a renamed OPAR. The check runs offline, with cosign 2.x or 3.x. cosign 3.x also prints a `--signature` deprecation notice and a "Skipping tlog verification" warning; both are expected, because the signatures are detached and deliberately not in a public transparency log.
 
 The release signing public key (`cosign.pub`, ECDSA P-256, sha256 `1c419e1a95947e4783d1754306539933f331666bb7804b7ad0cf007be2144a19`) is:
 
@@ -56,7 +56,7 @@ kAF+ryeo8esBrixM7EP9eWgXdWU+HOF+/++LrRfB0wOn9iV85EGyMhT1bA==
 -----END PUBLIC KEY-----
 ```
 
-Compare it with the `cosign.pub` delivered with a download before you trust either. The 24.1.1.0.0 / 13.5.2.0.0 OPARs were signed with the same key, without changing their bytes.
+Compare it with the `cosign.pub` delivered with a download before you trust either. The key is unchanged since it was introduced: GA (24.1.2.0.0 / 13.5.3.0.0) and this release are signed with it, and the 24.1.1.0.0 / 13.5.2.0.0 OPARs were signed with it afterwards, without changing their bytes.
 
 ## Import the OPAR {#import}
 
@@ -69,7 +69,7 @@ Compare it with the `cosign.pub` delivered with a download before you trust eith
 2. Import the OPAR file:
 
    ```
-   emcli import_update -file="/tmp/24.1.2.0.0_ip.em.xdb2_2000_0.opar" -omslocal
+   emcli import_update -file="/tmp/24.1.3.0.0_ip.em.xdb2_2000_0.opar" -omslocal
    ```
 
    `-omslocal` is for a file on the OMS host; use `-host` and `-credential_set_name` to import from an agent host instead. The plug-in then appears under **Setup → Extensibility → Plug-ins**, in the **Databases** category, as **IBM DB2 Database**. (The target types are named IBM Db2 Database and IBM Db2 Instance; the plug-in keeps its catalog name.)
@@ -83,10 +83,10 @@ Compare it with the `cosign.pub` delivered with a download before you trust eith
 The equivalent `emcli` command, pinned to the version you imported:
 
 ```
-emcli deploy_plugin_on_server -plugin="ip.em.xdb2:24.1.2.0.0" -dbUser=SYS -dbPassword=<repository_SYS_password>
+emcli deploy_plugin_on_server -plugin="ip.em.xdb2:24.1.3.0.0" -dbUser=SYS -dbPassword=<repository_SYS_password>
 ```
 
-`-dbUser` / `-dbPassword` are the Management Repository database's `SYS` account. Enterprise Manager 24ai rejects the older `-sys_password` form; Enterprise Manager 13.5 accepts both, so the command above works on either release with `13.5.3.0.0` in place of `24.1.2.0.0`. Always pin the `:version`, on this command and on the agent deploy below.
+`-dbUser` / `-dbPassword` are the Management Repository database's `SYS` account. Enterprise Manager 24ai rejects the older `-sys_password` form; Enterprise Manager 13.5 accepts both, so the command above works on either release with `13.5.4.0.0` in place of `24.1.3.0.0`. Always pin the `:version`, on this command and on the agent deploy below.
 
 To check deployment progress, run:
 
@@ -105,35 +105,45 @@ Each deploy is asynchronous, and the OMS may restart during it: wait for the sta
 The equivalent `emcli` command:
 
 ```
-emcli deploy_plugin_on_agent -plugin="ip.em.xdb2:24.1.2.0.0" -agent_names="<host>:<port>"
+emcli deploy_plugin_on_agent -plugin="ip.em.xdb2:24.1.3.0.0" -agent_names="<host>:<port>"
 ```
 
 **Always pin the version**: without it, an agent that already has an earlier version of the plug-in can be reported as "already deployed" and skipped. Separate several agents with commas in `-agent_names`. `get_plugin_deployment_status` reports agent deployment progress as it does for the OMS. The plug-in deploys only to Linux x86-64 and Windows x86-64 agents.
 
 Once the plug-in is on the OMS and at least one agent, you can add Db2 targets: see [Targets and properties](targets-and-properties.md), or let [discovery](discovery.md) propose them.
 
-## Upgrade from 24.1.1.0.0 {#upgrade}
+## Upgrade {#upgrade}
 
-**24.1.2.0.0 / 13.5.3.0.0 upgrades the initial release, 24.1.1.0.0 / 13.5.2.0.0, in place.** Import the new OPAR and deploy it the same way as the first install, over the existing plug-in, pinning the new `:version` on both the server and the agent commands. Targets, their credentials and their collected history are kept, except where [Upgrade notes](upgrade-notes.md) says otherwise.
+**24.1.3.0.0 / 13.5.4.0.0 upgrades GA, 24.1.2.0.0 / 13.5.3.0.0, in place, and the initial release, 24.1.1.0.0 / 13.5.2.0.0, too.** Import the new OPAR and deploy it the same way as the first install, over the existing plug-in, pinning the new `:version` on both the server and the agent commands. Targets, their credentials and their collected history are kept, except where [Upgrade notes](upgrade-notes.md) says otherwise.
 
-1. Read [Upgrade notes](upgrade-notes.md) and decide what to do about the compliance rules, the renamed lock and session groups, and the licence key, before the upgrade reaches production.
+1. Read [Upgrade notes](upgrade-notes.md#update-24-1-3) and plan the compliance re-association, the retired Top SQL groups and any table space threshold you set yourself, before the upgrade reaches production. From 24.1.1.0.0, also read the [GA notes](upgrade-notes.md#update-24-1-2): the compliance rules, the renamed lock and session groups, and the licence key.
 2. [Import](#import) the new OPAR.
-3. [Deploy to the OMS](#deploy-oms) with `ip.em.xdb2:24.1.2.0.0` (or `13.5.3.0.0`).
-4. [Deploy to every agent](#deploy-agents) that monitors a Db2 target, in the same maintenance window. Until an agent has the new version, the metrics this release adds have nowhere to come from, so their pages stay empty, and the agent refuses the new backup job type (1.6) and runs nothing.
-5. **Restart the OMS once**: `emctl stop oms`, then `emctl start oms`. Several metric groups gain columns in this release, and an OMS keeps each target type's column list in memory, so those columns stay empty, and the licence-status alert does not fire, until it restarts. A new OMS install needs no restart. See [Upgrade notes](upgrade-notes.md#restart-oms).
+3. [Deploy to the OMS](#deploy-oms) with `ip.em.xdb2:24.1.3.0.0` (or `13.5.4.0.0`).
+4. [Deploy to every agent](#deploy-agents) that monitors a Db2 target, in the same maintenance window. The agent-side changes of this release (the alert texts, the Windows job fix, the purge job's output, the HADR standby log fix) reach a target only when its agent has the new version. From 24.1.1.0.0, an agent left on the old version also refuses the GA backup job type (1.6) and runs nothing.
+5. **Restart the OMS once**: `emctl stop oms`, then `emctl start oms`. This release appends a column to the `DB_Backup` metric group, and an OMS keeps each target type's column list in memory, so the column stays empty, and a never-backed-up database raises no alert, until it restarts. A new OMS install needs no restart. See [Upgrade notes](upgrade-notes.md#restart-oms-24-1-3).
 6. Run the [after-upgrade checks](#after-upgrade).
 
-**Going back is not a rollback for the backup job.** The OMS keeps job type 1.6 after the upgrade, so re-deploying 24.1.1.0.0 to an agent does not restore its backup job.
+**Going back from 24.1.1.0.0 is not a rollback for the backup job.** The OMS keeps job type 1.6 after the upgrade, so re-deploying 24.1.1.0.0 to an agent does not restore its backup job.
 
 **Coming from the Open Beta?** The beta (`ip.em.xdbb`) and the released plug-in (`ip.em.xdb2`) are different plug-ins, so beta to GA is always a clean install side by side, never an in-place upgrade. Follow [Moving from the beta to GA](beta-pre-release.md).
 
 ## After an upgrade {#after-upgrade}
 
-- **Check the target menu and pages.** Pages are renamed in this release (Home is Overview, Analysis is Locks, and so on; see [Upgrade notes](upgrade-notes.md#page-names)). The target menu shows the new names after the deploy and the OMS restart.
+After any upgrade to this release:
+
+- **Associate the three compliance standards with your targets again.** They are now authored `INTEGRATION_PLUMBERS`, and the associations of the old `SYSMAN` standards are not carried over. See [Upgrade notes](upgrade-notes.md#reassociate-standards).
+- **Clear a table space threshold you set yourself** on *Tablespace Used of Allocated (%)*: the shipped space alert is now on `Tablespace_Forecast : PctUsed`. See [Upgrade notes](upgrade-notes.md#tablespace-threshold).
+- **Set thresholds again that you had on the retired Top SQL groups**, on `Query_Analytics` if you still want them. See [Upgrade notes](upgrade-notes.md#top-sql-retired).
+- **Re-import the incident rule set and the monitoring templates** if you use them. See [Upgrade notes](upgrade-notes.md#collateral-24-1-3).
+- **Run Purge Orphaned IBM Db2 Plug-in Cache Files once per agent**, or schedule it, to remove the older plug-in homes' cache files. Skipping it wastes a few KB and nothing else. See [Purge orphaned cache files](jobs-and-metric-extensions.md#purge-stale-cache).
+- **Open Monitoring Readiness** on a target or two. It checks the connection, licence, monitor authority, collection, monitor switches, deadlock capture, HADR and the diagnostic log live, and prints the statement that fixes each gap. See [Monitoring pages](monitoring-pages.md#monitoring-readiness).
+
+After an upgrade from 24.1.1.0.0, also:
+
+- **Check the target menu and pages.** GA renamed the pages (Home is Overview, Analysis is Locks, and so on; see [Upgrade notes](upgrade-notes.md#page-names)). The target menu shows the new names after the deploy and the OMS restart.
 - **Re-apply thresholds set on the renamed lock and session groups.** Thresholds, templates and incident rules set on the 24.1.1.0.0 names do not move. See [Upgrade notes](upgrade-notes.md#renamed-groups).
 - **Move each licence key into its credential set**, when you are ready. Nothing breaks if you wait: see [Moving a key](targets-and-properties.md#moving-a-key).
-- **Run Purge Orphaned IBM DB2 Plug-in Cache Files once per agent**, or schedule it. 24.1.1.0.0 kept a small cache file per target inside the versioned plug-in home; this release moves it to the agent state directory, and the job removes the old copies. Skipping it wastes a few KB and nothing else. See [Purge orphaned cache files](jobs-and-metric-extensions.md#purge-stale-cache).
-- **Open Monitoring Readiness** on a target or two. It checks the connection, licence, monitor authority, collection, monitor switches, deadlock capture, HADR and the diagnostic log live, and prints the statement that fixes each gap. See [Monitoring pages](monitoring-pages.md#monitoring-readiness).
+- **Expect the purge job to find more.** 24.1.1.0.0 kept a small cache file per target inside the versioned plug-in home; GA moved it to the agent state directory, and the purge job removes the old copies.
 
 If a limited-instance licence key's instance count fails to validate, see [Troubleshooting](troubleshooting.md#oms-licence-count): it is usually the OMS settings or the OMS certificate, not a licence problem.
 
@@ -173,7 +183,7 @@ Installing the plug-in again over these works.
 
 ## Related
 
-- [Upgrade notes](upgrade-notes.md): every operator action the upgrade from 24.1.1.0.0 needs
+- [Upgrade notes](upgrade-notes.md): every operator action an upgrade needs, from GA or from 24.1.1.0.0
 - [Prerequisites](prerequisites.md): supported versions, network access, and the monitoring role
 - [Targets and properties](targets-and-properties.md): add a target and set its licence key
 - [Moving from the beta to GA](beta-pre-release.md): for Open Beta users
