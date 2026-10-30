@@ -7,9 +7,61 @@ nav_order: 1
 
 The changes in each release of the IBM Db2 plug-in, newest first, for anyone deciding whether to upgrade or checking what a release changed. Each release ships as two builds with the same features: one for Enterprise Manager 24ai and one for Enterprise Manager 13.5. Install the build that matches your Enterprise Manager.
 
-**In this page:** [General availability: 24.1.2.0.0 / 13.5.3.0.0 (2026-10-23)](#update-24-1-2) · [Initial release: 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12)](#ga) · [Feedback](#feedback)
+**In this page:** [Update: 24.1.3.0.0 / 13.5.4.0.0 (2026-10-30)](#update-24-1-3) · [General availability: 24.1.2.0.0 / 13.5.3.0.0 (2026-10-23)](#update-24-1-2) · [Initial release: 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12)](#ga) · [Feedback](#feedback)
+
+## Update: 24.1.3.0.0 (Enterprise Manager 24ai) / 13.5.4.0.0 (Enterprise Manager 13.5), 2026-10-30 {#update-24-1-3}
+
+The first update of the GA release of the IBM Db2 plug-in, `ip.em.xdb2`, released on 2026-10-30. It installs fresh, or in place over GA, 24.1.2.0.0 / 13.5.3.0.0, or over the initial release, 24.1.1.0.0 / 13.5.2.0.0 ([Upgrade](install-and-upgrade.md#upgrade)). The database target metadata moves from 4.9 to 5.0, and the instance target from 1.3 to 1.4. [Upgrade notes](upgrade-notes.md#update-24-1-3) lists every change that needs operator action. The release files and their SHA-256 checksums are under [Download](install-and-upgrade.md#download).
+
+**Read this first.** Deploy to the OMS and to every agent, then restart the OMS once. After the upgrade, associate the three compliance standards with your targets again, and clear any table space threshold you set yourself on *Tablespace Used of Allocated (%)*. The two Top SQL groups are retired. The detail is under [Upgrade notes](#upgrade-notes-24-1-3) below.
+
+#### Functionality Added or Changed
+
+- **IBM Db2 labels and readable alert texts.** The console names that still said "IBM DB2" now say "IBM Db2": the five credential types and seven credential sets (for example *IBM Db2 Database Monitoring Credentials*), the configuration snapshot, the target down and up alerts, the four licence alerts, the six runbooks (*IBM Db2: Transaction Log Filling* and the rest) and the two plug-in job types, *Collect IBM Db2 Plug-in Diagnostics* and *Purge Orphaned IBM Db2 Plug-in Cache Files*. Preferred credentials already set are kept: only the label changes. The plug-in itself is still listed as *IBM DB2 Database* under Plug-ins.
+- **Alert messages read correctly.** A `%` follows a threshold only when the metric is a percentage, so rates, times, counts and days no longer read "warning (1%)". Failed-operation alerts give a readable time (*A Backup operation failed (SQLCODE -2036) at 2026-10-21 19:18:20*). Two labels that Enterprise Manager cut off at 64 characters are complete again, and the two Application Connection columns that duplicate `appls_cur_cons` and `appls_in_db2` say so in their labels. Three plain ratios (`creation_to_assigning_ratio`, `hashjoin_overflow_ratio` and `host_cpu_usage_per_sec`) are no longer labelled as percentages.
+- **A Critical alert for a database that has never been backed up.** Db2 reports no last backup for such a database, so `days_since_last_backup` reads -1, which no age threshold catches. The new `DB_Backup : never_backed_up` column is 1 exactly then, and ships a Critical when it equals 1; it clears at the first collection after a backup. The Backup page says **Never**, in red, on its *Last backup* and *Last backup result* tiles ([DB_Backup](metrics-reference.md#db-backup), [Backup](monitoring-pages.md#backup)). Expect it on development databases you do not back up, and clear the threshold for those targets.
+- **The table space alert is on percent of maximum.** The shipped Warning 80 / Critical 90 % moves from `Tablespace_Storage : tablespace_utilization`, which for an auto-resize table space is how close Db2 is to its next resize, to `Tablespace_Forecast : PctUsed`, the Storage page's *Used (% of maximum)*. An auto-resize table space no longer goes Critical while it is nearly empty. SMS table spaces and table spaces with no storage group now get a file-system ceiling too ([Tablespace_Forecast](metrics-reference.md#tablespace-forecast)).
+- **The two Top SQL groups are retired.** `Top_Queries_Cpu_Time` and `Top_Queries_Execution_Count` duplicated what `Query_Analytics` records per statement, each with its own read of the package cache. Their Conditions move to `Query_Analytics` (`CpuTime` and `Executions`, per 15-minute interval, shipped Not Defined), the package cache is read 4 times an hour per target instead of 8, and the SQL page is unchanged ([Top SQL](metrics-reference.md#top-sql)).
+- **Compliance content is authored `INTEGRATION_PLUMBERS`**, so the Library's *Author* column tells it apart from Oracle's content and your own. The standards keep their names and versions. **IBM Db2 Database Version Lifecycle** now reads the licensed edition: Db2 11.5 Base Edition, whose support ended on 30 September 2025, is reported past end of support ([Compliance standards](compliance-standards.md)).
+- **The optional incident rule set opens incidents for Warnings by default.** `db2_incident_rules.sh import` now turns on the Warning rule with the Critical and drift rules; pass `--no-warnings` to leave it off. Both threshold rules also cover the three thresholds the Production-critical template adds ([Incident rules](alerts-and-templates.md#incident-rules)).
+- **Production-critical raises its log-space alert on the first collection over 60 %**, instead of the third, and all three templates carry the never-backed-up Critical ([Monitoring templates](alerts-and-templates.md#monitoring-templates)).
+- **Console polish.** Locks fits Lock Contention on a 1440-pixel screen, Sessions shows Db2's application-status codes in words (`COMP` reads *Compiling*), the High Availability time labels are no longer cut off, configuration snapshot times are in your browser's time zone, and the Back Up Database button stays in view. On the SQL page, **Rank by** reorders Top Statements at once, and the two bar charts follow **Hide monitoring queries** and are labelled with the statement text.
+- **A script to move targets from Oracle's IBM DB2 plug-in.** `db2_migrate_from_sidb.sh`, an EM CLI script that ships beside the plug-in like the monitoring templates, exports the `ibm_db2_database` targets of Oracle's plug-in (`oracle.em.sidb`) to a CSV, creates `ip_db2_database` targets beside them under the same names with their monitoring and licence credentials, waits for each to come up licensed, associates the compliance standards and applies a monitoring template. It removes an Oracle target only when asked, and only after its new target has verified; `--dry-run` changes nothing. History does not move: the new targets start collecting fresh.
+- **The CycloneDX SBOM is signed.** Each release's software bill of materials, `<opar>.bom.cyclonedx.json`, is signed with the other release files from this release on ([Verify the download](install-and-upgrade.md#verify)).
+
+#### Bugs Fixed
+
+- An HADR standby target without reads on standby no longer writes an error and a stack trace to the plug-in log for every metric group it does not collect, about 5,400 lines a day per standby. Every page of such a target now opens with one banner naming the primary to monitor, the Overview counts the groups honestly (*6 of 79 collecting; 73 disabled*), and High Availability shows the pair as the primary reports it ([Monitoring a standby](hadr-monitoring.md#monitoring-a-standby)).
+- A healthy HADR pair no longer reads NOT READY for days after a reconnect: takeover readiness counts the heartbeats missed in the last collection interval, not since the database was activated.
+- Admin jobs on a Windows agent (*Online Backup*, including **Back Up Database**, *RUNSTATS on a Table*, *Force Application* and *Explain*) report the job's real result instead of *Succeeded* with empty output, so a failed backup now fails with Db2's message. On every platform a run that reports no result fails with `the plug-in produced no result line` ([Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs)).
+- The output of *Purge Orphaned IBM Db2 Plug-in Cache Files* lists each file it deleted or could not delete, then the *Purged N of M* summary, without log4j start and stop lines ([Purge orphaned cache files](jobs-and-metric-extensions.md#purge-stale-cache)).
+- The Backup page's *Days Since Last Backup* chart no longer draws a never-backed-up database as a flat line at -1; it says the database has never been backed up instead.
+- Trend charts on Last day and Last week draw every stored sample, not only the newest 60, so Last week shows the whole week. The Last month caption says *daily averages*, as Enterprise Manager serves it.
+- The Overview's Connections chart, now *Connected and Active Applications*, draws current counts instead of a running total, and the Performance page's Request Wait Time Breakdown is stacked.
+- The first open of a Db2 target on a slow link no longer times out with *Unexpected Error: Loading Controller Definition*: the page library ships minified, about half its former size.
+- Monitoring Readiness and the licence read retry once on a slow console, and a stored fallback matches the Overview's count instead of contradicting it.
+
+#### Upgrade notes {#upgrade-notes-24-1-3}
+
+Full detail, with what to do for each, is on [Upgrade notes](upgrade-notes.md#update-24-1-3).
+
+- Deploy to the OMS and to every agent, then restart the OMS once: the new backup column stays empty, and a never-backed-up database raises no alert, until it restarts ([details](upgrade-notes.md#restart-oms-24-1-3)).
+- Associate the three compliance standards with your targets again: the `SYSMAN` standards are replaced and their associations are not carried over ([details](upgrade-notes.md#reassociate-standards)).
+- The two Top SQL groups stop collecting and their stored rows are deleted; thresholds, template entries and incident rules set on them do not carry over ([details](upgrade-notes.md#top-sql-retired)).
+- A table space threshold you set yourself on *Tablespace Used of Allocated (%)* is kept and can go on alerting: clear it ([details](upgrade-notes.md#tablespace-threshold)).
+- Re-import the incident rule set and the Production-critical template if you use them, to pick up this release's changes ([details](upgrade-notes.md#collateral-24-1-3)).
+
+#### Known issue {#known-issue-24-1-3}
+
+**A successful online backup on a Windows agent was not lab-verified for this release.** The Windows job fix above was verified on a Windows agent with a failing backup and with RUNSTATS, but a backup that succeeds there was not run. If an *Online Backup* on a Windows agent reports a result you do not expect, check the database's recovery history (the Backup page's history, or `db2 list history backup all for <database>`) and tell support.
+
+#### Known limitations and boundaries
+
+The limitations of GA, below, still apply, with two changes: Last month reads daily averages (Last week stays hourly), and a standby without reads on standby, which still reports availability only, now says so on every page.
 
 ## General availability: 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), 2026-10-23 {#update-24-1-2}
+
+*24.1.3.0.0 / 13.5.4.0.0, above, updates this release in place.*
 
 The general-availability (GA) release of the IBM Db2 plug-in, `ip.em.xdb2`, released on 2026-10-23. It installs fresh, or over the initial release, 24.1.1.0.0 / 13.5.2.0.0, in place ([Upgrade from 24.1.1.0.0](install-and-upgrade.md#upgrade)). The database target metadata moves from 3.9 to 4.9, and a second target type, IBM Db2 Instance, arrives at 1.3. [Upgrade notes](upgrade-notes.md#update-24-1-2) lists every change that needs operator action. The release files and their SHA-256 checksums are under [Download](install-and-upgrade.md#download).
 

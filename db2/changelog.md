@@ -7,6 +7,32 @@ nav_order: 13
 
 This page lists what changed in each release of the IBM Db2 plug-in, most recent first, in brief: [What's new](whats-new.md) has the detail. The plug-in is `ip.em.xdb2`, with target types `ip_db2_database` and, from 24.1.2.0.0 / 13.5.3.0.0, `ip_db2_instance`. Its Enterprise Manager 24ai and Enterprise Manager 13.5 builds are versioned independently. The Open Beta history follows the released versions, under [Beta line](#beta-line).
 
+## 24.1.3.0.0 (Enterprise Manager 24ai) / 13.5.4.0.0 (Enterprise Manager 13.5), 2026-10-30 {#update-24-1-3}
+
+The first update of the GA release. It installs fresh, or in place over GA, 24.1.2.0.0 / 13.5.3.0.0, or over the initial release, 24.1.1.0.0 / 13.5.2.0.0. One release, two builds with the same content: 24.1.3.0.0 installs on Enterprise Manager 24ai, 13.5.4.0.0 on Enterprise Manager 13.5. The database target metadata moves from 4.9 to 5.0, and the instance target from 1.3 to 1.4. The full detail is on [What's new](whats-new.md#update-24-1-3), and the operator actions are on [Upgrade notes](upgrade-notes.md#update-24-1-3).
+
+- Renamed the console labels, credential sets, credential types, job types and runbooks from "IBM DB2" to "IBM Db2", and rewrote the alert texts: a `%` follows a threshold only when the metric is a percentage, and failed-operation alerts give a readable time.
+- Added a Critical alert for a database that has never been backed up (`DB_Backup : never_backed_up`). The Backup page says *Never* for it, and its Days Since Last Backup chart no longer draws -1.
+- Moved the shipped table space space alert from `Tablespace_Storage : tablespace_utilization` (used of allocated) to `Tablespace_Forecast : PctUsed` (used of maximum), so an auto-resize table space no longer goes Critical while nearly empty.
+- Retired the two Top SQL groups, `Top_Queries_Cpu_Time` and `Top_Queries_Execution_Count`, whose stored rows the upgrade deletes. Their Conditions move to `Query_Analytics`, and the package cache is read once per collection cycle instead of three times.
+- Re-authored the compliance framework, standards and rules as `INTEGRATION_PLUMBERS` (was `SYSMAN`), so the standards must be associated with targets again after upgrading. Db2 11.5 Base Edition is reported past IBM end of support.
+- Turned on the Warning rule of the optional incident rule set by default, and made Production-critical raise its log-space alert on the first collection over the threshold.
+- Fixed an HADR standby target filling the plug-in log with an error and a stack trace for every group it does not collect, and a healthy HADR pair reading NOT READY for days after a reconnect. A standby target now says it is a standby on every page.
+- Fixed admin jobs on a Windows agent reporting *Succeeded* with empty output whatever happened: they now report the real result, and a run that reports no result fails. The purge job's output now lists what it purged.
+- Fixed trend charts drawing only their newest 60 samples on Last day and Last week, the Last month caption (daily averages, not hourly), the Overview Connections chart, the stacking of the Request Wait Time Breakdown, and console time-outs on a slow link (the page library ships minified).
+- Signed the CycloneDX SBOM with the other release files for the first time.
+
+**Known issue:** a successful online backup on a Windows agent was not lab-verified for this release: see [What's new](whats-new.md#known-issue-24-1-3).
+
+**Release files and SHA-256 checksums**
+
+| Enterprise Manager | File | SHA-256 |
+| :--- | :--- | :--- |
+| 24ai | `24.1.3.0.0_ip.em.xdb2_2000_0.opar` | `b2b8d6a2c37269775602522408f731469d3dedbdd9708a4c86e97a196b221e8c` |
+| 13.5 | `13.5.4.0.0_ip.em.xdb2_2000_0.opar` | `aecd7ccedc44080c658922461e7c024f87cd489d111b0b110fd36235475ef9b4` |
+
+The same checksums are in the signed `SHA256SUMS` file delivered with the download, beside each file's signature, the build information, the CycloneDX SBOM and `cosign.pub`: verify the signature before you trust either, see [Verify the download](install-and-upgrade.md#verify).
+
 ## 24.1.2.0.0 (Enterprise Manager 24ai) / 13.5.3.0.0 (Enterprise Manager 13.5), GA, 2026-10-23 {#update-24-1-2}
 
 The general-availability release of `ip.em.xdb2`. It installs fresh, or in place over the initial release, 24.1.1.0.0 / 13.5.2.0.0. Moving from the Open Beta is a clean install: see [Moving from the beta to GA](beta-pre-release.md). One release, two builds with the same content: 24.1.2.0.0 installs on Enterprise Manager 24ai, 13.5.3.0.0 on Enterprise Manager 13.5. The full detail is on [What's new](whats-new.md#update-24-1-2), and the operator actions are on [Upgrade notes](upgrade-notes.md#update-24-1-2).

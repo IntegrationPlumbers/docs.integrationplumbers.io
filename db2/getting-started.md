@@ -5,7 +5,7 @@ nav_order: 2
 
 # Getting started
 
-If you have not deployed the IBM Db2 plug-in before, this page is the shortest path from a downloaded archive to a Db2 target you can look at: five steps, each with what to do and how you know it worked, then links to the page that carries the detail. Upgrading an existing 24.1.1.0.0 install instead? See [Upgrade from 24.1.1.0.0](install-and-upgrade.md#upgrade).
+If you have not deployed the IBM Db2 plug-in before, this page is the shortest path from a downloaded archive to a Db2 target you can look at: five steps, each with what to do and how you know it worked, then links to the page that carries the detail. Upgrading an existing install instead? See [Upgrade](install-and-upgrade.md#upgrade).
 
 > **Prerequisites for this page**
 > - OMS access that can import an OPAR and deploy plug-ins, for example `sysman`: see [Enterprise Manager and agents](prerequisites.md#enterprise-manager).
@@ -47,13 +47,13 @@ Import the OPAR that matches your Enterprise Manager onto the OMS, deploy it the
 
 ```
 emcli login -username=<em administrator>
-emcli import_update -file="/tmp/24.1.2.0.0_ip.em.xdb2_2000_0.opar" -omslocal
-emcli deploy_plugin_on_server -plugin="ip.em.xdb2:24.1.2.0.0" -dbUser=SYS -dbPassword=<repository SYS password>
+emcli import_update -file="/tmp/24.1.3.0.0_ip.em.xdb2_2000_0.opar" -omslocal
+emcli deploy_plugin_on_server -plugin="ip.em.xdb2:24.1.3.0.0" -dbUser=SYS -dbPassword=<repository SYS password>
 emcli get_plugin_deployment_status -plugin=ip.em.xdb2      # wait for Success
-emcli deploy_plugin_on_agent -plugin="ip.em.xdb2:24.1.2.0.0" -agent_names="<agent_host>:<agent_port>"
+emcli deploy_plugin_on_agent -plugin="ip.em.xdb2:24.1.3.0.0" -agent_names="<agent_host>:<agent_port>"
 ```
 
-On Enterprise Manager 13.5, use `13.5.3.0.0_ip.em.xdb2_2000_0.opar` and `13.5.3.0.0` in place of `24.1.2.0.0`. Enterprise Manager 13.5 also accepts `-sys_password=<repository SYS password>` in place of `-dbUser`/`-dbPassword`; 24ai accepts only `-dbUser`/`-dbPassword`. Always pin the `:version` on both deploy commands.
+On Enterprise Manager 13.5, use `13.5.4.0.0_ip.em.xdb2_2000_0.opar` and `13.5.4.0.0` in place of `24.1.3.0.0`. Enterprise Manager 13.5 also accepts `-sys_password=<repository SYS password>` in place of `-dbUser`/`-dbPassword`; 24ai accepts only `-dbUser`/`-dbPassword`. Always pin the `:version` on both deploy commands.
 
 **Done when** `emcli get_plugin_deployment_status -plugin=ip.em.xdb2` reports the deployment complete for the OMS and for each agent, and **IBM Db2 Database** appears in the Add Target list for that agent.
 
@@ -69,7 +69,7 @@ Detail: [Add a target from the console](targets-and-properties.md#add-target-con
 
 ## Step 4: Enter the licence key {#step-4-enter-the-licence-key}
 
-Enter your key in the target's **Plug-in Licence Key** field (the *IBM DB2 Plug-in Licence Monitoring Credentials* set), either while you add the target or afterwards under **Target Setup → Monitoring Configuration**. With EM CLI, use `emcli set_monitoring_credential` with `-set_name=DB2LicenseMonitoringCreds`: see [Licensing](targets-and-properties.md#licensing). Paste the key exactly as issued, as one line. The **License** metric then reports the licence state every 15 minutes.
+Enter your key in the target's **Plug-in Licence Key** field (the *IBM Db2 Plug-in Licence Monitoring Credentials* set), either while you add the target or afterwards under **Target Setup → Monitoring Configuration**. With EM CLI, use `emcli set_monitoring_credential` with `-set_name=DB2LicenseMonitoringCreds`: see [Licensing](targets-and-properties.md#licensing). Paste the key exactly as issued, as one line. The **License** metric then reports the licence state every 15 minutes.
 
 **Done when** the **License** metric reports `Active`. `License Required`, `Invalid Signature` or `Expired` stops ordinary collection on that target; `Grace Period` keeps it running for 14 days after expiry; `Exceeded Limit` keeps it running but leaves the licence alert open. See [Licensing](targets-and-properties.md#licensing) for each status, and for the OMS settings a key with an instance limit needs.
 
