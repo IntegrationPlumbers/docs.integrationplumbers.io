@@ -12,13 +12,13 @@ To evaluate the IBM Db2 plug-in against your own Db2 databases, on your own OMS,
 > - Db2 LUW 11.5 or 12.1 and a least-privilege monitoring user on each database: see [The monitoring role](prerequisites.md#monitoring-role).
 > - For the local-only jobs in the checklist, an agent on the same host as the Db2 instance: see [Network and ports](prerequisites.md#network).
 
-**Where to find it:** the key is requested through your Integration Plumbers contact. It goes in the target's **Plug-in Licence Key** credential, under **Target Setup → Monitoring Configuration**, and the target's **License Info** page confirms it.
+**Where to find it:** the key is requested through the form at [integrationplumbers.io/db2-plugin/trial](https://integrationplumbers.io/db2-plugin/trial) or your Integration Plumbers contact. It goes in the target's **Plug-in Licence Key** credential, under **Target Setup → Monitoring Configuration**, and the target's **License Info** page confirms it.
 
 **In this page:** Request a key · Your licence key · Install · Guided evaluation · Send us your findings · Coming from the Open Beta
 
 ## Request a key
 
-Request the key before you install anything: a valid licence key is required to monitor a target, and you are asked for it while adding the target. Email your Integration Plumbers contact, or **helpdesk@integrationplumbers.io**, with:
+Request the key before you install anything: a valid licence key is required to monitor a target, and you are asked for it while adding the target. Fill in the form at [integrationplumbers.io/db2-plugin/trial](https://integrationplumbers.io/db2-plugin/trial), or email your Integration Plumbers contact or **helpdesk@integrationplumbers.io**, with:
 
 | What we ask for | Why it matters |
 | :--- | :--- |
@@ -30,6 +30,8 @@ Request the key before you install anything: a valid licence key is required to 
 While you wait, work through the [Prerequisites checklist](prerequisites.md#checklist) on the database you plan to evaluate: creating the monitoring user is the one step worth starting early, since it needs a DBA connection.
 
 ## Your licence key {#your-licence-key}
+
+Trial keys are issued for 30 days (ask helpdesk to confirm the length, or to extend a trial). A trial key's type is `Trial` and its instance count is `Unlimited`, so it needs none of the OMS settings that a key with an instance count needs.
 
 The key is issued for `ip.em.xdb2` specifically. A key issued for the Open Beta plug-in (`ip.em.xdbb`) does not work on GA, and the reverse is also true.
 

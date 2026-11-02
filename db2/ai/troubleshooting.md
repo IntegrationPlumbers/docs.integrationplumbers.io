@@ -419,6 +419,18 @@ For Amazon RDS for Db2 over TLS, import every certificate in AWS's CA bundle, no
 - **An instance-level alert appears on the instance target and on each of its databases.** Both target types collect the instance-scope groups. Clear those thresholds on the database targets once an instance target exists.
 - **An HADR standby shows almost nothing.** Without reads on standby it accepts no connections; see `connection`.
 
+## Reading Db2 targets through the Enterprise Manager MCP server
+
+Enterprise Manager 24ai Release Update 12 and later include an MCP server at `https://<oms host>:<console port>/em/api/mcp` (JSON-RPC over HTTP POST, HTTP Basic authentication as an Enterprise Manager user, protocol version `2025-06-18`). An assistant connected to it reads the same repository data the console shows; the plug-in adds nothing to it.
+
+- **Filter IBM Db2 targets by type name:** `typeName ["ip_db2_database", "ip_db2_instance"]`. Do not use a `%db2%` or `%Db2%` wildcard. The server URL-decodes the pattern, reads `%db` as one encoded byte, and returns `count 0` with no error, which looks like an estate with no Db2 in it. A pattern that starts with literal text, such as `typeDisplayNameMatches ["IBM Db2%"]`, also works.
+- **Ask about "IBM Db2 targets", not "databases".** The server tells the client that "databases" means the Oracle database target types unless the question says otherwise.
+- **Connect as a view-only Enterprise Manager user, never as SYSMAN.** Enterprise Manager has no MCP-specific role. The user needs the default `EM_USER` role and `VIEW_TARGET` on each Db2 target, and nothing else. It also sees the host target of the agent that monitors those targets, and the `ExecuteSql` tool reads the repository for the same set of targets.
+- **The connection reads; it changes nothing.** No MCP tool sets a threshold, submits a job or acts on an incident. A person does those in the console or with EM CLI.
+- **An empty metric group is not always a fault.** Over MCP an empty group and a broken one both return no rows. Read the target's `CollectorStatus` rows (see "Where to look") before you conclude anything.
+
+The full connection steps, the `emcli create_user` command and the rehearsed questions are on https://docs.integrationplumbers.io/db2/mcp-server.html.
+
 ## Versions and platforms
 
 - Supported Db2: 11.5 and 12.1, for Linux, UNIX and Windows, single-partition and partitioned (DPF). pureScale: member and CF health only, implemented and not lab-certified. Db2 for z/OS and Db2 11.1 and earlier are not supported.
