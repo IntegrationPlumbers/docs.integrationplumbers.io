@@ -43,6 +43,8 @@ Three more columns help you read it:
 - **`StateAlert`** is `OK` when the standby is in the state it should be in: PEER, or REMOTE_CATCHUP under SUPERASYNC; an auxiliary standby is always `OK`. Otherwise it holds the unexpected state, which its alert names.
 - **`ReplayOnlyWindow`** reads `Y` while the standby is in a replay-only window (DDL or a maintenance operation replaying from the primary), and the readiness detail names the window. Neither the readiness score nor `TakeoverReady` is affected, because a replay-only window does not stop a takeover.
 
+**Missed heartbeats are counted over the last collection interval** (from 24.1.3.0.0 / 13.5.4.0.0). Db2's `HEARTBEAT_MISSED` counts every heartbeat missed since the database was activated and does not reset when the pair reconnects, so one past outage used to keep a healthy pair NOT READY until the next deactivation. A one-off miss now lowers one sample; the Critical needs two NOT READY collections in a row, so it fires when misses continue. Nothing is scored for one collection after a reactivation, takeover or reconnect. `HeartbeatMissed` and the High Availability page still show Db2's cumulative count.
+
 `TimeSinceLastRecv` is in milliseconds. A 0 means a message arrived within the last second; it is also what Db2 reports while the pair is not connected.
 
 ## Default alerts {#default-alerts}
@@ -70,7 +72,9 @@ A standby database of an HADR pair can be added as a target in its own right: sa
 
 - **No false alerts from a standby.** The groups a standby cannot serve write nothing, so they raise no metric collection errors and no threshold evaluates them.
 - **Roles are followed live.** After a takeover, the new primary collects everything on its next collection, and the new standby switches to the behaviour above. The plug-in decides per collection, so there is nothing to refresh.
-- **Set the status threshold on a standby target.** `DetailedResponse : db_status` warns on anything but `ACTIVE`. A standby reports `STANDBY`, or `ACTIVE_STANDBY` with reads on standby, so on a standby target set that threshold to its own healthy value:
+- **The console says it is a standby.** On a standby without reads on standby, every page opens with one banner naming the primary to monitor, the Overview counts the groups it collects (for example *6 of 79 collecting; 73 disabled*) and its KPI tiles read *n/a on standby*, and High Availability shows the pair as the primary reports it (from 24.1.3.0.0 / 13.5.4.0.0). The plug-in log gets one DEBUG line per refused group instead of an error and a stack trace.
+- **Associate the compliance standards with the primary**, not with a standby without reads on standby: it has no configuration snapshot, so every standard scores 100 there without evaluating anything. See [Compliance standards](compliance-standards.md#standby-association).
+- **Set the status threshold on a standby target with reads on standby on.** `DetailedResponse : db_status` warns on anything but `ACTIVE`. Such a standby reports `STANDBY` or `ACTIVE_STANDBY`, so on its target set that threshold to its own healthy value (a standby without reads on standby writes no `db_status` row, so it needs nothing):
 
   ```
   emcli modify_threshold -target_name=<standby target> -target_type=ip_db2_database \

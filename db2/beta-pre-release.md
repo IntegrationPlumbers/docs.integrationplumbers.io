@@ -10,7 +10,7 @@ nav_order: 5.7
 | | |
 |---|---|
 | Product | Integration Plumbers IBM Db2 Plug-in for Oracle Enterprise Manager |
-| Released plug-in | Plug-in `ip.em.xdb2`. GA is **24.1.2.0.0** for Enterprise Manager 24ai and **13.5.3.0.0** for Enterprise Manager 13.5, released 2026-10-23: install that one. It follows the initial release, 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12) |
+| Released plug-in | Plug-in `ip.em.xdb2`. The current release is **24.1.3.0.0** for Enterprise Manager 24ai and **13.5.4.0.0** for Enterprise Manager 13.5, released 2026-10-30: install that one. It updates GA, 24.1.2.0.0 / 13.5.3.0.0 (2026-10-23), which followed the initial release, 24.1.1.0.0 / 13.5.2.0.0 (2026-10-12) |
 | Open Beta | Plug-in `ip.em.xdbb`, versions `24.1.9.N.0` / `13.5.9.N.0`; the last drop was `24.1.9.9.0` / `13.5.9.4.0`. **There is no further beta drop** |
 | How to move | A clean install of GA, side by side with the beta, then undeploy the beta (section 3) |
 | Reference | [IBM Db2 plug-in User Guide](index.md): the authoritative description of what the released plug-in does |
@@ -23,7 +23,7 @@ GA is a **different plug-in** from the beta, by design. It has its own identity,
 |---|---|---|
 | Plug-in ID | `ip.em.xdbb` | `ip.em.xdb2` |
 | Target type | `ip_db2_database_beta`, shown as *IBM DB2 Database (Beta)* | `ip_db2_database`, shown as *IBM Db2 Database* (and, from 24.1.2.0.0, `ip_db2_instance`, *IBM Db2 Instance*) |
-| Versions | `24.1.9.N.0` / `13.5.9.N.0` | `24.1.2.0.0` / `13.5.3.0.0` (GA), after the initial `24.1.1.0.0` / `13.5.2.0.0` |
+| Versions | `24.1.9.N.0` / `13.5.9.N.0` | `24.1.3.0.0` / `13.5.4.0.0` (current), after GA `24.1.2.0.0` / `13.5.3.0.0` and the initial `24.1.1.0.0` / `13.5.2.0.0` |
 | Licence keys | Issued for `ip.em.xdbb` | Issued for `ip.em.xdb2` |
 
 - **Beta to GA is a clean install, not an upgrade.** Deploying GA does not replace or upgrade the beta. Nothing the beta created in your Management Repository carries into GA: targets, metric history, incidents, thresholds you tuned and credentials all stay with the beta.
@@ -55,13 +55,13 @@ Import the GA release file that matches your Enterprise Manager, deploy it to th
 
 ```
 emcli login -username=<em administrator>
-emcli import_update -file="/tmp/24.1.2.0.0_ip.em.xdb2_2000_0.opar" -omslocal
-emcli deploy_plugin_on_server -plugin="ip.em.xdb2:24.1.2.0.0" -dbUser=SYS -dbPassword=<repository SYS password>
+emcli import_update -file="/tmp/24.1.3.0.0_ip.em.xdb2_2000_0.opar" -omslocal
+emcli deploy_plugin_on_server -plugin="ip.em.xdb2:24.1.3.0.0" -dbUser=SYS -dbPassword=<repository SYS password>
 emcli get_plugin_deployment_status -plugin=ip.em.xdb2       # wait for Success
-emcli deploy_plugin_on_agent -plugin="ip.em.xdb2:24.1.2.0.0" -agent_names="<agent host>:<port>"
+emcli deploy_plugin_on_agent -plugin="ip.em.xdb2:24.1.3.0.0" -agent_names="<agent host>:<port>"
 ```
 
-On Enterprise Manager 13.5, use `13.5.3.0.0_ip.em.xdb2_2000_0.opar` and `13.5.3.0.0` in place of `24.1.2.0.0` (13.5 also accepts `-sys_password=<repository SYS password>` in place of `-dbUser`/`-dbPassword`). **Always pin the `:version`** on both deploy commands.
+On Enterprise Manager 13.5, use `13.5.4.0.0_ip.em.xdb2_2000_0.opar` and `13.5.4.0.0` in place of `24.1.3.0.0` (13.5 also accepts `-sys_password=<repository SYS password>` in place of `-dbUser`/`-dbPassword`). **Always pin the `:version`** on both deploy commands.
 
 ### 3.2 Add each database as a GA target
 
@@ -77,16 +77,16 @@ Once you no longer need the beta's history, remove every **IBM DB2 Database (Bet
 
 ## 4. What changed since the beta
 
-Everything new since the beta is on [What's new](whats-new.md): the initial release, 24.1.1.0.0 / 13.5.2.0.0, and the GA release, 24.1.2.0.0 / 13.5.3.0.0. The changes most likely to surprise a beta user:
+Everything new since the beta is on [What's new](whats-new.md): the initial release, 24.1.1.0.0 / 13.5.2.0.0, the GA release, 24.1.2.0.0 / 13.5.3.0.0, and its update, 24.1.3.0.0 / 13.5.4.0.0. The changes most likely to surprise a beta user:
 
 - **The administrative job types are renamed.** The beta's `sidbb_*` job types become `ip_db2_start_instance`, `ip_db2_stop_instance`, `ip_db2_quiesce_database`, `ip_db2_unquiesce_database` and `ip_db2_kill_application`. Saved jobs and job library entries do not carry over. See [Breaking changes](whats-new.md#breaking-changes).
-- **Three remote admin jobs**, Force Application, RUNSTATS on a Table and Online Backup, work on a remotely monitored target. They run as a separate admin user in the new **IBM DB2 Database Admin Credentials** set. See [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs).
+- **Three remote admin jobs**, Force Application, RUNSTATS on a Table and Online Backup, work on a remotely monitored target. They run as a separate admin user in the new **IBM Db2 Database Admin Credentials** set. See [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs).
 - **Availability reads differently.**
   - An HADR standby is **Up**, not Down, and raises no collection errors for the groups it cannot serve. See [Monitoring a standby](hadr-monitoring.md#monitoring-a-standby).
   - A database on an unsupported Db2 version or topology still reports availability. Every other group reads `DISABLED` in CollectorStatus, with the reason.
   - A wrong password, a missing privilege, a TLS problem, or a database quiesced against the monitoring user is now a *metric collection error*, not "target is down".
 - **New alert and collection defaults.** More conditions alert out of the box, and the lock, HADR status and backup groups collect more often. See [Changed defaults](whats-new.md#changed-defaults).
-- **Licensing.** The key is a credential (the *IBM DB2 Plug-in Licence Monitoring Credentials* set), not a target property. `Exceeded Limit` no longer stops collection, an expired key has a 14-day grace period, and a licence gate leaves **CollectorStatus** and **readiness_summary** running, alongside License, Response and Version. See [Licensing](targets-and-properties.md#licensing).
+- **Licensing.** The key is a credential (the *IBM Db2 Plug-in Licence Monitoring Credentials* set), not a target property. `Exceeded Limit` no longer stops collection, an expired key has a 14-day grace period, and a licence gate leaves **CollectorStatus** and **readiness_summary** running, alongside License, Response and Version. See [Licensing](targets-and-properties.md#licensing).
 - **DataFiles is retired**, replaced by Table_Overflow, keyed per table.
 - **The console is redesigned.** The beta's Home, Analysis and Performance pages become seventeen pages, from Overview to Monitoring Readiness. **Kill** is on the root blocker's row on **Locks** and on each row of **Sessions**, and asks for confirmation. See [Monitoring pages](monitoring-pages.md).
 - **SQL text is collected.** Top Statements shows each statement's SQL text, which is stored in the repository and can contain literal values. Read [Statement text and your data](whats-new.md#statement-text-privacy) before you roll GA out.

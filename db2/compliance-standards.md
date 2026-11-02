@@ -24,13 +24,13 @@ The rules are evaluated in the Enterprise Manager repository on the daily config
 | :--- | :--- | :---: | :---: | :--- |
 | **IBM Db2 Database Configuration Best Practices** | `ip_db2_config_best_practices` | 2 | 17 | Diagnostic logging, recovery (archive logging, backup protection, retention and recency, resync interval), memory, network and platform security (TLS), authentication and access, and maintenance and concurrency |
 | **IBM Db2 Database Audit Posture** | `ip_db2_audit_posture` | 1 | 10 | An audit policy exists, is attached and covers the core categories; audit records are written asynchronously; SYSADM belongs to a named group; and authorities and privileges granted to `PUBLIC` and to administrators |
-| **IBM Db2 Database Version Lifecycle** | `ip_db2_version_lifecycle` | 1 | 2 | The Db2 release is not past IBM end of support, and the server runs the latest modification pack of its release |
+| **IBM Db2 Database Version Lifecycle** | `ip_db2_version_lifecycle` | 1 | 2 | The Db2 release and licensed edition are not past IBM end of support, and the server runs the latest modification pack of its release |
 
 - **One framework** collects the three standards: **IBM Db2 Database Compliance Framework**. To check that the content installed, open **Enterprise → Compliance → Library** and look for the three standards and the framework.
 - **All 29 rules target IBM Db2 Database targets** (`ip_db2_database`), and each belongs to exactly one standard. No rule evaluates IBM Db2 Instance targets.
 - **Severity** is what a violation raises: 9 rules are Critical, 17 are Warning and 3 are Minor Warning.
 - **Importance** (High, Normal or Low) is how heavily a rule weighs in its standard's compliance score.
-- **All three are authored by `SYSMAN`.** No standard is evaluated until you associate it with targets.
+- **The framework, the three standards and every rule are authored `INTEGRATION_PLUMBERS`**, which is how the Library's *Author* column tells them apart from Oracle's content and your own. Releases up to 24.1.2.0.0 / 13.5.3.0.0 shipped them as `SYSMAN`: after upgrading from one of those, associate the standards with your targets again (see [below](#reassociate)). No standard is evaluated until you associate it with targets.
 
 This release adds twelve rules to the 17 of 24.1.1.0.0: client authentication, TLS offered but not enforced, `CATALOG_NOAUTH`, `LOCKTIMEOUT` -1, automatic RUNSTATS off, backup retention, backup recency, and five authorities and privileges rules.
 
@@ -61,15 +61,23 @@ In the console:
 With EM CLI, scriptable across as many targets as you like, once per standard, with the version the Library shows:
 
 ```
-emcli associate_cs_targets -name="ip_db2_config_best_practices" -version=2 -author=SYSMAN \
+emcli associate_cs_targets -name="ip_db2_config_best_practices" -version=2 -author=INTEGRATION_PLUMBERS \
       -target_list="<target1>,<target2>"
-emcli associate_cs_targets -name="ip_db2_version_lifecycle" -version=1 -author=SYSMAN \
+emcli associate_cs_targets -name="ip_db2_version_lifecycle" -version=1 -author=INTEGRATION_PLUMBERS \
       -target_list="<target1>,<target2>"
-emcli associate_cs_targets -name="ip_db2_audit_posture" -version=1 -author=SYSMAN \
+emcli associate_cs_targets -name="ip_db2_audit_posture" -version=1 -author=INTEGRATION_PLUMBERS \
       -target_list="<target1>,<target2>"
 ```
 
-Add `-force` to evaluate again at once, for example after a configuration change. The standards keep their 24.1.1.0.0 names and versions (2, 1 and 1) in this release.
+Add `-force` to evaluate again at once, for example after a configuration change. The standards keep their 24.1.1.0.0 names and versions (2, 1 and 1) in this release; only the author changed.
+
+### After upgrading from a release that shipped them as SYSMAN {#reassociate}
+
+This applies to an upgrade from 24.1.2.0.0 / 13.5.3.0.0 or earlier. Enterprise Manager identifies a standard by its name, author and version, so the upgrade removes the `SYSMAN` framework and standards and installs the `INTEGRATION_PLUMBERS` ones in their place. **Their target associations are not carried over**: associate the standards again (above), then check that the Library shows each one with your targets. If you changed a rule parameter for a target, check it on the new association. Results come back after the evaluation the association starts.
+
+### Leave HADR standbys without reads on standby out {#standby-association}
+
+Such a standby collects no configuration, so every rule has nothing to evaluate and all three standards score **100** on it: *nothing evaluated*, not *compliant*. Associate the standards with the primary instead, and if a standby was associated, remove it (**Associate Targets** in the Library, or `emcli disassociate_cs_targets` with the same `-name`, `-version`, `-author` and the standby in `-target_list`). See [Monitoring a standby](hadr-monitoring.md#monitoring-a-standby).
 
 ## Let a configuration collection run {#let-a-configuration-collection-run}
 
@@ -432,7 +440,7 @@ Each rule below gives its name as the console shows it, its internal name, its s
 
 **Why it matters:** a release past end of support receives no fixes from IBM, security fixes included, and is not certified against current operating systems.
 
-**Fix:** plan an upgrade to a release in support. Db2 12.1 is the release this plug-in certifies as primary; 11.5 is supported until 30 April 2027. IBM's Db2 Distributed end-of-support dates are the authoritative schedule.
+**Fix:** plan an upgrade to a release in support. Db2 12.1 is the release this plug-in certifies as primary. Db2 11.5 is supported until 30 April 2027, except **Db2 11.5 Base Edition**, whose support ended on 30 September 2025 with no extended support. From 24.1.3.0.0 / 13.5.4.0.0 the rule reads the edition licensed on the server, from the configuration snapshot, so a Base Edition server shows the Critical after its first configuration collection on that version; where no edition is licensed, the release's all-editions date applies. IBM's Db2 Distributed end-of-support dates are the authoritative schedule.
 
 #### Modification Pack Behind the Latest for Its Release
 
@@ -451,4 +459,4 @@ Each rule below gives its name as the console shows it, its internal name, its s
 - [Upgrade notes](upgrade-notes.md#compliance-scores): the score drop, with the other steps after you upgrade from 24.1.1.0.0
 - [Troubleshooting](troubleshooting.md#compliance): a standard that shows nothing
 - [Trial setup](trial.md): associating the standards during an evaluation
-- [What's new](whats-new.md#update-24-1-2): everything else in this release
+- [What's new](whats-new.md#update-24-1-3): everything else in this release

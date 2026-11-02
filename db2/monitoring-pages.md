@@ -38,11 +38,11 @@ Each page below says what question it answers, lists its regions and the metric 
 |---|---|
 | Instance | A line under the page hint naming the IBM Db2 Instance target the database runs on, with its status, when such a target exists ([Instance targets](targets-and-properties.md#instance-targets)). |
 | Availability History | Enterprise Manager's own Up/Down record for the last 24 hours. |
-| Database | Status (ACTIVE in green, any other state amber), the HADR role and state on an HADR database, size used against capacity, the last backup (**Never** in amber) and the number of invalid objects. Links to **Backup**. |
+| Database | Status (ACTIVE in green, any other state amber), the HADR role and state on an HADR database, size used against capacity, the last backup (**Never** in red, from the never-backed-up Critical's column; amber until that column first collects) and the number of invalid objects. Links to **Backup**. |
 | Monitoring and License | The licence status and days remaining, **Collection** (*All N groups collecting*, or how many groups are failing, in amber), and **Readiness**: *All checks pass*, *1 check needs attention* or *N checks need attention* (red when a check is not functional, amber otherwise), from the hourly `readiness_summary` ([readiness_summary](metrics-reference.md#readiness-summary); *Collected hourly; none yet* until its first collection). Links to **Monitoring Readiness**. |
 | Key Indicators | Seven tiles: **Sessions** (connected, and the share of the connection limit), **Commits per second** (with SQL statements per second), **Buffer pool hit ratio**, **Lock wait** (share of request time), **Storage used**, **Log space used** and **Deadlocks per second**. Each opens its page: Sessions, Performance, Locks, Storage or Transaction Log. |
 | Health Overview | One row per area (Availability, Storage, Transaction Log, Backup and Recovery, HADR, Locks and Transactions, Performance, Memory and Sorts, SQL Workload, Licence, Diagnostics and Other) with Enterprise Manager's current verdict, the number of open alerts, the worst alert's message, and a **Go To** link to the page that shows the metric behind it. The verdicts come from Enterprise Manager's current alerts and availability, so a threshold you tune changes the overview too. |
-| Connections | Remote, local and total application connections over the last day. |
+| Connected and Active Applications | The applications connected to the database, and those executing a request in Db2, over the last day (`Appl_Connection.appls_cur_cons` and `appls_in_db2`). |
 | Lock & Deadlock Activity | Lock-timeout, lock-escalation and deadlock rates over the last day. |
 | Incidents and Problems | Enterprise Manager's incident region for the target. |
 | Related Targets | The targets Enterprise Manager associates with this database, with their type and status: the Db2 server and the IBM Db2 Instance it runs on, its HADR standby (or, on a standby, its primary), the monitoring agent, and the agent's host ([Associations](targets-and-properties.md#associations)). |
@@ -96,7 +96,7 @@ Nothing on this page runs a collection: the sort and cache rates are computed fr
 #### SQL
 ![SQL page: Top Statements ranked by CPU time, with the per-statement charts](images/pages/sql.jpg)
 
-*Which statements cost the most over the window?* Click a statement for its full text, Copy and Explain. One **Time window** for the whole page: Last hour, Last day (the default), Last week or Last month. There is no Real time, because a live read would disturb the per-interval deltas. Last week and Last month are Enterprise Manager's hourly rollup: they list fewer distinct statements, and their totals are relative sizes.
+*Which statements cost the most over the window?* Click a statement for its full text, Copy and Explain. One **Time window** for the whole page: Last hour, Last day (the default), Last week or Last month. There is no Real time, because a live read would disturb the per-interval deltas. Last week and Last month are Enterprise Manager's hourly and daily rollups: they can list fewer distinct statements, and their totals are relative sizes.
 
 | Name | Description |
 |---|---|
@@ -108,7 +108,7 @@ Source: `Query_Analytics` (per statement and interval) and `Statement_Text` (eac
 
 - **Statements are grouped by digest** (from 24.1.2.0.0 / 13.5.3.0.0). Literal values are shown as `?`, and every run of a statement counts toward one row whatever its values: `WHERE ID > 2006` and `WHERE ID > 2007` are one statement, `WHERE ID > ?`. Comments and line breaks are ignored, and an `IN` list counts as one statement whatever its length. A window that starts before the upgrade can show a statement twice: once with the literal text it had before, and once as its digest.
 - At most 200 statements new to the target are added in any 24 hours (the busiest first; the first collection after the target is added or upgraded does not count). A new statement past the limit is left out, and its work is not counted, until a place frees up within the day; the agent log says so. [Statement keys](jobs-and-metric-extensions.md#statement-keys) explains why the limit exists.
-- Statement text is flattened to one line and cut at 2,000 characters. A statement that last ran before `Statement_Text` existed shows the text the older Top SQL groups stored, if any.
+- Statement text is flattened to one line and cut at 2,000 characters. A statement that last ran before `Statement_Text` existed has no stored text: the retired Top SQL groups' text is deleted on the upgrade to 24.1.3.0.0 / 13.5.4.0.0.
 
 When every statement in the window's top 20 is a monitoring query, the table says so and tells you to clear **Hide monitoring queries**. An empty window says *No statement activity in this window*.
 
@@ -290,9 +290,9 @@ Source: `Log_Storage`, `Log_Archive`, `Oldest_Transactions`, `DB_Backup`, and th
 
 | Name | Description |
 |---|---|
-| Recoverability | **Last backup** (*Today*, *N days ago* or *Never*, with the time on the server clock), **Last backup result** (Succeeded or Failed), **Failed operations** in the window, and **Utilities running**. |
+| Recoverability | **Last backup** (*Today*, *N days ago* or *Never*, with the time on the server clock), **Last backup result** (Succeeded or Failed, or *Never* for a database never backed up; *Never* is red on both tiles, with the alert's reason), **Failed operations** in the window, and **Utilities running**. |
 | Recovery History | Db2's recovery history, newest first (backup, restore, load, reorg, rollforward and the others Db2 records): operation and object, start, duration, result and device. Select an operation for its end, entry status, SQLCODE, table spaces, location and backup ID. The first 20 show; **Show all** lists the rest. Times are the Db2 server's clock. |
-| Days Since Last Backup | Over the window, so a schedule that slipped shows as a rising line (-1 means never backed up). |
+| Days Since Last Backup | Over the window, so a schedule that slipped shows as a rising line. A collection with no backup on record is left out of the line, and a note under the chart says so; a database never backed up shows *No backup age to draw: this database has never been backed up*. |
 | Running Utilities, Table Space Rebalance | Shown only when something is running: utilities in progress (backup, load, reorg, runstats) with who started them and for how long, and rebalance operations after storage changes. Otherwise one line says nothing is running. |
 
 Source: `DB_Backup`, `DB_History`, `Utilities`, `Rebalance_Status`, `Log_Archive`. Stored.
@@ -323,7 +323,7 @@ Source: `DB_Backup`, `DB_History`, `Utilities`, `Rebalance_Status`, `Log_Archive
 
 **Online only.** An offline backup needs every connection to the database gone, which is an outage, so the dialog does not offer it. An online backup needs archive logging (`LOGARCHMETH1` not `OFF`). On a database the last collection found using circular logging, the dialog says so and submits nothing; turning on archive logging needs one offline backup, taken on the server.
 
-**Who can use it.** You need **Full** privilege on the target. The target needs the two preferred credentials of the [remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs): *IBM DB2 Database Admin Credentials*, a Db2 user with SYSADM, SYSCTRL or SYSMAINT, and *IBM DB2 Plug-in Agent Owner Credentials*. On a TLS target, also its client truststore credential set ([TLS targets](jobs-and-metric-extensions.md#tls-targets)). Without them the dialog says the backup did not run and names the two credential sets. Deploy the plug-in to the agents as well as the OMS: an agent still on an earlier version refuses a job type 1.6 backup and runs nothing.
+**Who can use it.** You need **Full** privilege on the target. The target needs the two preferred credentials of the [remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs): *IBM Db2 Database Admin Credentials*, a Db2 user with SYSADM, SYSCTRL or SYSMAINT, and *IBM Db2 Plug-in Agent Owner Credentials*. On a TLS target, also its client truststore credential set ([TLS targets](jobs-and-metric-extensions.md#tls-targets)). Without them the dialog says the backup did not run and names the two credential sets. Deploy the plug-in to the agents as well as the OMS: an agent still on an earlier version refuses a job type 1.6 backup and runs nothing.
 
 #### High Availability
 ![High Availability page: Takeover Readiness tiles and the Standbys table](images/pages/high-availability.jpg)
@@ -480,7 +480,7 @@ Everything else, on every page, is stored, and opening it runs nothing on the ag
 | Tables | Last day, Last week, Last month | Last week |
 | Indexes | Last day, Last week, Last month | Last day |
 
-**Real time** has no fixed span: it starts empty and fills in, one point a minute, for as long as the page is open. **Last week** and **Last month** read Enterprise Manager's hourly averages rather than raw collections, because Enterprise Manager keeps raw data for about seven days, so peaks there look lower than they were. The KPI row always shows the newest collection, whatever the window.
+**Real time** has no fixed span: it starts empty and fills in, one point a minute, for as long as the page is open. **Last week** reads Enterprise Manager's hourly averages and **Last month** its daily averages rather than raw collections, because Enterprise Manager keeps raw data for about seven days, so peaks there look lower than they were. Line and area charts draw every sample of a stored window (96 for a day at the default 15-minute collection); Real time keeps the last 60 points. The KPI row always shows the newest collection, whatever the window.
 
 **Auto-refresh** (Locks and Sessions). At the top right: **Off**, **30 s**, **1 min** (the default) or **5 min**; the words beside it say the current rate. Every live read runs a collection on the agent: 5 min runs a fifth as many as the default, and Off runs none after the page opens. The stored reads, which run no collection, keep their own pace under Off: on Locks the Lock Pressure rates (once a minute) and the Diagnostic Log Matches (every 5 minutes), on Sessions the Connections tiles (every 60 seconds). With Off the live regions and Recent Deadlocks keep what they last read; choosing a rate reads the live regions at once and Recent Deadlocks within 5 minutes. After a kill with Off, choose a rate to see the change. While the browser tab is in the background the live reads pause, whatever the rate (the lock tables read once more as the tab goes to the background, as they do when you choose Off); when you come back to the tab the page reads at once and carries on at your rate (with Off, it stays off). The choice is shared by the two pages: turn it off on Locks and it is off on Sessions too. It is kept for this browser tab: a new tab or window opens at 1 min, though a tab the browser duplicates keeps the choice. Leaving the page stops it.
 

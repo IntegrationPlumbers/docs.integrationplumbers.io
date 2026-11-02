@@ -366,29 +366,32 @@ Each waiting file is a full `LOGFILSIZ` of log that cannot be reused. It sits on
 
 ### Tablespace_Storage {#tablespace-storage}
 
-Interval **15 min**. Per table space (`tablespace_id` and `tablespace_name` keys): state, buffer-pool id, page, extent and prefetch size, total, usable, used and free pages, type, current and maximum size, `tablespace_last_resize_failed`, `tablespace_auto_resize_enabled` and `tablespace_utilization` (%). These snapshots feed growth trending and days-to-full forecasting.
+Interval **15 min**. Per table space (`tablespace_id` and `tablespace_name` keys): state, buffer-pool id, page, extent and prefetch size, total, usable, used and free pages, type, current and maximum size, `tablespace_last_resize_failed`, `tablespace_auto_resize_enabled`, `tablespace_utilization` (*Tablespace Used of Allocated (%)*: % of the pages allocated now; 0 for SMS) and `tablespace_size_utilization` (allocated size as a % of MAXSIZE; 0 with no MAXSIZE). These snapshots feed growth trending and days-to-full forecasting.
+
+**No space alert ships here** from metadata 5.0 (24.1.3.0.0 / 13.5.4.0.0): for an auto-resize table space, `tablespace_utilization` is how close Db2 is to its next resize, not how full the table space is, so the shipped space alert is on [Tablespace_Forecast](#tablespace-forecast) `PctUsed`. A value you set on `tablespace_utilization` yourself before the upgrade is kept: see [Upgrade notes](upgrade-notes.md#tablespace-threshold).
 
 **Shipped alerts** (1 occurrence):
 
 | Column | Warning | Critical |
 |---|---|---|
-| `tablespace_utilization` | above 80 % | above 90 % |
 | `tablespace_state` | matches a fault state: `OFFLINE`, `STORAGE_MUST_BE_DEFINED`, `RESTORE_PENDING`, `ROLLFORWARD_PENDING`, `DELETE_PENDING`, `DISABLE_PENDING`, `DROP_PENDING`, `LOAD_PENDING` or `SUSPEND_WRITE` | matches `OFFLINE` |
 
 The state alert is not "anything but NORMAL": `TBSP_STATE` also covers routine transient states, such as an online backup or a rebalance, that must not warn every night.
 
 ### Tablespace_Forecast {#tablespace-forecast}
 
-Interval **30 min**. Per table space: `UsedBytes`, `CapacityBytes`, `MaxBytes`, `GrowthBytesPerDay`, `PctUsed` (%), `DaysToFull` (days; `9999` = no forecast), `AutoResize`, `ResizeFailed`, `FsFreeBytes`. **Shipped alerts:** `DaysToFull` Warning below 30, Critical below 7 days (2 occurrences); `ResizeFailed` Critical when equal to 1 (1 occurrence).
+Interval **30 min**. Per table space: `UsedBytes`, `CapacityBytes`, `MaxBytes`, `GrowthBytesPerDay`, `PctUsed` (used of maximum, %), `DaysToFull` (days; `9999` = no forecast), `AutoResize`, `ResizeFailed`, `FsFreeBytes`. **Shipped alerts:** `PctUsed` Warning above 80, Critical above 90 % (1 occurrence, from metadata 5.0); `DaysToFull` Warning below 30, Critical below 7 days (2 occurrences); `ResizeFailed` Critical when equal to 1 (1 occurrence).
+
+`PctUsed` is used bytes over the capacity below, which the Storage page shows as *Used (% of maximum)*. An auto-resize table space is measured against what it can grow into, so it no longer alerts while nearly empty; only a table space that cannot grow is measured against what is allocated.
 
 `CapacitySource` says what "full" means for each table space:
 
 | Value | Meaning |
 |---|---|
-| `ALLOCATED` | No auto-resize; it cannot grow past its current size |
+| `ALLOCATED` | A DMS table space with no auto-resize; it cannot grow past its current size |
 | `MAXSIZE` | Auto-resize up to its MAXSIZE, which its file systems can hold |
-| `FILESYSTEM` | Auto-resize with no MAXSIZE (the Db2 default), or a MAXSIZE larger than its file systems can hold. The ceiling is what is allocated now plus `FsFreeBytes`, the free space on its storage group's file systems, each counted once |
-| `NONE` | No ceiling can be read (an unlimited table space not on automatic storage). Only this case reports `9999` |
+| `FILESYSTEM` | Auto-resize with no MAXSIZE (the Db2 default), an SMS table space, or a MAXSIZE larger than its file systems can hold. The ceiling is what is allocated now plus `FsFreeBytes`, the free space on its storage group's file systems, each counted once; a table space with no storage group uses the file systems its own containers are on |
+| `NONE` | No ceiling can be read (Db2 reports no file-system size for any of its containers). Only this case reports `9999`, and `PctUsed` 0 |
 
 Several table spaces in one storage group share its free space, and each projection assumes the others stop growing. Storage_Paths watches the file system itself.
 
@@ -520,7 +523,9 @@ A healthy PEER pair measures exactly 0 on every gap and on the lag. `StateAlert`
 
 ## DB_Backup {#db-backup}
 
-Interval **30 min**. `db_name` (key), `server_instance_name`, `last_backup` (timestamp), `days_since_last_backup`. **Shipped alert:** `days_since_last_backup` Warning greater than 1 day, Critical greater than 3 days (3 occurrences). On a partitioned database it reports the oldest partition's backup (see [DPF](#dpf)). Shown on the [Backup page](monitoring-pages.md#backup).
+Interval **30 min**. `db_name` (key), `server_instance_name`, `last_backup` (timestamp), `days_since_last_backup` (-1 = never backed up), and from metadata 5.0 `never_backed_up` (0 or 1). **Shipped alerts:** `days_since_last_backup` Warning greater than 1 day, Critical greater than 3 days (3 occurrences); `never_backed_up` Critical when equal to 1 (1 occurrence).
+
+**A database never backed up.** Db2 reports no last backup for it, so `days_since_last_backup` reads -1, below every age threshold. `never_backed_up` is 1 exactly then, and raises a Critical: *Database SAMPLE has never been backed up: IBM Db2 has no backup of it on record (on a partitioned database, of at least one partition), so it cannot be restored after a media failure. Take a full backup.* It clears at the first collection after a backup. It is set only from a successful read that found no last backup, so a failed read is a collection error and raises nothing. Expect it on new and development databases you do not back up, and clear the threshold for those targets. After an upgrade it needs one OMS restart before it collects ([Upgrade notes](upgrade-notes.md#restart-oms-24-1-3)). On a partitioned database it reports the oldest partition's backup (see [DPF](#dpf)). Shown on the [Backup page](monitoring-pages.md#backup).
 
 ## Recovery history, utilities and rebalance {#recovery-history}
 
@@ -558,13 +563,13 @@ The [Backup page](monitoring-pages.md#backup) shows the last backup and the days
 
 ## Top SQL {#top-sql}
 
-**Top_Queries_Cpu_Time** and **Top_Queries_Execution_Count**, interval **30 min**. Top statements keyed by `StmtHash`, a hash of the statement's exact text. Unlike Query_Analytics, which groups by digest (see the [SQL page](monitoring-pages.md#sql)), the cumulative counters here are per cached statement. Only the top 5 are kept each collection.
+**Query_Analytics** and **Statement_Text**, interval **15 min**. `Query_Analytics` records each statement per collection interval, keyed by digest (see the [SQL page](monitoring-pages.md#sql)), and is the only collection that reads Db2's package cache (`MON_GET_PKG_CACHE_STMT`), 4 times an hour per target; `Statement_Text` reuses its rows. Its **`CpuTime`** (CPU time of one statement in the interval, ms) and **`Executions`** Conditions ship Not Defined.
 
-Columns: `StmtText` (the statement's SQL text), `CpuTime` (ms) and `CpuTimePerHour`; `ExecutionCount` and `ExecutionCountPerHour`. Delta-aware per-statement workload trends. The alert messages on these groups include the statement text; the `CpuTimePerHour` and `ExecutionCountPerHour` Conditions (2 occurrences) ship Not Defined.
+**Retired in metadata 5.0 (24.1.3.0.0 / 13.5.4.0.0):** `Top_Queries_Cpu_Time` and `Top_Queries_Execution_Count` no longer collect. They kept the top 5 statements by exact text every 30 minutes, each with its own read of the package cache, duplicating what `Query_Analytics` records. The upgrade deletes their stored rows, and thresholds or template entries set on them do not carry over; their two Conditions moved to `Query_Analytics` as above. See [Upgrade notes](upgrade-notes.md#top-sql-retired).
 
 The [SQL page](monitoring-pages.md#sql) reads the per-statement `Query_Analytics` group and the **SQL Statement Text** group (`Statement_Text`, interval 15 min). Statement_Text stores each statement's text under the same hash at most once a day, and the text is kept in the Enterprise Manager repository.
 
-**Statement text and literal values.** From 24.1.2.0.0 / 13.5.3.0.0 the SQL Statement Text group stores the digest text, without literal values (see [What's new](whats-new.md#statement-text-privacy)). Text it collected earlier, and the statement text in Top SQL, Top_Sessions, the lock groups and Deadlocks, is the SQL as it ran and can contain literal values from the application. To stop collecting the SQL Statement Text group, disable **SQL Statement Text** for the target in **Monitoring → Metric and Collection Settings → Other Collected Items**. Top Statements then shows its numbers without the text.
+**Statement text and literal values.** From 24.1.2.0.0 / 13.5.3.0.0 the SQL Statement Text group stores the digest text, without literal values (see [What's new](whats-new.md#statement-text-privacy)). Text it collected earlier, and the statement text in Top_Sessions, the lock groups and Deadlocks, is the SQL as it ran and can contain literal values from the application. To stop collecting the SQL Statement Text group, disable **SQL Statement Text** for the target in **Monitoring → Metric and Collection Settings → Other Collected Items**. Top Statements then shows its numbers without the text.
 
 ## Configuration inventory {#configuration}
 
@@ -761,7 +766,7 @@ From metadata 4.6 (24.1.2.0.0 / 13.5.3.0.0) a partitioned (DPF) database is supp
 | A size against a limit each member has on its own | The member closest to its limit | log space used, lock list in use, instance memory |
 | States | The worst member | database status, table-space state |
 | Restart clocks | The latest restart of any member | so a member restart reads as a counter reset, never as a negative rate |
-| Last backup | The oldest partition's backup; a partition never backed up means never | `DB_Backup`, the backup-recency compliance rule |
+| Last backup | The oldest partition's backup; a partition never backed up means never (and raises `never_backed_up`) | `DB_Backup`, the backup-recency compliance rule |
 
 Two things are per member on purpose. [FCM_Buffers](#memory) keeps one row per member, and [DB_History](#recovery-history) lists the recovery history of the catalog partition, because each partition keeps its own history file and their entry numbers repeat.
 

@@ -40,7 +40,7 @@ The plug-in is built and tested against single-member databases, and against a p
 
 ## Enterprise Manager and agents {#enterprise-manager}
 
-This release ships as two plug-in builds with the same features: **24.1.2.0.0** for Enterprise Manager 24ai and **13.5.3.0.0** for Enterprise Manager 13.5. Enterprise Manager refuses the build it was not compiled for at import (`Incompatible version`), so use the archive that matches your OMS.
+This release ships as two plug-in builds with the same features: **24.1.3.0.0** for Enterprise Manager 24ai and **13.5.4.0.0** for Enterprise Manager 13.5. Enterprise Manager refuses the build it was not compiled for at import (`Incompatible version`), so use the archive that matches your OMS.
 
 | Requirement | Detail |
 | :--- | :--- |
@@ -213,25 +213,25 @@ Monitoring needs only the monitoring user. The administrative jobs each run as a
 
 | Preferred credential set | Holds | Used by |
 | :--- | :--- | :--- |
-| **IBM DB2 Database Host Credentials** (`DB2HostCreds`) | The Db2 instance owner's OS account on the Db2 host | The six local administrative jobs, including **Kill** on the Locks and Sessions pages |
-| **IBM DB2 Plug-in Agent Owner Credentials** (`DB2AgentOwnerCreds`) | The account that owns the agent installation (commonly `oracle`) | Purge Orphaned IBM DB2 Plug-in Cache Files, Collect IBM DB2 Plug-in Diagnostics, the three remote administrative jobs (including **Back Up Database**) and Explain |
-| **IBM DB2 Database Admin Credentials** (`DB2AdminCreds`) | A Db2 admin user (a database credential) | The three remote administrative jobs only |
+| **IBM Db2 Database Host Credentials** (`DB2HostCreds`) | The Db2 instance owner's OS account on the Db2 host | The six local administrative jobs, including **Kill** on the Locks and Sessions pages |
+| **IBM Db2 Plug-in Agent Owner Credentials** (`DB2AgentOwnerCreds`) | The account that owns the agent installation (commonly `oracle`) | Purge Orphaned IBM Db2 Plug-in Cache Files, Collect IBM Db2 Plug-in Diagnostics, the three remote administrative jobs (including **Back Up Database**) and Explain |
+| **IBM Db2 Database Admin Credentials** (`DB2AdminCreds`) | A Db2 admin user (a database credential) | The three remote administrative jobs only |
 
 On Linux, the Db2 instance owner must also be able to read the agent's plug-in files, so add it to the agent install owner's group on the Db2 host: see [Jobs](jobs-and-metric-extensions.md#local-jobs). The authority the admin user needs is on [Remote admin jobs](jobs-and-metric-extensions.md#remote-admin-jobs). An IBM Db2 Instance target has its own host and agent-owner sets: see [Credentials](jobs-and-metric-extensions.md#credentials).
 
 ## Sizing {#sizing}
 
-Each metric collection is a short-lived Java process that the agent starts: it opens one JDBC connection, runs its query, prints the result and exits. A database target runs about **180 collections an hour**, on intervals from 5 minutes to 24 hours. Measured on an Enterprise Manager 24ai agent on an 8-vCPU Linux host against Db2 12.1, with 1, 10 and 50 targets:
+Each metric collection is a short-lived Java process that the agent starts: it opens one JDBC connection, runs its query, prints the result and exits. A database target has 61 enabled collection items on intervals from 5 minutes to 24 hours, so it runs about **295 collections an hour**; an instance target runs about 62. The figures below were measured on an earlier version, when a database target ran about 180 collections an hour, on an Enterprise Manager 24ai agent on an 8-vCPU Linux host against Db2 12.1, with 1, 10 and 50 targets. The per-collection figures still hold; the per-target rows grow with the collection rate, so read them as about 1.6 times higher for today's database target (an estimate, not a new measurement). [Batch collection](#batch-collection) removes most of the processes and connections:
 
-| Resource | Per target | 10 targets | 50 targets |
+| Resource (measured at about 180 collections an hour per target) | Per target | 10 targets | 50 targets |
 | :--- | :--- | :--- | :--- |
 | Agent-host CPU (agent plus its collectors) | about 0.1 to 0.12 core | about 1 core | about 6 cores |
 | Collector processes started | about 180 an hour | about 1,800 an hour | about 9,000 an hour |
 | Db2 connections open at once | 0 to 1 | peak 2 | peak 8 |
 
-- **Agent-host CPU:** plan for about **0.12 core per target**, and keep the plug-in's share of an agent host below about 60% of its cores: about 20 targets on a dedicated 4-core host. Spread larger estates across agents. Sustained saturation was not tested and is not a supported operating point.
+- **Agent-host CPU:** plan for about **0.2 core per database target** at today's collection rate (0.12 core at the measured one; an estimate), and keep the plug-in's share of an agent host below about 60% of its cores: about 12 database targets on a dedicated 4-core host. Spread larger estates across agents. Sustained saturation was not tested and is not a supported operating point.
 - **Memory:** each running collection takes 70 to 130 MB for its short life. The agent ran at most 12 collections at once in every test, so allow about **1.5 GB** of headroom for collector processes on top of the agent's own heap, whatever the target count.
-- **On the Db2 side:** each target makes about 3 short connections a minute as the monitoring user, each held for about a second. That adds little to `MAXAPPLS`, but it shows in any audit policy that records connect events: about 4,300 a day per target. The SQL groups read the package cache 8 times an hour per target, a cost that grows with the size of the package cache.
+- **On the Db2 side:** each database target makes about 5 short connections a minute as the monitoring user, each held for about a second, and an instance target about 1. That adds little to `MAXAPPLS`, but it shows in any audit policy that records connect events: about 7,100 a day per database target. The package cache is read once per `Query_Analytics` collection, 4 times an hour per target (8 before 24.1.3.0.0 / 13.5.4.0.0, when the two Top SQL groups each read it too), a cost that grows with the number of statements in the package cache.
 
 ## Pausing collection when the agent host is busy (optional) {#collection-throttle}
 
@@ -285,10 +285,10 @@ batch_collection = off
 | `batch_collection` | `off` | `on` turns batch collection on for the section |
 | `batch_idle_seconds` | 120 | The helper exits after this many seconds with no collection (10 to 900) |
 | `batch_max_lifetime` | 1800 | And after this many seconds in any case (60 to 7200) |
-| `batch_max_helpers` | 25 | Helpers running at once on this agent; beyond this, a target collects as before (1 to 500) |
+| `batch_max_helpers` | 25 | Helpers running at once on this agent; beyond this, a target collects as before (1 to 500). With more than about 20 Db2 targets on the agent, set it to about 1.25 times the number of targets |
 | `batch_connection` | `shared` | `per_query` keeps one Db2 connection per query, as without batching |
 
-**What it changes.** Measured over two 15-minute windows on an Enterprise Manager 24ai agent monitoring four Db2 12.1 targets (two databases, two instances): collector Java processes started fell by about 91%, Db2 connections opened by one database by about 80%, and agent-host CPU by about 0.3 core, with no rows lost. **What it costs:** one resident Java process per target, about 170 MB each, so plan memory for `batch_max_helpers` of them.
+**What it changes.** Measured over two 15-minute windows on an Enterprise Manager 24ai agent monitoring four Db2 12.1 targets (two databases, two instances): collector Java processes started fell by about 91%, Db2 connections opened by one database by about 80%, and agent-host CPU by about 0.3 core, with no rows lost. **At 50 targets** (an agent with 52 Db2 targets on an 8-vCPU host that also ran the OMS): without batching the host was saturated and collection fell behind; with a helper for every target (`batch_max_helpers` 60) it ran 69% more collections for 69% less CPU, from 7.2 cores to 2.2. At the default of 25, only 25 targets got a helper and the host stayed saturated, so leave headroom above the number of targets. **What it costs:** one resident Java process per batched target, about 170 to 200 MB each, so plan memory for `batch_max_helpers` of them (about 12 GB for 60), and one Db2 session held open per batched target, to count against `MAXAPPLS` where it is not `AUTOMATIC`.
 
 **What stays the same.** Credentials still reach the collector only on its standard input and are never written to a file; a helper serves one target with one set of credentials. The throttle is checked first. `License`, the version detection and every job always run in their own process. If a helper is busy for 20 seconds or stops, its waiting collections each run in their own process; a collection already being served when its helper stops reports `batch collection timed out` after 240 seconds. The helpers' files are under `<agentStateDir>/ip_plugin/xdb2/batch/`, readable only by the agent user; `fallback.log` there has one line for each collection that ran in its own process instead. Delete the line, or set it to `off`, to go back.
 
@@ -309,9 +309,9 @@ batch_collection = off
 **Full capability (adds to the minimum)**
 
 - [ ] Agent on the Db2 host, for the six local-only administrative jobs and diagnostic-log monitoring
-- [ ] **IBM DB2 Database Host Credentials** set under Preferred Credentials, for the local-only jobs; on Linux, the instance owner in the agent install owner's group
-- [ ] **IBM DB2 Plug-in Agent Owner Credentials** set, for the housekeeping, diagnostics, remote jobs and Explain
-- [ ] A Db2 admin user and **IBM DB2 Database Admin Credentials** set, for the remote administrative jobs and Back Up Database
+- [ ] **IBM Db2 Database Host Credentials** set under Preferred Credentials, for the local-only jobs; on Linux, the instance owner in the agent install owner's group
+- [ ] **IBM Db2 Plug-in Agent Owner Credentials** set, for the housekeeping, diagnostics, remote jobs and Explain
+- [ ] A Db2 admin user and **IBM Db2 Database Admin Credentials** set, for the remote administrative jobs and Back Up Database
 - [ ] TLS, DRDA encryption or Kerberos configured, if your site requires it; on a TLS target, the truststore credential set
 - [ ] The Db2 explain tables and their grants, for Explain Plan
 - [ ] A locking event monitor and its `SELECT` grant, for Recent Deadlocks

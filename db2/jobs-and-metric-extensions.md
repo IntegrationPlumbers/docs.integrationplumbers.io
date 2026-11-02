@@ -31,10 +31,10 @@ The jobs fall into four groups: six **local** jobs that run the Db2 command line
 | IBM Db2 - RUNSTATS on a Table (remote) | `ip_db2_admin_runstats` | Table, distribution and sampled detailed index statistics for one table. | Remote, any target |
 | IBM Db2 - Online Backup (remote) | `ip_db2_admin_backup` | An online backup to a directory on the database server, compressed and with logs unless you say no. Also submitted by **Back Up Database** on Backup, now or on a schedule. | Remote, any target |
 | IBM Db2 - Explain SQL Statement | `ip_db2_explain_statement` | Shows the access plan of a statement's cached section. Runs nothing. Also submitted by **Explain Plan** in Statement Detail. | Remote, any target |
-| Purge Orphaned IBM DB2 Plug-in Cache Files | `ip_db2_purge_stale_cache` | Deletes the metric-cache files earlier upgrades left in older plug-in homes. Opens no database connection. | Agent-side |
-| Collect IBM DB2 Plug-in Diagnostics | `ip_db2_collect_diagnostics` | Writes one archive of the plug-in's logs and environment for support. Opens no database connection. | Agent-side |
+| Purge Orphaned IBM Db2 Plug-in Cache Files | `ip_db2_purge_stale_cache` | Deletes the metric-cache files earlier upgrades left in older plug-in homes. Opens no database connection. | Agent-side |
+| Collect IBM Db2 Plug-in Diagnostics | `ip_db2_collect_diagnostics` | Writes one archive of the plug-in's logs and environment for support. Opens no database connection. | Agent-side |
 
-**Four of them also run from an IBM Db2 Instance target** ([Instance targets](targets-and-properties.md#instance-targets)): Start and Stop IBM Db2 Instance, whose natural home is the instance and which offer the instance target type first, plus Purge Orphaned IBM DB2 Plug-in Cache Files and Collect IBM DB2 Plug-in Diagnostics. They behave the same from either target type, and jobs saved against a database target keep working. The other jobs act on one database and run only from a database target.
+**Four of them also run from an IBM Db2 Instance target** ([Instance targets](targets-and-properties.md#instance-targets)): Start and Stop IBM Db2 Instance, whose natural home is the instance and which offer the instance target type first, plus Purge Orphaned IBM Db2 Plug-in Cache Files and Collect IBM Db2 Plug-in Diagnostics. They behave the same from either target type, and jobs saved against a database target keep working. The other jobs act on one database and run only from a database target.
 
 The job types were renamed for GA; the earlier `sidb_*` and beta `sidbb_*` names are gone: see [Breaking changes](whats-new.md#breaking-changes).
 
@@ -49,10 +49,10 @@ emcli set_preferred_credential -set_name=<set name> -target_type=ip_db2_database
 
 | Preferred credential set | Set name | Holds | Used by |
 | :--- | :--- | :--- | :--- |
-| IBM DB2 Database Host Credentials | `DB2HostCreds` | The Db2 instance owner's OS account on the Db2 host | The six local jobs, including Kill and the archive-log corrective action |
-| IBM DB2 Plug-in Agent Owner Credentials | `DB2AgentOwnerCreds` | The account that owns the agent installation (commonly `oracle`) | Purge Orphaned IBM DB2 Plug-in Cache Files, Collect IBM DB2 Plug-in Diagnostics, the three remote jobs and Explain SQL Statement |
-| IBM DB2 Database Admin Credentials | `DB2AdminCreds` | A Db2 admin user (a database credential) | The three remote jobs |
-| IBM DB2 Database Monitoring Credentials | `DB2DatabaseMonitoringCreds` | The monitoring user | Explain SQL Statement only |
+| IBM Db2 Database Host Credentials | `DB2HostCreds` | The Db2 instance owner's OS account on the Db2 host | The six local jobs, including Kill and the archive-log corrective action |
+| IBM Db2 Plug-in Agent Owner Credentials | `DB2AgentOwnerCreds` | The account that owns the agent installation (commonly `oracle`) | Purge Orphaned IBM Db2 Plug-in Cache Files, Collect IBM Db2 Plug-in Diagnostics, the three remote jobs and Explain SQL Statement |
+| IBM Db2 Database Admin Credentials | `DB2AdminCreds` | A Db2 admin user (a database credential) | The three remote jobs |
+| IBM Db2 Database Monitoring Credentials | `DB2DatabaseMonitoringCreds` | The monitoring user | Explain SQL Statement only |
 
 On an IBM Db2 Instance target, the start and stop jobs use the instance target's own **IBM Db2 Instance Host Credentials** (set `DB2HostCreds`, the instance owner) and the housekeeping jobs its `DB2AgentOwnerCreds`:
 
@@ -65,7 +65,7 @@ Only Explain uses the monitoring user. The remote jobs need **both** the admin a
 
 ## The six local jobs {#local-jobs}
 
-The local jobs run the Db2 command line on the database host as the instance owner, through **IBM DB2 Database Host Credentials**. The agent must be on the same host as the Db2 instance, so they are unavailable on managed services such as Amazon RDS for Db2: see [Troubleshooting](troubleshooting.md#rds-for-db2).
+The local jobs run the Db2 command line on the database host as the instance owner, through **IBM Db2 Database Host Credentials**. The agent must be on the same host as the Db2 instance, so they are unavailable on managed services such as Amazon RDS for Db2: see [Troubleshooting](troubleshooting.md#rds-for-db2).
 
 - **The local-only rule is enforced.** Each job reads the target's `local` property, which the plug-in sets by comparing the Db2 host with the agent host. Unless `local` is 1, the job fails at once with `ERROR: refusing to run: this job acts on the Db2 instance on the agent's own host…`, and nothing runs. A remotely monitored target's agent host may run a *different* Db2 instance, which the job would otherwise act on.
 - **Start and Stop act on the whole instance.** Every database in the instance is affected, not just the target you selected, and Stop also forces off every connection. Both display names say so. While the instance is stopped, its database targets and the instance target all read Down, as expected.
@@ -76,13 +76,13 @@ The local jobs run the Db2 command line on the database host as the instance own
   usermod -aG <agent install group> db2inst1      # for example oinstall
   ```
 
-**The Kill buttons on Locks and Sessions use preferred credentials.** They submit the job without asking for any, so set the target's **IBM DB2 Database Host Credentials** first (`-set_name=DB2HostCreds` in the command above). Without them, the button reports *The kill job could not run. Check that preferred host credentials are set for this target.* Jobs created under **Enterprise → Job → Activity** use the same preferred credentials, or take explicit ones at submission. Every kill stays in **Enterprise → Job → Activity** as an audit record.
+**The Kill buttons on Locks and Sessions use preferred credentials.** They submit the job without asking for any, so set the target's **IBM Db2 Database Host Credentials** first (`-set_name=DB2HostCreds` in the command above). Without them, the button reports *The kill job could not run. Check that preferred host credentials are set for this target.* Jobs created under **Enterprise → Job → Activity** use the same preferred credentials, or take explicit ones at submission. Every kill stays in **Enterprise → Job → Activity** as an audit record.
 
 **Archive IBM Db2 Active Log** is the only way the plug-in archives the log on its own: the remote jobs cannot, because `ADMIN_CMD` does not accept `ARCHIVE LOG`. It reads the database name from the target and takes no parameter. The instance owner needs SYSADM, SYSCTRL, SYSMAINT or DBADM.
 
 ## Remote admin jobs {#remote-admin-jobs}
 
-The three remote jobs do not need the agent on the database host. Each runs one Db2 command over `SYSPROC.ADMIN_CMD` on the target's own JDBC connection, as the user in **IBM DB2 Database Admin Credentials**, never the monitoring user, so they work on a remotely monitored target too.
+The three remote jobs do not need the agent on the database host. Each runs one Db2 command over `SYSPROC.ADMIN_CMD` on the target's own JDBC connection, as the user in **IBM Db2 Database Admin Credentials**, never the monitoring user, so they work on a remotely monitored target too.
 
 | Job (display name) | Job type | Db2 command | Parameters | Authority (any one) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -111,13 +111,13 @@ The backup job type is version **1.6**. A job saved under an earlier version has
 
 ### Before the first run {#before-first-run}
 
-1. Set **IBM DB2 Database Admin Credentials** on the target: a named credential of type **IBM DB2 Database Credentials** holding the admin user (`-set_name=DB2AdminCreds` in the command above).
-2. Set **IBM DB2 Plug-in Agent Owner Credentials** on the target: the agent install owner, who can read the plug-in's files (`-set_name=DB2AgentOwnerCreds`).
+1. Set **IBM Db2 Database Admin Credentials** on the target: a named credential of type **IBM Db2 Database Credentials** holding the admin user (`-set_name=DB2AdminCreds` in the command above).
+2. Set **IBM Db2 Plug-in Agent Owner Credentials** on the target: the agent install owner, who can read the plug-in's files (`-set_name=DB2AgentOwnerCreds`).
 3. On a TLS target, set its client truststore credential set too: see [TLS targets](#tls-targets).
 
 A job with either credential missing fails at once with `Default preferred credentials are not set`, and never falls back to the monitoring user. Submitting the jobs needs **Full** privilege on the target, because the job runs as the admin user stored on it.
 
-**Every value is checked before anything runs.** Schema and table must be plain Db2 names; the directory must be an absolute path with no spaces, quotes or commas; anything else is refused with a message naming the field. A parameter that contains a line break is refused before the job connects (`refusing to run <job>`), so a value submitted through EM CLI or the REST API cannot add connection settings of its own. A refused value or a Db2 error fails the job, and the job output carries Db2's own message.
+**Every value is checked before anything runs.** Schema and table must be plain Db2 names; the directory must be an absolute path with no spaces, quotes or commas; anything else is refused with a message naming the field. A parameter that contains a line break is refused before the job connects (`refusing to run <job>`), so a value submitted through EM CLI or the REST API cannot add connection settings of its own. A refused value or a Db2 error fails the job, and the job output carries Db2's own message (for example `SQL2413N` when an online backup is attempted on a circular-logging database). A run that ends without reporting any result fails too, with `the plug-in produced no result line`, and one whose Java process was killed fails with `the plug-in ended on signal N`. On a Windows agent, releases before 24.1.3.0.0 / 13.5.4.0.0 showed these jobs as *Succeeded* with empty output whatever happened; upgrade the agent to get the real result.
 
 ### Backup {#backup-job}
 
@@ -142,9 +142,9 @@ The job's failures carry one plain sentence before Db2's own message:
 
 ## TLS targets {#tls-targets}
 
-A target with **Use SSL/TLS?** set to `yes` runs the remote jobs and Explain over TLS with its own **Client Truststore**: the *IBM DB2 Client Truststore Monitoring Credentials*, the same location, type and password its metrics use. The job reads them from that credential set when it runs.
+A target with **Use SSL/TLS?** set to `yes` runs the remote jobs and Explain over TLS with its own **Client Truststore**: the *IBM Db2 Client Truststore Monitoring Credentials*, the same location, type and password its metrics use. The job reads them from that credential set when it runs.
 
-- The truststore file must be readable on the agent host by the *IBM DB2 Plug-in Agent Owner Credentials* user, and its location must be an absolute path. A location or type that fails the check is refused before the job connects, and the message names the location.
+- The truststore file must be readable on the agent host by the *IBM Db2 Plug-in Agent Owner Credentials* user, and its location must be an absolute path. A location or type that fails the check is refused before the job connects, and the message names the location.
 - The truststore password goes to the job on its standard input, never on a command line, and is never printed.
 - **A `yes` target needs the truststore credential set, even when it trusts the agent JVM's default `cacerts`.** Enterprise Manager fails the job at once when it is missing ("Unable to resolve credential reference" or "Default preferred credentials are not set"). For a server certificate the JVM already trusts, point the truststore credential at the agent JVM's own `cacerts`: the location `<agent JDK>/jre/lib/security/cacerts` (`<agent JDK>/lib/security/cacerts` on JDK 9 or later), the type `keytool -list -keystore <that file>` reports (`JKS` on the agent's JDK 8), and its store password (`changeit` unless the agent's JDK was changed). EM CLI does not store an empty truststore password: `set_monitoring_credential` prompts for one. [The OMS settings](targets-and-properties.md#oms-settings) say how to find the JDK the agent runs the plug-in on.
 - The jobs recognise `yes`, `YES` and `Yes`. Any other value the collector accepts as yes (`true`, `y`, `1`, `on`) still connects over TLS, but against the agent JVM's default trust store. Use `yes`.
@@ -153,7 +153,7 @@ A target with **Use SSL/TLS?** set to `yes` runs the remote jobs and Explain ove
 
 **IBM Db2 - Explain SQL Statement** (`ip_db2_explain_statement`) shows the access plan Db2 is using for one statement. Start it from **SQL → Top Statements**: open a statement, then click **Explain Plan** in Statement Detail. The plan appears in the dialog when the job finishes, usually within a minute. Each run is also kept under **Enterprise → Job → Activity**, and the job can be submitted from there with the **Statement Hash** shown in the dialog.
 
-**What it does.** The job finds the statement's section in Db2's package cache and explains that section with `SYSPROC.EXPLAIN_FROM_SECTION`. The statement is not run, and its text is not compiled again, so the plan is the one Db2 actually used. The job reads the plan back from the explain tables and then rolls back, so it leaves no rows in them. It runs on any target, local or remote, as the **monitoring user**, and authenticates to the agent host with the *IBM DB2 Plug-in Agent Owner Credentials*. Submitting it needs **Operator** privilege on the target.
+**What it does.** The job finds the statement's section in Db2's package cache and explains that section with `SYSPROC.EXPLAIN_FROM_SECTION`. The statement is not run, and its text is not compiled again, so the plan is the one Db2 actually used. The job reads the plan back from the explain tables and then rolls back, so it leaves no rows in them. It runs on any target, local or remote, as the **monitoring user**, and authenticates to the agent host with the *IBM Db2 Plug-in Agent Owner Credentials*. Submitting it needs **Operator** privilege on the target.
 
 The dialog shows, for each operator from the top down: the operator (for example `RETURN`, `NLJOIN`, `TBSCAN`, `IXSCAN`), the estimated rows it passes up, its cumulative cost and I/O cost in timerons, and the table or index it reads or writes. Above the table: the statement's estimated total cost and how often the cached section has run.
 
@@ -183,7 +183,7 @@ Replace `OEM_MONITOR` with your monitoring user. Instead of `SYSTOOLS`, the tabl
 | *The Db2 explain tables were created by an older Db2 level …* | `SQL0220N` after a Db2 upgrade | `CALL SYSPROC.SYSINSTALLOBJECTS('EXPLAIN', 'M', NULL, NULL)` |
 | *… lacks a privilege EXPLAIN needs …* | `SQL0551N` | The grants above |
 | *Statement … is not in the Db2 package cache now …* | Db2 has dropped the statement from its package cache (it needed the room, or the database restarted) | Run the statement again, then explain it |
-| *The explain job could not run …* | A credential set is missing on the target | Set the monitoring credentials and the preferred *IBM DB2 Plug-in Agent Owner Credentials* |
+| *The explain job could not run …* | A credential set is missing on the target | Set the monitoring credentials and the preferred *IBM Db2 Plug-in Agent Owner Credentials* |
 
 **Limitations.** The section must still be in the package cache, so a statement that ran once, long ago, may have left it. When one statement text has several sections in the cache, the job explains the most-executed one and says how many there were. On a TLS target the job uses the target's client truststore, with the same rules as the remote jobs ([TLS targets](#tls-targets)).
 
@@ -200,9 +200,9 @@ An administrator can have Enterprise Manager run **Archive IBM Db2 Active Log** 
 3. **Circular logging** (`LOGARCHMETH1` and `LOGARCHMETH2` both `OFF`): it runs nothing and **succeeds**, with the output *Nothing to archive: database … uses circular logging …*. Db2 itself refuses `ARCHIVE LOG` there (`SQL2417N`), and reuses circular log files by itself, so on such a database a full log is held by an open transaction.
 4. **Archive logging** (any other method, including `LOGRETAIN`): it runs `db2 archive log for database <the target's database>`. That closes the active log file and archives it, online. If the configuration could not be read, the job still runs `ARCHIVE LOG` and lets Db2 answer. Running it again is harmless.
 
-**What it cannot fix.** Archiving frees log space only once no open transaction still needs that log. When one long transaction holds the log, archiving does not help. The [Transaction Log](monitoring-pages.md#transaction-log) page and the *IBM DB2: Transaction Log Filling* [runbook](alerts-and-templates.md#runbooks) name the application holding the oldest transaction, and ending that transaction is a decision for you.
+**What it cannot fix.** Archiving frees log space only once no open transaction still needs that log. When one long transaction holds the log, archiving does not help. The [Transaction Log](monitoring-pages.md#transaction-log) page and the *IBM Db2: Transaction Log Filling* [runbook](alerts-and-templates.md#runbooks) name the application holding the oldest transaction, and ending that transaction is a decision for you.
 
-**Before you attach it:** attach it only on targets whose agent runs on the Db2 server (`local` = 1); set the target's preferred **IBM DB2 Database Host Credentials** to the instance owner, as for Kill; and on Linux, put the instance owner in the agent install owner's group ([The six local jobs](#local-jobs)).
+**Before you attach it:** attach it only on targets whose agent runs on the Db2 server (`local` = 1); set the target's preferred **IBM Db2 Database Host Credentials** to the instance owner, as for Kill; and on Linux, put the instance owner in the agent install owner's group ([The six local jobs](#local-jobs)).
 
 ### Create the library entry (once per OMS)
 
@@ -210,7 +210,7 @@ An administrator can have Enterprise Manager run **Archive IBM Db2 Active Log** 
 2. In **Create Library Corrective Action**, choose **Archive IBM Db2 Active Log**, then click **Go**. The list can also show older Db2 job types from other or earlier plug-ins (for example *Kill DB2 Application* or *Quiesce IBM DB2 DB*). Pick only **Archive IBM Db2 Active Log**.
 3. On the **General** tab, enter a **Name** such as `IP Db2 - archive active log` (Enterprise Manager stores it in upper case, as *IP DB2 - ARCHIVE ACTIVE LOG*) and a **Description**, and under **Event Types** select **Metric Alert**. Leave **Automatic Attempts** at `<none>`. **Target Type** is already IBM Db2 Database.
 4. **Parameters:** the page says *This job does not require any parameters.*
-5. **Credentials:** for **defaultHostCred**, leave **Preferred Credential Name** at **IBM DB2 Database Host Credentials**. Do not enter a user name and password here.
+5. **Credentials:** for **defaultHostCred**, leave **Preferred Credential Name** at **IBM Db2 Database Host Credentials**. Do not enter a user name and password here.
 6. **Access:** grant **View** to the administrators who will attach it.
 7. Click **Save to Library**. The entry is saved as **Draft**.
 8. Select the entry, click **Publish**, then click **Yes**. A Draft entry is not offered when you attach it from the library.
@@ -222,7 +222,7 @@ An administrator can have Enterprise Manager run **Archive IBM Db2 Active Log** 
 3. Log Space Utilization is kept per database, so **Edit Advanced Settings** first shows a **Monitored Objects** table. Select **All others**, or the row for one database, then click **Edit**.
 4. In **Corrective Actions**, click **Add** on the **Critical** row.
 5. Leave **Add Corrective Action** at **From Library...**, select *IP DB2 - ARCHIVE ACTIVE LOG*, then click **Continue**.
-6. Under **Credential**, leave **Preferred**, with **IBM DB2 Database Host Credentials**, then click **Continue**.
+6. Under **Credential**, leave **Preferred**, with **IBM Db2 Database Host Credentials**, then click **Continue**.
 7. Select **Allow only one corrective action for this metric to run at any given time**. It is not selected by default.
 8. Click **Continue** twice, then click **OK** on **Metric and Collection Settings**. The page reports *Update succeeded*.
 
@@ -234,7 +234,7 @@ To do this for many targets, add the same corrective action to the Log Space Uti
 
 ## Purge orphaned cache files {#purge-stale-cache}
 
-The job is listed as **Purge Orphaned IBM DB2 Plug-in Cache Files** (job type `ip_db2_purge_stale_cache`).
+The job is listed as **Purge Orphaned IBM Db2 Plug-in Cache Files** (job type `ip_db2_purge_stale_cache`).
 
 
 **Run it once after upgrading from 24.1.1.0.0 / 13.5.2.0.0, or schedule it.** It is housekeeping, not a fix: skipping it wastes a small amount of disk and nothing else.
@@ -245,7 +245,7 @@ The job is listed as **Purge Orphaned IBM DB2 Plug-in Cache Files** (job type `i
 
 **Why it is not automatic.** Enterprise Manager provides no post-deployment or upgrade hook for a plug-in. A scheduled job is the supported equivalent.
 
-**Run it once, from the console:** **Enterprise → Job → Activity → Create Job**, choose **Purge Orphaned IBM DB2 Plug-in Cache Files**, and select any one Db2 target on the agent you want cleaned. The sweep covers that whole agent, so one target per agent is enough.
+**Run it once, from the console:** **Enterprise → Job → Activity → Create Job**, choose **Purge Orphaned IBM Db2 Plug-in Cache Files**, and select any one Db2 target on the agent you want cleaned. The sweep covers that whole agent, so one target per agent is enough. The job output lists each file it deleted or could not delete, then a *Purged N of M orphaned cache file(s)* summary (from 24.1.3.0.0 / 13.5.4.0.0 on the agent).
 
 **Or schedule it.** The sweep is idempotent: it deletes only files that are already dead and does nothing when there is nothing stale, so a weekly job costs nothing between upgrades:
 
@@ -264,7 +264,7 @@ emcli create_job -input_file=property_file:purge_job.props
 
 `emcli create_job` takes a property file and has no `-target_list`, `-job_type` or `-schedule` flags. Add `-preview` to have Enterprise Manager describe the job it would create without creating it: the quickest way to check a property file, and it reports an unrecognised property name rather than ignoring it.
 
-**Credentials: the one thing that catches people out.** The job needs host credentials for the account that **owns the agent installation** (commonly `oracle`), held in **IBM DB2 Plug-in Agent Owner Credentials**, not the Db2 instance owner the local jobs use. The plug-in's agent-side files are not world-readable, so a credential for any other OS user authenticates and then cannot read the job's script. A user who can read them but does not own them (for example the Db2 instance owner, once it is in the agent group) runs the job but cannot delete the files, and the job fails with `Deleted 0 of N orphaned cache file(s); N could not be removed`. On Windows that message can also mean a file is in use: run the job again later. If the set is not configured, the job fails at once with `Unable to get credentials for defaultHostCred`. To supply a credential explicitly instead:
+**Credentials: the one thing that catches people out.** The job needs host credentials for the account that **owns the agent installation** (commonly `oracle`), held in **IBM Db2 Plug-in Agent Owner Credentials**, not the Db2 instance owner the local jobs use. The plug-in's agent-side files are not world-readable, so a credential for any other OS user authenticates and then cannot read the job's script. A user who can read them but does not own them (for example the Db2 instance owner, once it is in the agent group) runs the job but cannot delete the files, and the job fails with `Deleted 0 of N orphaned cache file(s); N could not be removed`. On Windows that message can also mean a file is in use: run the job again later. If the set is not configured, the job fails at once with `Unable to get credentials for defaultHostCred`. To supply a credential explicitly instead:
 
 ```
 cred.defaultHostCred.<target_name>:ip_db2_database=NAMED:<host_credential_name>
@@ -286,7 +286,7 @@ cred.defaultHostCred.<target_name>:ip_db2_database=NAMED:<host_credential_name>
 
 ## Collect diagnostics for support {#collect-diagnostics}
 
-When support asks for diagnostics, run **Collect IBM DB2 Plug-in Diagnostics** against the target. It reads files on the target's agent only and opens no database connection, so it works whether the agent is on the Db2 host or not. It writes one archive and prints its path in the job output:
+When support asks for diagnostics, run **Collect IBM Db2 Plug-in Diagnostics** against the target. It reads files on the target's agent only and opens no database connection, so it works whether the agent is on the Db2 host or not. It writes one archive and prints its path in the job output:
 
 ```
 <agent state dir>/ip_plugin/xdb2/diagnostics/ip_db2_diagnostics_<target>_<UTC time>.tar.gz
@@ -321,7 +321,7 @@ From an IBM Db2 Instance target, use `target_list=<instance target>:ip_db2_insta
 | `batch/` | The batch-collection helpers' files, when [batch collection](prerequisites.md#batch-collection) is on | The helpers |
 | `collection-throttle.conf`, `krb5.conf`, `jaas.conf` | Configuration you place there yourself | You |
 
-In a cache file name, a character of the target name that a file name cannot hold (`/ \ : * ? " < > |`), and `%`, is written as `%` and its hex code: target `db2host/SAMPLE` has `IBM Db2 Database-db2host%2FSAMPLE.ser`. Before this release the target type was spelled *IBM DB2 Database*; the first collection after the upgrade renames the cache file, so the CollectorStatus history is kept.
+In a cache file name, a character of the target name that a file name cannot hold (`/ \ : * ? " < > |`), and `%`, is written as `%` and its hex code: target `db2host/SAMPLE` has `IBM Db2 Database-db2host%2FSAMPLE.ser`. Before 24.1.2.0.0 / 13.5.3.0.0 the target type was spelled *IBM DB2 Database*; the first collection after the upgrade renames the cache file, so the CollectorStatus history is kept.
 
 If the agent has no `agentStateDir`, or the plug-in cannot create or write those directories, it keeps the cache and the log in the plug-in home as earlier releases did.
 
