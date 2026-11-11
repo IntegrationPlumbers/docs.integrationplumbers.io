@@ -272,6 +272,38 @@ emcli delete_target -name="mysql84-prod-01" -type="ip_mysql_database"
 
 > **Note:** Removing a target removes its collected metric history and its compliance associations with it. A target re-added under the same name starts both over, so prefer editing a target's properties to deleting and recreating it.
 
+#### Changing credentials on a member of a cluster target
+
+The plug-in does not create membership associations between its targets. If you created them yourself, for example with `emcli create_assoc -assoc_type=cluster_contains` from a MySQL InnoDB Cluster target to its MySQL Database targets, or from a MySQL InnoDB ClusterSet target to its Cluster targets, Enterprise Manager treats each member as an instance of a cluster. It then refuses a change to the member's MySQL user or password, in the console and in EM CLI:
+
+```
+Cannot set monitoring credential at instance. Set credential for parent target <parent_name>:<parent_type>
+```
+
+The parent target has no credential set for its members, so the credentials cannot be set there either. Credentials that were set before the association was created keep working; only changing them is refused. Other properties, including the License Key, host and port, are not affected and can be changed as described above.
+
+To change a member's user or password, remove the association, make the change, and create the association again:
+
+```bash
+emcli delete_assoc -assoc_type="cluster_contains" \
+  -source="<parent_name>:<parent_type>" -dest="<member_name>:<member_type>"
+```
+
+```bash
+emcli set_monitoring_credential -target_name="<member_name>" -target_type="ip_mysql_database" \
+  -set_name="MySQLDatabaseMonitoringCreds" -cred_type="MySQLDatabaseCreds" \
+  -attributes="MySQLUsername:<user>;MySQLPassword:PWTAG" -input_file="PWTAG:<file holding only the password>"
+```
+
+```bash
+emcli create_assoc -assoc_type="cluster_contains" \
+  -source="<parent_name>:<parent_type>" -dest="<member_name>:<member_type>"
+```
+
+`<parent_type>` is `ip_mysql_cluster` or `ip_mysql_clusterset`, and `<member_type>` is `ip_mysql_database` or `ip_mysql_cluster`. For a Cluster target that is a member of a ClusterSet target, the middle command uses `-target_type="ip_mysql_cluster"`, `-set_name="MySQLClusterMonitoringCreds"` and `-cred_type="MySQLClusterCreds"`. `-input_file` keeps the password off the command line; delete the file afterwards. You can also make the change on the Monitoring Configuration page while the association is removed.
+
+The target keeps collecting throughout, and its metric history is not affected. While the association is removed, the target is not a member of its parent: a blackout of the parent that includes members does not cover it, and a view privilege granted on the parent does not extend to it. Run the three commands together.
+
 ## 4.6 Associate compliance standards
 Adding a target does not associate compliance standards with it: neither the console wizard nor emcli add_target carries an association, so a new target has no compliance evaluations until you associate the standards.
 
