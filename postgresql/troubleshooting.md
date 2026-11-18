@@ -7,7 +7,7 @@ nav_order: 17
 
 When an advisor page sits empty, a KPI shows a placeholder, or an action fails outright, the cause is almost always a missing prerequisite or a job still waiting on Preferred Credentials, not a fault in the plug-in. Find the exact message or symptom you're seeing below and work the fix.
 
-**In this page:** Unable to run job · Error getting meta-data after an upgrade · Monitoring Readiness shows "Not functional" · Plan Analysis shows "No captured plans yet" · Query ids show as `syn:` · Workload History is empty or shows "Accumulating" · Autovacuum runs KPI shows "—" · An amber banner says collections are paused · Index Advisor sections are empty · Support
+**In this page:** Unable to run job · "License not found" and "Connection refused" · Error getting meta-data after an upgrade · Monitoring Readiness shows "Not functional" · Plan Analysis shows "No captured plans yet" · Query ids show as `syn:` · Workload History is empty or shows "Accumulating" · Autovacuum runs KPI shows "—" · An amber banner says collections are paused · Index Advisor sections are empty · Support
 
 ## Unable to run job {#unable-to-run-job}
 
@@ -21,6 +21,28 @@ When an advisor page sits empty, a KPI shows a placeholder, or an action fails o
 3. Reload the page, or retry the action.
 
 **Related:** [Preferred Credentials](prerequisites.md#preferred-credentials)
+
+## "License not found" and "Connection refused" {#license-not-found-connection-refused}
+
+**Symptoms:** The target's metric collections fail with "License not found", and the plug-in's pages show no data. The plug-in log on the agent host, `postgres_oem.log` under `<agent state directory>/sysman/log`, shows "Connection refused" next to "Unable to retrieve target count". The license key itself is valid, and **Test Connection** succeeds.
+
+**Cause:** Before it collects anything, the plug-in checks the number of PostgreSQL targets against your license by calling the Enterprise Manager REST API at the target's **OMS Hostname** and **OMS Port**. When nothing answers on that host and port, the check fails and every other collection on the target stops with "License not found". The most common reason is an OMS behind a load balancer, such as an F5, that serves the console on a port like `443`, while **OMS Port** is blank or `7803`. Agent uploads use a different port, so they keep working, and **Test Connection** does not check the OMS fields.
+
+**Fix:**
+1. Find the host and port the Enterprise Manager console answers on. Take them from the address you use to open the console; an `https://` address with no port shown means `443`. Or run `emctl status oms -details` on the OMS host: behind a load balancer, read **SLB or virtual hostname** and **HTTPS SLB Console Port**.
+2. From the agent host, check that the port answers:
+
+   ```
+   curl -k -s -o /dev/null -w '%{http_code}\n' https://<oms or load balancer host>:<port>/em/api/targets
+   ```
+
+   Any HTTP status code, such as `401`, means the port answers. "Connection refused" or a timeout means the host or port is wrong, or a firewall blocks the path.
+3. Open the target, go to **Target Setup ▸ Monitoring Configuration**, set **OMS Hostname** and **OMS Port** to those values, and save.
+4. The license check runs every minute. Within a minute or two, the target's **License Info** page shows your license record and collections resume.
+
+If the port answers and the error continues, check the OMS login on the target's monitoring credentials: a rejected login stops collections the same way.
+
+**Related:** [Agent host to the OMS](prerequisites.md#oms-connectivity) · [Database target properties](targets-and-properties.md#database-properties)
 
 ## Error getting meta-data after an upgrade {#error-getting-meta-data}
 

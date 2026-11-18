@@ -41,6 +41,21 @@ Every read against the monitored PostgreSQL instance travels over this one conne
 
 Cluster targets using the Patroni REST API also need a path to the Patroni API port. See [Patroni REST API monitoring](targets-and-properties.md#patroni).
 
+### Agent host to the OMS {#oms-connectivity}
+
+The plug-in makes one more connection: from the agent host to the Enterprise Manager REST API over HTTPS, to check the number of PostgreSQL targets against your license. It connects to the **OMS Hostname** and **OMS Port** set on each database target. Every collection on a target waits for this check, so if the agent host cannot reach that host and port, the target collects nothing.
+
+Set the two properties to the host name and HTTPS port the Enterprise Manager console answers on:
+
+- **OMS reached directly:** the OMS host name and its HTTPS console port, `7803` by default. A blank **OMS Port** means `7803`.
+- **OMS behind a load balancer, such as an F5:** the load balancer's virtual host name and the HTTPS port it serves the console on, which is often `443`. A blank **OMS Port** still means `7803`, which a load balancer usually does not serve, so set the port explicitly.
+
+To find the values, look at the address you use to open the Enterprise Manager console: its host name and port are the ones to use, and an `https://` address with no port shown means `443`. On the OMS host, `emctl status oms -details` also lists them; when the OMS is configured for a load balancer, read **SLB or virtual hostname** and **HTTPS SLB Console Port**.
+
+This connection is separate from the one the agent uses to upload data to the OMS, which goes to a different port. An agent that uploads normally does not show that this path is open. **Test Connection** does not check it either: it tests the PostgreSQL connection only, so a wrong **OMS Hostname** or **OMS Port** is accepted when you add the target and shows up later as a license failure. See ["License not found" and "Connection refused"](troubleshooting.md#license-not-found-connection-refused).
+
+If the target's **OMS API Communication** property is set to `STRICT`, the agent's Java must also trust the certificate the load balancer presents.
+
 ## The monitoring role {#monitoring-role}
 
 The monitoring role reads catalogs and statistics views. It never writes to your data, and the plug-in never grants privileges to itself or to anyone else.
@@ -178,6 +193,7 @@ Copy the list that matches what you want from the release.
 - [ ] A valid license key
 - [ ] Plug-in OPAR imported, deployed to the OMS, deployed to the monitoring agent(s)
 - [ ] Agent host on Linux 64-bit or Windows 64-bit, with a network path to the database (JDBC, port 5432 by default)
+- [ ] A network path from the agent host to the Enterprise Manager console's HTTPS host and port (`7803` by default; behind a load balancer, the load balancer's console port, often `443`), entered as the target's **OMS Hostname** and **OMS Port**
 - [ ] Monitoring role created, with a matching `pg_hba.conf` entry for the agent host
 - [ ] `GRANT pg_monitor TO "<monitoring role>";` (or equivalent read access to the statistics catalogs)
 - [ ] `track_activities` and `track_counts` on (PostgreSQL defaults)
