@@ -49,10 +49,10 @@ Before the PostgreSQL plug-in can monitor anything, you add each PostgreSQL inst
 | Database Login Name | Entered on the credential screen; stored as a monitoring credential, not a target property. |
 | Database Login Password | Entered on the credential screen; stored as a monitoring credential, not a target property. |
 | Database Port | PostgreSQL port number (default is `5432`). |
-| OMS Hostname | Hostname of the Oracle Management Server (used for agent service validation). |
+| OMS Hostname | Host name the Enterprise Manager console answers on. The plug-in calls the Enterprise Manager REST API here to check the target count against your license. Behind a load balancer, use the load balancer's virtual host name. See [Agent host to the OMS](prerequisites.md#oms-connectivity). |
 | OMS Login Name | Entered on the credential screen; stored as a monitoring credential, not a target property. |
 | OMS Login Password | Entered on the credential screen; stored as a monitoring credential, not a target property. |
-| OMS Port | OMS HTTPS console port (default is `7803`, used for target count validation). |
+| OMS Port | HTTPS port the Enterprise Manager console answers on at **OMS Hostname**. Blank means `7803`, the OMS default. Behind a load balancer such as an F5, use the port the load balancer serves the console on, often `443`. |
 | Primary Database | The database the plug-in connects to for statement statistics (default is `postgres`). |
 | Path to patroni log file | Absolute path, including file name, to the Patroni log file. |
 | Path to postgres log file | Absolute path, including file name, to the PostgreSQL log file. |
@@ -63,6 +63,8 @@ Before the PostgreSQL plug-in can monitor anything, you add each PostgreSQL inst
 | Collection Throttle: Memory Threshold (%) | Agent-host memory usage percentage at or above which the plug-in pauses its heavier scheduled collections. See [Collection throttle properties](#throttle-properties). |
 
 The Database Login Name/Password and OMS Login Name/Password are entered on the credential screens above, not on the properties screen. They are stored as monitoring credentials rather than plain target properties.
+
+> **Test Connection does not check the OMS fields.** It tests the PostgreSQL connection only. A wrong **OMS Hostname**, **OMS Port**, or OMS login is accepted when you add the target, and shows up later as "License not found" on every collection. See ["License not found" and "Connection refused"](troubleshooting.md#license-not-found-connection-refused).
 
 ## Add a PostgreSQL Cluster target {#add-cluster-target}
 
