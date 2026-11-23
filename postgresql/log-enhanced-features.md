@@ -29,7 +29,7 @@ Until the grants below are in place these sections stay inactive and say which g
 | [enable_log_enhanced_features.sh](downloads/enable_log_enhanced_features.sh) | A wrapper that runs the grant script in every database the plug-in monitors. `--dry-run` shows the result and rolls back. Keep it in the same folder as the `.sql` file. |
 | [recommended_logging_settings.sql](downloads/recommended_logging_settings.sql) | The optional server logging settings, as `ALTER SYSTEM` statements to review before you run them. |
 
-The scripts need `psql` and a superuser login to the monitored server. The plug-in never runs them and never applies a grant for you.
+The scripts need `psql` 11 or later and a superuser login to the monitored server. The plug-in never runs them and never applies a grant for you.
 
 ## 1. The monitoring role {#monitoring-role}
 

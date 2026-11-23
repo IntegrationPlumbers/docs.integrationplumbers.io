@@ -9,7 +9,7 @@
 -- target is monitored; this script lets you prepare a server before adding it.
 --
 -- Status values: OK = in place, ACTION = needed for a log-enhanced feature, OPTIONAL = enables more
--- (extensions, extra event categories). Needs psql 10 or later (\if).
+-- (extensions, extra event categories). Needs psql 11 or later (\if with :{?name}).
 
 \set QUIET on
 \if :{?role}

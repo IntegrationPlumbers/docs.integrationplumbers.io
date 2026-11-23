@@ -8,7 +8,7 @@
 --   psql ... -v role=<monitoring role> -v dry_run=1 -f enable_log_enhanced_features.sql   (show, then roll back;
 --                                                     dry_run=0 or leaving it out applies the grants)
 --
--- Needs psql 10 or later (\if). Always write the variable as -v dry_run=1: a bare -v dry_run unsets it.
+-- Needs psql 11 or later (\if with :{?name}). Always write the variable as -v dry_run=1: a bare -v dry_run unsets it.
 --
 -- Functions and their grants are PER DATABASE: run this in every database the plug-in monitors (or use
 -- enable_log_enhanced_features.sh, which loops over them). pg_monitor membership is cluster-wide and is
