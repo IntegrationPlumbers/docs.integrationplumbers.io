@@ -29,6 +29,10 @@
 \endif
 
 BEGIN;
+-- This script runs as a superuser, possibly in a database where other roles can create objects. Resolve
+-- every unqualified name in pg_catalog only, so a function planted in public (or a search_path set on the
+-- database) cannot be called with the superuser's rights.
+SET LOCAL search_path = pg_catalog, pg_temp;
 SET LOCAL client_min_messages = warning;   -- no "already a member" notice on a re-run
 
 -- psql does not substitute variables inside a DO block, so the role travels in a transaction-local

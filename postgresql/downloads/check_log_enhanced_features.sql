@@ -12,6 +12,9 @@
 -- (extensions, extra event categories). Needs psql 11 or later (\if with :{?name}).
 
 \set QUIET on
+-- Run as a DBA, possibly in a database where other roles can create objects: resolve every unqualified
+-- name in pg_catalog only, so a function planted in public cannot be called with the DBA's rights.
+SET search_path = pg_catalog, pg_temp;
 \if :{?role}
 \else
 \set role ''
