@@ -5,7 +5,7 @@ nav_order: 4
 
 # Prerequisites
 
-If you already monitor PostgreSQL with the plug-in, most of this list is in place today. What the plug-in needs falls into three groups. A monitoring role that can read PostgreSQL's statistics catalogs covers all existing monitoring. Plan capture and the advisors built on it need `auto_explain` plus one privilege grant. The third group is a short list of optional extensions that add What-If index simulation, predicate-based index advice, wait-event sampling, and table bloat estimates. The plug-in applies none of it for you except the `auto_explain` settings, and only when you click **Configure auto_explain**.
+If you already monitor PostgreSQL with the plug-in, most of this list is in place today. What the plug-in needs falls into three groups. A monitoring role that can read PostgreSQL's statistics catalogs covers all existing monitoring. Plan capture and the other features that read the server log need one privilege grant, and plan capture also needs `auto_explain`. The third group is a short list of optional extensions that add What-If index simulation, predicate-based index advice, wait-event sampling, table bloat estimates, and buffer cache monitoring. The plug-in applies none of it for you except the `auto_explain` settings, and only when you click **Configure auto_explain**.
 
 **Where to find it:** every item below is checked live, per target, on the database target's **Monitoring Readiness** page.
 
@@ -23,7 +23,7 @@ If you already monitor PostgreSQL with the plug-in, most of this list is in plac
 
 ## Enterprise Manager and agents {#enterprise-manager}
 
-This release ships as two plug-in builds with the same features: **24.1.3.0.0** for Enterprise Manager 24ai and **13.5.17.0.0** for Enterprise Manager 13.5. The version number tells you which Enterprise Manager the build is for, not what it does; everything in this guide applies to both.
+This release ships as two plug-in builds with the same features: **24.1.4.0.0** for Enterprise Manager 24ai and **13.5.18.0.0** for Enterprise Manager 13.5. The version number tells you which Enterprise Manager the build is for, not what it does; everything in this guide applies to both.
 
 Before you add any target, import the plug-in OPAR, deploy it to the OMS, then deploy it to each agent that will monitor a PostgreSQL instance. See [Install and upgrade](install-and-upgrade.md#import).
 
@@ -37,7 +37,7 @@ The agent connects to PostgreSQL over JDBC on the database port, 5432 by default
 2. Allow that role to connect from the agent host: add a matching entry to `pg_hba.conf`, and make sure `listen_addresses` accepts connections from that address. See [pg_hba.conf](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html) in the PostgreSQL documentation.
 3. Reload the server so the new authentication rule takes effect.
 
-Every read against the monitored PostgreSQL instance travels over this one connection, including reading the server log for captured plans. The plug-in needs no OS-level access to the database host, so a remote agent collects the same metric data as a local agent, apart from three local-only capabilities: the [Logs](monitoring-pages.md#logs) page, the [Kill Idle PostgreSQL Connections](jobs-and-metric-extensions.md#kill-idle-postgresql-connections) job, and the collection throttle.
+Every read against the monitored PostgreSQL instance travels over this one connection, including reading the server log for captured plans, the vacuum history, and the server log events. The plug-in needs no OS-level access to the database host, so a remote agent collects the same metric data as a local agent, apart from three local-only capabilities: the **Log Statistics** and **PostgreSQL Logs** sections of the [Logs](monitoring-pages.md#logs) page, the [Kill Idle PostgreSQL Connections](jobs-and-metric-extensions.md#kill-idle-postgresql-connections) job, and the collection throttle.
 
 Cluster targets using the Patroni REST API also need a path to the Patroni API port. See [Patroni REST API monitoring](targets-and-properties.md#patroni).
 
@@ -70,7 +70,7 @@ GRANT pg_monitor TO "<monitoring role>";
 
 `pg_monitor` already carries `pg_stat_scan_tables`, which is what pgstattuple's approximate function needs for the table bloat estimates on **Vacuum Advisor**, so no additional grant is needed for the estimate. A table the role somehow cannot read is skipped and logged; the collection does not fail.
 
-One capability needs more than `pg_monitor`: plan capture needs EXECUTE on the server-log functions so the plug-in can read the server log. See [The server log read grant](#log-read-grant).
+One group of features needs more than `pg_monitor`: plan capture, the vacuum history, and the server log events read the server log, which needs a read grant. See [The server log read grant](#log-read-grant).
 
 ## Statement statistics (pg_stat_statements) {#pg-stat-statements}
 
@@ -101,8 +101,8 @@ Execution plans are captured passively: `auto_explain` writes each qualifying st
 | `auto_explain.log_verbose` | `on`, recommended | Carries the real query id into the captured plan. Without it the plug-in falls back to synthetic ids shown as `syn:…`, derived from the query text. Grouping and drift pairing still work, but the ids will not match `pg_stat_statements`. | Plug-in (Configure auto_explain) |
 | `compute_query_id` | `on`, or `auto` with `pg_stat_statements` preloaded. Recommended | Pairs with `log_verbose` so every captured plan carries its real query id. | Plug-in (Configure auto_explain) |
 | `logging_collector` | `on` | A current server logfile has to exist for the plug-in to read. | DBA |
-| `log_destination` | `stderr` | The harvester parses stderr-format logs. `csvlog` and `jsonlog` are not parsed. | DBA |
-| `log_line_prefix` | begins with `%m` | Plan lines are matched by their leading timestamp. | DBA |
+| `log_destination` | includes `stderr` | The plan harvester parses stderr-format logs. `csvlog` and `jsonlog` are not parsed for plans; the vacuum history and the server log events do read `jsonlog` on PostgreSQL 15 and later. | DBA |
+| `log_line_prefix` | begins with `%m`; `%u@%d` recommended | Plan lines are matched by their leading timestamp. A captured plan takes its database from the `%u@%d` token; without it the plan is listed under every database as "unknown". See [Log line prefix](log-enhanced-features.md#log-line-prefix). | DBA |
 
 Apply the plug-in-settable rows from the **Plan Capture (auto_explain)** panel on **Monitoring Readiness**: click **Configure auto_explain**, review the preview, then click **Apply**. See [Configure auto_explain](monitoring-readiness.md#configure-auto-explain).
 
@@ -115,15 +115,23 @@ Enabling `log_verbose` and `compute_query_id` after captures already exist start
 
 ## The server log read grant {#log-read-grant}
 
-The plug-in locates the current log with `pg_current_logfile()`, sizes it with `pg_stat_file()`, and reads it with `pg_read_file()` over JDBC. PostgreSQL does not let ordinary roles execute those functions, and this is the one privilege the plug-in deliberately never applies for you. Run it as a superuser, **connected to the database the target monitors** (function privileges are granted per database), substituting your monitoring role:
+Plan capture, the Vacuum Advisor's server-log sections, and the server log events on the Logs page all read the server log over JDBC. PostgreSQL does not let an ordinary role read server files, and this is the one privilege the plug-in deliberately never applies for you. The monitoring role can be given the access by either of two routes, in each database the target monitors (function privileges are per database):
 
-```sql
-GRANT EXECUTE ON FUNCTION pg_current_logfile(), pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO "<monitoring role>";
-```
+- **The `xpgs_monitor` reader, recommended.** A superuser runs [enable_log_enhanced_features.sql](downloads/enable_log_enhanced_features.sql), which installs three superuser-owned functions that read files in the server's `log_directory` and refuse any other file, and grants the role EXECUTE on them.
 
-The **Plan Capture (auto_explain)** panel on **Monitoring Readiness** shows this statement with your actual role name and database already filled in, ready to copy. Membership in `pg_read_server_files` is not needed: with these grants the role can read the server log wherever `log_directory` points, and nothing else outside the data directory. (Releases before 24.1.3.0.0 / 13.5.17.0.0 asked for `pg_read_server_files` instead; a role that still holds it keeps working once the EXECUTE grants are in place, and the role membership can be revoked.)
+  ```bash
+  psql -h db.example.com -d appdb -U postgres -v role=<monitoring role> -f enable_log_enhanced_features.sql
+  ```
 
-Without the grant, all other monitoring works normally and no plans are captured, so **Plan Analysis** and **Plan Drift Advisor** stay empty. If the log is unreadable, the plug-in logs a warning and skips the harvest; collection never fails.
+- **The built-in functions.** A superuser grants EXECUTE on the functions PostgreSQL itself provides. This is the route earlier releases documented; it still works, and the plug-in uses it when the `xpgs_monitor` reader is absent. With these grants the role can read any file inside the data and log directories, not only the log.
+
+  ```sql
+  GRANT EXECUTE ON FUNCTION pg_current_logfile(), pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO "<monitoring role>";
+  ```
+
+Membership in `pg_read_server_files` is not needed on either route and is not checked. The **Server log read grants** item on **Monitoring Readiness** reports which route the target uses, and when neither is in place it shows the statement to run with your actual role name and database filled in. [Enabling the log-enhanced features](log-enhanced-features.md) has the full checklist, a read-only check script, and a wrapper that covers every database in one run.
+
+Without the grant, all other monitoring works normally. No plans are captured, so **Plan Analysis** and **Plan Drift Advisor** stay empty, and the server-log sections on **Vacuum Advisor** and **Logs** stay inactive and say which grant is missing. If the log is unreadable, the plug-in logs a warning and skips the read; collection never fails.
 
 ## Optional extensions {#optional-extensions}
 
@@ -134,13 +142,16 @@ Extensions are per-database. Run `CREATE EXTENSION <name>;` in each database you
 | `hypopg` | What-If hypothetical-index simulations with projected speedups on **Index Advisor**. | PGDG package `postgresql-<ver>-hypopg`, then `CREATE EXTENSION hypopg;` |
 | `pg_qualstats` | Predicate-based, filter-clause index recommendations on **Index Advisor**, including GIN and GIST. | PGDG package `postgresql-<ver>-pg-qualstats`, then `CREATE EXTENSION pg_qualstats;`. Needs the library in `shared_preload_libraries`, which means a restart |
 | `pg_wait_sampling` | Wait-event sampling and the Wait Events chart on **Query Analyzer**. | PGDG package `postgresql-<ver>-pg-wait-sampling`, then `CREATE EXTENSION pg_wait_sampling;`. Needs the library in `shared_preload_libraries`, which means a restart |
-| `pgstattuple` | Table bloat and avoidable-growth estimates on **Vacuum Advisor**. | Ships in the PostgreSQL contrib package, then `CREATE EXTENSION pgstattuple;` |
+| `pgstattuple` | Table bloat and avoidable-growth estimates on **Vacuum Advisor**, and the measured free space on its bloat findings from the server log. | Ships in the PostgreSQL contrib package, then `CREATE EXTENSION pgstattuple;` |
+| `pg_buffercache` | The **Buffer Cache** section on the **Database** page and the **Buffer Cache** metric. | Ships in the PostgreSQL contrib package, then `CREATE EXTENSION pg_buffercache;` |
 
 Install `hypopg` and `pg_qualstats` together. Catalog-native index detection works on every target with no extension at all, but the two extensions together give **Index Advisor** its full output: simulated cost validation from `hypopg`, observed-predicate recommendations from `pg_qualstats`.
 
 For `pg_wait_sampling`, set `pg_wait_sampling.profile_queries` to `all` or `top`, otherwise the profile carries no per-query rows. The extension is not included in most PostgreSQL distributions and is not available on Windows, but most package managers carry it.
 
 For `pgstattuple`, a monitoring role with `pg_monitor` already holds the `pg_stat_scan_tables` the estimate needs. See [The monitoring role](#monitoring-role).
+
+For `pg_buffercache`, the plug-in detects the extension and turns the buffer cache collection on by itself; there is no target property to set. `pg_monitor` already carries the right to read the view. The cache is sampled every 15 minutes, and on PostgreSQL 14 and 15 a large cache pays a short scan per sample.
 
 ## Preferred Credentials {#preferred-credentials}
 
@@ -154,7 +165,7 @@ Some plug-in pages read their data through Enterprise Manager jobs that run on t
 
 *Agent Host Credentials set for one target under Target Preferred Credentials.*
 
-To cover every target of the type with one login, set it under **Default Preferred Credentials** on the same page instead. The jobs look up this set on the PostgreSQL target; Normal Host Credentials set on the host target itself do not satisfy them. The same page holds **Postgresql Preferred Credentials**, a database login that only the [Backup and Restore jobs](jobs-and-metric-extensions.md#backup-and-restore-jobs) need. See [Configuring and Using Target Credentials](https://docs.oracle.com/en/enterprise-manager/cloud-control/enterprise-manager-cloud-control/24.1/emsec/configuring-using-target-credentials.html) in the Oracle documentation.
+To cover every target of the type with one login, set it under **Default Preferred Credentials** on the same page instead. The jobs look up this set on the PostgreSQL target; Normal Host Credentials set on the host target itself do not satisfy them. The same page holds **Postgresql Preferred Credentials**, a database login that the [Backup and Restore jobs](jobs-and-metric-extensions.md#backup-and-restore-jobs) and the Index Advisor's [Apply](index-advisor.md#apply) action need. For Apply, the login must own the tables concerned, be a member of the owning role, or be a superuser, because PostgreSQL lets only an owner create or drop an index. See [Configuring and Using Target Credentials](https://docs.oracle.com/en/enterprise-manager/cloud-control/enterprise-manager-cloud-control/24.1/emsec/configuring-using-target-credentials.html) in the Oracle documentation.
 
 Agent Host Credentials are needed by:
 
@@ -162,7 +173,9 @@ Agent Host Credentials are needed by:
 - **Plan Analysis**
 - **Plan Drift Advisor**
 - **Retention Policies**
-- The "Autovacuum runs · 24h" KPI on **Vacuum Advisor**
+- The "Autovacuum runs · 24h" KPI and the history sections on **Vacuum Advisor**
+- The history sections on **Database** (Buffer Cache), **Configuration** (Parameter Changes), **Locks**, **Logs** (the two event sections), and **Index Advisor**
+- The **Apply** action on **Index Advisor**
 - The **Configure auto_explain** action on **Monitoring Readiness**
 
 When the set is missing, the page raises "Unable to run job. Verify Preferred Credentials are set for this target."
@@ -171,10 +184,10 @@ When the set is missing, the page raises "Unable to run job. Verify Preferred Cr
 
 ## Agent host {#agent-host}
 
-Decide where the agent runs before you add targets. Both models are supported and collect the same metric data, apart from three local-only capabilities — the [Logs](monitoring-pages.md#logs) page, the [Kill Idle PostgreSQL Connections](jobs-and-metric-extensions.md#kill-idle-postgresql-connections) job (it runs `psql` on the agent host), and the collection throttle:
+Decide where the agent runs before you add targets. Both models are supported and collect the same metric data, apart from three local-only capabilities — the **Log Statistics** and **PostgreSQL Logs** sections of the [Logs](monitoring-pages.md#logs) page, the [Kill Idle PostgreSQL Connections](jobs-and-metric-extensions.md#kill-idle-postgresql-connections) job (it runs `psql` on the agent host), and the collection throttle:
 
 - **Local agent**, on the database host.
-- **Remote agent**, connecting out to the database. Plan capture works here too, because the log is read over JDBC rather than from the filesystem.
+- **Remote agent**, connecting out to the database. Plan capture, the vacuum history, and the server log events work here too, because the log is read over JDBC rather than from the filesystem.
 
 Two things depend on that choice.
 
@@ -205,18 +218,21 @@ Copy the list that matches what you want from the release.
 
 - [ ] `auto_explain` module installed on the database server (contrib package)
 - [ ] `logging_collector = on`
-- [ ] `log_destination = stderr` (not `csvlog`, not `jsonlog`)
-- [ ] `log_line_prefix` begins with `%m`
+- [ ] `log_destination` includes `stderr` (plans are not read from `csvlog` or `jsonlog`)
+- [ ] `log_line_prefix` begins with `%m` and carries a space-delimited `%u@%d`, for example `'%m [%p] %q%u@%d %e '`
 - [ ] `session_preload_libraries` includes `auto_explain`
 - [ ] `auto_explain.log_min_duration` set to your capture threshold in milliseconds, `0` or higher
 - [ ] `auto_explain.log_format = json`
 - [ ] `auto_explain.log_analyze = on`, applied together with `auto_explain.log_timing = on`
 - [ ] `auto_explain.log_verbose = on`
 - [ ] `compute_query_id = on`, or `auto` with `pg_stat_statements` preloaded
-- [ ] `GRANT EXECUTE ON FUNCTION pg_current_logfile(), pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO "<monitoring role>";` run by a superuser in the monitored database
+- [ ] The server log read grant, run by a superuser in each monitored database: `enable_log_enhanced_features.sql` for the `xpgs_monitor` reader, or EXECUTE on the four built-in log functions
+- [ ] `log_autovacuum_min_duration = 0` for the vacuum history and bloat findings on **Vacuum Advisor**
 - [ ] Optional: `hypopg` and `pg_qualstats` for the full **Index Advisor** output
 - [ ] Optional: `pg_wait_sampling`, with `pg_wait_sampling.profile_queries` set to `all` or `top`
 - [ ] Optional: `pgstattuple` (no extra grant: the `pg_stat_scan_tables` it needs comes with `pg_monitor`)
+- [ ] Optional: `pg_buffercache` for the **Buffer Cache** section on the **Database** page
+- [ ] Optional: Postgresql Preferred Credentials set to a role that owns the tables, to use **Apply** on **Index Advisor**
 
 The six `auto_explain` and `compute_query_id` rows above are applied for you by **Configure auto_explain** on **Monitoring Readiness**. The rest are yours to set.
 
@@ -225,4 +241,5 @@ The six `auto_explain` and `compute_query_id` rows above are applied for you by 
 - [Install and upgrade](install-and-upgrade.md#import) — import the OPAR and deploy it to the OMS and agents
 - [Targets and properties](targets-and-properties.md#throttle-properties) — add targets and set the throttle properties
 - [Monitoring Readiness](monitoring-readiness.md#configure-auto-explain) — check every prerequisite live, and apply the `auto_explain` settings
+- [Enabling the log-enhanced features](log-enhanced-features.md) — the checklist and scripts for the features that read the server log
 - [History store and retention](history-store-and-retention.md#store-size) — what the agent-local store holds and how to bound its size

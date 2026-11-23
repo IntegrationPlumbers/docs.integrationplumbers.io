@@ -7,7 +7,7 @@ nav_order: 17
 
 When an advisor page sits empty, a KPI shows a placeholder, or an action fails outright, the cause is almost always a missing prerequisite or a job still waiting on Preferred Credentials, not a fault in the plug-in. Find the exact message or symptom you're seeing below and work the fix.
 
-**In this page:** Unable to run job · "License not found" and "Connection refused" · Error getting meta-data after an upgrade · Monitoring Readiness shows "Not functional" · Plan Analysis shows "No captured plans yet" · Query ids show as `syn:` · Workload History is empty or shows "Accumulating" · Autovacuum runs KPI shows "—" · An amber banner says collections are paused · Index Advisor sections are empty · Support
+**In this page:** Unable to run job · "License not found" and "Connection refused" · Error getting meta-data after an upgrade · Monitoring Readiness shows "Not functional" · Plan Analysis shows "No captured plans yet" · Query ids show as `syn:` · Workload History is empty or shows "Accumulating" · Autovacuum runs KPI shows "—" · An amber banner says collections are paused · Index Advisor sections are empty · A server-log section says the log cannot be read · Captured plans show their database as "unknown" · Log Statistics and PostgreSQL Logs are empty · Apply on Index Advisor fails · The wraparound forecast or size projection is blank · Support
 
 ## Unable to run job {#unable-to-run-job}
 
@@ -76,7 +76,7 @@ If the port answers and the error continues, check the OMS login on the target's
 **Fix:**
 1. Open the panel and read its items top to bottom: each shows the value currently in effect on the server ("current: …") next to what it needs ("needs: …"), with a sentence explaining the consequence.
 2. For anything the plug-in can set itself, click **Configure auto_explain** and apply it.
-3. For the server log read grants, copy the `GRANT EXECUTE ON FUNCTION …` statement shown on that item and run it as a superuser while connected to the database the target monitors.
+3. For the server log read grants, run `enable_log_enhanced_features.sql` as a superuser while connected to the database the target monitors, or copy the `GRANT EXECUTE ON FUNCTION …` statement shown on that item and run that. See [Read access to the server log](log-enhanced-features.md#log-read-access).
 4. Reload the page. Readiness is probed at page load only — there is no background polling.
 
 **Related:** [Monitoring Readiness](monitoring-readiness.md)
@@ -161,6 +161,70 @@ If the port answers and the error continues, check the OMS login on the target's
 3. Reload **Index Advisor**. Data is collected on demand when the page loads.
 
 **Related:** [Index Advisor](index-advisor.md)
+
+## A server-log section says the log cannot be read {#log-sections-inactive}
+
+**Symptoms:** **Autovacuum Activity from the Server Log** or **Bloat and Dead Rows from the Server Log** on **Vacuum Advisor**, or **Events from the Server Log** on **Logs**, shows a status line and no data.
+
+**Cause:** These sections read the server log over the monitoring connection. The status line names what is missing: the read grant, a log file that can be read (`logging_collector` on, with `stderr` or `jsonlog` in `log_destination`), English server messages for the vacuum history, or autovacuum logging (`log_autovacuum_min_duration`). This is an inactive state, not a failure, and the rest of the page is unaffected.
+
+**Fix:**
+1. Run [check_log_enhanced_features.sql](downloads/check_log_enhanced_features.sql) against the monitored database. It reports every item, with an `ACTION` row for each one that is missing.
+2. For the grant, run `enable_log_enhanced_features.sql` as a superuser in each monitored database.
+3. For the logging settings, review and apply the lines you want from `recommended_logging_settings.sql`. On a Patroni-managed cluster, set them in the DCS instead.
+4. Wait for the next read. The sections read the log every 15 minutes.
+
+**Related:** [Enabling the log-enhanced features](log-enhanced-features.md)
+
+## Captured plans show their database as "unknown" {#captured-plans-unknown-database}
+
+**Symptoms:** On **Plan Analysis** or **Plan Drift Advisor**, a capture's Database reads "unknown" and the same capture appears under every database of the target. The Fix Workbench refuses to run it with "No database for this capture".
+
+**Cause:** A captured plan takes its database from the `%u@%d` token in the server's `log_line_prefix`. The PostgreSQL default prefix, `'%m [%p] '`, has no database in it. The plan is still stored, counted, and analysed.
+
+**Fix:**
+1. Add a space-delimited `%u@%d` to `log_line_prefix`, for example `'%m [%p] %q%u@%d %e '`, and run `SELECT pg_reload_conf();`.
+2. Reload **Monitoring Readiness**. The **Database in log_line_prefix (%u@%d)** item turns green.
+3. New captures name their database. Plans captured before the change keep their blank database until they age out of the plan archive.
+
+**Related:** [Log line prefix](log-enhanced-features.md#log-line-prefix)
+
+## Log Statistics and PostgreSQL Logs are empty {#log-statistics-empty}
+
+**Symptoms:** The two sections at the bottom of the **Logs** page are empty, or the **Log Statistics** metric reports no data.
+
+**Cause:** Both read the file named in the target's optional **Path to postgres log file** property, on the agent host. With the property blank they stay empty and report no error. They also need a local agent: a remote agent cannot read the file.
+
+**Fix:**
+1. Set **Path to postgres log file** under the target's Monitoring Configuration to the absolute path of the log file, name included.
+2. Confirm the agent user can read the file. A path that is set but cannot be read reports an error.
+3. If you only need the server log events, you do not need this property at all. The two event sections at the top of the page read the log over the database connection.
+
+**Related:** [Logs](monitoring-pages.md#logs)
+
+## Apply on Index Advisor fails {#index-advisor-apply-fails}
+
+**Symptoms:** After you confirm an **Apply** on **Index Advisor**, the dialog reports "Verify Preferred Credentials are set for this target", or an error containing "must be owner of table", or the request is refused before anything runs.
+
+**Cause:** Apply runs as an Enterprise Manager job with your own Preferred Credentials for the target, not with the monitoring role. PostgreSQL lets only an owner create or drop an index. A refusal before anything runs means the statement is one the job will not run: on a standby, against an index that backs a constraint, a unique index, a replica identity index, an index of a partitioned table, an object in a system schema, an index another session is still building, or a finding that no longer holds.
+
+**Fix:**
+1. Set both **Agent Host Credentials** and **Postgresql Preferred Credentials** for the target. See [Preferred Credentials](prerequisites.md#preferred-credentials).
+2. Make the database login a role that owns the tables concerned, a member of the owning role, or a superuser.
+3. For a refusal, reload the page. If the finding is gone, the index has been scanned since or is valid again, and there is nothing to apply.
+4. If a concurrent drop was interrupted and left the index marked INVALID, click **Apply** on it again to finish the drop.
+
+**Related:** [Apply a recommendation](index-advisor.md#apply)
+
+## The wraparound forecast or size projection is blank {#forecast-blank}
+
+**Symptoms:** The **XID Consumption** panel reads "Wraparound forecast accumulating", the **Transaction ID Wraparound Forecast** metric's day columns are blank, or **Database Size History** shows no projection.
+
+**Cause:** Forecasts are computed from history in the agent-side store. The wraparound forecast needs 24 hours of history, and the size projection needs a week. A blank value raises no alert.
+
+**Fix:** Wait. Nothing needs configuring. If the wraparound forecast reads "No transaction-ID consumption measured over the last 7 days", the target consumed no transaction IDs in that time and there is nothing to project.
+
+**Related:** [Vacuum Advisor](vacuum-advisor.md#wraparound-monitoring)
 
 ## Support
 

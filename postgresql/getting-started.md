@@ -43,7 +43,7 @@ Detail: [The monitoring role](prerequisites.md#monitoring-role) · [Statement st
 
 Import the OPAR onto the OMS with `emcli import_update -file=<PATH_TO_FILE> -omslocal`, deploy it to the OMS, then deploy it to every agent that will monitor a PostgreSQL instance, in that order. Both deployments run from Setup ▸ Extensibility ▸ Plug-ins, Databases ▸ PostgreSQL, Actions ▸ Deploy On, or from the equivalent `emcli deploy_plugin_on_server` and `emcli deploy_plugin_on_agent` commands.
 
-**Done when** `emcli get_plugin_deployment_status -plugin=ip.em.xpgs` reports the deployment complete for the OMS and for each agent, and the Plug-ins page lists the PostgreSQL plug-in at the version you imported (24.1.3.0.0 on Enterprise Manager 24ai, 13.5.17.0.0 on 13.5).
+**Done when** `emcli get_plugin_deployment_status -plugin=ip.em.xpgs` reports the deployment complete for the OMS and for each agent, and the Plug-ins page lists the PostgreSQL plug-in at the version you imported (24.1.4.0.0 on Enterprise Manager 24ai, 13.5.18.0.0 on 13.5).
 
 Detail: [Download](install-and-upgrade.md#download) · [Import the OPAR](install-and-upgrade.md#import) · [Deploy to the OMS](install-and-upgrade.md#deploy-oms) · [Deploy to agents](install-and-upgrade.md#deploy-agents).
 
@@ -76,11 +76,11 @@ Detail: [Preferred Credentials](prerequisites.md#preferred-credentials) · [Unab
 
 ## Step 6: Check Monitoring Readiness and configure auto_explain
 
-Open **Monitoring Readiness** on the target. It probes the live server once at page load and reports seven panels, one per feature, each showing the value in effect next to the value the feature needs. Work down the panels and fix what is red. Where the **Plan Capture (auto_explain)** panel has an unmet item the plug-in can set itself, a **Configure auto_explain** button appears at the bottom of that panel: click it, read the preview of exactly what will be written, then click **Apply**. The preview writes back the capture threshold already in effect on the server, falling back to `1000` ms when `auto_explain.log_min_duration` is absent or set to `-1`.
+Open **Monitoring Readiness** on the target. It probes the live server once at page load and reports eight panels, one per feature, each showing the value in effect next to the value the feature needs. Work down the panels and fix what is red. Where the **Plan Capture (auto_explain)** panel has an unmet item the plug-in can set itself, a **Configure auto_explain** button appears at the bottom of that panel: click it, read the preview of exactly what will be written, then click **Apply**. The preview writes back the capture threshold already in effect on the server, falling back to `1000` ms when `auto_explain.log_min_duration` is absent or set to `-1`.
 
-Three things stay with you. Install the `auto_explain` contrib module on the database server, because the plug-in configures the module but never installs it. Run the `GRANT EXECUTE ON FUNCTION …` statement for the server-log functions as a superuser in the monitored database, which is the one privilege the plug-in deliberately never grants itself; the panel shows the statement with your role name and database already filled in (see [The server log read grant](prerequisites.md#log-read-grant)). And set `logging_collector = on`, `log_destination = stderr`, and a `log_line_prefix` that begins with `%m`, which the harvester needs in order to parse the log at all.
+Three things stay with you. Install the `auto_explain` contrib module on the database server, because the plug-in configures the module but never installs it. Give the monitoring role read access to the server log, as a superuser in the monitored database, which is the one privilege the plug-in deliberately never grants itself: run `enable_log_enhanced_features.sql` for the narrow `xpgs_monitor` reader, or the `GRANT EXECUTE ON FUNCTION …` statement the panel shows with your role name and database already filled in (see [The server log read grant](prerequisites.md#log-read-grant)). The same grant switches on the Vacuum Advisor's server-log sections and the server log events on the Logs page; see [Enabling the log-enhanced features](log-enhanced-features.md). And set `logging_collector = on`, `log_destination = stderr`, and a `log_line_prefix` that begins with `%m`, which the harvester needs in order to parse the log at all.
 
-![The Monitoring Readiness page showing its seven feature panels with status chips](images/13-5-15/readiness-page.png)
+![The Monitoring Readiness page showing its feature panels with status chips](images/13-5-15/readiness-page.png)
 *Monitoring Readiness reads live server values, so a database you configured yourself shows green exactly like one configured from this page.*
 
 **Done when** the **Plan Capture (auto_explain)** panel carries an OK chip. The **Configure auto_explain** button disappears as soon as every item the plug-in can set is green, but the panel stays **Not functional** until the server log read grants are in place as well, because that item is not one the plug-in will set. Applied settings take effect for new sessions only, so a connection-pooled application starts producing captures when its pool recycles.
@@ -104,9 +104,9 @@ An empty advisor section is usually the healthy answer rather than a fault. A cl
 
 ## Next steps
 
-- **Apply a monitoring template.** Three templates ship for the `ip_postgresql_db` target type: `ip_xpgs_production_critical` for critical production, `ip_xpgs_standard` for dev, test, and staging, and `ip_xpgs_starter` as a minimal base to clone and extend. An administrator imports them into the OMS once, then applies them to targets. See [Monitoring templates](alerts-and-templates.md#templates).
+- **Apply a monitoring template.** Three templates ship for the `ip_postgresql_db` target type: `ip_xpgs_production_critical` for critical production, `ip_xpgs_standard` for dev, test, and staging, and `ip_xpgs_starter` as a minimal base to clone and extend. A fourth, `ip_xpgs_cluster_production_critical`, covers the PostgreSQL Cluster target. An administrator imports them into the OMS once, then applies them to targets. See [Monitoring templates](alerts-and-templates.md#templates).
 - **Set the super-user count threshold.** The `superuser_audit` metric ships with an empty warning threshold, because the sanctioned super-user count is site policy, and an empty threshold never fires. Enter your approved roster size before you adopt `ip_xpgs_production_critical`, so privilege drift becomes an alert instead of an audit finding. See [Super-user / Privilege Audit](alerts-and-templates.md#superuser-audit).
-- **Review retention.** Twelve history types each have their own retention window, plus a protected minimum and a whole-store size ceiling that ships disabled. The defaults suit most targets; change them before the store grows rather than after. See [Retention Policies page](history-store-and-retention.md#retention-policies).
+- **Review retention.** Nineteen history types each have their own retention window, plus a protected minimum and a whole-store size ceiling that ships disabled. The defaults suit most targets; change them before the store grows rather than after. See [Retention Policies page](history-store-and-retention.md#retention-policies).
 - **Add a cluster target** if the instance belongs to a Patroni-managed cluster, so replication and failover are visible in one place. See [Add a PostgreSQL Cluster target](targets-and-properties.md#add-cluster-target).
 
 ## Related
@@ -115,6 +115,6 @@ An empty advisor section is usually the healthy answer rather than a fault. A cl
 - [Prerequisites](prerequisites.md#checklist) — the full checklist behind every step here
 - [Install and upgrade](install-and-upgrade.md#import) — import and deploy, and the same sequence for an upgrade
 - [Targets and properties](targets-and-properties.md#database-properties) — every target property, and adding targets with EM CLI
-- [Monitoring Readiness](monitoring-readiness.md#configure-auto-explain) — the seven panels, the status model, and the Configure action
+- [Monitoring Readiness](monitoring-readiness.md#configure-auto-explain) — the eight panels, the status model, and the Configure action
 - [Alerts and templates](alerts-and-templates.md#default-thresholds) — what alerts by default and what you have to set
 - [Troubleshooting](troubleshooting.md#unable-to-run-job) — the messages you are most likely to meet in your first week

@@ -34,7 +34,7 @@ Aggregates and alert-carrying metrics still flow to Enterprise Manager exactly a
 
 ## What it holds
 
-Two kinds of history sit side by side in the store: the five staged infrastructure tiers, and the per-statement and advisor history (workload snapshots, captured execution plans and their query text, and advisor findings).
+Three kinds of history sit side by side in the store: the five staged infrastructure tiers, the per-statement and advisor history (workload snapshots, captured execution plans and their query text, and advisor findings), and the event and sample history behind the sections added in 24.1.4.0.0 / 13.5.18.0.0.
 
 The five staged tiers write full-resolution rows on every scheduled collection, then get condensed once a day:
 
@@ -56,35 +56,52 @@ How the condense works:
 - `databases` keeps a rolling seven-day window of full-resolution staged rows even after condensation, so rate calculations still have sub-daily points.
 - Reads that need the current day merge the open, uncondensed day's staged rows into the condensed history. Today is never blank.
 
-All delta and aggregation work runs in the plug-in's agent-side code; the read jobs return plain values.
+The event and sample history is written as it is observed and is not condensed:
+
+| History type | What it holds | Read by |
+|---|---|---|
+| Autovacuum Log Events | Each autovacuum and autoanalyze run read from the server log | [Vacuum Advisor](vacuum-advisor.md#autovacuum-activity), the two server-log sections |
+| Server Log Events | The count of server log entries per category, with the newest sample entries of each | [Logs](monitoring-pages.md#server-log-events) |
+| Lock Samples | The sessions waiting on a lock at each 10-minute sample | [Locks](monitoring-pages.md#locks), the three history sections |
+| Buffer Cache Summary, Buffer Cache by Database, Buffer Cache Top Relations | The 15-minute samples of `shared_buffers` | [Database](monitoring-pages.md#buffer-cache), **Buffer Cache** |
+| Parameter Changes | Every change to a server parameter, with the old and new value | [Configuration](monitoring-pages.md#parameter-changes), **Parameter Changes** |
+
+All delta and aggregation work runs in the plug-in's agent-side code; the read jobs return plain values. Everything historical on the plug-in's pages is read from this store. Enterprise Manager receives only the summary rows that thresholds and incidents use.
 
 Staged writes carry a write-rate cap: a tier is not staged again until at least 15 minutes have passed since its last staging. The cap protects the store from repeated manual **All Metrics** fetches. It sits below the scheduled collection cadence, so a scheduled collection is never dropped, and it does not change any collection schedule. It is a separate mechanism from the [collection throttle](#collection-throttle).
 
 ## Retention Policies page {#retention-policies}
 
-Every history type in the store has its own retention window in days, enforced by the daily trim, plus a protected minimum that size-based eviction may never cross. The Retention Policies page puts all twelve windows and the whole-store size ceiling on one screen.
+Every history type in the store has its own retention window in days, enforced by the daily trim, plus a protected minimum that size-based eviction may never cross. The Retention Policies page puts all nineteen windows and the whole-store size ceiling on one screen.
 
-![The Retention Policies page, showing the Retention Windows table and the Store Size Limit section](images/13-5-15/retention-policies-page.png)
-*The twelve history types, each with a minimum and a maximum retention, above the whole-store size ceiling.*
+![The Retention Policies page, showing the Retention Windows table with its nineteen history types](images/24-1-4/retention-policies-page.png)
+*The history types, each with a minimum and a maximum retention. The Store Size Limit section follows the table.*
 
 ### Defaults
 
 | History type | Default max retention (days) | Default protected minimum (days) |
 |---|---|---|
+| Autovacuum Log Events | 90 | 7 |
 | Background Writer | 90 | 7 |
+| Buffer Cache Summary | 90 | 7 |
+| Buffer Cache Top Relations | 90 | 7 |
+| Buffer Cache by Database | 90 | 7 |
 | Captured Plans | 90 | 7 |
 | Databases | 90 | 7 |
 | Index Advisor | 90 | 7 |
 | Index Advisor Qualstats | 90 | 7 |
 | Index Advisor What-If | 90 | 7 |
 | Indexes | 365 | 365 |
+| Lock Samples | 90 | 7 |
+| Parameter Changes | 365 | None: the page reads "Never evicted" |
+| Server Log Events | 90 | 7 |
 | SQL Statements | 90 | 7 |
 | Table Bloat | 90 | 7 |
 | Tables | 90 | 7 |
 | Vacuum Advisor | 90 | 7 |
 | Wait Events (sampled) | 90 | 7 |
 
-Rows appear in alphabetical order by display label, as they do on the page. Indexes is the long-term archive and ships at 365 days on both columns. The effective protected minimum clamps to at least 1 day. The whole-store size ceiling ships disabled (0).
+Rows appear in alphabetical order by display label, as they do on the page. Indexes is the long-term archive and ships at 365 days on both columns. Parameter Changes is kept for a year and is exempt from size-based eviction, so it has no minimum to set. Server Log Events covers the per-category counts, and the sample entries shown under **Recent Events** follow its window and minimum; it is seeded at the 90 days those events already aged out at, so an upgraded store behaves as before until you change it. The **Databases** window is also how far back the Overview's **Database Size History** and the Vacuum Advisor's transaction-ID age chart reach, and **Background Writer** does the same for **Checkpoint History**. The effective protected minimum clamps to at least 1 day. The whole-store size ceiling ships disabled (0).
 
 ### Set the windows
 
@@ -141,7 +158,7 @@ Every control on the configuration pages is backed by an Enterprise Manager job 
 
 | Job (display name) | Job type | What it sets |
 |---|---|---|
-| **PostgreSQL - Set Granular Retention Days** | `xpgs_set_retention_days` | Per-type retention days (**Indexes (Days)**, **SQL Statements (Days)**, and so on) and protected minimums (**Protected Minimum - Indexes (Days)**, and so on) for all twelve history types. A parameter you leave out keeps its stored value. |
+| **PostgreSQL - Set Granular Retention Days** | `xpgs_set_retention_days` | Per-type retention days (**Indexes (Days)**, **SQL Statements (Days)**, and so on) and protected minimums (**Protected Minimum - Indexes (Days)**, and so on) for all nineteen history types, including **Server Log Events (Days)**, **Autovacuum Log Events (Days)**, **Lock Samples (Days)**, the three **Buffer Cache** types, and **Parameter Changes (Days)**. Parameter Changes has no protected minimum. A parameter you leave out keeps its stored value. |
 | **PostgreSQL - Set Plan Archive Size Ceiling** | `xpgs_set_size_ceiling` | **Captured Plans Size Ceiling (MB)** and **Whole-Store Size Ceiling (MB)**. 0 disables the whole-store ceiling; blank keeps the current value. |
 | **PostgreSQL - Reclaim Collection Store Disk Space** | `xpgs_reclaim_store` | Compacts the store file on demand and reports the MB freed. No parameters. |
 | **PostgreSQL - Set Wait History Retention Threshold** | `xpgs_set_wait_threshold` | **Minimum Daily Wait Time (ms)** — the estimated daily wait a query and wait-event combination must reach for its daily row to be kept. Default 0, which keeps every combination that waited at all. Raise it to thin high-cardinality wait history. |

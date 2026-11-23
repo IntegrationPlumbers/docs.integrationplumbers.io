@@ -10,30 +10,35 @@ When an advisor page sits empty or a feature produces nothing, the cause is usua
 > **Prerequisites for this page**
 > - Viewing the page needs only the target's monitoring connection. Readiness is probed by a real-time metric that runs under [the monitoring role](prerequisites.md#monitoring-role), so configuration you set up yourself is detected exactly like configuration the plug-in applied.
 > - The **Configure auto_explain** action runs as Enterprise Manager jobs, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target.
-> - [The server log read grant](prerequisites.md#log-read-grant) must be run by a superuser. The plug-in never applies it for you.
+> - [The server log read grant](prerequisites.md#log-read-grant) must be run by a superuser. The plug-in never applies it for you. [Enabling the log-enhanced features](log-enhanced-features.md) has a script for it.
 > - [Optional extensions](prerequisites.md#optional-extensions) are installed by you through your own platform packaging. The plug-in detects them automatically and never installs them.
 
 **Where to find it:** on a PostgreSQL Database target, **target navigation tree ▸ _database name_ ▸ Monitoring Readiness**. The same entry appears in the target menu.
 
-**In this page:** The seven panels · Status model · Configure auto_explain · The grant the plug-in never applies · Query identifiers and the syn: fallback · Behaviors
+**In this page:** The eight panels · Status model · Configure auto_explain · The grant the plug-in never applies · Query identifiers and the syn: fallback · Behaviors
 
-## The seven panels
+## The eight panels {#the-panels}
 
-The page probes once at load and renders seven panels, one per feature, in this order. Each panel carries a status chip; each item inside it carries a status dot, the value in effect on the server ("current: …"), the value the feature needs ("needs: …"), and a sentence explaining the consequence.
+The page probes once at load and renders eight panels, one per feature, in this order. The panels reflect the database selected in the navigation tree. Each panel carries a status chip; each item inside it carries a status dot, the value in effect on the server ("current: …"), the value the feature needs ("needs: …"), and a sentence explaining the consequence.
 
-![The Monitoring Readiness page showing its seven feature panels with status chips](images/13-5-15/readiness-page.png)
+![The Monitoring Readiness page showing its feature panels with status chips](images/13-5-15/readiness-page.png)
 
-*Seven panels, top to bottom: one per feature, each with its own status chip.*
+*One panel per feature, top to bottom, each with its own status chip.*
 
 | Panel | What it checks | Required or optional |
 |---|---|---|
 | **Database Connection** | The monitoring connection every probe below depends on. | Required |
-| **Plan Capture (auto_explain)** | The `auto_explain` settings and the log read grant behind log-based plan capture. | Required for **Plan Analysis** and **Plan Drift Advisor** |
+| **Plan Capture (auto_explain)** | The `auto_explain` settings, the log read grant, and the log line prefix behind log-based plan capture. | Required for **Plan Analysis** and **Plan Drift Advisor**. The log read grant on this panel also serves the server-log sections on **Vacuum Advisor** and **Logs** |
 | **Statement Monitoring & Workload History** | The `pg_stat_statements` extension. | Required for SQL statement monitoring and **Workload History** |
 | **Wait-Event Sampling** | The `pg_wait_sampling` extension. | Optional. Without it, basic monitoring continues. See [Wait-event sampling](workload-history.md#wait-event-sampling) |
 | **Index Advisor — Enhanced Recommendations** | The `hypopg` and `pg_qualstats` extensions. | Optional. Catalog-native index detection always works without them |
 | **Table Bloat Estimates** | The `pgstattuple` extension. | Optional. Adds bloat estimates to the **Vacuum Advisor** |
+| **Buffer Cache Monitoring** | The `pg_buffercache` extension. | Optional. Without it the **Buffer Cache** section on the **Database** page stays empty |
 | **Historical Store** | The agent-side store that holds long-window history. | No action needed |
+
+![The Wait-Event Sampling, Index Advisor, Table Bloat Estimates, Buffer Cache Monitoring, and Historical Store panels](images/24-1-4/readiness-extension-panels.png)
+
+*The extension panels and the Historical Store, including the Buffer Cache Monitoring panel.*
 
 If **Database Connection** fails, the page reports that live readiness cannot be probed and asks you to verify the target is up and the monitoring credentials are valid. Until the connection succeeds, only **Database Connection** and **Historical Store** are shown — the feature panels are not probed at all.
 
@@ -45,6 +50,10 @@ Plans reach **Plan Analysis** by being written to the server log by `auto_explai
 
 This is the panel with the most items, and the only one the plug-in can configure for you.
 
+![The Database Connection and Plan Capture panels, with the log line prefix item and the server log read grants item reading granted (xpgs_monitor log reader)](images/24-1-4/readiness-plan-capture.png)
+
+*The Plan Capture panel with every item met. The last two items are the log line prefix and the server log read grants, which names the route in use.*
+
 | Item | needs: | Why it matters |
 |---|---|---|
 | **auto_explain loaded** | `loaded (session/shared_preload_libraries)` | Configure loads `auto_explain` via `session_preload_libraries` for this database — new sessions only, no restart. |
@@ -53,7 +62,8 @@ This is the panel with the most items, and the only one the plug-in can configur
 | **Run-time statistics (log_analyze)** | `on - hard capture prerequisite` | Captured plans need actual rows and timings for drift and insight detection. It adds per-query instrumentation cost, so enabling it is the per-target opt-in. |
 | **Query identifiers (log_verbose)** — optional | `on` | Without it, plans fall back to synthetic query ids. See [Query identifiers and the syn: fallback](#query-identifiers-and-the-syn-fallback). |
 | **Query id computation (compute_query_id)** — optional | `on, or auto with pg_stat_statements preloaded` | Pairs with `log_verbose` so every captured plan carries its real query id. |
-| **Server log read grants** | `EXECUTE on pg_current_logfile, pg_stat_file and pg_read_file in this database` | The harvester reads the server log file. See [The grant the plug-in never applies](#the-grant-the-plug-in-never-applies). |
+| **Database in log_line_prefix (%u@%d)** — optional | `%u@%d in log_line_prefix, surrounded by spaces` | A captured plan takes its database from this token. Without it the plan is still captured and analysed, but it is listed under every database of the target with its database shown as "unknown". See [Log line prefix](log-enhanced-features.md#log-line-prefix). |
+| **Server log read grants** | `EXECUTE on the xpgs_monitor log reader (enable_log_enhanced_features.sql), or on pg_current_logfile, pg_stat_file and pg_read_file, in this database` | The harvester reads the server log file. When the grant is in place the item also names the route in use. See [The grant the plug-in never applies](#the-grant-the-plug-in-never-applies). |
 
 ## Status model
 
@@ -100,21 +110,32 @@ For items the plug-in will not set itself (the log read grant and the extension 
 
 ## The grant the plug-in never applies
 
-One item is deliberately never self-applied: EXECUTE on the functions that read the server log. The plug-in reads the log to harvest plans, and granting itself the privilege to read server files is not a change it will make on your behalf.
+One item is deliberately never self-applied: the right to read the server log. The plug-in reads the log to harvest plans, the autovacuum history, and the server log events, and granting itself the privilege to read server files is not a change it will make on your behalf.
 
-The **Server log read grants** item shows the exact statement to run, with your actual monitoring role name and database already filled in, listing only the functions the role still lacks:
+The role can hold the access by either of two routes, and the **Server log read grants** item reports which one the target uses:
+
+| The item reads | Meaning |
+|---|---|
+| `granted (xpgs_monitor log reader)` | The role reads the log through the superuser-owned functions that [enable_log_enhanced_features.sql](downloads/enable_log_enhanced_features.sql) installs. They refuse any file outside the server's log directory. This is the recommended route. |
+| `granted (built-in functions)` | The role holds EXECUTE on PostgreSQL's own `pg_current_logfile`, `pg_stat_file`, and `pg_read_file`. Everything works, but those functions also let the role read any file in the data and log directories. The item says so and points at the narrower reader. |
+| `missing: …` | Neither route is complete. The item lists the functions the role still lacks and shows the statement to run, with your actual monitoring role name and database filled in. The **Plan Capture (auto_explain)** panel is **Not functional**: plans are written to the log but nothing can read them back. |
+| `undetermined` | The probe could not determine the grants. The item shows **Attention**. |
+
+The statement the item shows for the built-in route is:
 
 ```sql
 GRANT EXECUTE ON FUNCTION pg_current_logfile(), pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO "<monitoring role>";
 ```
 
-Run it as a superuser while connected to the database the target monitors (function privileges are per database), then reload the page. Until it is granted, the item reads `missing: …` and the **Plan Capture (auto_explain)** panel is **Not functional** — plans are written to the log but nothing can read them back. If the probe cannot determine the grants, the item reads `undetermined` and shows **Attention**. The **Database Connection** panel also carries a **Monitoring role (pg_monitor)** item: without `pg_monitor` several checks on this page cannot run.
+Run either the script or the statement as a superuser while connected to the database the target monitors (function privileges are per database), then reload the page. See [Read access to the server log](log-enhanced-features.md#log-read-access) for both routes and for moving a target from the built-in functions to the narrower reader.
+
+The **Database Connection** panel also carries a **Monitoring role (pg_monitor)** item: without `pg_monitor` several checks on this page cannot run.
 
 Extension items behave the same way. Each shows an install hint of the form `CREATE EXTENSION <name>;`, and you install the underlying package through your own platform packaging first.
 
 ## Query identifiers and the syn: fallback {#query-identifiers-and-the-syn-fallback}
 
-Two items in the **Plan Capture (auto_explain)** panel are advisory rather than blocking: **Query identifiers (log_verbose)** and **Query id computation (compute_query_id)**. Both show **Attention** when off, never **Not functional**.
+Three items in the **Plan Capture (auto_explain)** panel are advisory rather than blocking: **Query identifiers (log_verbose)**, **Query id computation (compute_query_id)**, and **Database in log_line_prefix (%u@%d)**. They show **Attention** when unmet, never **Not functional**. This section covers the first two; the third is covered under [Log line prefix](log-enhanced-features.md#log-line-prefix).
 
 When a captured plan arrives without a real query id, the plug-in computes a synthetic id of the form `syn:<hex-hash>` from the literal-normalized query text. Grouping, plan history, drift detection, and baselines all keep working on synthetic ids, and the `syn:` prefix makes them visible at a glance wherever query ids appear. What you lose is the join to `pg_stat_statements`: synthetic ids will not match the ids reported there.
 
@@ -135,6 +156,7 @@ Enabling the two settings later is safe, but it has one side effect. Affected st
 ## Related
 
 - [Prerequisites](prerequisites.md) — the full setup list behind every panel here, including [the monitoring role](prerequisites.md#monitoring-role) and [optional extensions](prerequisites.md#optional-extensions)
+- [Enabling the log-enhanced features](log-enhanced-features.md) — the checklist and scripts for the server log read grant and the logging settings
 - [Plan Analysis](plan-analysis.md) — what plan capture feeds once this page is green
 - [History store and retention](history-store-and-retention.md#store-size) — the store behind the **Historical Store** panel
 - [Troubleshooting](troubleshooting.md#unable-to-run-job) — what to do about "Unable to run job. Verify Preferred Credentials are set for this target."
