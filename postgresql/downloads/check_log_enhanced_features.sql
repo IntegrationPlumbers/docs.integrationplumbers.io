@@ -9,12 +9,16 @@
 -- target is monitored; this script lets you prepare a server before adding it.
 --
 -- Status values: OK = in place, ACTION = needed for a log-enhanced feature, OPTIONAL = enables more
--- (extensions, extra event categories). Needs psql 11 or later (\if with :{?name}).
+-- (extensions, extra event categories). Needs psql 11 or later (\if and :{?name}).
 
 \set QUIET on
--- Run as a DBA, possibly in a database where other roles can create objects: resolve every unqualified
--- name in pg_catalog only, so a function planted in public cannot be called with the DBA's rights.
-SET search_path = pg_catalog, pg_temp;
+-- First statement, before any function call: this script is usually run by a superuser, and an unqualified
+-- call would otherwise resolve through the session's search_path, where a function planted in public
+-- (pg_has_role(text, text, text), for one) can be a better match than the pg_catalog one. The catalog
+-- names below are schema-qualified as well. SET LOCAL ends with the transaction, so the session's own
+-- search_path is untouched afterwards; the transaction is read only, like the report.
+BEGIN READ ONLY;
+SET LOCAL search_path = pg_catalog, pg_temp;
 \if :{?role}
 \else
 \set role ''
@@ -27,88 +31,88 @@ WITH r AS (
   SELECT COALESCE(NULLIF(:'role', ''), current_user::text) AS role_name
 ), s AS (
   SELECT
-    current_database()                                              AS db,
-    current_setting('server_version_num')::int                      AS vnum,
-    current_setting('logging_collector', true)                      AS logging_collector,
-    current_setting('log_destination', true)                        AS log_destination,
-    current_setting('lc_messages', true)                            AS lc_messages,
-    current_setting('log_line_prefix', true)                        AS log_line_prefix,
-    current_setting('log_autovacuum_min_duration', true)            AS log_autovacuum_min_duration,
-    current_setting('log_min_duration_statement', true)             AS log_min_duration_statement,
-    current_setting('log_temp_files', true)                         AS log_temp_files,
-    current_setting('log_lock_waits', true)                         AS log_lock_waits,
-    current_setting('log_connections', true)                        AS log_connections,
-    current_setting('log_checkpoints', true)                        AS log_checkpoints,
-    current_setting('shared_preload_libraries', true)               AS shared_preload_libraries,
-    current_setting('compute_query_id', true)                       AS compute_query_id,
-    current_setting('auto_explain.log_min_duration', true)          AS ae_min_duration,
-    current_setting('auto_explain.log_format', true)                AS ae_format,
-    current_setting('auto_explain.log_analyze', true)               AS ae_analyze,
-    current_setting('auto_explain.log_verbose', true)               AS ae_verbose
+    pg_catalog.current_database()                                              AS db,
+    pg_catalog.current_setting('server_version_num')::int                      AS vnum,
+    pg_catalog.current_setting('logging_collector', true)                      AS logging_collector,
+    pg_catalog.current_setting('log_destination', true)                        AS log_destination,
+    pg_catalog.current_setting('lc_messages', true)                            AS lc_messages,
+    pg_catalog.current_setting('log_line_prefix', true)                        AS log_line_prefix,
+    pg_catalog.current_setting('log_autovacuum_min_duration', true)            AS log_autovacuum_min_duration,
+    pg_catalog.current_setting('log_min_duration_statement', true)             AS log_min_duration_statement,
+    pg_catalog.current_setting('log_temp_files', true)                         AS log_temp_files,
+    pg_catalog.current_setting('log_lock_waits', true)                         AS log_lock_waits,
+    pg_catalog.current_setting('log_connections', true)                        AS log_connections,
+    pg_catalog.current_setting('log_checkpoints', true)                        AS log_checkpoints,
+    pg_catalog.current_setting('shared_preload_libraries', true)               AS shared_preload_libraries,
+    pg_catalog.current_setting('compute_query_id', true)                       AS compute_query_id,
+    pg_catalog.current_setting('auto_explain.log_min_duration', true)          AS ae_min_duration,
+    pg_catalog.current_setting('auto_explain.log_format', true)                AS ae_format,
+    pg_catalog.current_setting('auto_explain.log_analyze', true)               AS ae_analyze,
+    pg_catalog.current_setting('auto_explain.log_verbose', true)               AS ae_verbose
 ), fn AS (
-  SELECT array_agg(f ORDER BY f) FILTER (WHERE NOT has_function_privilege(r.role_name, f, 'EXECUTE')) AS missing
-  FROM r, unnest(ARRAY['pg_current_logfile()', 'pg_current_logfile(text)', 'pg_stat_file(text)',
+  SELECT pg_catalog.array_agg(f ORDER BY f) FILTER (WHERE NOT pg_catalog.has_function_privilege(r.role_name, f, 'EXECUTE')) AS missing
+  FROM r, pg_catalog.unnest(ARRAY['pg_current_logfile()', 'pg_current_logfile(text)', 'pg_stat_file(text)',
                        'pg_read_file(text, bigint, bigint)']) AS f
-  WHERE EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r.role_name)
+  WHERE EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r.role_name)
 ), nfn AS (
   -- the narrow xpgs_monitor reader: present, trusted (SECURITY DEFINER, superuser-owned, schema
   -- usable by the role: a schema merely named xpgs_monitor is ignored by the plug-in) and executable. The
   -- CASE guards keep has_function_privilege away from a missing function (it would raise), since PostgreSQL
   -- does not promise AND short-circuit order.
-  SELECT bool_and(to_regprocedure(f) IS NOT NULL) AS installed,
-         bool_and(CASE WHEN to_regprocedure(f) IS NOT NULL THEN
-                    EXISTS (SELECT 1 FROM pg_proc p JOIN pg_roles o ON o.oid = p.proowner
-                             WHERE p.oid = to_regprocedure(f) AND p.prosecdef AND o.rolsuper)
-                    AND has_schema_privilege(r.role_name, 'xpgs_monitor', 'USAGE')
+  SELECT pg_catalog.bool_and(pg_catalog.to_regprocedure(f) IS NOT NULL) AS installed,
+         pg_catalog.bool_and(CASE WHEN pg_catalog.to_regprocedure(f) IS NOT NULL THEN
+                    EXISTS (SELECT 1 FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_roles o ON o.oid = p.proowner
+                             WHERE p.oid = pg_catalog.to_regprocedure(f) AND p.prosecdef AND o.rolsuper)
+                    AND pg_catalog.has_schema_privilege(r.role_name, 'xpgs_monitor', 'USAGE')
                   ELSE false END) AS trusted,
-         bool_and(CASE WHEN to_regprocedure(f) IS NOT NULL THEN has_function_privilege(r.role_name, f, 'EXECUTE') ELSE false END) AS executable
-  FROM r, unnest(ARRAY['xpgs_monitor.current_log_file(text)', 'xpgs_monitor.log_file_size(text)',
+         pg_catalog.bool_and(CASE WHEN pg_catalog.to_regprocedure(f) IS NOT NULL THEN pg_catalog.has_function_privilege(r.role_name, f, 'EXECUTE') ELSE false END) AS executable
+  FROM r, pg_catalog.unnest(ARRAY['xpgs_monitor.current_log_file(text)', 'xpgs_monitor.log_file_size(text)',
                        'xpgs_monitor.log_read(text, bigint, bigint)']) AS f
-  WHERE EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r.role_name)
+  WHERE EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r.role_name)
 ), ext AS (
   SELECT e.name,
-         (SELECT extversion FROM pg_extension x WHERE x.extname = e.name) AS installed,
+         (SELECT extversion FROM pg_catalog.pg_extension x WHERE x.extname = e.name) AS installed,
          a.default_version AS available
-  FROM unnest(ARRAY['pg_stat_statements', 'pgstattuple', 'pg_qualstats', 'hypopg', 'pg_wait_sampling']) AS e(name)
-  LEFT JOIN pg_available_extensions a ON a.name = e.name
+  FROM pg_catalog.unnest(ARRAY['pg_stat_statements', 'pgstattuple', 'pg_qualstats', 'hypopg', 'pg_wait_sampling']) AS e(name)
+  LEFT JOIN pg_catalog.pg_available_extensions a ON a.name = e.name
 ), checks AS (
   -- 1. the monitoring role
   SELECT 10.0 AS n, 'Monitoring role exists' AS item,
-         CASE WHEN EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r.role_name) THEN 'OK' ELSE 'ACTION' END AS status,
-         r.role_name AS current, 'CREATE ROLE ' || quote_ident(r.role_name) || ' LOGIN PASSWORD ''...'';' AS recommended
+         CASE WHEN EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r.role_name) THEN 'OK' ELSE 'ACTION' END AS status,
+         r.role_name AS current, 'CREATE ROLE ' || pg_catalog.quote_ident(r.role_name) || ' LOGIN PASSWORD ''...'';' AS recommended
   FROM r
   UNION ALL
   SELECT 10.5, 'Monitoring role can log in',
-         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r.role_name) THEN 'ACTION'
-              WHEN (SELECT rolcanlogin FROM pg_roles WHERE rolname = r.role_name) THEN 'OK' ELSE 'ACTION' END,
-         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r.role_name) THEN 'role missing'
-              WHEN (SELECT rolcanlogin FROM pg_roles WHERE rolname = r.role_name) THEN 'LOGIN' ELSE 'NOLOGIN' END,
-         'ALTER ROLE ' || quote_ident(r.role_name) || ' LOGIN;'
+         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r.role_name) THEN 'ACTION'
+              WHEN (SELECT rolcanlogin FROM pg_catalog.pg_roles WHERE rolname = r.role_name) THEN 'OK' ELSE 'ACTION' END,
+         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r.role_name) THEN 'role missing'
+              WHEN (SELECT rolcanlogin FROM pg_catalog.pg_roles WHERE rolname = r.role_name) THEN 'LOGIN' ELSE 'NOLOGIN' END,
+         'ALTER ROLE ' || pg_catalog.quote_ident(r.role_name) || ' LOGIN;'
   FROM r
   UNION ALL
   SELECT 11, 'Role is a member of pg_monitor (required)',
-         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r.role_name) THEN 'ACTION'
-              WHEN pg_has_role(r.role_name, 'pg_monitor', 'MEMBER') THEN 'OK' ELSE 'ACTION' END,
-         CASE WHEN EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r.role_name)
-              THEN CASE WHEN pg_has_role(r.role_name, 'pg_monitor', 'MEMBER') THEN 'member' ELSE 'not a member' END
+         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r.role_name) THEN 'ACTION'
+              WHEN pg_catalog.pg_has_role(r.role_name, 'pg_monitor', 'MEMBER') THEN 'OK' ELSE 'ACTION' END,
+         CASE WHEN EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r.role_name)
+              THEN CASE WHEN pg_catalog.pg_has_role(r.role_name, 'pg_monitor', 'MEMBER') THEN 'member' ELSE 'not a member' END
               ELSE 'role missing' END,
-         'GRANT pg_monitor TO ' || quote_ident(r.role_name) || ';'
+         'GRANT pg_monitor TO ' || pg_catalog.quote_ident(r.role_name) || ';'
   FROM r
   UNION ALL
   SELECT 12, 'Role can read the server log in database ' || s.db || ' (required for log-based features)',
-         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r.role_name) THEN 'ACTION'
+         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r.role_name) THEN 'ACTION'
               WHEN COALESCE(nfn.trusted, false) AND COALESCE(nfn.executable, false) THEN 'OK'
               WHEN fn.missing IS NULL THEN 'OK' ELSE 'ACTION' END,
-         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r.role_name) THEN 'role missing'
+         CASE WHEN NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r.role_name) THEN 'role missing'
               WHEN COALESCE(nfn.trusted, false) AND COALESCE(nfn.executable, false) THEN 'xpgs_monitor log reader installed and granted (reads the server log only)'
               WHEN COALESCE(nfn.installed, false) AND NOT COALESCE(nfn.trusted, false) THEN 'a schema named xpgs_monitor exists but is NOT the plug-in''s reader (not superuser-owned SECURITY DEFINER functions, or no USAGE for the role): the plug-in ignores it'
-                || CASE WHEN fn.missing IS NULL THEN '; the built-ins are granted and in use' ELSE '; built-ins missing: ' || array_to_string(fn.missing, ', ') END
+                || CASE WHEN fn.missing IS NULL THEN '; the built-ins are granted and in use' ELSE '; built-ins missing: ' || pg_catalog.array_to_string(fn.missing, ', ') END
               WHEN fn.missing IS NULL THEN 'EXECUTE granted on the four built-in functions (the role can read any file in the data and log directories; the xpgs_monitor reader is narrower)'
-              WHEN COALESCE(nfn.installed, false) THEN 'xpgs_monitor log reader installed but not granted to the role; built-ins missing: ' || array_to_string(fn.missing, ', ')
-              ELSE 'missing: ' || array_to_string(fn.missing, ', ') END,
+              WHEN COALESCE(nfn.installed, false) THEN 'xpgs_monitor log reader installed but not granted to the role; built-ins missing: ' || pg_catalog.array_to_string(fn.missing, ', ')
+              ELSE 'missing: ' || pg_catalog.array_to_string(fn.missing, ', ') END,
          'run enable_log_enhanced_features.sql as a superuser in THIS database (installs the xpgs_monitor log reader and grants it to '
-           || quote_ident(r.role_name) || '); the older alternative is GRANT EXECUTE ON FUNCTION pg_current_logfile(), '
-           || 'pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO ' || quote_ident(r.role_name) || ';'
+           || pg_catalog.quote_ident(r.role_name) || '); the older alternative is GRANT EXECUTE ON FUNCTION pg_current_logfile(), '
+           || 'pg_current_logfile(text), pg_stat_file(text), pg_read_file(text, bigint, bigint) TO ' || pg_catalog.quote_ident(r.role_name) || ';'
   FROM r, s, fn, nfn
   UNION ALL
   -- 2. the server log itself
@@ -125,8 +129,8 @@ WITH r AS (
   FROM s
   UNION ALL
   SELECT 21, 'Server messages are in English',
-         CASE WHEN s.lc_messages IS NULL OR s.lc_messages = '' OR lower(s.lc_messages) IN ('c', 'posix')
-                   OR lower(s.lc_messages) LIKE 'c.%' OR lower(s.lc_messages) LIKE 'en%' THEN 'OK' ELSE 'ACTION' END,
+         CASE WHEN s.lc_messages IS NULL OR s.lc_messages = '' OR pg_catalog.lower(s.lc_messages) IN ('c', 'posix')
+                   OR pg_catalog.lower(s.lc_messages) LIKE 'c.%' OR pg_catalog.lower(s.lc_messages) LIKE 'en%' THEN 'OK' ELSE 'ACTION' END,
          'lc_messages = ' || COALESCE(s.lc_messages, '(default)'),
          'lc_messages = C or an en_* locale (the plug-in recognises English messages)'
   FROM s
@@ -181,7 +185,7 @@ WITH r AS (
   FROM s
   UNION ALL
   -- 4. optional extensions
-  SELECT 40 + row_number() OVER (ORDER BY e.name), 'Optional extension ' || e.name || ' (' ||
+  SELECT 40 + pg_catalog.row_number() OVER (ORDER BY e.name), 'Optional extension ' || e.name || ' (' ||
            CASE e.name WHEN 'pgstattuple' THEN 'measured table bloat on the Vacuum Advisor'
                        WHEN 'pg_qualstats' THEN 'predicate-based index recommendations'
                        WHEN 'hypopg' THEN 'what-if index simulations'
@@ -228,6 +232,7 @@ SELECT status, item, current, recommended
 FROM checks
 ORDER BY n;
 
+COMMIT;
 \pset title
 \echo
 \echo 'ACTION rows block a log-enhanced feature; OPTIONAL rows enable more. The grants are per database:'

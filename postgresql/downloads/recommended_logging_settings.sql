@@ -15,6 +15,14 @@
 -- (one -s per setting; a value with % or a trailing space must be YAML-quoted:
 --   -s 'postgresql.parameters.log_line_prefix="%m [%p] %q%u@%d %e "'), and let Patroni apply them to every member.
 
+-- Run by a superuser: catalog functions are called by qualified name, and the search_path is pinned for
+-- the length of the script so nothing planted in another schema can be picked up instead. ALTER SYSTEM
+-- cannot run inside a transaction, so the pin is a session setting: the caller's own value is read first
+-- (a qualified call, safe before the pin) and put back at the end. If a statement fails part-way in an
+-- interactive session, run RESET search_path yourself.
+SELECT pg_catalog.current_setting('search_path') AS xpgs_caller_search_path \gset
+SET search_path = pg_catalog, pg_temp;
+
 -- 1. Record every autovacuum run (vacuum history, dead-row and bloat findings). 0 = every run.
 ALTER SYSTEM SET log_autovacuum_min_duration = 0;
 
@@ -36,12 +44,13 @@ ALTER SYSTEM SET log_checkpoints = on;                 -- the default from Postg
 -- ALTER SYSTEM SET log_connections = on;              -- connection churn; high volume on busy servers
 
 -- 5. Match captured plans to statements (the setting exists from PostgreSQL 14).
-SELECT current_setting('server_version_num')::int >= 140000 AS has_compute_query_id \gset
+SELECT pg_catalog.current_setting('server_version_num')::int >= 140000 AS has_compute_query_id \gset
 \if :has_compute_query_id
 ALTER SYSTEM SET compute_query_id = on;
 \endif
 
-SELECT pg_reload_conf();
+SELECT pg_catalog.pg_reload_conf();
+SELECT pg_catalog.set_config('search_path', :'xpgs_caller_search_path', false) AS xpgs_restored_search_path \gset
 
 -- Needs a RESTART, so it is not run here. auto_explain is configured afterwards from the plug-in's
 -- Monitoring Readiness page (its Configure action sets the auto_explain.* values), and

@@ -8,12 +8,12 @@
 --   psql ... -v role=<monitoring role> -v dry_run=1 -f enable_log_enhanced_features.sql   (show, then roll back;
 --                                                     dry_run=0 or leaving it out applies the grants)
 --
--- Needs psql 11 or later (\if with :{?name}). Always write the variable as -v dry_run=1: a bare -v dry_run unsets it.
+-- Needs psql 11 or later (\if and :{?name}). Always write the variable as -v dry_run=1: a bare -v dry_run unsets it.
 --
 -- Functions and their grants are PER DATABASE: run this in every database the plug-in monitors (or use
 -- enable_log_enhanced_features.sh, which loops over them). pg_monitor membership is cluster-wide and is
--- simply re-granted. The role is never given pg_read_server_files, and (with the xpgs_monitor reader)
--- no longer needs EXECUTE on the built-in pg_current_logfile / pg_stat_file / pg_read_file,
+-- simply re-granted. The role is never given pg_read_server_files, and (now that the xpgs_monitor
+-- reader exists) no longer needs EXECUTE on the built-in pg_current_logfile / pg_stat_file / pg_read_file,
 -- which would let it read every file inside the data and log directories (pg_hba.conf, table files).
 -- xpgs_monitor.current_log_file / log_file_size / log_read accept only a file that sits directly in the
 -- server's log_directory (the current log and its rotated siblings) and run as their superuser owner.
@@ -25,24 +25,27 @@
 \if :{?role}
 \else
 \echo 'usage: psql -d <database> -v role=<monitoring role> [-v dry_run=1] -f enable_log_enhanced_features.sql'
+\echo '       (psql 11 or later: an older psql cannot see -v role and always lands here; nothing was granted)'
 \quit
 \endif
 
 BEGIN;
--- This script runs as a superuser, possibly in a database where other roles can create objects. Resolve
--- every unqualified name in pg_catalog only, so a function planted in public (or a search_path set on the
--- database) cannot be called with the superuser's rights.
+-- First statement, before any function call: this script runs as a superuser, and an unqualified call
+-- would otherwise resolve through the session's search_path. A function planted in public (any role can
+-- create one there on PostgreSQL 14 and earlier) such as pg_has_role(text, text, text) is a better match
+-- for an untyped argument than the pg_catalog one and would run with the superuser's rights. The catalog
+-- calls below are schema-qualified as well. SET LOCAL ends with the transaction.
 SET LOCAL search_path = pg_catalog, pg_temp;
 SET LOCAL client_min_messages = warning;   -- no "already a member" notice on a re-run
 
 -- psql does not substitute variables inside a DO block, so the role travels in a transaction-local
 -- setting. A missing role raises, which ON_ERROR_STOP turns into a non-zero exit (the wrapper counts it).
-SELECT set_config('onboarding.role', :'role', true) AS onboarding_role \gset
+SELECT pg_catalog.set_config('onboarding.role', :'role', true) AS onboarding_role \gset
 DO $enable$
-DECLARE r text := current_setting('onboarding.role');
+DECLARE r text := pg_catalog.current_setting('onboarding.role');
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r) THEN
-    RAISE EXCEPTION 'role % does not exist; create it first (CREATE ROLE % LOGIN PASSWORD ''...'';)', r, quote_ident(r);
+  IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = r) THEN
+    RAISE EXCEPTION 'role % does not exist; create it first (CREATE ROLE % LOGIN PASSWORD ''...'';)', r, pg_catalog.quote_ident(r);
   END IF;
 END
 $enable$;
@@ -60,7 +63,7 @@ GRANT pg_monitor TO :"role";
 DO $guard$
 DECLARE o text;
 BEGIN
-  SELECT r.rolname INTO o FROM pg_namespace n JOIN pg_roles r ON r.oid = n.nspowner
+  SELECT r.rolname INTO o FROM pg_catalog.pg_namespace n JOIN pg_catalog.pg_roles r ON r.oid = n.nspowner
    WHERE n.nspname = 'xpgs_monitor' AND NOT r.rolsuper;
   IF o IS NOT NULL THEN
     RAISE EXCEPTION 'schema xpgs_monitor already exists and is owned by non-superuser %; drop it (DROP SCHEMA xpgs_monitor CASCADE) before installing the log reader', o;
@@ -133,16 +136,16 @@ TO :"role";
 \pset format aligned
 \pset border 2
 \pset title 'Grants for the log-enhanced features'
-SELECT current_database()                                                            AS database,
+SELECT pg_catalog.current_database()                                                            AS database,
        :'role'                                                                       AS role,
-       pg_has_role(:'role', 'pg_monitor', 'MEMBER')                                  AS pg_monitor,
-       has_function_privilege(:'role', 'xpgs_monitor.current_log_file(text)', 'EXECUTE')
-         AND has_function_privilege(:'role', 'xpgs_monitor.log_file_size(text)', 'EXECUTE')
-         AND has_function_privilege(:'role', 'xpgs_monitor.log_read(text, bigint, bigint)', 'EXECUTE') AS xpgs_monitor_reader,
-       has_function_privilege(:'role', 'pg_current_logfile()', 'EXECUTE')
-         AND has_function_privilege(:'role', 'pg_current_logfile(text)', 'EXECUTE')
-         AND has_function_privilege(:'role', 'pg_stat_file(text)', 'EXECUTE')
-         AND has_function_privilege(:'role', 'pg_read_file(text, bigint, bigint)', 'EXECUTE') AS builtin_log_functions;
+       pg_catalog.pg_has_role(:'role', 'pg_monitor', 'MEMBER')                                  AS pg_monitor,
+       pg_catalog.has_function_privilege(:'role', 'xpgs_monitor.current_log_file(text)', 'EXECUTE')
+         AND pg_catalog.has_function_privilege(:'role', 'xpgs_monitor.log_file_size(text)', 'EXECUTE')
+         AND pg_catalog.has_function_privilege(:'role', 'xpgs_monitor.log_read(text, bigint, bigint)', 'EXECUTE') AS xpgs_monitor_reader,
+       pg_catalog.has_function_privilege(:'role', 'pg_current_logfile()', 'EXECUTE')
+         AND pg_catalog.has_function_privilege(:'role', 'pg_current_logfile(text)', 'EXECUTE')
+         AND pg_catalog.has_function_privilege(:'role', 'pg_stat_file(text)', 'EXECUTE')
+         AND pg_catalog.has_function_privilege(:'role', 'pg_read_file(text, bigint, bigint)', 'EXECUTE') AS builtin_log_functions;
 \pset title
 
 -- Any value other than 0 / false / off / no (and an empty one) means dry run.
@@ -150,7 +153,7 @@ SELECT current_database()                                                       
 \else
 \set dry_run 0
 \endif
-SELECT COALESCE(NULLIF(lower(:'dry_run'), ''), '1') NOT IN ('0', 'false', 'off', 'no') AS is_dry \gset
+SELECT COALESCE(NULLIF(pg_catalog.lower(:'dry_run'), ''), '1') NOT IN ('0', 'false', 'off', 'no') AS is_dry \gset
 \if :is_dry
 ROLLBACK;
 \echo 'dry run: nothing was changed'
