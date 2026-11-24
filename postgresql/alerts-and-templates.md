@@ -5,7 +5,7 @@ nav_order: 14
 
 # Alerts and templates
 
-If you would rather be told about a plan regression or a wraparound risk than go looking for one, you do not have to build anything. Every advisor finding in the PostgreSQL plug-in also publishes as a standard Oracle Enterprise Manager metric on the target, with editable schedules, tunable thresholds, alert history, and routing through whatever notification connector you already have bound. Thresholds ship pre-set where a safe default exists; three importable monitoring templates apply a curated set to one target or a whole group.
+If you would rather be told about a plan regression or a wraparound risk than go looking for one, you do not have to build anything. Every advisor finding in the PostgreSQL plug-in also publishes as a standard Oracle Enterprise Manager metric on the target, with editable schedules, tunable thresholds, alert history, and routing through whatever notification connector you already have bound. Thresholds ship pre-set where a safe default exists; four importable monitoring templates apply a curated set to one target or a whole group.
 
 > **Prerequisites for this page**
 > - A deployed plug-in and at least one PostgreSQL Database target — see [Add a PostgreSQL Database target](targets-and-properties.md#add-database-target).
@@ -54,6 +54,16 @@ Most of the plug-in's thresholds ship undefined on purpose: the right number for
 | Tables · Table Unfrozen Multixact Age | `tables` / `table_multixact_age` | Every 30 minutes | 1,000,000,000 or higher | 1,500,000,000 or higher | 2 | Age returns below the warning value. |
 | Plan Drift | `plan_drifts` / `drift_severity` | Every 15 minutes | Drift Severity matches `PLAN_CHANGED` | Not set | 1 | The query runs on an accepted baseline plan again. |
 | Plan Insights | `plan_insights` / `severity` | Every 15 minutes | Severity is `HIGH` | Not set | 1 | The insight resolves and drops out of the feed. |
+| Transaction ID Wraparound Forecast | `wraparound_forecast` / `days_to_xid_wraparound`, `days_to_multixact_wraparound` | Every 30 minutes | 14 days or less | 7 days or less | 2 | The projected days rise back above the warning value. |
+| Background Writer · Checkpoint Frequency Spike Ratio | `background_writer` / `spike_ratio` | Every 30 minutes | 2 or higher | 3 or higher | 1 | The last 24 hours fall back under twice the baseline. |
+| Background Writer · Requested Checkpoints Share | `background_writer` / `requested_share_24h_pct` | Every 30 minutes | Not set | Not set | 1 | — |
+| Cluster Size Capacity Forecast | `cluster_size_forecast` / `cluster_size_gb`, `projected_size_gb_30d`, `projected_size_gb_90d` | Every 60 minutes | Not set — enter your capacity | Not set | 1 | The size or projection returns below your value. |
+| Workload Anomalies | `workload_anomaly` / `mean_time_ratio`, `calls_ratio` | Every 60 minutes | Not set | Not set | 1 | The statement's ratio returns below your value. |
+| Vacuum Log Insights | `vacuum_log_insights` / seven 24-hour counts | Every 15 minutes | Not set | Not set | 1 | The count returns below your value. |
+| Server Log Events | `log_event_insights` / `events_24h` | Every 30 minutes | Not set | Not set | 1 | The category's 24-hour count returns below your value. |
+| Lock Contention | `lock_contention` / `max_wait_seconds`, `blocked_sessions`, `idle_in_transaction_blockers` | Every 10 minutes | Not set | Not set | 1 | The next sample is back below your value. |
+| Buffer Cache | `buffer_cache` / `dirty_percent`, `used_percent` | Every 15 minutes | Not set | Not set | 2 | The share returns below your value. |
+| Parameter Drift | `parameter_drift` / `significant_changes_24h`, `changes_24h`, `pending_restart_count` | Every 30 minutes | Not set | Not set | 1 | The change ages out of the last 24 hours, or the restart happens. |
 | Super-user / Privilege Audit | `superuser_audit` / `superuser_count` | Every 30 minutes | Not set — enter your sanctioned count | Not set | 1 | The count returns to your warning value or below. |
 | Wait Events Sampled | `wait_events_sampled` | Every 15 minutes | None | None | — | No shipped alert. |
 | Collection Throttle | `collection_throttle` | Every 5 minutes | None | None | — | No shipped alert. |
@@ -68,6 +78,20 @@ Reading the table:
 - Cost Drift is advisory by default. The shipped Plan Drift condition matches `PLAN_CHANGED` only, so a query whose plan shape is unchanged but whose estimated cost moved does not raise an incident. To be alerted on it, add a Warning threshold on the **Plan Drift** metric's `drift_severity` column for the query keys you care about (see [Tuning thresholds](#tuning-thresholds)); Drift Configuration on **Plan Drift Advisor** changes how captures are classified, not whether they alert.
 - Four metrics emit rows only where their extension is present: `index_advisor_whatif` needs hypopg, `index_advisor_qualstats` needs pg_qualstats, `table_bloat` needs pgstattuple, and `wait_events_sampled` needs pg_wait_sampling. Without the extension the metric returns zero rows, which is a healthy state, not an error, and nothing alerts. The **Monitoring Readiness** page tells you which extension is missing.
 - Multixact wraparound is tracked and alerted separately from transaction-ID wraparound, at both database and table grain.
+- The **Transaction ID Wraparound Forecast** is blank until 24 hours of history exist, and a blank value raises nothing. It is the calendar-time companion to the age thresholds: see [Wraparound monitoring](vacuum-advisor.md#wraparound-monitoring).
+- The **Checkpoint Frequency Spike Ratio** compares the checkpoints of the last 24 hours with the target's own daily average over the prior 7 days. Checkpoint-spike detection lives on the **Background Writer** metric; there is no separate checkpoint metric to add to a template. See [Checkpoint History](monitoring-pages.md#checkpoint-history).
+- The **Cluster Size Capacity Forecast** thresholds ship undefined because the plug-in cannot see the storage behind the cluster. Enter the size, in GB, at which you want to be told.
+- The seven **Vacuum Log Insights** conditions are on its 24-hour counts: runs skipped or cancelled by locks, runs needing multiple index passes, the longest run in seconds, runs with dead rows held back, anti-wraparound runs, WAL written by autovacuum, and autoanalyze runs.
+- **Server Log Events** has one row per event category, so set its threshold per category: for example a Warning at 1 on the Deadlocks row. See [Events from the Server Log](monitoring-pages.md#server-log-events).
+- `buffer_cache` emits rows only where `pg_buffercache` is installed. `vacuum_log_insights` and `log_event_insights` need the server log read grant; without it they report the status of the log read and no counts. See [Enabling the log-enhanced features](log-enhanced-features.md).
+
+The PostgreSQL Cluster target has one alerting metric of its own:
+
+| Metric | Internal name | Collected | Default Warning | Default Critical | Occurrences | Clears when |
+|---|---|---|---|---|---|---|
+| Leader Change Alert (Patroni) | `ClusterLeaderChangeAlert` / `hours_since_change` | Every 15 minutes, evaluated in the repository | 24 hours or less | Not set | 1 | The newest leader change is more than 24 hours old. |
+
+It warns on every leader change, planned switchovers included. See [Leader Change History](monitoring-pages.md#leader-change-history).
 
 ## Tuning thresholds {#tuning-thresholds}
 
@@ -89,17 +113,29 @@ Two things to keep in mind. Collection schedules and thresholds are independent:
 
 ## Monitoring templates {#templates}
 
-Three pre-built Enterprise Manager monitoring templates cover the plug-in's metrics for the `ip_postgresql_db` target type. They ship in the standard Enterprise Manager export format, the same shape `emcli export_template` produces, so they behave like any template you built yourself.
+Four pre-built Enterprise Manager monitoring templates cover the plug-in's metrics: three for the `ip_postgresql_db` target type and one for `ip_postgresql_cluster`. They ship in the standard Enterprise Manager export format, the same shape `emcli export_template` produces, so they behave like any template you built yourself.
 
-| Template name | File | Purpose |
-|---|---|---|
-| `ip_xpgs_production_critical` | `ip_xpgs_production_critical.template.xml` | Critical production. "Production Critical baseline: all safety-critical and advisory metrics on a 15-minute schedule with tight thresholds (wraparound, privilege drift, failover, blocking, index/vacuum/bloat advisories)." |
-| `ip_xpgs_standard` | `ip_xpgs_standard.template.xml` | Dev, test and staging. "Standard baseline for dev/test/staging PostgreSQL databases: core health on a 15-minute schedule with loosened wraparound/connection thresholds; advisory metrics collected store-only on a 1-hour schedule (no paging)." |
-| `ip_xpgs_starter` | `ip_xpgs_starter.template.xml` | A starter to extend. "Minimal starter monitoring template for PostgreSQL databases: availability plus core database health, ready to clone and extend into your own site standard." |
+| Template name | File | Target type | Purpose |
+|---|---|---|---|
+| `ip_xpgs_production_critical` | `ip_xpgs_production_critical.template.xml` | PostgreSQL Database | Critical production. "Production Critical baseline: every collection the plug-in ships on is enabled (core health on a 15-minute schedule) with tight thresholds (wraparound, privilege drift, failover, blocking, index/vacuum/bloat advisories)." |
+| `ip_xpgs_standard` | `ip_xpgs_standard.template.xml` | PostgreSQL Database | Dev, test and staging. "Standard baseline for dev/test/staging PostgreSQL databases: core health on a 15-minute schedule with loosened wraparound/connection thresholds; index/vacuum/bloat advisories store-only on a 1-hour schedule (no paging)." |
+| `ip_xpgs_starter` | `ip_xpgs_starter.template.xml` | PostgreSQL Database | A starter to extend. "Minimal starter monitoring template for PostgreSQL databases: availability, core database health and the wraparound forecast, ready to clone and extend into your own site standard." |
+| `ip_xpgs_cluster_production_critical` | `ip_xpgs_cluster_production_critical.template.xml` | PostgreSQL Cluster | Patroni clusters. "Cluster Production Critical baseline for PostgreSQL (Patroni) clusters: a leader change under 24 hours old warns, planned switchovers included, and clears as it ages." |
 
 After import, the console lists each template under its template name, and that same name is what you pass to `emcli apply_template`.
 
-Monitoring templates live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself. The three template files ship with each release; their download details, including SHA-256 checksums, are provided during the order process or trial enrollment (see [Download](install-and-upgrade.md#download)). Download them, import them into the OMS once, then apply them to targets.
+The database templates carry the two thresholds added in 24.1.4.0.0 / 13.5.18.0.0 that ship with a default, so a template keeps them armed whichever way it is applied:
+
+| Threshold | Production Critical | Standard | Starter |
+|---|---|---|---|
+| Wraparound forecast: days until transaction ID wraparound, and the same for multixact (2 occurrences) | Warning 14, Critical 7 | Warning 7, Critical 3 | Warning 7, Critical 3 |
+| Checkpoint frequency spike ratio | Warning 2, Critical 3 | Warning 3, Critical 4 | Not carried |
+
+The cluster template carries the leader-change warning: **Hours Since Leader Change** at 24 or less, Warning only.
+
+The two full database templates and the cluster template list every collection of their target type, at the state the plug-in ships it in (**Log Statistics** ships off). The collections added in this release run at the plug-in's default schedule. The Starter template is a seed: it carries availability, core health, and the wraparound forecast only.
+
+Monitoring templates live in the Enterprise Manager repository rather than in agent or OMS plug-in metadata, so they are not part of the plug-in deployment itself. The four template files ship in the release zip beside the plug-in archive, under `xpgs_monitoring_templates_v1/` (see [Download](install-and-upgrade.md#download)). Import them into the OMS once, then apply them to targets.
 
 ### Import and apply
 
@@ -107,17 +143,35 @@ Monitoring templates live in the Enterprise Manager repository rather than in ag
 # Import a template into the OMS repository
 emcli import_template -files="ip_xpgs_production_critical.template.xml"
 
-# Apply it to one or more database targets
+# Apply it to one or more database targets. -targets is TargetName:TargetType,
+# semicolon-separated for several targets.
 emcli apply_template \
    -name="ip_xpgs_production_critical" \
-   -targets="myprod_db:ip_postgresql_db"
+   -targets="myprod_db:ip_postgresql_db" \
+   -replace_metrics=0
+
+# The cluster target takes the cluster template the same way.
+emcli import_template -files="ip_xpgs_cluster_production_critical.template.xml"
+emcli apply_template \
+   -name="ip_xpgs_cluster_production_critical" \
+   -targets="myprod_cluster:ip_postgresql_cluster" \
+   -replace_metrics=0
 ```
+
+**Apply modes.** `emcli apply_template` chooses the mode with `-replace_metrics`:
+
+| Option | What it does |
+|---|---|
+| `-replace_metrics=0`, the default | The template's rows override the target's settings for the metrics the template carries. Everything else on the target stays as it is, so the template lands on top of the plug-in's defaults. |
+| `-replace_metrics=1`, the console's full replace | As above, and in addition the thresholds of every metric the template does not carry are cleared, so those metrics raise no alerts afterwards. |
+
+Because the two full database templates and the cluster template list every collection of their target type, a full replace with one of them no longer switches off a collection the template did not name. It does still clear thresholds: the templates carry their own threshold rows plus availability, not every default condition of the plug-in. Apply them with the default, `-replace_metrics=0`, unless you mean to clear the rest. Always apply the Starter template with `-replace_metrics=0`; it is a seed to copy and extend, and a full replace with it would clear most of the plug-in's default thresholds.
 
 In the console:
 
 1. Go to **Enterprise ▸ Monitoring ▸ Monitoring Templates**, click **Import**, choose the `.template.xml` file, and import it.
 2. The imported template is listed under its template name. If it is not, select **Display Oracle Certified Templates** in the search region and search again.
-3. Select the template, choose **Actions ▸ Apply**, add the PostgreSQL Database targets, and apply.
+3. Select the template, choose **Actions ▸ Apply**, add the PostgreSQL Database targets (PostgreSQL Cluster targets for the cluster template), and apply.
 
 ![The Monitoring Templates page with the Import action selected](images/13-5-15/templates-import.png)
 
@@ -160,4 +214,5 @@ The condition compares greater-than, so a count equal to your sanctioned number 
 - [Plan Drift Advisor](plan-drift-advisor.md) — how to respond to a Plan Drift alert, including accepting a new baseline.
 - [Plan Analysis](plan-analysis.md) — how to respond to a Plan Insights alert.
 - [Monitoring Readiness](monitoring-readiness.md) — which extensions are present, and therefore which metrics can emit rows.
+- [Monitoring pages](monitoring-pages.md) — the page sections behind the checkpoint, size, lock, buffer cache, parameter, server log, and leader-change metrics.
 - [History store and retention](history-store-and-retention.md) — the agent-local history that keeps accumulating whether or not a threshold is set.

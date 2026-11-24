@@ -15,7 +15,7 @@ When a query that was fine last week is suddenly slow, the question is rarely wh
 
 **Where to find it:** on a PostgreSQL Database target, the navigation tree under the database name ▸ **Plan Drift Advisor**. The target's PostgreSQL menu carries the same entry.
 
-**In this page:** Problematic Queries · Investigating a query · Severity model · Baseline governance · Fix Workbench: Test a Rewrite · Drift Configuration · Plan Drift alerts · Cross-links with Query Analyzer
+**In this page:** Problematic Queries · Workload Anomalies · Investigating a query · Severity model · Baseline governance · Fix Workbench: Test a Rewrite · Drift Configuration · Plan Drift alerts · Cross-links with Query Analyzer
 
 ## Problematic Queries
 
@@ -33,8 +33,8 @@ This list is the entry point. It holds one row per query and database pair, show
 | Column | What it shows |
 |---|---|
 | Query | The statement text. Statements captured without a real query id are grouped under a synthetic id and shown with a `syn:` prefix. |
-| Database | The database the statement ran in. Query id plus database is the key for everything on this page. |
-| Severity | The drift badge for the newest capture: OK, Cost Drift, or Plan Changed. |
+| Database | The database the statement ran in. Query id plus database is the key for everything on this page. A capture whose database could not be read from the log line (a `log_line_prefix` without `%d`) is listed under every database of the target with its database shown as "unknown"; see [Log line prefix](log-enhanced-features.md#log-line-prefix). |
+| Severity | The drift badge for the newest capture: OK, Cost Drift, or Plan Changed. A statement that is also a workload anomaly carries a second badge, "Slower N×" or "Busier N×"; see [Workload Anomalies](#workload-anomalies). |
 | Insights | How many plan pathologies were detected on the newest captured plan, colored by the highest severity present. A dash means none were found. |
 | Cost Δ | How far the newest capture's optimizer total cost sits from the cheapest accepted baseline, as a percentage. Reads `n/a` until the query has an accepted baseline. |
 | Mean (ms) | Mean execution time for the capture. |
@@ -42,6 +42,31 @@ This list is the entry point. It holds one row per query and database pair, show
 | Captured | When the plan was captured. |
 
 When nothing is drifting the list shows "No problematic queries found." When drift exists but your filter hides it, the list shows "No queries match the current severity filter." — widen the Severity filter rather than reading it as an error.
+
+## Workload Anomalies {#workload-anomalies}
+
+Plan drift compares plans. **Workload Anomalies**, below the list, compares behaviour: it lists the statements running markedly slower per call, or far more often, over the last 24 hours than over the prior 7 days, whether or not their plan changed. The comparison is computed every hour from the statement history in the agent-side store, so it needs `pg_stat_statements` and at least a day of history, not plan capture.
+
+![The Problematic Queries and Workload Anomalies sections of the Plan Drift Advisor page](images/24-1-4/plan-drift-workload-anomalies.png)
+
+*Workload Anomalies: a statement running 1.9 times slower per call than over the prior week, on an unchanged plan.*
+
+A statement is listed when it ran at least 20 times in the last 24 hours and either its mean time per call is 1.5 times its prior-week mean or more, or its call volume is 3 times its average prior day or more. The list holds the 25 largest.
+
+| Column | What it shows |
+|---|---|
+| Query | The statement text, truncated |
+| Database | The database the statement ran in |
+| Mean 24h (ms) | Mean time per call over the last 24 hours |
+| Prior 7d (ms) | Mean time per call over the 7 days before |
+| Slower by | The ratio of the two |
+| Calls 24h | Calls in the last 24 hours |
+| Extra time 24h | The execution time the slowdown added over the last 24 hours |
+| Plan drift | The drift state of the statement's newest captured plan, where it has one |
+
+Select a row to open that statement's plan history in the panels below. The link runs both ways: a statement in **Problematic Queries** that is also an anomaly carries a "Slower N×" badge when it is slower per call, or "Busier N×" when it is only being called more often. A statement that is both slower and on a changed plan is the first one to open.
+
+The **Workload Anomalies** metric (`workload_anomaly`) publishes the same rows, with **Mean Time Ratio** and **Call Volume Ratio** as its threshold columns. Both thresholds ship undefined, because how much slower is worth an incident depends on the workload; set them per target or in a monitoring template. See [Default thresholds](alerts-and-templates.md#default-thresholds).
 
 ## Investigating a query
 
@@ -61,9 +86,14 @@ An empty chart reads "No captures for this query in the selected time range. Wid
 
 ### Insights & Recommendations
 
-The insight rules run against this query's newest captured plan and render as cards, highest severity first. Five detections surface: **Insufficient Index**, **Misestimate**, **Stale Statistics**, **Slow Sequential Scan**, and **Lossy Bitmap**.
+The insight rules run against this query's newest captured plan and render as cards, highest severity first. The detections are the ones [Plan Analysis](plan-analysis.md#the-insights) runs: **Insufficient Index**, **Misestimate**, **Stale Statistics**, **Slow Sequential Scan**, **Lossy Bitmap**, **Disk Sort**, **Hash Batches**, **Expensive Node**, and **Large Offset**.
 
-Each card carries the detection name with a Low, Medium, or High severity, the plan node it is anchored at, the evidence from the plan, and, where the rule has one, a recommendation with a type chip (Parameter, Index, Statistics, or Review) and the concrete setting to try. Insight severity is a separate scale from the drift severity badge — a High insight on an OK plan means the plan is certified but still doing something expensive.
+![The Insights & Recommendations panel with four cards: Insufficient Index, Stale Statistics, Slow Sequential Scan, and Expensive Node](images/24-1-4/plan-drift-insights.png)
+*Insights & Recommendations: cards in severity order, each with the plan node it is anchored at.*
+
+Each card carries the detection name with a Low, Medium, or High severity, the plan node it is anchored at, the evidence from the plan, and, where the rule has one, a recommendation with a type chip (Parameter, Index, Statistics, Query rewrite, or Review) and the concrete setting to try. Insight severity is a separate scale from the drift severity badge — a High insight on an OK plan means the plan is certified but still doing something expensive.
+
+A **Query rewrite** card appears where rewriting the statement is estimated to make it run at least ten times faster, for example a filter that wraps a column in a function and so cannot use an index. The card states the rewrite to make and carries a **Test this rewrite** button, which loads the captured query into the [Fix Workbench](#fix-workbench-test-a-rewrite) for you to edit and run. The plug-in never runs a proposed rewrite, and the Fix Workbench stays the only place a statement is executed.
 
 Recommendations are review-and-run: you run them in your own tooling. The plug-in never applies a recommendation. When there is nothing to report the panel reads "No insights detected for this query's latest capture."
 
@@ -240,5 +270,6 @@ The preselection is carried for one navigation and consumed on arrival. Opening 
 - [Monitoring Readiness](monitoring-readiness.md#configure-auto-explain) — check and apply the `auto_explain` settings plan capture needs
 - [Monitoring pages](monitoring-pages.md) — the Query Analyzer page this one cross-links with
 - [Index Advisor](index-advisor.md) — where an Insufficient Index insight turns into a ranked index recommendation
+- [Workload History](workload-history.md) — the statement history the Workload Anomalies comparison is computed from
 - [History store and retention](history-store-and-retention.md#store-size) — how long captured plans are kept and which ones are protected
 - [Alerts and templates](alerts-and-templates.md#default-thresholds) — the shipped thresholds for `plan_drifts` and how to retune them fleet-wide

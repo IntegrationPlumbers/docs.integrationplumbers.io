@@ -12,6 +12,7 @@ groups:
       - { title: "Install and upgrade", url: /postgresql/install-and-upgrade.html }
       - { title: "Targets and properties", url: /postgresql/targets-and-properties.html }
       - { title: "Monitoring Readiness", url: /postgresql/monitoring-readiness.html }
+      - { title: "Log-enhanced features", url: /postgresql/log-enhanced-features.html }
   - name: Advisors
     pages:
       - { title: "Plan Analysis", url: /postgresql/plan-analysis.html }

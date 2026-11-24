@@ -7,6 +7,90 @@ nav_order: 18
 
 This page lists what changed in each release of the PostgreSQL plug-in, most recent first.
 
+## 24.1.4.0.0 (Enterprise Manager 24ai) / 13.5.18.0.0 (Enterprise Manager 13.5)
+
+One release, two builds with the same content: 24.1.4.0.0 installs on Enterprise Manager 24ai, 13.5.18.0.0 on Enterprise Manager 13.5. A feature release: one new job, nine new metrics, and new history sections on most existing pages. Everything historical is read from the agent-side history store; Enterprise Manager receives only the summary rows that thresholds and incidents use. Upgrading uses the same three steps as any plug-in update; see [Upgrade from an earlier release](install-and-upgrade.md#upgrade). The optional log-based features need a one-time grant on the monitored server; see [Enabling the log-enhanced features](log-enhanced-features.md).
+
+**New sections on existing pages**
+
+- Locks — three history sections below the blocking-sessions view: *Lock Wait History* (sessions seen waiting on a lock, sampled every 10 minutes), *Recent Lock Waits* with the blocking session and whether it was idle in an open transaction, and *Lock Waits by Query*. A **Database** selector at the top of the page filters the live blocking-sessions table (by the waiting session's database) and the history sections; it starts on All databases.
+- Logs — *Events from the Server Log* and *Recent Events*: log entries sorted into 26 categories (deadlocks, timeouts, refused connections, connection limit, temporary files, slow statements, wraparound warnings, out of memory or disk, crashes, start/stop/recovery, configuration changes, replication, WAL archiving, constraint violations, permission denied, other SQL errors, and more), with counts per window and the most recent sample of each. Reads stderr and, on PostgreSQL 15 and later, jsonlog; csvlog is not read. The page's **Database** selector scopes the recent events.
+- Overview — *Checkpoint History*: checkpoint frequency and duration over the retained history (90 days by default), with the last 24 hours compared against the target's own baseline. *Database Size History*: cluster size over the retained history (90 days by default), the change per database, and a 30- and 90-day projection.
+- Database — *Buffer Cache*: what is in `shared_buffers`, the dirty share, each database's share, and the most-cached relations, sampled every 15 minutes where the `pg_buffercache` extension is installed.
+- Configuration — *Parameter Changes*: every change to a server parameter since monitoring began, with the old and new value and when it was first seen, kept for a year.
+- Vacuum Advisor — *Vacuum History* for any table (not only the busiest); *Autovacuum Activity from the Server Log*: each autovacuum run with its duration, index passes, lock-conflict skips and cancellations, anti-wraparound runs, autoanalyze runs, and the buffer and WAL cost per run; *Bloat and Dead Rows from the Server Log*: tables whose dead rows a vacuum could not remove (held back by the xmin horizon) and tables where space was freed but no page released (a rebuilt table loses the finding at its next pgstattuple measurement; without the extension, once the next logged autovacuum run reports the smaller heap), with a measured free-space chart where `pgstattuple` is installed; a calendar-time wraparound forecast ("~N days to wraparound") above the XID consumption chart, with the projection drawn in.
+- Index Advisor — *Index History*: 12 months of size and usage for any index, month-over-month or over a custom range, with drift badges on the recommendations and drift-aware ranking; *Apply History*; an **Apply** action on each exact index recommendation (see *New jobs*). A usage trend (rising, declining, steady) is stated only where the history holds 60 days for that index; with less, a badge says only "unused" or "accumulating". An index reads "accumulating" on the day it is first seen and through the following day, and is not offered as a confirmed drop in that time.
+- Plan Drift Advisor — *Workload Anomalies*: statements whose mean time or call rate over the last 24 hours departs from the prior week, linked to their captured plans and badged "Slower N×" / "Busier N×" in the plan list; query-rewrite recommendation cards for captured plans where a rewrite is estimated to run at least ten times faster (the plug-in never runs a proposed rewrite; the Fix Workbench stays the only place a statement is executed).
+- Plan Analysis — the four supplementary plan insights (Disk Sort, Hash Batches, Expensive Node, Large Offset) and the non-sargable-predicate rewrite call-out now surface on the page and in the `plan_insights` metric beside the five existing insights. The metric's HIGH-severity condition applies to every insight code, so after the upgrade a sort spilling 256 MB or more to disk, or a hash join of 8 batches or more, raises a Warning (and a ticket where incidents route to ServiceNow) on targets that had none before; the work_mem values on those cards are copy-ready. Expensive Node is a Low, informational pointer to the plan node that owns the runtime. It is not shown when another insight already explains that node's cost, and the data-change, row-lock and function-scan nodes themselves are never pointed at (their time is lock waits, triggers or function bodies, not plan shape); when such a node holds a visible part of the time, the pointer says how much sits outside the plan nodes.
+- Retention Policies — the server-log events behind the Logs page (`log_event_counts`, with the verbatim samples following it) are now a tier of their own with an editable window and protected minimum; `PostgreSQL - Set Granular Retention Days` (job type 1.7) takes `Server Log Events (Days)` and its protected minimum. The seeded window is the 90 days they already aged out at, so an upgraded store behaves as before until an operator changes it.
+- PostgreSQL Cluster overview — *Leader Change History*: every switchover and failover the cluster has seen, newest first, with the time since the last change, and a warning on the cluster target while a leader change is under 24 hours old.
+- Monitoring Readiness — rows for the `pg_buffercache` extension, for which server-log reader the monitoring role can use, and for whether `log_line_prefix` carries the database name that captured plans need (on the PostgreSQL default prefix `'%m [%p] '` the plan capture section shows a warning until `%u@%d` is added; see [Enabling the log-enhanced features](log-enhanced-features.md#log-line-prefix)).
+- Retention Policies — windows and protected minimums for the new history types (autovacuum log events, lock samples, buffer cache samples and parameter changes).
+
+**New metrics**
+
+- Transaction ID Wraparound Forecast — days until wraparound per database from the consumption rate of the last 7 days; warning at 14 days, critical at 7 (two consecutive collections). Blank until 24 hours of history exist.
+- Cluster Size Capacity Forecast — projected size in 30 and 90 days; the capacity thresholds ship undefined because the plug-in cannot see the storage behind the cluster.
+- Workload Anomalies — per-statement mean-time and call-rate ratios, last 24 hours against the prior 7 days; thresholds ship undefined.
+- Vacuum Log Insights — the last 24 hours of autovacuum activity from the server log, with the status of the log read.
+- Server Log Events — one row per event category with its 24-hour count and most recent sample.
+- Lock Contention — sessions waiting on a lock at each sample, the longest wait and its relation, and blockers idle in an open transaction.
+- Buffer Cache — `shared_buffers` occupancy, dirty and pinned buffers, and the average usage count per sample.
+- Parameter Drift — parameters changed in the last 24 hours, how many of them matter for performance or safety, parameters awaiting a restart, and the last change.
+- Background Writer gains six columns comparing the last 24 hours of checkpoints against the target's baseline, with a warning at 2× and critical at 3× the baseline rate.
+- Leader Change Alert (Patroni), on the cluster target — one row per leader change of the last 7 days, evaluated in the repository, with a warning while the newest change is under 24 hours old.
+- Cluster Events (Patroni) gains *Hours Since Leader Change*.
+- Locks gains *Blocked Database* and Idle Connections gains *Database Name*, the columns the new Database selectors filter on.
+
+All new conditions ship with no threshold unless stated above; set them in a monitoring template.
+
+**New jobs**
+
+- PostgreSQL - Apply Index Recommendation — runs the `CREATE INDEX CONCURRENTLY` or `DROP INDEX CONCURRENTLY` behind one Index Advisor recommendation with the submitting user's Preferred PostgreSQL credentials. The job rebuilds the statement from the recommendation's parts after checking each against the live catalog; it never accepts SQL text. Every run is recorded under *Apply History*.
+
+**Changed jobs**
+
+- PostgreSQL - Read Workload History Data accepts a database scope and a per-object filter, so the history charts can show any table or index.
+- PostgreSQL - Set Granular Retention Days has windows and protected minimums for the new history types.
+
+**Monitoring templates**
+
+- The three database templates carry thresholds for the wraparound forecast; Production Critical and Standard also carry them for the checkpoint-spike ratio. The two full templates list every collection of the target type, so applying one in complete mode no longer switches off collections it did not name. Apply the Starter template in partial mode; it is a seed to copy.
+- New: `ip_xpgs_cluster_production_critical` for the cluster target, with the leader-change warning.
+- The four templates ship beside the plug-in archive in the release zip, under `xpgs_monitoring_templates_v1/`.
+
+**Metric-extension template**
+
+- pgBackRest backup history — a customer-deployable Metric Extension (Perl, with sample output) that reports the newest backup per stanza and its age; see [pgBackRest backup history](jobs-and-metric-extensions.md#pgbackrest).
+
+**Enabling the log-enhanced features**
+
+The vacuum history, bloat findings, server-log events and plan capture read the server log through the target's own database connection. The monitoring role needs `pg_monitor` and one of two read routes in each monitored database: EXECUTE on the four built-in log-read functions, or the narrower `xpgs_monitor` reader that the onboarding script installs (superuser-owned functions that can read files in the log directory only). Never `pg_read_server_files`. The checklist, a read-only check script and an idempotent grant script are on [Enabling the log-enhanced features](log-enhanced-features.md); the Monitoring Readiness page reports which route is in use.
+
+**Changed**
+
+- Checkpoint-spike detection lives on the Background Writer metric; there is no separate checkpoint metric to add to templates.
+- Vacuum insights and log events read jsonlog as well as stderr (PostgreSQL 15 and later).
+- Plan Analysis and Plan Drift Advisor list captured plans whose database could not be read from the log line (a `log_line_prefix` without `%d`) under every database, shown as "unknown", instead of hiding them while still counting them.
+- Page layout: every page has a title, every section sits on a panel with one heading style, and the navigation lists the sections of the current page under *On this page*. Long tables show 15 rows a page. On the Index Advisor, *Unused & Invalid Indexes* now follows *Missing Index Recommendations*. The Overview's agent host figures are grouped tiles with a link to the host target.
+- Idle Connections and Vacuums in Progress have the same **Database** selector as Locks and Logs.
+- Vacuum Advisor: the transaction-ID age chart covers the retained Databases history (90 days by default) where it showed a fixed 30 days, and its label states the window.
+- A new dynamic property, `buffercache_enabled`, turns the buffer cache collection on when the extension is present. No target property needs setting.
+
+**Fixed**
+
+- The bundled `log4j-api` and `log4j-core` are 2.26.1 (were 2.26.0): CVE-2026-49844, malformed JSON for non-finite numbers in `MapMessage.asJson`. The plug-in does not log through that path, so earlier builds were not exposed in practice; the upgrade keeps dependency scanners from flagging the jar.
+- The Logs page raised an "Error getting metric from Agent" dialog on every refresh when the target's optional **Path to postgres log file** was blank. *Log Statistics* and *PostgreSQL Logs* now stay empty in that case and say why. The *Log Statistics* title now says what it counts: the last 500 log lines. The same applies to a scheduled collection: a target with *Log Statistics* collection enabled and no path used to report a collection error and now reports no data and no error, so an empty metric there means the path is not set. A path that is set but cannot be read still reports an error.
+- Security: a job parameter value containing a comma could add or override another parameter of the same job, because Enterprise Manager joins a job's parameters with commas without escaping them. Every job script now accepts only the parameters its job type declares, refuses a repeated one, and never passes a value through a shell.
+- Security: database names, statement text and user names from a monitored database were written into HTML attributes with their quotes unescaped, so a value containing a quote could add markup to a console page. Both quote characters are now encoded everywhere such a value is written.
+- Realtime pages (Locks, Queries, Logs, Idle Connections, Vacuums in Progress, Vacuum xmin Horizon): the collection-throttle banner and the Logs page's *Log Statistics* did not follow the Auto Refresh setting. Every feed on a page now does.
+- On Enterprise Manager 24ai the notice and confirmation popup opened too short to show its message (the Retention Policies save notice and the Plan Drift Advisor's Retire Baseline confirmation).
+- On a slow connection a database target page could fail to open with "Load timeout for modules: xpgs/CommonXpgsController". The console library is now minified (about 40% smaller).
+- Security: the onboarding scripts (`enable_log_enhanced_features.sql`, `check_log_enhanced_features.sql`, `recommended_logging_settings.sql` and the `enable_log_enhanced_features.sh` wrapper) are run by a superuser and called PostgreSQL's built-in functions by unqualified name. A role able to create a function in the `public` schema (any role on PostgreSQL 14 and earlier, the database owner on 15 and later) could plant one with the same name and have it run with the superuser's rights, on a dry run as well. Each script now pins `search_path` to `pg_catalog` before it calls anything and names every built-in function and catalog by schema. If you downloaded these scripts before this release, replace them with the current copies before running them again. Nothing the scripts installed in a database needs changing.
+- The onboarding grant and check scripts need psql 11 or later; their headers said 10. On psql 10 the grant script printed its usage line and granted nothing. The wrapper now stops with a message on an older psql.
+- Plan Analysis and Plan Drift Advisor: insight cards showed three unreadable characters in place of a dash in the Stale Statistics, Lossy Bitmap, Disk Sort, Hash Batches, Expensive Node and Large Offset text. The text now uses a plain hyphen.
+- Plan Drift Advisor: after another query was selected, the heading changed at once while the tiles, chart, captures, plan comparison, baselines and audit trail went on showing the previous query until each finished loading, and a baseline action taken in that interval applied to the previous query. Every panel now clears as soon as a query is selected and the baseline actions stay disabled until that query's baselines have loaded. A panel that cannot load says so.
+
 ## 24.1.3.0.0 (Enterprise Manager 24ai) / 13.5.17.0.0 (Enterprise Manager 13.5)
 
 One release, two builds with the same content: 24.1.3.0.0 installs on Enterprise Manager 24ai, 13.5.17.0.0 on Enterprise Manager 13.5. Certified on Enterprise Manager 24ai Release Update 13 (24.1 RU 13) and Enterprise Manager 13.5 Release Update 34 (13.5 RU 34). A maintenance release: no new pages or metrics. Upgrading uses the same three steps as any plug-in update; see [Upgrade from an earlier release](install-and-upgrade.md#upgrade). One prerequisite changed: the server log read access that plan capture needs is now a per-database `GRANT EXECUTE` on the log-file functions instead of the `pg_read_server_files` role; see **Changed** below and [The server log read grant](prerequisites.md#log-read-grant).

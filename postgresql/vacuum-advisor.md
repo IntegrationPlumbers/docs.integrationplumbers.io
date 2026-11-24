@@ -5,7 +5,7 @@ nav_order: 12
 
 # Vacuum Advisor
 
-If a table keeps growing while autovacuum is nominally running, the answer is usually one of three things: the table's own storage parameters moved its trigger point, cleanup is running but not often enough for the churn, or something is pinning the transaction horizon so no vacuum anywhere can remove the dead rows. **Vacuum Advisor** answers all three from PostgreSQL's own statistics catalogs, names the table or the holder, and hands you the exact statement to run. It needs no extension for anything except the bloat estimate, and it never runs any of the SQL it recommends.
+If a table keeps growing while autovacuum is nominally running, the answer is usually one of three things: the table's own storage parameters moved its trigger point, cleanup is running but not often enough for the churn, or something is pinning the transaction horizon so no vacuum anywhere can remove the dead rows. **Vacuum Advisor** answers all three from PostgreSQL's own statistics catalogs, names the table or the holder, and hands you the exact statement to run. It needs no extension for anything except the bloat estimate, and it never runs any of the SQL it recommends. Where the monitoring role can read the server log, the page adds what the catalogs cannot show: each autovacuum run as it happened, the runs that were skipped or cancelled, and the dead rows a run had to leave behind.
 
 Every command on this page is advisory. The `ALTER TABLE` tuning statements, `SELECT pg_terminate_backend(…)`, `SELECT pg_drop_replication_slot(…)` and `ROLLBACK PREPARED` all appear as text you copy and run yourself, in your own tooling, after you have decided they are safe. The plug-in executes none of them.
 
@@ -13,19 +13,20 @@ Every command on this page is advisory. The `ALTER TABLE` tuning statements, `SE
 > - The core page is catalog-native. It reads `pg_stat_user_tables`, `pg_class`, `pg_settings`, `pg_stat_activity`, `pg_replication_slots` and `pg_prepared_xacts` under [the monitoring role](prerequisites.md#monitoring-role), with no extension required.
 > - The **Avoidable-Growth / Bloat Estimate** section needs the `pgstattuple` extension installed on the monitored database. See [Optional extensions](prerequisites.md#optional-extensions). Without it that one section is empty and nothing else on the page changes.
 > - No extra grant is needed for the estimate: `pgstattuple`'s approximate function requires `pg_stat_scan_tables`, which `pg_monitor` already includes. A table the role somehow cannot read is skipped.
-> - The **Autovacuum runs · 24h** KPI is read through an Enterprise Manager job, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target. It also needs two daily snapshots in the agent-local store before it can compute a delta.
+> - The **Autovacuum runs · 24h** KPI and the history sections are read through an Enterprise Manager job, so [Preferred Credentials](prerequisites.md#preferred-credentials) must be set for the target. The KPI also needs two daily snapshots in the agent-local store before it can compute a delta.
+> - **Autovacuum Activity from the Server Log** and **Bloat and Dead Rows from the Server Log** need [the server log read grant](prerequisites.md#log-read-grant) and `log_autovacuum_min_duration = 0`. See [Enabling the log-enhanced features](log-enhanced-features.md). Without them the two sections stay inactive and say why; nothing else on the page changes.
 
 **Where to find it:** on a PostgreSQL Database target, **target navigation tree ▸ _database name_ ▸ Vacuum Advisor**. The same entry appears in the target menu. Two live watch pages sit under **Realtime ▸ Vacuum xmin Horizon** and **Realtime ▸ Vacuums in Progress**. The same findings alert through the target's **All Metrics**.
 
-**In this page:** The Vacuum Advisor page · Acting on a recommendation · Autovacuum frequency detection · Table bloat estimate · xmin horizon root cause · Wraparound monitoring · Vacuums in Progress
+**In this page:** The Vacuum Advisor page · Vacuum History · Autovacuum Activity from the Server Log · Bloat and Dead Rows from the Server Log · Acting on a recommendation · Autovacuum frequency detection · Table bloat estimate · xmin horizon root cause · Wraparound monitoring · Vacuums in Progress
 
 ## The Vacuum Advisor page
 
 The page collects once when it loads and does not auto-refresh. The detections move slowly and re-polling would only re-run the heavier catalog queries. Reload the page when you want fresh numbers.
 
-![The Vacuum Advisor page with the XID Consumption panel, Vacuum Health KPIs and the Detections band](images/13-5-15/vacuum-advisor-page.png)
+![The top of the Vacuum Advisor page with the XID Consumption panel, its wraparound forecast, and the Vacuum Health KPIs](images/24-1-4/vacuum-advisor-page.png)
 
-*Top band: cluster XID position on the left, health KPIs and the xmin root-cause card on the right.*
+*The top of the page: the cluster's XID position, then the health KPIs and the xmin root-cause card.*
 
 Read it top to bottom. The bands narrow from cluster-wide risk to the individual table.
 
@@ -35,31 +36,40 @@ One live line, built from the `databases` metric:
 
 > Cluster-wide max XID age: 148,332,190 — oldest database: template0 · ~6.9% of the 2B wraparound limit
 
-Wraparound is cluster-scoped, so this deliberately reports the cluster's **oldest** database rather than the one you are looking at. That is very often a template database, and it is normal. The panel notes underneath that snapshots are daily and alerting is active.
+Wraparound is cluster-scoped, so this deliberately reports the cluster's **oldest** database rather than the one you are looking at. That is very often a template database, and it is normal.
+
+Below that line, a **wraparound forecast** turns the age into calendar time:
+
+> ~755 days to wraparound · Nov 23 → Dec 17, 2028
+
+The forecast projects each database's age forward at the consumption rate measured over the last 7 days, as if no further freezing happened, and reports the database that would arrive first. A detail line names that database, its age, and its transaction IDs consumed per day, and gives the multixact forecast beside it. The callout's edge is green, turns orange at 14 days or less, and red at 7 days or less, matching the metric's Warning and Critical thresholds.
+
+The forecast needs 24 hours of history. Until then the callout reads "Wraparound forecast accumulating: N of 24 hours of history collected." When no transaction IDs were consumed over the last 7 days it reads "No transaction-ID consumption measured over the last 7 days: no wraparound is projected."
+
+The chart under the callout plots transaction-ID age over the retained Databases history, 90 days by default, with the projection drawn on. Its label states the window it covers. See [Wraparound monitoring](#wraparound-monitoring) for the metric and its thresholds.
 
 ### Vacuum Health
 
-Two KPIs and a card.
+Six KPIs and a card.
 
 | KPI | What it reports |
 |---|---|
 | **Dead-tuple bloat** | Dead tuples as a share of all rows, across the tables that have vacuum findings. Catalog-native. |
 | **Autovacuum runs · 24h** | How many autovacuum runs happened across the database in the last day, computed by deltaing snapshots of PostgreSQL's lifetime `autovacuum_count`. |
+| **Tables past autovacuum trigger** | Tables whose real dead-tuple count is past their own recomputed trigger point. |
+| **Highest dead-tuple ratio** | The worst dead-to-live ratio in the set. |
+| **Bloat findings** | Rows in the bloat estimate table. Zero when `pgstattuple` is absent. |
+| **xmin horizon blocked** | Yes or No. |
+
+The last four summarize what the tables further down the page contain. Earlier releases showed them in a separate **Detections** band.
 
 The **xmin-horizon root-cause card** sits below them and has two states. When cleanup is pinned its left edge turns red and it reads `Horizon blocked by <holder type> <holder> (PID <n>). Suggested action: <command>`. When nothing is holding the horizon its left edge turns green and it reads "No session, replication slot or prepared transaction is currently holding the xmin horizon back."
 
 **Autovacuum runs · 24h** shows "—" until it has the history it needs, with the tooltip "Accumulating: needs two daily snapshots to compute a delta". Once it has them, the tooltip names the two snapshots the delta was computed over and how many tables were autovacuumed. A busy database reporting zero runs is itself a finding.
 
-### Detections
+### Vacuum History, and the two server-log sections
 
-Four counters summarizing what the tables below contain.
-
-| KPI | What it counts |
-|---|---|
-| **Tables past autovacuum trigger** | Tables whose real dead-tuple count is past their own recomputed trigger point. |
-| **Highest dead-tuple ratio** | The worst dead-to-live ratio in the set. |
-| **Bloat findings** | Rows in the bloat estimate table. Zero when `pgstattuple` is absent. |
-| **xmin horizon blocked** | Yes or No. |
+Three history sections follow the KPIs: [Vacuum History](#vacuum-history), [Autovacuum Activity from the Server Log](#autovacuum-activity), and [Bloat and Dead Rows from the Server Log](#bloat-and-dead-rows). Each is described in its own section below.
 
 ### The tables
 
@@ -76,6 +86,79 @@ Two behaviors explain most "why isn't my table here?" questions:
 - An empty **xmin Horizon · Holder Detail** table is the healthy state, not a collection failure.
 
 An amber informational banner appears at the top of the page, as on every plug-in page, when the collection throttle is active on the agent host. See [Collection throttle](history-store-and-retention.md#collection-throttle).
+
+## Vacuum History {#vacuum-history}
+
+**Vacuum History** charts one table's history from the agent-side store, for the database selected in the tree: **Dead tuples** (with each day's peak), **Transaction-ID age**, and **Vacuum runs**. Past days show one point per day; today shows every collection.
+
+Pick the table from the **Table** list. The list opens with the window's ten most active tables by peak dead tuples, followed by every other table seen in the window, by name, so you can chart any table and not only the busiest. System catalogs are not included. Set **From** and **To** and click **Refresh** to change the window.
+
+![The Vacuum History section with the dead tuples, transaction-ID age, and vacuum runs charts for one table](images/24-1-4/vacuum-history.png)
+
+*Vacuum History for one table: dead tuples with each day's peak, transaction-ID age, and vacuum runs.*
+
+Use it to answer whether a table's dead rows are growing between vacuums, and whether a tuning change you applied has brought the peaks down.
+
+## Autovacuum Activity from the Server Log {#autovacuum-activity}
+
+PostgreSQL's catalogs count autovacuum runs but say nothing about each one. The server log does. Every 15 minutes the plug-in reads the autovacuum entries from the log and keeps them, for the database selected in the tree.
+
+| KPI | What it reports |
+|---|---|
+| **Runs logged** | Autovacuum runs in the window. |
+| **Longest run** | The longest single run. |
+| **Skipped or cancelled by locks** | Runs that never started, or were cancelled, because another session held a conflicting lock. |
+| **Runs with multiple index passes** | Runs that needed more than one pass over the table's indexes, a sign that `autovacuum_work_mem` is too small. |
+| **Anti-wraparound runs** | Runs PostgreSQL started to prevent transaction-ID wraparound. |
+| **WAL written by autovacuum** | Write-ahead log the runs generated. |
+
+The table below the KPIs has one row per table: Runs, Average run (s), Longest run (s), Multiple index passes, Most index passes, Skipped (lock), Cancelled (lock), Last run, Last lock conflict, Anti-wraparound runs, Analyze runs, WAL written, and Last analyze.
+
+![The Autovacuum Activity from the Server Log section with its status line, KPI tiles, and per-table list](images/24-1-4/vacuum-autovacuum-activity.png)
+
+*Autovacuum Activity from the Server Log: the status line, the window's totals, and one row per table.*
+
+Below the table, **Run history for** charts one table's runs over the window: the duration of each run, marked by how many index passes it needed, with autoanalyze runs and the WAL written. **Show** narrows the chart from all logged runs.
+
+![The run history chart for one table, plotting run duration and WAL written](images/24-1-4/vacuum-autovacuum-run-history.png)
+
+*Run history for one table: each run's duration and the WAL it wrote.*
+
+A status line at the top of the section says whether the log is being read. When it is not, the line names the reason: the read grant is missing, the server is not writing a log file that can be read, the server's messages are not in English (`lc_messages`), or autovacuum runs are not being logged (`log_autovacuum_min_duration`). The KPIs and table stay hidden until there is something to show. On a standby target the section shows zero runs, because only the leader runs autovacuum.
+
+The **Vacuum Log Insights** metric publishes the last 24 hours of the same data, with the status of the log read. Its thresholds ship undefined. See [Default thresholds](alerts-and-templates.md#default-thresholds).
+
+## Bloat and Dead Rows from the Server Log {#bloat-and-dead-rows}
+
+Each logged autovacuum run also reports what it could and could not do: the dead rows it removed, the dead rows it had to leave behind, and whether any pages were given back to the file system. This section reads those figures over the same window and database as the section above, and raises two findings.
+
+| Finding | Meaning | What to do |
+|---|---|---|
+| **Dead rows held back** | Autovacuum found dead rows it could not remove yet, because an older open transaction, an idle-in-transaction session, a prepared transaction, or a replication slot still needs them. This is the xmin horizon. | Find the holder under [xmin horizon root cause](#xmin-horizon-root-cause). Once it is gone, the next run removes the rows. |
+| **Space not released** | Vacuum freed space inside the table file, but no page was given back to the file system. Only trailing empty pages ever are. | New rows reuse the free space, so often nothing. To return the space to the file system, run `VACUUM FULL` or `pg_repack` on the table in a maintenance window. |
+
+| KPI | What it reports |
+|---|---|
+| **Tables with dead rows held back** | Tables whose autovacuum runs keep finding dead rows they cannot remove yet. |
+| **Dead rows held back (latest runs)** | Dead rows the most recent run of each table could not remove. |
+| **Tables with space not released** | Tables where vacuum freed space inside the file but released no page. |
+| **Dead rows removed in window** | Dead rows all runs in the window removed. |
+
+The table has one row per table: Findings, Runs, Dead rows removed, Held back in last run, Runs with rows held back (runs that found at least 100 dead rows they could not remove), Pages now, Pages released, Free space, and Last run. A free-space figure that comes from the log reads as an upper bound, for example "up to 75.0% (estimate)".
+
+![The Bloat and Dead Rows from the Server Log section with its KPI tiles and findings per table](images/24-1-4/vacuum-bloat-dead-rows.png)
+
+*Bloat and Dead Rows from the Server Log: the findings sit beside each table's run totals.*
+
+Below the table, **Dead rows per run for** charts one table: the dead rows each run removed, the dead rows it had to hold back, and the table's page count.
+
+![The dead rows per run chart for one table, with held-back rows in red and removed rows in green](images/24-1-4/vacuum-bloat-dead-rows-chart.png)
+
+*Dead rows per run for one table: thirteen runs left dead rows behind before a later run removed them.*
+
+**Free space** is measured with the `pgstattuple` extension when it is installed, and a second chart then plots the measured free space for the selected table. Without the extension it is estimated from the biggest single run in the log.
+
+A table you rebuild, with `VACUUM FULL` or `pg_repack`, loses its **Space not released** finding at its next `pgstattuple` measurement. Without the extension, the finding clears once the next logged autovacuum run reports the smaller heap.
 
 ## Acting on a recommendation
 
@@ -207,7 +290,7 @@ This metric is current-state only. The history of XID age lives on the `database
 
 Transaction-ID age and multixact age are tracked continuously against the wraparound limit, at both database and table grain. Multixact wraparound is tracked and alerted separately from XID wraparound at both levels, because a database can be perfectly healthy on one and in trouble on the other.
 
-Normally you do nothing here: these thresholds ship enabled. The **XID Consumption** panel gives you the live cluster position, and when an age alert arrives, the rest of the Vacuum Advisor page tells you which tables are holding cleanup back and whether the horizon is pinned.
+Normally you do nothing here: these thresholds ship enabled, and a forecast metric warns in calendar time before the age thresholds are reached. The **XID Consumption** panel gives you the live cluster position, and when an age alert arrives, the rest of the Vacuum Advisor page tells you which tables are holding cleanup back and whether the horizon is pinned.
 
 | Metric | Internal name | Collected | Default Warning | Default Critical | Occurrences | Clears when |
 |---|---|---|---|---|---|---|
@@ -215,6 +298,15 @@ Normally you do nothing here: these thresholds ship enabled. The **XID Consumpti
 | Databases · Multixact Unfrozen Age | `databases` / `multixact_age` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
 | Tables · Table Unfrozen XID Age | `tables` / `table_xid_age` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
 | Tables · Table Unfrozen Multixact Age | `tables` / `table_multixact_age` | Every 30 minutes | 1,000,000,000 | 1,500,000,000 | 2 | Age returns under the warning line |
+
+The **Transaction ID Wraparound Forecast** metric (`wraparound_forecast`) reports the same projection the **XID Consumption** panel shows, one row per database:
+
+| Column | Default Warning | Default Critical | Occurrences |
+|---|---|---|---|
+| Days Until Transaction ID Wraparound | 14 or less | 7 or less | 2 |
+| Days Until Multixact Wraparound | 14 or less | 7 or less | 2 |
+
+It collects every 30 minutes. Both columns are blank until 24 hours of history exist, and a blank value raises nothing; **Forecast Ready** reads 0 in that time. The other columns give the age, the IDs consumed per day, and the projected wraparound date. The age thresholds above fire on how far a database has gone; the forecast fires on how soon it will arrive at the measured rate, so a database consuming IDs quickly warns while its age is still far from the 1,000,000,000 line.
 
 The table-level rows are the safety net. Their alert messages say directly that the table is holding back the database's `datfrozenxid` or `datminmxid` and to check autovacuum, so a table past its trigger with stale cleanup raises an alert even while autovacuum is nominally running.
 
@@ -230,17 +322,17 @@ As everywhere else on this page, the plug-in never runs the freeze for you.
 
 Age history accumulates in the agent-local store from day one with no configuration. Every collection stages full-resolution rows, and the daily condense keeps each day's maximum XID and multixact ages, so trend depth builds on its own without touching the [Retention Policies page](history-store-and-retention.md#retention-policies).
 
-All four thresholds are retunable per target or through the shipped [monitoring templates](alerts-and-templates.md#templates), and alerts route through the standard Enterprise Manager notification framework to whatever connector you have bound.
+All of these thresholds are retunable per target or through the shipped [monitoring templates](alerts-and-templates.md#templates), and alerts route through the standard Enterprise Manager notification framework to whatever connector you have bound.
 
 ## Vacuums in Progress
 
 A live view of what `pg_stat_progress_vacuum` currently reports, joined to session state. It needs no extension and no setup.
 
-![The Realtime Vacuums in Progress page showing a running vacuum advancing through its phases](images/13-5-15/vacuums-in-progress.png)
+![The Realtime Vacuums in Progress page with its Database selector and Auto Refresh control, and no vacuum running](images/24-1-4/vacuums-in-progress.png)
 
-*Realtime ▸ Vacuums in Progress, with the Auto Refresh control above the table.*
+*Realtime ▸ Vacuums in Progress, with the Database selector and the Auto Refresh control above the table.*
 
-Open **Realtime ▸ Vacuums in Progress**, set **Auto Refresh** to No Refresh, 15, 30 or 60 seconds, and watch running vacuums advance phase by phase. It is the page to use while confirming a manual `VACUUM` you kicked off, or checking whether autovacuum is actively working a table the advisor flagged.
+Open **Realtime ▸ Vacuums in Progress**, set **Auto Refresh** to No Refresh, 15, 30 or 60 seconds, and watch running vacuums advance phase by phase. The **Database** selector at the top of the page narrows the list to one database; it starts on **All databases**. It is the page to use while confirming a manual `VACUUM` you kicked off, or checking whether autovacuum is actively working a table the advisor flagged.
 
 | Column | What it shows |
 |---|---|
@@ -261,6 +353,7 @@ An empty table means no vacuum is running right now.
 
 - [Prerequisites](prerequisites.md#optional-extensions) — installing `pgstattuple`, and [Preferred Credentials](prerequisites.md#preferred-credentials) for the Autovacuum runs KPI
 - [Monitoring Readiness](monitoring-readiness.md) — the **Table Bloat Estimates** panel reports whether `pgstattuple` is detected
+- [Enabling the log-enhanced features](log-enhanced-features.md) — the grant and logging settings behind the two server-log sections
 - [Alerts and templates](alerts-and-templates.md#default-thresholds) — every shipped threshold in one table, and how the templates retune them fleet-wide
 - [History store and retention](history-store-and-retention.md#retention-policies) — the **Vacuum Advisor** and **Table Bloat** retention rows, and the XID-age history behind the trends
 - [Monitoring pages](monitoring-pages.md) — the **Tables** page, where per-table vacuum and analyze timings live

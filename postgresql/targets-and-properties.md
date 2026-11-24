@@ -55,7 +55,7 @@ Before the PostgreSQL plug-in can monitor anything, you add each PostgreSQL inst
 | OMS Port | HTTPS port the Enterprise Manager console answers on at **OMS Hostname**. Blank means `7803`, the OMS default. Behind a load balancer such as an F5, use the port the load balancer serves the console on, often `443`. |
 | Primary Database | The database the plug-in connects to for statement statistics (default is `postgres`). |
 | Path to patroni log file | Absolute path, including file name, to the Patroni log file. |
-| Path to postgres log file | Absolute path, including file name, to the PostgreSQL log file. |
+| Path to postgres log file | Optional. Absolute path, including file name, to the PostgreSQL log file on the agent host. It feeds only the **Log Statistics** and **PostgreSQL Logs** sections of the [Logs](monitoring-pages.md#log-statistics) page and the **Log Statistics** metric; left blank, those stay empty and report no error. The server log events, the vacuum history, and plan capture do not use it: they read the log over the database connection. |
 | Path to patroni.yml | Absolute path, including file name, to `patroni.yml`. |
 | Plugin License | Your plug-in license key. |
 | Top X Queries | Limits the number of rows returned for the SQL Statement metric groups, ordered by execution time. Default: 10. |
@@ -63,6 +63,8 @@ Before the PostgreSQL plug-in can monitor anything, you add each PostgreSQL inst
 | Collection Throttle: Memory Threshold (%) | Agent-host memory usage percentage at or above which the plug-in pauses its heavier scheduled collections. See [Collection throttle properties](#throttle-properties). |
 
 The Database Login Name/Password and OMS Login Name/Password are entered on the credential screens above, not on the properties screen. They are stored as monitoring credentials rather than plain target properties.
+
+No property turns the optional collections on. The plug-in detects `pg_wait_sampling` and `pg_buffercache` on the target and enables the wait-event and buffer cache collections by itself where the extension is present.
 
 > **Test Connection does not check the OMS fields.** It tests the PostgreSQL connection only. A wrong **OMS Hostname**, **OMS Port**, or OMS login is accepted when you add the target, and shows up later as "License not found" on every collection. See ["License not found" and "Connection refused"](troubleshooting.md#license-not-found-connection-refused).
 
@@ -104,7 +106,7 @@ The plug-in supports three TLS modes for the Patroni REST API, set with the **Pa
 
 If your Patroni REST API requires HTTP Basic authentication, set both **Patroni REST Username** and **Patroni REST Password**. Otherwise leave both blank.
 
-With Patroni REST API mode enabled, the cluster target also collects the **Cluster Events (Patroni)** metric, a durable record of timeline switches (leader changes from failovers and switchovers). See [Monitoring pages](monitoring-pages.md) for its columns.
+With Patroni REST API mode enabled, the cluster target also collects the **Cluster Events (Patroni)** metric, a durable record of timeline switches (leader changes from failovers and switchovers), and the **Leader Change Alert (Patroni)** metric, which warns while a leader change is under 24 hours old. The cluster home page lists the same events under **Leader Change History**. See [Monitoring pages](monitoring-pages.md#leader-change-history).
 
 > **Just upgraded?** The Cluster Home page may show an "Error getting meta-data" popup for a short time after an upgrade, until the OMS refreshes its metadata. See [Error getting meta-data after an upgrade](troubleshooting.md#error-getting-meta-data) if you run into this.
 
