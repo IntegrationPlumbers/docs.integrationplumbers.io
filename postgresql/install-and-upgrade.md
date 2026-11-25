@@ -90,6 +90,8 @@ The agent-local history store used by the advisory pages and the history section
 
 For up to 24 hours after the upgrade, the OMS may show an "Error getting meta-data" error until its next metadata refresh completes. See [Error getting meta-data after an upgrade](troubleshooting.md#error-getting-meta-data) if you run into it.
 
+If the sections new in this release stay empty after the upgrade, restart the OMS: an Enterprise Manager server can go on serving the previous release's list of metrics until it is restarted.
+
 Once the plug-in is deployed, open [**Monitoring Readiness**](monitoring-readiness.md) on each target. It shows exactly which prerequisites a given target is still missing.
 
 Coming from 24.1.3.0.0 / 13.5.17.0.0, expect the following:
