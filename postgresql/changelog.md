@@ -9,7 +9,7 @@ This page lists what changed in each release of the PostgreSQL plug-in, most rec
 
 ## 24.1.4.0.0 (Enterprise Manager 24ai) / 13.5.18.0.0 (Enterprise Manager 13.5)
 
-One release, two builds with the same content: 24.1.4.0.0 installs on Enterprise Manager 24ai, 13.5.18.0.0 on Enterprise Manager 13.5. A feature release: one new job, nine new metrics, and new history sections on most existing pages. Everything historical is read from the agent-side history store; Enterprise Manager receives only the summary rows that thresholds and incidents use. Upgrading uses the same three steps as any plug-in update; see [Upgrade from an earlier release](install-and-upgrade.md#upgrade). The optional log-based features need a one-time grant on the monitored server; see [Enabling the log-enhanced features](log-enhanced-features.md).
+One release, two builds with the same content: 24.1.4.0.0 installs on Enterprise Manager 24ai, 13.5.18.0.0 on Enterprise Manager 13.5. A feature release: one new job, nine new metrics, and new history sections on most existing pages. Everything historical is read from the agent-side history store; Enterprise Manager receives only the summary rows that thresholds and incidents use. Upgrading uses the same three steps as any plug-in update; see [Upgrade from an earlier release](install-and-upgrade.md#upgrade). If the sections new in this release stay empty after the upgrade, restart the OMS: an Enterprise Manager server can go on serving the previous release's list of metrics until it is restarted. The optional log-based features need a one-time grant on the monitored server; see [Enabling the log-enhanced features](log-enhanced-features.md).
 
 **New sections on existing pages**
 
@@ -84,6 +84,7 @@ The vacuum history, bloat findings, server-log events and plan capture read the 
 - On a slow connection a database target page could fail to open with "Load timeout for modules: xpgs/CommonXpgsController". The console library is now minified (about 40% smaller).
 - Plan Analysis and Plan Drift Advisor: insight cards showed three unreadable characters in place of a dash in the Stale Statistics and Lossy Bitmap text. The text now uses a plain hyphen.
 - Plan Drift Advisor: after another query was selected, the heading changed at once while the tiles, chart, captures, plan comparison, baselines and audit trail went on showing the previous query until each finished loading, and a baseline action taken in that interval applied to the previous query. Every panel now clears as soon as a query is selected and the baseline actions stay disabled until that query's baselines have loaded. A panel that cannot load says so.
+- Overview: the header under the PostgreSQL logo read "undefined" in place of the port on a target added without a Port. It now shows 5432, the port such a target is monitored on.
 
 ## 24.1.3.0.0 (Enterprise Manager 24ai) / 13.5.17.0.0 (Enterprise Manager 13.5)
 
