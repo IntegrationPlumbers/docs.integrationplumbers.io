@@ -98,7 +98,6 @@ Coming from 24.1.3.0.0 / 13.5.17.0.0, expect the following:
 - **History fills from the upgrade onward.** The lock wait history, buffer cache samples, parameter changes, and server log events start accumulating at the first collection after the upgrade. The wraparound forecast is blank for its first 24 hours, and the size projection appears once a week of history exists.
 - **Server-log sections need the grant.** The Vacuum Advisor's server-log sections and the Logs page's event sections stay inactive, and say why, until the monitoring role can read the server log. A target where plan capture already works has a grant that covers them. See [Enabling the log-enhanced features](log-enhanced-features.md).
 - **Captured plans may read "unknown".** Where `log_line_prefix` carries no `%d`, captured plans are now listed under every database with their database shown as "unknown", where they were previously hidden. See [Log line prefix](log-enhanced-features.md#log-line-prefix).
-- **Server Log Events retention.** The new retention row is seeded at the 90 days those events already aged out at, so an upgraded store behaves as before until you change it.
 - **Templates.** If you applied a shipped monitoring template, import and apply the new version to pick up the wraparound forecast and checkpoint spike thresholds. See [Monitoring templates](alerts-and-templates.md#templates).
 
 ## Uninstall

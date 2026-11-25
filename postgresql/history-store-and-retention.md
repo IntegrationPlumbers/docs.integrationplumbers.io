@@ -101,7 +101,7 @@ Every history type in the store has its own retention window in days, enforced b
 | Vacuum Advisor | 90 | 7 |
 | Wait Events (sampled) | 90 | 7 |
 
-Rows appear in alphabetical order by display label, as they do on the page. Indexes is the long-term archive and ships at 365 days on both columns. Parameter Changes is kept for a year and is exempt from size-based eviction, so it has no minimum to set. Server Log Events covers the per-category counts, and the sample entries shown under **Recent Events** follow its window and minimum; it is seeded at the 90 days those events already aged out at, so an upgraded store behaves as before until you change it. The **Databases** window is also how far back the Overview's **Database Size History** and the Vacuum Advisor's transaction-ID age chart reach, and **Background Writer** does the same for **Checkpoint History**. The effective protected minimum clamps to at least 1 day. The whole-store size ceiling ships disabled (0).
+Rows appear in alphabetical order by display label, as they do on the page. Indexes is the long-term archive and ships at 365 days on both columns. Parameter Changes is kept for a year and is exempt from size-based eviction, so it has no minimum to set. Server Log Events covers the per-category counts, and the sample entries shown under **Recent Events** follow its window and minimum. The **Databases** window is also how far back the Overview's **Database Size History** and the Vacuum Advisor's transaction-ID age chart reach, and **Background Writer** does the same for **Checkpoint History**. The effective protected minimum clamps to at least 1 day. The whole-store size ceiling ships disabled (0).
 
 ### Set the windows
 
