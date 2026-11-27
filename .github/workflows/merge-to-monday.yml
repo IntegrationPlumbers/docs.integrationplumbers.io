@@ -1,14 +1,66 @@
 name: merge-to-monday
 
-# Thin caller — delegates to the central reusable workflow in ip-dev-plugin.
-# The real logic (feature/fix-branch task parse + Monday "Done" flip) lives once
-# at IntegrationPlumbers/ip-dev-plugin. Do not add logic to this file.
+# LOCAL COPY of IntegrationPlumbers/ip-dev-plugin/.github/workflows/merge-to-monday.yml.
+# This repo is PUBLIC and cannot call the private reusable (see slack-notify.yml
+# for the full note), so the job body lives here. ip-dev-plugin remains the
+# source of truth: when its merge-to-monday.yml changes, re-copy the jobs: block.
+#
+# Event-driven backstop for the Monday "Done" flip. /pr-merge already flips the
+# task on tooling-driven merges; this catches PRs merged any other way (the UI
+# button, a teammate). Setting Done twice is a no-op.
+#
+# Only `feature`/`fix` branches auto-flip - those complete task work. docs/chore/
+# security PRs (and a PR-body pulse link) merely REFERENCE a task and must never
+# close it. Most branches in this repo are docs/<id>-<slug> and so do not flip.
+#
+# Requires repo secret MONDAY_API_TOKEN (the job exits 0 without it). Targets the
+# Tasks board (8169697083): status column `status` -> "Done", completed-date
+# column `date_mkky998p` -> today.
 
 on:
   pull_request:
     types: [closed]
 
 jobs:
-  merge:
-    uses: IntegrationPlumbers/ip-dev-plugin/.github/workflows/merge-to-monday.yml@main
-    secrets: inherit
+  flip-monday:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    # Cap a hung step (GitHub's default is 6h). The Monday call below is a
+    # single request and a normal run is ~10s, so 5 is generous.
+    timeout-minutes: 5
+    steps:
+      - name: Flip the linked Monday task to Done
+        env:
+          MONDAY_API_TOKEN: ${{ secrets.MONDAY_API_TOKEN }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          # Degrade gracefully in repos that haven't provisioned the token yet.
+          if [ -z "${MONDAY_API_TOKEN:-}" ]; then
+            echo "MONDAY_API_TOKEN unset — skipping Monday flip."; exit 0
+          fi
+          # Task id comes SOLELY from a feature|fix branch named <type>/<task-id>-<slug>.
+          # docs/chore/security branches (and any PR-body pulse link) never auto-flip —
+          # they reference a task without completing it.
+          TASK_ID=$(printf '%s' "$BRANCH" | sed -nE 's#^(feature|fix)/([0-9]+)-.*#\2#p')
+          if [ -z "$TASK_ID" ]; then
+            echo "Branch '$BRANCH' is not a feature/fix task branch — not auto-flipping."; exit 0
+          fi
+
+          TODAY=$(date -u +%F)
+          COLS=$(jq -nc --arg d "$TODAY" '{status:{label:"Done"}, date_mkky998p:{date:$d}}')
+          QUERY=$(jq -nc \
+            --arg item "$TASK_ID" \
+            --arg cols "$COLS" \
+            '{query: "mutation($item: ID!, $cols: JSON!){ change_multiple_column_values(board_id: 8169697083, item_id: $item, column_values: $cols){ id } }",
+              variables: {item: $item, cols: $cols}}')
+
+          RESP=$(curl -sS --max-time 15 https://api.monday.com/v2 \
+            -H "Authorization: $MONDAY_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$QUERY")
+          echo "$RESP"
+          if printf '%s' "$RESP" | jq -e '.errors' >/dev/null 2>&1; then
+            echo "::error::Monday API returned errors"; exit 1
+          fi
+          echo "Flipped Monday task $TASK_ID to Done ($TODAY)."

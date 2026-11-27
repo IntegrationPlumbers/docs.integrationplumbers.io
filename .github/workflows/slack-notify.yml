@@ -1,20 +1,31 @@
 name: slack-notify
 
-# Thin caller — delegates to the central reusable workflow in ip-dev-plugin.
-# The real logic lives once at IntegrationPlumbers/ip-dev-plugin; changing it is
-# a single PR there, live here on the next run. Do not add logic to this file.
+# LOCAL COPY of IntegrationPlumbers/ip-dev-plugin/.github/workflows/slack-notify.yml.
+# The plug-in repos use a thin caller that delegates to that reusable workflow,
+# but this repo is PUBLIC and ip-dev-plugin is private, and GitHub does not let
+# a public repository call a reusable workflow in a private one (the run dies
+# before any job starts: "workflow file issue", zero jobs - PR #34). So the job
+# bodies live here. ip-dev-plugin remains the source of truth: when its
+# slack-notify.yml changes, re-copy the jobs: block below. Only the on: block
+# and this header are local.
 #
-# permissions MUST be declared here: a reusable (called) workflow can only
-# DOWNSCOPE the caller's GITHUB_TOKEN, never elevate it. Without this block the
-# default (often read-only) token would 403 when the reusable posts the
-# slack-ts marker comment on the PR.
+# One parent card per *Reviewed* PR (opened); on approved/merged the card's
+# STATUS LINE is updated in place (chat.update) AND a threaded reply + reaction
+# are added (the thread is the timeline). **Self-merge PRs are NOT posted** - the
+# channel is reserved for PRs that need a non-author approver; a self-merge has
+# no card (so its approved/merged events stay silent too).
+#
+# Idempotency key = the parent message ts, stashed in a hidden marker COMMENT
+# (`<!-- slack-ts: <ts> -->`) on the PR.
 #
 # on: types include synchronize + reopened so a PR opened while it has merge
-# conflicts (GitHub dispatches no run for an unbuildable test-merge commit, so
-# the card never posts at 'opened') SELF-HEALS its card on the later synchronize
-# once the conflict clears — the reusable card job is idempotent via the marker.
-# Callers subscribe broadly; the reusable's job `if:` conditions decide what runs,
-# so future event-scope changes stay a single reusable-side PR (no caller fan-out).
+# conflicts (no run dispatches for an unbuildable test-merge commit) self-heals
+# its card on the later synchronize - the card job is idempotent via the marker.
+#
+# Requires repo secrets (none are needed for the workflow to pass; every job
+# exits 0 without them):
+#   SLACK_BOT_TOKEN  - bot token with chat:write + reactions:write, bot in the channel
+#   SLACK_PR_CHANNEL - the #pull-requests channel id (e.g. C0123ABCD)
 
 on:
   pull_request:
@@ -23,10 +34,221 @@ on:
     types: [submitted]
 
 permissions:
-  pull-requests: write
+  pull-requests: write   # to post the slack-ts marker comment on the PR
   contents: read
 
 jobs:
-  slack:
-    uses: IntegrationPlumbers/ip-dev-plugin/.github/workflows/slack-notify.yml@main
-    secrets: inherit
+  card:
+    # Fires on opened AND synchronize/reopened so a PR that was born CONFLICTED
+    # self-heals: GitHub dispatches no pull_request run for a PR that can't build
+    # its test-merge commit, so the opened event may never carry a card. When the
+    # conflict is later resolved (a synchronize push), this job runs and posts the
+    # card it missed. Idempotent via the slack-ts marker comment — a no-op when a
+    # card already exists, so the extra synchronize runs are harmless. (Requires
+    # callers to subscribe to these event types in their on: block.)
+    if: >-
+      github.event_name == 'pull_request' &&
+      (github.event.action == 'opened' ||
+       github.event.action == 'synchronize' ||
+       github.event.action == 'reopened')
+    runs-on: ubuntu-latest
+    # Cap a hung step. Without this a job inherits GitHub's 6h default; on
+    # 2026-08-18/19 that default burned 720 billable minutes org-wide. This job
+    # is one Slack POST (now --max-time 15) plus one `gh pr comment` — a normal
+    # run is 7-10s — so 8 is deliberately loose headroom, not a tuned bound.
+    timeout-minutes: 8
+    steps:
+      - name: Post the parent card and stash its ts
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          CHANNEL: ${{ secrets.SLACK_PR_CHANNEL }}
+          GH_TOKEN: ${{ github.token }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Degrade gracefully in repos that haven't provisioned Slack yet.
+          if [ -z "${SLACK_BOT_TOKEN:-}" ] || [ -z "${CHANNEL:-}" ]; then
+            echo "Slack not configured (SLACK_BOT_TOKEN/SLACK_PR_CHANNEL unset) — skipping."; exit 0
+          fi
+          # Already carded? (re-open / replay) -> no-op. Check the marker comment
+          # AND the body (back-compat with pre-comment PRs).
+          EXISTING=$(gh api "repos/$REPO/issues/$PR_NUM/comments" --jq '.[].body' 2>/dev/null | grep -c 'slack-ts:' || true)
+          if [ "${EXISTING:-0}" != "0" ] || printf '%s' "$PR_BODY" | grep -q 'slack-ts:'; then
+            echo "Marker present — card already posted."; exit 0
+          fi
+          # Self-merge PRs are NOT posted — the channel is reserved for PRs that
+          # need a non-author approver. No card + no marker => the approved/merged
+          # jobs also stay silent for this PR. (Unlabeled PRs fall through to
+          # Reviewed below, so the fail-safe still errs toward visibility.)
+          if printf '%s' "$LABELS" | grep -q 'risk:self-merge'; then
+            echo "Self-merge PR — not posting to #pull-requests (no review needed)."; exit 0
+          fi
+          CLASS="Reviewed"; STATUS="🟡 awaiting review — needs one reviewer (not the author)"
+          TEXT=$(printf '*PR #%s — %s*\n%s\nClass: *%s*  •  author: @%s  •  %s\n%s' \
+            "$PR_NUM" "$PR_TITLE" "$PR_URL" "$CLASS" "$PR_AUTHOR" "$STATUS" \
+            "$( [ "$CLASS" = "Reviewed" ] && echo '<!here> a review is needed' || echo '' )")
+          PAYLOAD=$(jq -nc --arg c "$CHANNEL" --arg t "$TEXT" '{channel:$c, text:$t, unfurl_links:false}')
+          RESP=$(curl -sS --max-time 15 -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d "$PAYLOAD")
+          if [ "$(printf '%s' "$RESP" | jq -r '.ok')" != "true" ]; then
+            echo "::error::Slack chat.postMessage failed: $(printf '%s' "$RESP" | jq -r '.error')"; exit 1
+          fi
+          TS=$(printf '%s' "$RESP" | jq -r '.ts')
+          echo "Posted card ts=$TS"
+          # Stash the ts in a PR COMMENT (survives body edits) for the later jobs.
+          gh pr comment "$PR_NUM" --repo "$REPO" --body "<!-- slack-ts: $TS -->"
+
+  approved:
+    if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    # Cap a hung step. Without this a job inherits GitHub's 6h default; on
+    # 2026-08-18/19 that default burned 720 billable minutes org-wide. Worst
+    # LEGITIMATE run here is ~3.3 min (3 post() calls x 51s max, plus the 3-try
+    # gh ts-resolution loop), so 8 leaves ~2.4x headroom.
+    timeout-minutes: 8
+    steps:
+      - name: Thread an approval reply and update the card status
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          CHANNEL: ${{ secrets.SLACK_PR_CHANNEL }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          REVIEWER: ${{ github.event.review.user.login }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_BOT_TOKEN:-}" ] || [ -z "${CHANNEL:-}" ]; then
+            echo "Slack not configured (SLACK_BOT_TOKEN/SLACK_PR_CHANNEL unset) — skipping."; exit 0
+          fi
+          # Resilient Slack POST: retries a transient failure, checks .ok, and is
+          # NON-FATAL. This job is a courtesy notification, not a merge gate — an
+          # unguarded `curl | jq` under `set -e` used to abort the whole job on any
+          # one-off network/Slack blip (stderr hidden), so a PR would silently get
+          # no card update AND the check would go red. Now a real failure logs a
+          # ::warning (also surfaces an ok:false the old code swallowed) and moves on.
+          post() {  # $1 = slack api method, $2 = json payload
+            local method="$1" payload="$2" resp ok err
+            for _ in 1 2 3; do
+              resp=$(curl -sS --max-time 15 -X POST "https://slack.com/api/$method" \
+                -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+                -H "Content-Type: application/json; charset=utf-8" \
+                -d "$payload" 2>/dev/null) || resp=""
+              ok=$(printf '%s' "$resp" | jq -r '.ok // false' 2>/dev/null || echo false)
+              [ "$ok" = "true" ] && return 0
+              sleep 2
+            done
+            err=$(printf '%s' "$resp" | jq -r '.error // "no response / network error"' 2>/dev/null || echo unparseable)
+            echo "::warning::Slack $method failed after 3 attempts: $err"
+            return 0
+          }
+          # Resolve the ts: prefer the marker COMMENT, fall back to the body. Retry
+          # a transient gh failure and tolerate ultimate failure (|| sleep) so a
+          # GitHub API hiccup can't abort the job under `set -e` — it degrades to
+          # the body fallback instead of silently failing.
+          TS=""
+          for _ in 1 2 3; do
+            if TS=$(gh api "repos/$REPO/issues/$PR_NUM/comments" --jq '.[].body' 2>/dev/null | sed -nE 's/.*slack-ts: ([0-9.]+).*/\1/p' | tail -1); then break; fi
+            sleep 2
+          done
+          if [ -z "$TS" ]; then TS=$(printf '%s' "$PR_BODY" | sed -nE 's/.*slack-ts: ([0-9.]+).*/\1/p' | head -1); fi
+          if [ -z "$TS" ]; then echo "No slack-ts marker (comment or body) — nothing to update."; exit 0; fi
+          if printf '%s' "$LABELS" | grep -q 'risk:self-merge'; then CLASS="Self-merge"; else CLASS="Reviewed"; fi
+          # A self-approval does NOT satisfy the Reviewed gate — say so, don't claim "ready to merge".
+          if [ "$REVIEWER" = "$AUTHOR" ]; then
+            NOTE=" (self-approval — does NOT satisfy the Reviewed gate)"
+            STATUS="🟡 awaiting review — a self-approval doesn't count (needs a non-author)"
+          else
+            NOTE=""
+            STATUS=$(printf '✅ approved by @%s — ready to merge' "$REVIEWER")
+          fi
+          # Thread reply (the timeline).
+          MSG=$(printf '✅ approved by @%s%s' "$REVIEWER" "$NOTE")
+          post chat.postMessage "$(jq -nc --arg c "$CHANNEL" --arg ts "$TS" --arg t "$MSG" '{channel:$c, thread_ts:$ts, text:$t}')"
+          # Update the parent card's status line in place.
+          TEXT=$(printf '*PR #%s — %s*\n%s\nClass: *%s*  •  author: @%s  •  %s' \
+            "$PR_NUM" "$PR_TITLE" "$PR_URL" "$CLASS" "$AUTHOR" "$STATUS")
+          post chat.update "$(jq -nc --arg c "$CHANNEL" --arg ts "$TS" --arg t "$TEXT" '{channel:$c, ts:$ts, text:$t}')"
+          post reactions.add "$(jq -nc --arg c "$CHANNEL" --arg ts "$TS" '{channel:$c, timestamp:$ts, name:"white_check_mark"}')"
+
+  merged:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    # Cap a hung step. Without this a job inherits GitHub's 6h default; on
+    # 2026-08-18/19 that default burned 720 billable minutes org-wide. Worst
+    # LEGITIMATE run here is ~3.3 min (3 post() calls x 51s max, plus the 3-try
+    # gh ts-resolution loop), so 8 leaves ~2.4x headroom.
+    timeout-minutes: 8
+    steps:
+      - name: Thread a merged reply and update the card status
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          CHANNEL: ${{ secrets.SLACK_PR_CHANNEL }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          MERGER: ${{ github.event.pull_request.merged_by.login }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_BOT_TOKEN:-}" ] || [ -z "${CHANNEL:-}" ]; then
+            echo "Slack not configured (SLACK_BOT_TOKEN/SLACK_PR_CHANNEL unset) — skipping."; exit 0
+          fi
+          # Resilient Slack POST: retries a transient failure, checks .ok, and is
+          # NON-FATAL. This job is a courtesy notification, not a merge gate — an
+          # unguarded `curl | jq` under `set -e` used to abort the whole job on any
+          # one-off network/Slack blip (stderr hidden), so a merged PR would silently
+          # get no card update AND the check would go red. Now a real failure logs a
+          # ::warning (also surfaces an ok:false the old code swallowed) and moves on.
+          post() {  # $1 = slack api method, $2 = json payload
+            local method="$1" payload="$2" resp ok err
+            for _ in 1 2 3; do
+              resp=$(curl -sS --max-time 15 -X POST "https://slack.com/api/$method" \
+                -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+                -H "Content-Type: application/json; charset=utf-8" \
+                -d "$payload" 2>/dev/null) || resp=""
+              ok=$(printf '%s' "$resp" | jq -r '.ok // false' 2>/dev/null || echo false)
+              [ "$ok" = "true" ] && return 0
+              sleep 2
+            done
+            err=$(printf '%s' "$resp" | jq -r '.error // "no response / network error"' 2>/dev/null || echo unparseable)
+            echo "::warning::Slack $method failed after 3 attempts: $err"
+            return 0
+          }
+          # Resolve the ts: prefer the marker COMMENT, fall back to the body. Retry
+          # a transient gh failure and tolerate ultimate failure (|| sleep) so a
+          # GitHub API hiccup can't abort the job under `set -e` — it degrades to
+          # the body fallback instead of silently failing.
+          TS=""
+          for _ in 1 2 3; do
+            if TS=$(gh api "repos/$REPO/issues/$PR_NUM/comments" --jq '.[].body' 2>/dev/null | sed -nE 's/.*slack-ts: ([0-9.]+).*/\1/p' | tail -1); then break; fi
+            sleep 2
+          done
+          if [ -z "$TS" ]; then TS=$(printf '%s' "$PR_BODY" | sed -nE 's/.*slack-ts: ([0-9.]+).*/\1/p' | head -1); fi
+          if [ -z "$TS" ]; then echo "No slack-ts marker (comment or body) — nothing to update."; exit 0; fi
+          if printf '%s' "$LABELS" | grep -q 'risk:self-merge'; then CLASS="Self-merge"; else CLASS="Reviewed"; fi
+          # Thread reply (the timeline).
+          MSG=$(printf '🚀 merged by @%s' "$MERGER")
+          post chat.postMessage "$(jq -nc --arg c "$CHANNEL" --arg ts "$TS" --arg t "$MSG" '{channel:$c, thread_ts:$ts, text:$t}')"
+          # Update the parent card's status line in place.
+          STATUS=$(printf '🚀 merged by @%s' "$MERGER")
+          TEXT=$(printf '*PR #%s — %s*\n%s\nClass: *%s*  •  author: @%s  •  %s' \
+            "$PR_NUM" "$PR_TITLE" "$PR_URL" "$CLASS" "$AUTHOR" "$STATUS")
+          post chat.update "$(jq -nc --arg c "$CHANNEL" --arg ts "$TS" --arg t "$TEXT" '{channel:$c, ts:$ts, text:$t}')"
+          post reactions.add "$(jq -nc --arg c "$CHANNEL" --arg ts "$TS" '{channel:$c, timestamp:$ts, name:"rocket"}')"
